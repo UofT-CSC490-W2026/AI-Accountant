@@ -1,0 +1,91 @@
+name: Deploy Autobook API
+
+on:
+  push:
+    branches: [main]
+
+env:
+  AWS_REGION: ca-central-1
+  ENV: ${{ vars.ENV }}
+  CLUSTER: ${{ vars.CLUSTER_NAME_PREFIX }}-${{ vars.ENV }}
+  SERVICE: ${{ vars.SERVICE_NAME_PREFIX }}-${{ vars.ENV }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set variables
+        run: |
+          echo "ECR_REPO=${{ steps.ecr-login.outputs.registry }}/${{ env.SERVICE }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build and push
+        run: |
+          docker build \
+            -f autobook/Dockerfile \
+            -t $ECR_REPO:$IMAGE_TAG \
+            -t $ECR_REPO:latest \
+            autobook/
+          docker push $ECR_REPO:$IMAGE_TAG
+          docker push $ECR_REPO:latest
+
+      - name: Register new task definition revision
+        run: |
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition ${{ env.SERVICE }} \
+            --query 'taskDefinition')
+
+          NEW_TASK_DEF=$(echo $TASK_DEF | jq \
+            --arg IMAGE "$ECR_REPO:$IMAGE_TAG" \
+            '.containerDefinitions[0].image = $IMAGE |
+             del(.taskDefinitionArn, .revision, .status,
+                 .requiresAttributes, .compatibilities,
+                 .registeredAt, .registeredBy)')
+
+          NEW_ARN=$(aws ecs register-task-definition \
+            --cli-input-json "$NEW_TASK_DEF" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "NEW_TASK_DEF_ARN=$NEW_ARN" >> $GITHUB_ENV
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.CLUSTER }} \
+            --service ${{ env.SERVICE }} \
+            --task-definition $NEW_TASK_DEF_ARN
+
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ env.CLUSTER }} \
+            --services ${{ env.SERVICE }}
+
+      - name: Verify deployment
+        run: |
+          DEPLOYED=$(aws ecs describe-services \
+            --cluster ${{ env.CLUSTER }} \
+            --services ${{ env.SERVICE }} \
+            --query 'services[0].deployments[?status==`PRIMARY`].taskDefinition' \
+            --output text)
+          if [[ "$DEPLOYED" != "$NEW_TASK_DEF_ARN" ]]; then
+            echo "::error::Deploy rolled back by circuit breaker"
+            exit 1
+          fi
