@@ -60,6 +60,18 @@ variable "service_name_prefix" {
 }
 # Actual names: autobook-${env} (cluster), autobook-api-${env} (service/task family)
 
+# ACM cert ARN — passed from global module output
+# (sandbox SCP blocks acm:ListCertificates, so data source lookup fails)
+variable "cert_arn" {
+  type = string
+}
+
+# Backup — disable in sandbox (SCP blocks CreateBackupVault)
+variable "enable_backup" {
+  type    = bool
+  default = true
+}
+
 # DR — only set when restoring from snapshot
 variable "restore_snapshot_id" {
   type    = string

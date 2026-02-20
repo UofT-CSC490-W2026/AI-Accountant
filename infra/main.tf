@@ -32,11 +32,7 @@ data "aws_route53_zone" "main" {
   name = var.domain_name
 }
 
-data "aws_acm_certificate" "main" {
-  domain      = "*.${var.domain_name}"
-  statuses    = ["ISSUED"]
-  most_recent = true
-}
+# ACM cert ARN passed as variable (sandbox SCP blocks acm:ListCertificates)
 
 # --- Module wiring ---
 
@@ -97,7 +93,7 @@ module "compute" {
   app_sg_id                 = module.networking.app_sg_id
   ecs_execution_role_arn    = module.iam.ecs_execution_role_arn
   ecs_task_role_arn         = module.iam.ecs_task_role_arn
-  cert_arn                  = data.aws_acm_certificate.main.arn
+  cert_arn                  = var.cert_arn
   zone_id                   = data.aws_route53_zone.main.zone_id
   api_subdomain             = var.api_subdomain
   domain_name               = var.domain_name
@@ -120,6 +116,7 @@ module "monitoring" {
 }
 
 module "backup" {
+  count           = var.enable_backup ? 1 : 0
   source          = "./modules/backup"
   env             = var.env
   db_instance_arn = module.database.instance_arn

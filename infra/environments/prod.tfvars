@@ -5,3 +5,5 @@ domain_name       = "autobook.tech"
 api_subdomain     = "api"
 github_repo       = "your-org/autobook"
 alert_email       = "autobook@pm.me"
+cert_arn          = "arn:aws:acm:ca-central-1:609092547371:certificate/f316d507-c097-4ff5-b3f8-2e8c155bd4d9"
+enable_backup     = false
