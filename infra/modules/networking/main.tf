@@ -89,7 +89,7 @@ resource "aws_route_table_association" "private_b" {
 # --- Security Groups ---
 resource "aws_security_group" "alb" {
   name_prefix = "autobook-alb-${var.env}-"
-  description = "ALB — inbound HTTPS from internet"
+  description = "ALB - inbound HTTPS from internet"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -111,7 +111,7 @@ resource "aws_security_group" "alb" {
 
 resource "aws_security_group" "app" {
   name_prefix = "autobook-app-${var.env}-"
-  description = "App — inbound 8000 from ALB only"
+  description = "App - inbound 8000 from ALB only"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -133,7 +133,7 @@ resource "aws_security_group" "app" {
 
 resource "aws_security_group" "db" {
   name_prefix = "autobook-db-${var.env}-"
-  description = "DB — inbound 5432 from App only"
+  description = "DB - inbound 5432 from App only"
   vpc_id      = aws_vpc.main.id
 
   ingress {
