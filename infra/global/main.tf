@@ -1,7 +1,10 @@
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
-    aws = { source = "hashicorp/aws"; version = "~> 5.0" }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
   }
   backend "s3" {
     # bucket provided via: terraform init -backend-config="bucket=autobook-tfstate-<ACCOUNT_ID>"
