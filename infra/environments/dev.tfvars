@@ -1,0 +1,7 @@
+env               = "dev"
+aws_region        = "ca-central-1"
+db_instance_class = "db.t4g.micro"
+domain_name       = "autobook.app"
+api_subdomain     = "dev-api"
+github_repo       = "your-org/autobook"
+alert_email       = "team@autobook.app"
