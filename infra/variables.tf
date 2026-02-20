@@ -9,7 +9,7 @@ variable "aws_region" {
 
 variable "domain_name" {
   type    = string
-  default = "autobook.app"
+  default = "autobook.tech"
 }
 
 variable "api_subdomain" {

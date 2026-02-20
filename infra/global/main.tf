@@ -23,13 +23,13 @@ provider "aws" {
 
 # --- Route 53 zone (one per account) ---
 resource "aws_route53_zone" "main" {
-  name = "autobook.app"
+  name = "autobook.tech"
 }
 
 # --- ACM wildcard cert (ca-central-1) ---
 resource "aws_acm_certificate" "main" {
-  domain_name               = "autobook.app"
-  subject_alternative_names = ["*.autobook.app"]
+  domain_name               = "autobook.tech"
+  subject_alternative_names = ["*.autobook.tech"]
   validation_method         = "DNS"
 }
 
@@ -57,7 +57,7 @@ resource "aws_acm_certificate_validation" "main" {
 # --- Vercel frontend DNS ---
 resource "aws_route53_record" "frontend" {
   zone_id = aws_route53_zone.main.zone_id
-  name    = "autobook.app"
+  name    = "autobook.tech"
   type    = "A"
   ttl     = 300
   records = ["76.76.21.21"]
@@ -65,7 +65,7 @@ resource "aws_route53_record" "frontend" {
 
 resource "aws_route53_record" "www" {
   zone_id = aws_route53_zone.main.zone_id
-  name    = "www.autobook.app"
+  name    = "www.autobook.tech"
   type    = "CNAME"
   ttl     = 300
   records = ["cname.vercel-dns.com"]
