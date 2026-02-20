@@ -1,0 +1,30 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=local
+      - DATABASE_URL=postgresql://autobook:autobook@db:5432/autobook
+      - S3_BUCKET=local
+      - AWS_PROFILE=${AWS_PROFILE:-default}
+      - AWS_DEFAULT_REGION=ca-central-1
+    volumes:
+      - ./src:/app/src
+      - ~/.aws:/root/.aws:ro    # Bedrock auth — mount AWS credentials
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=autobook
+      - POSTGRES_PASSWORD=autobook
+      - POSTGRES_DB=autobook
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
