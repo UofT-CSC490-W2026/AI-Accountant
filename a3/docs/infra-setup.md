@@ -63,3 +63,123 @@ All training runs use **Modal**. See [Infrastructure](#infrastructure) for GPU p
   - `p2` — P2 teammate's architecture changes (branched from `master`)
 - **Config field**: YAML configs use `nanochat_ref` to specify which branch or tag to check out (e.g., `baseline-v0`, `p2`)
 - **Runtime fetch**: Modal runner does `git fetch origin --tags` before checkout so a single cached image serves all refs
+
+## Nanochat Architecture
+
+Reference for the nanochat codebase. All facts verified against source (commit `baseline-v0`).
+
+### The `--depth` Dial
+
+Nanochat uses a single `--depth` parameter to control model size:
+
+```
+model_dim = depth * aspect_ratio          # aspect_ratio defaults to 64
+num_heads = model_dim / head_dim          # head_dim defaults to 128
+```
+
+Example: `--depth=6` → `model_dim=384`, `num_heads=3` (picochat-sized).
+
+### GPTConfig
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `sequence_len` | 2048 | Max context length |
+| `vocab_size` | 32768 | Tokenizer vocabulary size |
+| `n_layer` | 12 | Number of transformer blocks (= depth) |
+| `n_head` | 6 | Query heads |
+| `n_kv_head` | 6 | Key/value heads (GQA) |
+| `n_embd` | 768 | Model dimension |
+| `window_pattern` | "SSSL" | Sliding window attention pattern |
+
+### RoPE (Rotary Position Embeddings)
+
+Nanochat uses RoPE for positional encoding — a fixed mathematical formula that computes each token's position at runtime from sinusoidal frequencies. Nothing about position is learned or stored in the checkpoint:
+
+```python
+self.register_buffer("cos", cos, persistent=False)  # NOT saved to checkpoint
+self.register_buffer("sin", sin, persistent=False)
+```
+
+This is why changing `--max-seq-len` on resume works: no positional embedding weights to mismatch. The RoPE cache is recomputed at model init from the current config.
+
+The cache is pre-computed at 10x the training sequence length, so inference can handle sequences up to 10x training length without error.
+
+### Key CLI Args (`base_train.py`)
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--depth` | 20 | Transformer depth |
+| `--max-seq-len` | 2048 | Context length |
+| `--num-iterations` | -1 | Total optimization steps (not additional on resume) |
+| `--resume-from-step` | -1 | Resume from this checkpoint step |
+| `--model-tag` | None | Override checkpoint directory name (default: `d{depth}`) |
+| `--save-every` | -1 | Checkpoint interval (-1 = only at end) |
+| `--run` | "dummy" | W&B run name ("dummy" disables logging) |
+| `--device-batch-size` | 32 | Per-device batch size |
+| `--total-batch-size` | -1 | Total batch size in tokens (-1 = auto-compute) |
+| `--window-pattern` | "SSSL" | Sliding window pattern (L=full, S=half context) |
+
+### Checkpoint Format
+
+Checkpoints are stored at `{base_dir}/base_checkpoints/{model_tag}/`:
+
+| File | Contents |
+|------|----------|
+| `model_{step:06d}.pt` | Model weights (state_dict) |
+| `optim_{step:06d}_rank{rank}.pt` | Optimizer state (sharded per rank) |
+| `meta_{step:06d}.json` | Metadata: step, val_bpb, model_config, user_config, dataloader state |
+
+**Storage path**: `~/.cache/nanochat/` by default. Override with `NANOCHAT_BASE_DIR` env var. On Modal, set `NANOCHAT_BASE_DIR=/checkpoints` and mount a Volume there.
+
+### Resume Behavior
+
+On resume (`--resume-from-step=N`):
+
+- Model weights loaded from checkpoint, overwriting freshly initialized weights
+- Optimizer state restored (including momentum)
+- Dataloader state restored (resumes from same position in dataset)
+- `step` variable set to N, training continues until `--num-iterations` (total)
+- Current CLI args are used for model config — **not** the checkpoint's saved config
+- This means `--max-seq-len` can change on resume (RoPE recomputes, dataloader uses new length)
+
+**What can change on resume**: `--max-seq-len`, `--num-iterations`, `--save-every`, `--eval-every`, `--run`
+**What should NOT change**: `--depth`, `--head-dim`, `--aspect-ratio` (would cause shape mismatch in `load_state_dict`)
+
+### Model Loading API
+
+For evaluation scripts:
+
+```python
+from nanochat.checkpoint_manager import load_model
+
+model, tokenizer, meta_data = load_model(
+    "base",           # source: "base", "sft", or "rl"
+    device,           # torch.device
+    phase="eval",     # "eval" or "train"
+    model_tag="pico-short",  # checkpoint directory name
+    step=1000,        # checkpoint step (None = latest)
+)
+```
+
+Returns model in eval mode, ready for inference. Uses `NANOCHAT_BASE_DIR` for path resolution.
+
+### Eval System
+
+**Built-in evals** (`python -m scripts.base_eval`):
+- `--eval bpb` — bits per byte on train/val splits
+- `--eval core` — CORE benchmark (ICL tasks: MMLU, ARC, etc.)
+- `--eval sample` — generate text samples
+
+**Custom evals**: No plugin system. Write a standalone script that imports `load_model()` and implements custom evaluation logic. The `core_eval.forward_model()` function provides a useful primitive: takes `BxT` tokens, returns `BxT` losses and predictions.
+
+### CPU/MPS Testing Mode
+
+For local testing without a GPU:
+
+```bash
+python -m scripts.base_train --depth=6 --head-dim=64 --window-pattern=L \
+    --max-seq-len=512 --device-batch-size=1 --eval-tokens=512 \
+    --core-metric-every=-1 --total-batch-size=512 --num-iterations=20
+```
+
+Note: `--window-pattern=L` is required on CPU/MPS because SDPA fallback doesn't support sliding window attention. `--head-dim=64` is needed because small models with default `--head-dim=128` may have `model_dim < head_dim`.
