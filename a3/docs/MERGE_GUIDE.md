@@ -5,10 +5,12 @@
 ```
 main
  └── a3                    ← shared: docs, infra, configs
-      ├── a3/p2            ← P2: architecture changes (if applicable)
-      ├── a3/p3            ← P3: context window extension
-      └── a3/p4            ← P4: final nanochat training
+      ├── a3-p2            ← P2: architecture changes (if applicable)
+      ├── a3-p3            ← P3: context window extension
+      └── a3-p4            ← P4: final nanochat training
 ```
+
+> **Note**: Branch names use hyphens (`a3-p3`), not slashes (`a3/p3`), because git cannot create `a3/p3` when `a3` already exists as a branch.
 
 ## How to Merge
 
@@ -16,9 +18,9 @@ main
 
 ```bash
 git checkout a3
-git merge a3/p3 --no-ff -m "Merge P3: context window extension"
-git merge a3/p2 --no-ff -m "Merge P2: architecture changes"
-git merge a3/p4 --no-ff -m "Merge P4: final nanochat training"
+git merge a3-p3 --no-ff -m "Merge P3: context window extension"
+git merge a3-p2 --no-ff -m "Merge P2: architecture changes"
+git merge a3-p4 --no-ff -m "Merge P4: final nanochat training"
 ```
 
 ### 2. Verify
