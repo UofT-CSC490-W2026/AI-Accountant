@@ -41,3 +41,25 @@ Modal provides the simplest path for single-GPU small model training:
 - **Modal**: $500 (primary compute)
 - **Anyscale**: $1,000 (backup for P4 if A100 availability is limited)
 - **AWS**: backup
+
+## Global Config
+
+### Compute Platform
+
+All training runs use **Modal**. See [Infrastructure](#infrastructure) for GPU pricing and credits.
+
+### Weights & Biases
+
+- **Project**: `490-autobook-a3`
+- **Tag convention**: each run is tagged by part (`p2`, `p3`, `p4`) so runs from all parts coexist in one project
+- **Commit hash**: every run logs the nanochat git commit hash in W&B config (`git_hash` field) for reproducibility
+
+### Nanochat Fork
+
+- **URL**: https://github.com/seonghyunban/nanochat
+- **Branch strategy**:
+  - `master` — baseline code (frozen, do not push)
+  - `baseline-v0` — immutable tag on `master`, used as the reference point for all baseline runs
+  - `p2` — P2 teammate's architecture changes (branched from `master`)
+- **Config field**: YAML configs use `nanochat_ref` to specify which branch or tag to check out (e.g., `baseline-v0`, `p2`)
+- **Runtime fetch**: Modal runner does `git fetch origin --tags` before checkout so a single cached image serves all refs
