@@ -7,12 +7,16 @@ positions beyond its training length.
 
 Requires: datasets (pip install datasets)
 
-Usage:
+Usage (CLI):
     python context_length_eval.py \
         --checkpoint-dir /path/to/checkpoints \
         --model-tag pico-short \
         --step 929 \
         --output results.json
+
+Usage (Python):
+    from context_length_eval import run_eval
+    results = run_eval("/path/to/checkpoints", "pico-short", 929)
 """
 
 import argparse
@@ -100,38 +104,54 @@ def compute_positional_losses(model, tokenizer, documents, seq_len, bucket_size,
     return bucket_sums, bucket_sum_sqs, bucket_counts, doc_count
 
 
-def main():
-    args = parse_args()
+def run_eval(
+    checkpoint_dir: str,
+    model_tag: str,
+    step: int,
+    seq_len: int = 2048,
+    bucket_size: int = 128,
+) -> dict:
+    """Run positional perplexity eval and return results dict.
 
-    assert args.seq_len % args.bucket_size == 0, (
-        f"seq_len ({args.seq_len}) must be divisible by bucket_size ({args.bucket_size})"
+    Args:
+        checkpoint_dir: Base checkpoint directory (sets NANOCHAT_BASE_DIR).
+        model_tag: Model tag (e.g., "pico-short").
+        step: Checkpoint step number.
+        seq_len: Sequence length for eval (default 2048).
+        bucket_size: Bucket size in tokens (default 128).
+
+    Returns:
+        Dict with per-bucket losses, aggregate perplexity, and metadata.
+    """
+    assert seq_len % bucket_size == 0, (
+        f"seq_len ({seq_len}) must be divisible by bucket_size ({bucket_size})"
     )
 
     # Set checkpoint directory before importing nanochat
-    os.environ["NANOCHAT_BASE_DIR"] = args.checkpoint_dir
+    os.environ["NANOCHAT_BASE_DIR"] = checkpoint_dir
     from nanochat.checkpoint_manager import load_model
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
 
-    print(f"Loading model: tag={args.model_tag}, step={args.step}")
+    print(f"Loading model: tag={model_tag}, step={step}")
     model, tokenizer, _ = load_model(
         source="base",
         device=device,
         phase="eval",
-        model_tag=args.model_tag,
-        step=args.step,
+        model_tag=model_tag,
+        step=step,
     )
 
     print("Loading PG19 test split...")
     documents = load_pg19_test()
     print(f"Loaded {len(documents)} documents")
 
-    num_buckets = args.seq_len // args.bucket_size
-    print(f"Computing positional losses: seq_len={args.seq_len}, {num_buckets} buckets of {args.bucket_size} tokens")
+    num_buckets = seq_len // bucket_size
+    print(f"Computing positional losses: seq_len={seq_len}, {num_buckets} buckets of {bucket_size} tokens")
 
     bucket_sums, bucket_sum_sqs, bucket_counts, doc_count = compute_positional_losses(
-        model, tokenizer, documents, args.seq_len, args.bucket_size, device
+        model, tokenizer, documents, seq_len, bucket_size, device
     )
 
     # Build per-bucket results
@@ -146,8 +166,8 @@ def main():
             std_ce = None
         buckets.append({
             "bucket": b,
-            "position_start": b * args.bucket_size,
-            "position_end": (b + 1) * args.bucket_size,
+            "position_start": b * bucket_size,
+            "position_end": (b + 1) * bucket_size,
             "mean_cross_entropy": float(mean_ce) if mean_ce is not None else None,
             "std_cross_entropy": float(std_ce) if std_ce is not None else None,
             "num_tokens": n,
@@ -163,10 +183,10 @@ def main():
         aggregate_ppl = None
 
     results = {
-        "model_tag": args.model_tag,
-        "step": args.step,
-        "seq_len": args.seq_len,
-        "bucket_size": args.bucket_size,
+        "model_tag": model_tag,
+        "step": step,
+        "seq_len": seq_len,
+        "bucket_size": bucket_size,
         "num_buckets": num_buckets,
         "document_count": doc_count,
         "total_tokens": total_tokens,
@@ -175,13 +195,26 @@ def main():
         "buckets": buckets,
     }
 
-    os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
-    with open(args.output, "w") as f:
-        json.dump(results, f, indent=2)
-
     print(f"\nResults: {doc_count} documents, {total_tokens} tokens")
     if aggregate_ppl is not None:
         print(f"Aggregate perplexity: {aggregate_ppl:.2f}")
+
+    return results
+
+
+def main():
+    args = parse_args()
+    results = run_eval(
+        checkpoint_dir=args.checkpoint_dir,
+        model_tag=args.model_tag,
+        step=args.step,
+        seq_len=args.seq_len,
+        bucket_size=args.bucket_size,
+    )
+
+    os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
+    with open(args.output, "w") as f:
+        json.dump(results, f, indent=2)
     print(f"Written to {args.output}")
 
 
