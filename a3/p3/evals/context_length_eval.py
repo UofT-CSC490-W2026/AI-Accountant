@@ -84,7 +84,9 @@ def compute_positional_losses(model, tokenizer, documents, seq_len, bucket_size,
         targets = torch.tensor([tokens[1:]], dtype=torch.long, device=device)
 
         # Per-token loss, shape: (seq_len,)
-        loss = model(input_ids, targets=targets, loss_reduction='none')
+        # autocast handles BFloat16 model weights on CUDA; no-op on CPU/MPS
+        with torch.autocast(device_type=device.type, dtype=torch.bfloat16, enabled=device.type == "cuda"):
+            loss = model(input_ids, targets=targets, loss_reduction='none')
         loss = loss.float().cpu().numpy()
 
         # Accumulate into buckets
