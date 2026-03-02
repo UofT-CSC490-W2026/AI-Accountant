@@ -258,21 +258,24 @@ eval_image = image.add_local_dir("a3/p3/evals", remote_path="/root/evals")
     image=eval_image,
     volumes={VOLUME_PATH: volume},
     secrets=[wandb_secret],
-    gpu="A100",      # change here to switch GPU for all eval stages
+    gpu="A100-80GB",  # 80GB needed for CORE eval at seq_len=2048
     timeout=3600,    # 1 hour max
 )
 def evaluate(
     nanochat_ref: str,
     checkpoint_tag: str,
     step: int,
+    standard_evals: str = "bpb,core",
     custom_eval_script: str | None = None,
 ) -> dict:
-    """Run BPB + CORE evals, and optionally a custom eval, on one checkpoint.
+    """Run standard evals and optionally a custom eval on one checkpoint.
 
     Args:
         nanochat_ref: Git ref (branch or tag) to checkout in the nanochat fork.
         checkpoint_tag: Model tag identifying the checkpoint directory.
         step: Checkpoint step number to evaluate.
+        standard_evals: Comma-separated list of nanochat evals (e.g. "bpb,core"
+            or "bpb"). Passed directly to --eval flag.
         custom_eval_script: Basename of a script mounted at /root/evals/,
             or None. The script must expose run_eval(checkpoint_dir, model_tag,
             step) -> dict.
@@ -294,10 +297,10 @@ def evaluate(
 
     results = {"checkpoint_tag": checkpoint_tag, "step": step}
 
-    # --- Standard evals: BPB + CORE ---
+    # --- Standard evals ---
     cmd = [
         "python", "-m", "scripts.base_eval",
-        "--eval=bpb,core",
+        f"--eval={standard_evals}",
         f"--model-tag={checkpoint_tag}",
         f"--step={step}",
     ]
@@ -324,6 +327,7 @@ def evaluate(
         import sys
 
         sys.path.insert(0, "/root/evals")
+        sys.path.insert(0, NANOCHAT_DIR)  # nanochat not pip-installed, need it on path
         from context_length_eval import run_eval
 
         print("[eval] Running custom: context_length_eval.run_eval()")
@@ -420,10 +424,12 @@ def run_pipeline(cfg: dict) -> dict:
             step = eval_entry["step"]
 
         evals = eval_entry.get("evals", [])
+        standard = [e for e in evals if e in ("bpb", "core")]
+        standard_evals = ",".join(standard) if standard else "bpb"
         custom_script = eval_entry.get("custom_eval") if "custom" in evals else None
 
-        eval_inputs.append((nanochat_ref, checkpoint, step, custom_script))
-        print(f"[pipeline] [eval] Queued: {checkpoint} @ step {step}")
+        eval_inputs.append((nanochat_ref, checkpoint, step, standard_evals, custom_script))
+        print(f"[pipeline] [eval] Queued: {checkpoint} @ step {step} ({standard_evals})")
 
     eval_results = []
     if eval_inputs:
