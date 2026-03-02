@@ -33,7 +33,7 @@ Modal provides the simplest path for single-GPU small model training:
 | Part | Description | GPU | Est. Cost |
 |------|-------------|-----|-----------|
 | P2 | Picochat ablations (4 runs) | A10G | $2–20 |
-| P3 | Context window extension (2 stages + eval) | A10G | $2–10 |
+| P3 | Context window extension (2 stages + eval) | A100 | $1–5 |
 | P4 | Full nanochat training | A100 | $30–100 |
 
 ### Available Credits
