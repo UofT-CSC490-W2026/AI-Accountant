@@ -338,21 +338,19 @@ def evaluate(
 
 
 # ---------------------------------------------------------------------------
-# Orchestrator
+# Orchestrator (runs remotely on Modal — immune to local disconnects)
 # ---------------------------------------------------------------------------
 
-@app.local_entrypoint()
-def main(config: str):
-    """Run the full training + eval pipeline from a YAML config.
+@app.function(
+    image=image,
+    timeout=4 * 3600,  # 4 hours max for full pipeline
+)
+def run_pipeline(cfg: dict) -> dict:
+    """Run the full training + eval pipeline remotely.
 
-    Usage:
-        modal run a3/shared/scripts/modal_runner.py --config a3/p3/configs/p3_baseline.yaml
+    Dispatches setup, training stages, and evals. Returns all results.
+    Runs on Modal (no GPU) so the pipeline survives local client disconnects.
     """
-    import yaml
-
-    with open(config) as f:
-        cfg = yaml.safe_load(f)
-
     nanochat_ref = cfg["nanochat_ref"]
     experiment_name = cfg.get("experiment_name", "experiment")
 
@@ -362,7 +360,7 @@ def main(config: str):
     print(f"{'='*60}")
 
     # --- Setup (idempotent) ---
-    print("\n[main] Ensuring tokenizer exists on volume...")
+    print("\n[pipeline] Ensuring tokenizer exists on volume...")
     setup.remote(nanochat_ref)
 
     # --- Training stages ---
@@ -373,10 +371,10 @@ def main(config: str):
     if independent:
         names = [s["name"] for s in independent]
         inputs = [(nanochat_ref, dict(s["args"])) for s in independent]
-        print(f"\n[main] Running {len(independent)} independent stages in parallel: {names}")
+        print(f"\n[pipeline] Running {len(independent)} independent stages in parallel: {names}")
         for stage, result in zip(independent, train.starmap(inputs)):
             stage_results[stage["name"]] = result
-            print(f"[main] [{stage['name']}] Done: final_step={result['final_step']}")
+            print(f"[pipeline] [{stage['name']}] Done: final_step={result['final_step']}")
 
     # Wave 2: dependent stages (sequential — each resolves from prior results)
     for stage in cfg["stages"]:
@@ -396,13 +394,13 @@ def main(config: str):
         args["resume_from_step"] = dep_final_step
         args["num_iterations"] = dep_final_step + stage["extra_iterations"]
 
-        print(f"\n[main] [{stage_name}] Resuming from '{dep_name}' step {dep_final_step}")
-        print(f"[main] [{stage_name}] num_iterations={args['num_iterations']}")
-        print(f"[main] [{stage_name}] Starting training...")
+        print(f"\n[pipeline] [{stage_name}] Resuming from '{dep_name}' step {dep_final_step}")
+        print(f"[pipeline] [{stage_name}] num_iterations={args['num_iterations']}")
+        print(f"[pipeline] [{stage_name}] Starting training...")
 
         result = train.remote(nanochat_ref, args)
         stage_results[stage_name] = result
-        print(f"[main] [{stage_name}] Done: final_step={result['final_step']}")
+        print(f"[pipeline] [{stage_name}] Done: final_step={result['final_step']}")
 
     # --- Evaluation (all evals in parallel) ---
     eval_entries = cfg.get("eval", [])
@@ -425,11 +423,11 @@ def main(config: str):
         custom_script = eval_entry.get("custom_eval") if "custom" in evals else None
 
         eval_inputs.append((nanochat_ref, checkpoint, step, custom_script))
-        print(f"[main] [eval] Queued: {checkpoint} @ step {step}")
+        print(f"[pipeline] [eval] Queued: {checkpoint} @ step {step}")
 
     eval_results = []
     if eval_inputs:
-        print(f"\n[main] Running {len(eval_inputs)} evals in parallel...")
+        print(f"\n[pipeline] Running {len(eval_inputs)} evals in parallel...")
         eval_results = list(evaluate.starmap(eval_inputs))
 
         for result in eval_results:
@@ -437,10 +435,10 @@ def main(config: str):
             s = result.get("step", "?")
             val_bpb = result.get("val_bpb", "N/A")
             core = result.get("core_metric", "N/A")
-            print(f"[main]   {tag}@{s}: BPB={val_bpb}, CORE={core}")
+            print(f"[pipeline]   {tag}@{s}: BPB={val_bpb}, CORE={core}")
             if "custom_eval" in result:
                 ppl = result["custom_eval"].get("aggregate_perplexity")
-                print(f"[main]   Positional PPL: {ppl:.2f}" if ppl else "[main]   Positional PPL: N/A")
+                print(f"[pipeline]   Positional PPL: {ppl:.2f}" if ppl else "[pipeline]   Positional PPL: N/A")
 
     # --- Summary ---
     print(f"\n{'='*60}")
@@ -449,6 +447,52 @@ def main(config: str):
     for name, res in stage_results.items():
         print(f"  {name}: final_step={res['final_step']}")
     for i, res in enumerate(eval_results):
+        tag = res.get("checkpoint_tag", "?")
+        s = res.get("step", "?")
+        bpb = res.get("val_bpb", "N/A")
+        core = res.get("core_metric", "N/A")
+        print(f"  eval[{i}] {tag}@{s}: BPB={bpb}, CORE={core}")
+    print("\nDone!")
+
+    return {
+        "experiment_name": experiment_name,
+        "stage_results": stage_results,
+        "eval_results": eval_results,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Local entrypoint (thin wrapper — just parses YAML and dispatches)
+# ---------------------------------------------------------------------------
+
+@app.local_entrypoint()
+def main(config: str):
+    """Launch the pipeline from a YAML config.
+
+    Usage:
+        modal run a3/shared/scripts/modal_runner.py --config a3/p3/configs/p3_baseline.yaml
+
+    With --detach, the pipeline runs entirely on Modal (survives local disconnects):
+        modal run --detach a3/shared/scripts/modal_runner.py --config ...
+    """
+    import yaml
+
+    with open(config) as f:
+        cfg = yaml.safe_load(f)
+
+    experiment_name = cfg.get("experiment_name", "experiment")
+    print(f"Launching pipeline: {experiment_name}")
+    print("Tip: use 'modal run --detach ...' to survive local disconnects.\n")
+
+    results = run_pipeline.remote(cfg)
+
+    # Print summary locally (only reached if not using --detach)
+    print(f"\n{'='*60}")
+    print(f"  RESULTS: {experiment_name}")
+    print(f"{'='*60}")
+    for name, res in results["stage_results"].items():
+        print(f"  {name}: final_step={res['final_step']}")
+    for i, res in enumerate(results["eval_results"]):
         tag = res.get("checkpoint_tag", "?")
         s = res.get("step", "?")
         bpb = res.get("val_bpb", "N/A")
