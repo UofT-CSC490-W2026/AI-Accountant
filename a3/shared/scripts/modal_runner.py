@@ -73,6 +73,7 @@ def train(nanochat_ref: str, args: dict) -> dict:
     import subprocess
 
     os.environ["NANOCHAT_BASE_DIR"] = VOLUME_PATH
+    os.environ["WANDB_PROJECT"] = "490-autobook-a3"
     os.chdir(NANOCHAT_DIR)
 
     # Fetch latest refs (critical — cached image may be stale)
