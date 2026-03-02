@@ -2,34 +2,51 @@ experiment_name: p3-baseline        # W&B group name + results folder name
 nanochat_ref: baseline-v0            # git branch or tag to checkout in the nanochat fork
 
 modal:
-  gpu: A10G                          # "T4", "A10G", "A100", "H100"
-  timeout_hours: 2                   # max wall time before Modal kills the run
+  gpu: A100                           # "T4", "A10G", "A100", "H100"
+  timeout_hours: 3                   # max wall time before Modal kills the run
 
 stages:
   - name: short-context
     args:                            # maps directly to nanochat CLI args
-      depth: 6                       # picochat depth — PLACEHOLDER, finalized after Phase 3
-      max_seq_len: 512               # reduced sequence length for stage 1 — PLACEHOLDER
-      num_iterations: 1000           # iterations for short-context training — PLACEHOLDER
+      depth: 6                       # picochat depth
+      max_seq_len: 512               # reduced sequence length for stage 1
       model_tag: pico-short          # checkpoint folder name
-      save_every: 500                # checkpoint interval
+      save_every: 250                # save at 250, 500, ~929
       run: p3-baseline-short         # W&B run name
+    # num_iterations omitted — nanochat auto-computes from scaling law (~929)
 
   - name: extended-context
+    depends_on: short-context        # runner reads previous stage's final step
+    extra_iterations: 500            # runner adds to previous stage's final step (~929 + 500 = ~1429)
     args:
       depth: 6                       # must match stage 1
       max_seq_len: 2048              # extended sequence length for stage 2
-      num_iterations: 1500           # PLACEHOLDER — depends on --num-iterations semantics (Phase 2)
       model_tag: pico-short          # same tag — checkpoints coexist by step number
-      resume_from_step: 1000         # resume from end of stage 1 — PLACEHOLDER
-      save_every: 500
+      save_every: 50                 # fine granularity to capture loss spike and recovery
       run: p3-baseline-extended      # W&B run name
+    # num_iterations and resume_from_step computed by runner from depends_on + extra_iterations
+
+  - name: full-from-scratch
+    args:
+      depth: 6                       # same model as cheap path
+      max_seq_len: 2048              # full context from the start
+      model_tag: pico-full           # distinct tag — separate checkpoint directory
+      save_every: 250                # same granularity as stage 1
+      run: p3-baseline-full          # W&B run name
+    # num_iterations omitted — nanochat auto-computes (~929, same as stage 1)
 
 eval:
-  - checkpoint: pico-short           # model_tag to evaluate
-    step: 1000                       # stage 1 checkpoint — PLACEHOLDER
+  - checkpoint: pico-short           # stage 1 — short context only
+    after_stage: short-context       # runner uses final step of this stage
+    evals: [bpb, core, custom]
     custom_eval: p3/evals/context_length_eval.py
 
-  - checkpoint: pico-short
-    step: 1500                       # stage 2 checkpoint — PLACEHOLDER
+  - checkpoint: pico-short           # stage 2 — after context extension
+    after_stage: extended-context    # runner uses final step of this stage
+    evals: [bpb, core, custom]
+    custom_eval: p3/evals/context_length_eval.py
+
+  - checkpoint: pico-full            # stage 3 — full context from scratch
+    after_stage: full-from-scratch   # runner uses final step of this stage
+    evals: [bpb, core, custom]
     custom_eval: p3/evals/context_length_eval.py

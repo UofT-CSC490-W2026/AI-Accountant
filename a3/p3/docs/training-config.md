@@ -4,13 +4,13 @@
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| Depth | 6 | Assignment default for picochat |
+| Depth | 6 | Our choice (see rationale below) |
 | Model dim | 384 | `depth * 64 = 384` (aspect_ratio=64) |
 | Heads | 3 | `384 / 128 = 3` (head_dim=128) |
 | Total params | 73,531,692 (~74M) | Verified from `GPT.num_scaling_params()` |
 | Scaling params | 23,200,032 (~23M) | `transformer_matrices + lm_head` (nanochat convention) |
 
-**Why depth=6**: The assignment specifies picochat. Depth 6 is the smallest model that still produces meaningful language (used in nanochat's own `runcpu.sh` demo). Depth 4 (~37M) converges too quickly for an interesting context extension experiment. Depth 8 (~126M) costs 3-4x more with diminishing pedagogical returns.
+**Why depth=6**: The assignment defines picochat as "a smaller nanochat config you define (reduced depth or width)." We choose depth 6 because it is the smallest model with enough heads (3) for meaningful attention patterns and is used in nanochat's own `runcpu.sh` demo. Depth 4 (~37M) has only 2 attention heads, limiting the model's ability to learn diverse attention patterns. Depth 8 (~126M) costs ~3x more with no pedagogical benefit.
 
 ## Scaling Law and Data Budget
 
@@ -28,51 +28,67 @@ This ratio was derived empirically from nanochat's d12-d26 miniseries sweep (see
 
 We use nanochat's default 10.5 rather than overriding it — the codebase's hyperparameters (learning rate, batch size scaling, weight decay) are tuned for this ratio.
 
-## Two-Stage Training Plan
+**Data portion**: The assignment requires training picochat "on a portion of the dataset" (R1). Our token budget of ~244M is 0.24% of the FineWeb-edu 100B-token corpus. This portion is not arbitrary — it is the compute-optimal amount for a 23M scaling-parameter model under nanochat's 10.5x data ratio, which follows from Chinchilla-style scaling laws (Hoffmann et al., 2022).
+
+## Three-Stage Training Plan
 
 ### Stage 1: Short-Context Training (seq_len=512)
 
-Train picochat at reduced sequence length to establish baseline capabilities.
+Train picochat at reduced sequence length to completion. Let nanochat auto-compute the iteration count from the scaling law — don't override `--num-iterations`.
 
 | Parameter | Value | Reasoning |
 |-----------|-------|-----------|
-| `--max-seq-len` | 512 | Assignment suggestion; 4x ratio to target 2048 is well within safe range (see lit review) |
-| `--num-iterations` | 750 | ~75% of total budget at short context (see split rationale below) |
+| `--max-seq-len` | 512 | See lit review: BabyLM grounds 512 for models our scale; 4x jump is smallest viable extrapolation beyond GrowLength's 2x baseline |
+| `--num-iterations` | (auto) ~929 | `target_tokens // total_batch_size`. Let nanochat compute — don't override |
 | `--model-tag` | `pico-short` | Descriptive name for checkpoint directory |
-| `--save-every` | 250 | Save at 250, 500, 750 for analysis |
+| `--save-every` | 250 | Save at 250, 500, ~929 for analysis |
+
+Stage 1 runs to natural completion, including proper LR warmdown. The model is fully trained at seq_len=512 when this stage ends.
 
 ### Stage 2: Extended-Context Training (seq_len=2048)
 
-Resume from stage 1 checkpoint with extended sequence length.
+Resume from stage 1 checkpoint with extended sequence length. This is continued pretraining — additional steps beyond stage 1's natural training horizon, not carved from a shared budget.
 
 | Parameter | Value | Reasoning |
 |-----------|-------|-----------|
 | `--max-seq-len` | 2048 | Nanochat's default; target context length |
-| `--num-iterations` | 1000 | Total iterations (not additional — `--num-iterations` is absolute) |
-| `--resume-from-step` | 750 | Resume from end of stage 1 |
+| `--num-iterations` | ~1429 | ~929 (stage 1) + 500 extension steps |
+| `--resume-from-step` | ~929 | Resume from end of stage 1 |
 | `--model-tag` | `pico-short` | Same tag — checkpoints coexist by step number |
-| `--save-every` | 125 | Finer granularity to capture loss spike recovery |
+| `--save-every` | 50 | Fine granularity to capture loss spike and recovery trajectory |
 
-**Stage 2 runs 250 additional iterations** (1000 total - 750 resume = 250 new steps). This is ~25% of the total budget.
+**Stage 2 runs 500 additional steps.** GrowLength reports 2x jumps are "smooth" while 8x jumps cause "dramatic loss rising" but provides no quantitative recovery data. Our 4x jump falls between — we run generously (500 steps) with frequent saves (`save_every=50`) to observe the actual recovery curve. If loss plateaus early, the extra steps are wasted compute but harmless.
 
-### Stage Split Rationale: 75% Short / 25% Extended
+### Stage 3: Full-Context Baseline (seq_len=2048, from scratch)
 
-| Factor | Reasoning |
-|--------|-----------|
-| Literature | GrowLength finds most learning happens during short-context phase. SkyLadder confirms short-context pre-training transfers well. |
-| Cost efficiency | Training at seq_len=512 is ~4x cheaper per token than 2048 (quadratic attention cost). 75% of compute at the cheap length maximizes token throughput. |
-| Extension needs | The model only needs to adapt attention patterns to longer contexts — not learn language from scratch. A few hundred steps suffices (GrowLength sees recovery within 100-300 steps). |
-| Eval signal | 25% is enough for loss to recover from the spike and plateau, giving a clear before/after comparison. |
+Train picochat at full sequence length from step 0. This is the "expensive path" — the control group that context extension aims to match at lower cost.
+
+| Parameter | Value | Reasoning |
+|-----------|-------|-----------|
+| `--max-seq-len` | 2048 | Same target as stage 2 |
+| `--num-iterations` | (auto) ~929 | Same auto-computed default as stage 1 — fair comparison |
+| `--model-tag` | `pico-full` | Distinct tag — separate checkpoint directory |
+| `--save-every` | 250 | Same granularity as stage 1 |
+
+**Why auto-compute (~929)**: Both Stage 1 and Stage 3 use the same model (depth=6) and the same default scaling ratio (10.5x), so nanochat auto-computes the same iteration count for both. The comparison is fair: same model, same data budget, different sequence lengths.
 
 ### `--num-iterations` Semantics
 
-Nanochat's `--num-iterations` specifies the **total** step count, not additional steps on resume. When resuming from step 750 with `--num-iterations=1000`, training runs steps 750→1000 (250 new steps). This was verified in Phase 2 from `base_train.py:340`:
+Nanochat's `--num-iterations` specifies the **total** step count, not additional steps on resume. When resuming from step ~929 with `--num-iterations=1429`, training runs steps 929→1429 (500 new steps). This was verified in Phase 2 from `base_train.py:340`:
 
 ```python
 num_iterations = target_tokens // total_batch_size
 ```
 
 The step variable is set to the resume step, and the training loop runs `while step < num_iterations`.
+
+### Learning Rate Schedule on Resume
+
+Nanochat uses a linear warmdown schedule (`base_train.py:349-359`): constant LR for the first half of training, then linear decay to zero (`warmdown_ratio=0.5`, `final_lr_frac=0.0`). The schedule is computed from the current run's `num_iterations`, not the original run's — so it **recalculates on resume**.
+
+Stage 1 runs to natural completion, so its LR warmdown finishes properly (LR ≈ 0 at final step). On resume for Stage 2 with `--num-iterations=1429`, the schedule recalculates: warmdown starts at step ~714. Since we resume at step ~929, we're already past the warmdown midpoint — LR starts at roughly `(1429 - 929) / (1429 - 714) ≈ 0.70`.
+
+This means LR jumps from ~0 (end of Stage 1) to ~0.70 (start of Stage 2) — an effective LR rewarm. This is deliberate: Stage 1 runs to natural completion with full warmdown, producing a converged model. Stage 2 then re-warms the LR for continued pretraining at the new context length — the same approach ProLong uses for context extension. Because Stage 1 finishes properly (not cut short), the rewarm is a clean transition, not an artifact. The jump may compound with the loss spike from the 4x context length increase, but 500 steps with `save_every=50` gives fine granularity to observe recovery.
 
 ## Batch Size
 
@@ -88,14 +104,13 @@ If auto-compute produces batch sizes too large for reasonable gradient accumulat
 
 | Stage | GPU | Est. Time | Est. Cost |
 |-------|-----|-----------|-----------|
-| Stage 1 (750 iters, seq_len=512) | A100 | ~5-10 min | $0.25-0.50 |
-| Stage 2 (250 iters, seq_len=2048) | A100 | ~5-10 min | $0.25-0.50 |
-| Eval (2 checkpoints) | A100 | ~2-5 min | $0.10-0.20 |
-| **Total** | **A100** | **~15-25 min** | **$0.60-1.20** |
+| Stage 1 (~929 iters, seq_len=512) | A100 | ~5-15 min | $0.25-0.60 |
+| Stage 2 (500 iters, seq_len=2048) | A100 | ~10-20 min | $0.40-0.80 |
+| Stage 3 (~929 iters, seq_len=2048) | A100 | ~15-30 min | $0.60-1.25 |
+| Eval (3 checkpoints × evals) | A100 | ~10-15 min | $0.40-0.60 |
+| **Total** | **A100** | **~40-80 min** | **$1.65-3.25** |
 
-On A10G (cheaper per hour but slower): ~30-60 min, $0.55-1.10.
-
-These estimates are rough — actual throughput depends on batch size, gradient accumulation, and whether evals run between stages. P3's total cost should be well under $5 even with failed runs and reruns.
+These estimates are rough — actual throughput depends on batch size, gradient accumulation, and whether evals run between stages. P3's total cost should be well under $10 even with failed runs and reruns.
 
 ## Param Count Reference Table
 
