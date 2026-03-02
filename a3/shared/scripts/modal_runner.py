@@ -47,6 +47,42 @@ NANOCHAT_DIR = "/root/nanochat"
 
 
 # ---------------------------------------------------------------------------
+# Setup (one-time): download data + train tokenizer
+# ---------------------------------------------------------------------------
+
+@app.function(
+    image=image,
+    volumes={VOLUME_PATH: volume},
+    gpu="A100",
+    timeout=3600,
+)
+def setup(nanochat_ref: str):
+    """Download data shards and train tokenizer. Idempotent — skips if already done."""
+    import os
+    import subprocess
+
+    os.environ["NANOCHAT_BASE_DIR"] = VOLUME_PATH
+    os.chdir(NANOCHAT_DIR)
+
+    subprocess.run(["git", "fetch", "origin", "--tags"], check=True)
+    subprocess.run(["git", "checkout", nanochat_ref], check=True)
+
+    tokenizer_path = os.path.join(VOLUME_PATH, "tokenizer", "tokenizer.pkl")
+    if os.path.exists(tokenizer_path):
+        print("[setup] Tokenizer already exists, skipping.")
+        return
+
+    print("[setup] Downloading data shards...")
+    subprocess.run(["python", "-m", "nanochat.dataset", "-n", "8"], check=True)
+
+    print("[setup] Training tokenizer...")
+    subprocess.run(["python", "-m", "scripts.tok_train"], check=True)
+
+    volume.commit()
+    print("[setup] Done — tokenizer saved to volume.")
+
+
+# ---------------------------------------------------------------------------
 # Train function
 # ---------------------------------------------------------------------------
 
@@ -270,6 +306,10 @@ def main(config: str):
     print(f"  {experiment_name}")
     print(f"  nanochat ref: {nanochat_ref}")
     print(f"{'='*60}")
+
+    # --- Setup (idempotent) ---
+    print("\n[setup] Ensuring tokenizer exists on volume...")
+    setup.remote(nanochat_ref)
 
     # --- Training stages ---
     stage_results = {}  # stage_name -> train result dict
