@@ -47,7 +47,9 @@ def parse_args():
 def load_pg19_test():
     """Load all documents from PG19 test split."""
     from datasets import load_dataset
-    ds = load_dataset("deepmind/pg19", split="test")
+    # Use emozilla/pg19-test (parquet re-upload) because deepmind/pg19 uses
+    # a legacy loading script that datasets>=4.0 no longer supports.
+    ds = load_dataset("emozilla/pg19-test", split="test")
     return ds["text"]
 
 
