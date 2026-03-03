@@ -1,14 +1,19 @@
 experiment_name: p3-baseline        # W&B group name + results folder name
-nanochat_ref: baseline-v0            # git branch or tag to checkout in the nanochat fork
-# GPU (A100) and timeouts are set in modal_runner.py decorators, not here.
+nanochat_ref: p3-log-every          # git branch on nanochat fork (adds --log-every)
+gpu: A100-80GB                      # documentation — actual GPU is in Modal decorators
 
 stages:
   - name: short-context
-    args:                            # maps directly to nanochat CLI args
+    args:
       depth: 6                       # picochat depth
       max_seq_len: 512               # reduced sequence length for stage 1
       model_tag: pico-short          # checkpoint folder name
-      save_every: 250                # save at 250, 500, ..., ~1433
+      device_batch_size: 512         # 1 forward pass per step on A100-80GB
+      log_every: 50                  # dense W&B logging
+      eval_every: 50                 # dense val/bpb evaluation
+      save_every: 50                 # dense checkpoints
+      core_metric_every: -1          # disable during training, run post-hoc
+      sample_every: -1               # disable text sampling
       run: p3-baseline-short         # W&B run name
     # num_iterations omitted — nanochat auto-computes from scaling law (~1433)
 
@@ -19,7 +24,12 @@ stages:
       depth: 6                       # must match stage 1
       max_seq_len: 2048              # extended sequence length for stage 2
       model_tag: pico-short          # same tag — checkpoints coexist by step number
-      save_every: 50                 # fine granularity to capture loss spike and recovery
+      device_batch_size: 128         # 1 forward pass per step on A100-80GB
+      log_every: 50
+      eval_every: 50
+      save_every: 50
+      core_metric_every: -1
+      sample_every: -1
       run: p3-baseline-extended      # W&B run name
     # num_iterations and resume_from_step computed by runner from depends_on + extra_iterations
 
@@ -28,7 +38,12 @@ stages:
       depth: 6                       # same model as cheap path
       max_seq_len: 2048              # full context from the start
       model_tag: pico-full           # distinct tag — separate checkpoint directory
-      save_every: 250                # same granularity as stage 1
+      device_batch_size: 128         # 1 forward pass per step on A100-80GB
+      log_every: 50
+      eval_every: 50
+      save_every: 50
+      core_metric_every: -1
+      sample_every: -1
       run: p3-baseline-full          # W&B run name
     # num_iterations omitted — nanochat auto-computes (~1433, same as stage 1)
 
@@ -42,6 +57,10 @@ eval:
     after_stage: extended-context    # runner uses final step of this stage
     evals: [bpb, core, custom]
     custom_eval: p3/evals/context_length_eval.py
+    recovery_curve:                  # M3: intermediate evals generated dynamically by orchestrator
+      depends_on: short-context      # start from this stage's final step
+      interval: 50                   # eval every 50 steps (at checkpoint positions)
+      custom_eval: p3/evals/context_length_eval.py
 
   - checkpoint: pico-full            # stage 3 — full context from scratch
     after_stage: full-from-scratch   # runner uses final step of this stage
