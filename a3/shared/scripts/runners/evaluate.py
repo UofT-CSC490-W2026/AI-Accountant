@@ -63,7 +63,8 @@ class Evaluate:
         results = {"checkpoint_tag": checkpoint_tag, "step": step}
 
         # [3] Standard evals: run BPB and/or CORE and parse results
-        results.update(_run_standard_evals(checkpoint_tag, step, standard_evals))
+        if standard_evals:
+            results.update(_run_standard_evals(checkpoint_tag, step, standard_evals))
 
         # [3.1] Rename CSV: add model_tag to prevent collisions across checkpoints
         _rename_core_csv(checkpoint_tag, step)

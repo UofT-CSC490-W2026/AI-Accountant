@@ -71,7 +71,7 @@ def resolve_eval_inputs(
         # Standard evals
         evals = entry.get("evals", [])
         standard = [e for e in evals if e in ("bpb", "core")]
-        standard_evals = ",".join(standard) if standard else "bpb"
+        standard_evals = ",".join(standard)
         custom_script = entry.get("custom_eval") if "custom" in evals else None
 
         eval_inputs.append((nanochat_ref, checkpoint, step, standard_evals, custom_script))

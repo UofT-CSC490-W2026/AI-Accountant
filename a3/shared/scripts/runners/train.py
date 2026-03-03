@@ -12,7 +12,7 @@ from shared.infra import (
     volume,
     wandb_secret,
 )
-from shared.helpers import checkout_ref, find_final_step
+from shared.helpers import checkout_ref
 
 
 @app.cls(
@@ -56,9 +56,10 @@ class Train:
         cmd = _build_cli(args)
         subprocess.run(cmd, check=True)
 
-        # [4] Final step: find the highest checkpoint step written during training
+        # [4] Final step: use num_iterations (the target step nanochat trained to).
+        #     Avoids stale checkpoints on the Volume from prior runs.
         model_tag = args.get("model_tag", f"d{args['depth']}")
-        final_step = find_final_step(VOLUME_PATH, CKPT_SUBDIR, model_tag)
+        final_step = args["num_iterations"]
         print(f"[train] Final step: {final_step}")
 
         # [5] W&B metadata: attach git hash to the W&B run for reproducibility
