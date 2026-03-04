@@ -1,0 +1,26 @@
+experiment_name: p2-layerscale
+nanochat_ref: p2-swiglu-layerscale
+gpu: A100-80GB
+
+train:
+  - name: train
+    args:
+      depth: 6
+      max_seq_len: 512
+      model_tag: pico-layerscale
+      device_batch_size: 512
+      log_every: 20
+      eval_every: 100
+      save_every: 100
+      core_metric_every: -1
+      sample_every: -1
+      run: p2-layerscale
+      window_pattern: L
+      mlp_variant: relu2
+      residual_variant: layerscale
+      layerscale_init: 1.0e-4
+
+eval:
+  - checkpoint: pico-layerscale
+    after_stage: train
+    evals: [bpb, core]
