@@ -19,7 +19,7 @@ from shared.helpers import checkout_ref, parse_core_csv, parse_eval_stdout
     image=eval_image,
     volumes={VOLUME_PATH: volume},
     secrets=[wandb_secret],
-    gpu="A100-80GB",
+    gpu="H100",
 )
 class Evaluate:
     @modal.method()

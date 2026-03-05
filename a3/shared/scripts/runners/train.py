@@ -19,7 +19,7 @@ from shared.helpers import checkout_ref
     image=image,
     volumes={VOLUME_PATH: volume},
     secrets=[wandb_secret],
-    gpu="A100-80GB",
+    gpu="H100",
 )
 class Train:
     @modal.method()
