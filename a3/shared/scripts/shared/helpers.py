@@ -52,7 +52,8 @@ def resolve_eval_inputs(
     - recovery_curve blocks (M3): generates intermediate eval entries
       dynamically at checkpoint positions (multiples of save interval).
 
-    Returns list of tuples: (nanochat_ref, checkpoint, step, standard_evals, custom_script)
+    Returns list of tuples:
+    (nanochat_ref, checkpoint, step, standard_evals, custom_script, max_per_task)
     """
     eval_inputs = []
 
@@ -73,8 +74,9 @@ def resolve_eval_inputs(
         standard = [e for e in evals if e in ("bpb", "core")]
         standard_evals = ",".join(standard)
         custom_script = entry.get("custom_eval") if "custom" in evals else None
+        max_per_task = int(entry.get("max_per_task", -1))
 
-        eval_inputs.append((nanochat_ref, checkpoint, step, standard_evals, custom_script))
+        eval_inputs.append((nanochat_ref, checkpoint, step, standard_evals, custom_script, max_per_task))
 
         # Recovery curve — generate intermediate checkpoint evals dynamically
         if "recovery_curve" in entry:
@@ -90,7 +92,7 @@ def resolve_eval_inputs(
             # Snap to next multiple of interval (checkpoints at step % save_every == 0)
             first = ((start_step // interval) + 1) * interval
             for rc_step in range(first, end_step, interval):
-                eval_inputs.append((nanochat_ref, checkpoint, rc_step, "bpb", rc_custom))
+                eval_inputs.append((nanochat_ref, checkpoint, rc_step, "bpb", rc_custom, -1))
 
     return eval_inputs
 

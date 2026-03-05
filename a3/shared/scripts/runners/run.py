@@ -139,7 +139,9 @@ def _log_stage_resume(stage_name: str, dep_name: str, dep_step: int, num_iterati
 def _log_eval_queue(eval_inputs: list):
     print(f"\n[pipeline] Spawning {len(eval_inputs)} evals in parallel...")
     for inp in eval_inputs:
-        print(f"[pipeline] [eval] Queued: {inp[1]} @ step {inp[2]} ({inp[3]})")
+        max_per_task = inp[5] if len(inp) > 5 else -1
+        suffix = f", max_per_task={max_per_task}" if max_per_task > 0 else ""
+        print(f"[pipeline] [eval] Queued: {inp[1]} @ step {inp[2]} ({inp[3]}{suffix})")
 
 
 def _log_eval_result(result: dict):

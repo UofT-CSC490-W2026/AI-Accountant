@@ -30,6 +30,7 @@ class Evaluate:
         step: int,
         standard_evals: str = "bpb,core",
         custom_eval_script: str | None = None,
+        max_per_task: int = -1,
     ) -> dict:
         """Run standard evals and optionally a custom eval on one checkpoint.
 
@@ -45,6 +46,7 @@ class Evaluate:
             step: Checkpoint step number to evaluate.
             standard_evals: Comma-separated eval names ("bpb", "core", or "bpb,core").
             custom_eval_script: Path to a custom eval script, or None to skip.
+            max_per_task: Max examples per CORE task (-1 = full task).
 
         Returns:
             Dict with train_bpb, val_bpb, core_metric, core_tasks, and
@@ -64,7 +66,7 @@ class Evaluate:
 
         # [3] Standard evals: run BPB and/or CORE and parse results
         if standard_evals:
-            results.update(_run_standard_evals(checkpoint_tag, step, standard_evals))
+            results.update(_run_standard_evals(checkpoint_tag, step, standard_evals, max_per_task))
 
         # [3.1] Rename CSV: add model_tag to prevent collisions across checkpoints
         _rename_core_csv(checkpoint_tag, step)
@@ -95,7 +97,7 @@ class Evaluate:
 # Internal helpers
 # ---------------------------------------------------------------------------
 
-def _run_standard_evals(checkpoint_tag: str, step: int, standard_evals: str) -> dict:
+def _run_standard_evals(checkpoint_tag: str, step: int, standard_evals: str, max_per_task: int = -1) -> dict:
     """Run nanochat's built-in BPB and/or CORE benchmarks."""
     import subprocess
 
@@ -105,6 +107,8 @@ def _run_standard_evals(checkpoint_tag: str, step: int, standard_evals: str) -> 
         f"--model-tag={checkpoint_tag}",
         f"--step={step}",
     ]
+    if "core" in standard_evals and max_per_task > 0:
+        cmd.append(f"--max-per-task={max_per_task}")
     print(f"[eval] Running: {' '.join(cmd)}")
     proc = subprocess.Popen(
         cmd,
