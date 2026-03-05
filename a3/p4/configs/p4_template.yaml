@@ -1,0 +1,26 @@
+# P4 Template — train full nanochat
+#
+# Copy this file, fill in the values, push your branch to the fork, then run:
+#   modal run --detach a3/shared/scripts/main.py --config a3/p4/configs/p4_your_config.yaml
+#
+# Remember: push your branch to the fork BEFORE running. Modal pulls from GitHub, not your laptop.
+
+experiment_name: p4-final            # W&B group name
+nanochat_ref: p2-best                # git branch — use P2's best architecture change
+gpu: A100-80GB                       # A100-80GB recommended for depth=20
+timeout_hours: 6                     # depth=20 trains longer — increase if needed
+
+train:
+  - name: train
+    args:
+      depth: 20                      # full nanochat
+      max_seq_len: 512               # standard sequence length
+      model_tag: d20                 # checkpoint folder name
+      device_batch_size: 32          # depth=20 needs small batch — reduce to 16 if OOM
+      run: p4-final                  # W&B run name
+    # num_iterations omitted — nanochat auto-computes from scaling law
+
+eval:
+  - checkpoint: d20                  # must match model_tag above
+    after_stage: train
+    evals: [bpb, core]
