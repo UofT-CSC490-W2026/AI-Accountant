@@ -74,10 +74,16 @@ TOKENIZER_FILES = ["tokenizer.pkl", "token_bytes.pt"]
 @app.function(
     image=image,
     volumes={VOLUME_PATH: volume},
-    timeout=3600,
+    timeout=8 * 3600,
 )
-def setup(nanochat_ref: str):
-    """Download tokenizer and data shards to Volume. Idempotent."""
+def setup(nanochat_ref: str, data_shards: int = 8, data_workers: int = 4):
+    """Download tokenizer and data shards to Volume. Idempotent.
+
+    Args:
+        nanochat_ref: Git ref to checkout in nanochat.
+        data_shards: Number of base data shards to ensure (-1 = full dataset).
+        data_workers: Parallel worker count for data download.
+    """
     import os
     import subprocess
     import urllib.request
@@ -106,7 +112,11 @@ def setup(nanochat_ref: str):
 
     # Data shards
     print("[setup] Ensuring data shards exist...")
-    subprocess.run(["python", "-m", "nanochat.dataset", "-n", "8"], check=True)
+    print(f"[setup] Requested shards: {data_shards} (workers={data_workers})")
+    subprocess.run(
+        ["python", "-m", "nanochat.dataset", "-n", str(data_shards), "-w", str(data_workers)],
+        check=True,
+    )
 
     volume.commit()
     print("[setup] Done.")

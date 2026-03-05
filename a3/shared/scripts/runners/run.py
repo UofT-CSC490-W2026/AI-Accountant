@@ -21,10 +21,12 @@ def run(cfg: dict) -> dict:
     experiment_name = cfg.get("experiment_name", "experiment")
     gpu = cfg.get("gpu", "A100-80GB")
     timeout = cfg.get("timeout_hours", 3) * 3600
+    data_shards = int(cfg.get("data_shards", 8))
+    data_workers = int(cfg.get("data_workers", 4))
     _print_header(experiment_name, nanochat_ref)
 
     # [2] Setup: download tokenizer and data shards to the volume if missing
-    setup.remote(nanochat_ref)
+    setup.remote(nanochat_ref, data_shards, data_workers)
 
     # [3] Training: split stages and run them
     stage_results = {}
