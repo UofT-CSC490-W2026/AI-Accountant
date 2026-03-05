@@ -33,6 +33,7 @@ image = (
     )
     .pip_install(
         "datasets>=4.0.0",
+        "kernels",
         "psutil>=7.1.0",
         "regex>=2025.9.1",
         "rustbpe>=0.1.0",
