@@ -1,0 +1,52 @@
+# Smoke test — P3 pattern: context extension + custom eval.
+# Tests seq_len change on resume, custom eval script, and explicit step resolution.
+# Takes ~2-3 min.
+#
+#   modal run a3/shared/scripts/main.py --config a3/shared/configs/smoke_test_p3.yaml
+
+experiment_name: smoke-p3
+nanochat_ref: baseline-v0
+gpu: A10G
+timeout_hours: 1
+
+train:
+  - name: short-context
+    args:
+      depth: 6
+      max_seq_len: 512
+      model_tag: smoke-p3
+      device_batch_size: 32
+      total_batch_size: 16384
+      num_iterations: 3
+      save_every: 3
+      eval_every: -1
+      core_metric_every: -1
+      sample_every: -1
+      run: dummy
+
+  - name: extended-context
+    depends_on: short-context
+    extra_iterations: 2
+    args:
+      depth: 6
+      max_seq_len: 2048
+      model_tag: smoke-p3
+      device_batch_size: 8               # 8 * 2048 = 16384 = total_batch_size (no grad accum)
+      total_batch_size: 16384
+      save_every: 5
+      eval_every: -1
+      core_metric_every: -1
+      sample_every: -1
+      run: dummy
+
+eval:
+  # BPB on short checkpoint (seq_len=512 fits on A10G; seq_len=2048 OOMs)
+  - checkpoint: smoke-p3
+    after_stage: short-context
+    evals: [bpb]
+
+  # Custom eval on extended checkpoint — tests explicit step + custom eval script
+  - checkpoint: smoke-p3
+    step: 5
+    evals: [custom]
+    custom_eval: p3/evals/context_length_eval.py
