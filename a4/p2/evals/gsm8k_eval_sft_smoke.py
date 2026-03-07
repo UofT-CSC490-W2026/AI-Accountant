@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Fast/cheap GSM8K+BPB smoke eval for SFT checkpoints."""
 
+import copy
 import os
+import re
 from contextlib import nullcontext
 
 import torch
@@ -18,6 +20,23 @@ def _numeric_equal(a: str | None, b: str | None, tol: float = 1e-9) -> bool:
         return abs(float(a) - float(b)) <= tol
     except ValueError:
         return False
+
+
+_LAST_NUM_RE = re.compile(r"-?[0-9]+(?:\.[0-9]+)?")
+_FORCE_SUFFIX = "\n\nReturn the final answer on the last line exactly as: #### <number>"
+
+
+def _extract_last_number(text: str) -> str | None:
+    matches = _LAST_NUM_RE.findall(text)
+    if not matches:
+        return None
+    return matches[-1].replace(",", "").strip()
+
+
+def _force_format_prompt(conversation: dict) -> dict:
+    conv = copy.deepcopy(conversation)
+    conv["messages"][0]["content"] = conv["messages"][0]["content"] + _FORCE_SUFFIX
+    return conv
 
 
 def run_eval(
@@ -90,6 +109,8 @@ def run_eval(
     parseable = 0
     exact = 0
     numeric = 0
+    forced_parseable = 0
+    forced_exact = 0
     samples = []
 
     for i in range(n):
@@ -109,13 +130,33 @@ def run_eval(
         pred_num = extract_answer(completion)
         parseable += int(pred_num is not None)
         exact += int(pred_num == ref_num)
-        numeric += int(_numeric_equal(pred_num, ref_num))
+        relaxed_pred = pred_num if pred_num is not None else _extract_last_number(completion)
+        numeric += int(_numeric_equal(relaxed_pred, ref_num))
+
+        forced_conversation = _force_format_prompt(conversation)
+        forced_prompt_ids = tokenizer.render_for_completion(forced_conversation)
+        with autocast_ctx:
+            forced_results, _ = engine.generate_batch(
+                forced_prompt_ids,
+                num_samples=1,
+                max_tokens=128,
+                temperature=0.0,
+                top_k=50,
+            )
+        forced_completion = tokenizer.decode(forced_results[0][len(forced_prompt_ids):])
+        forced_pred = extract_answer(forced_completion)
+        forced_parseable += int(forced_pred is not None)
+        forced_exact += int(forced_pred == ref_num)
+
         samples.append(
             {
                 "idx": i,
-                "pred_num": pred_num,
                 "ref_num": ref_num,
-                "completion": completion,
+                "strict_pred_num": pred_num,
+                "relaxed_pred_num": relaxed_pred,
+                "forced_pred_num": forced_pred,
+                "strict_completion": completion,
+                "forced_completion": forced_completion,
             }
         )
 
@@ -131,11 +172,17 @@ def run_eval(
         "bpb_split_tokens": split_tokens,
         "max_problems": SMOKE_MAX_PROBLEMS,
         "accuracy": float(accuracy),
+        "accuracy_strict": float(accuracy),
+        "accuracy_relaxed_numeric_debug": numeric / n if n else 0.0,
+        "accuracy_prompt_forced_debug": forced_exact / n if n else 0.0,
+        "prompt_forced_parseable_rate_debug": forced_parseable / n if n else 0.0,
         "gsm8k_debug": {
             "n": n,
             "parseable_rate": parseable / n if n else 0.0,
             "strict_exact_rate": exact / n if n else 0.0,
             "numeric_match_rate": numeric / n if n else 0.0,
+            "prompt_forced_parseable_rate": forced_parseable / n if n else 0.0,
+            "prompt_forced_strict_rate": forced_exact / n if n else 0.0,
             "samples": samples,
         },
     }
