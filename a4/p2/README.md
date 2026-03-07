@@ -66,6 +66,20 @@ modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_midtrai
 modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_midtrain_altmix.yaml
 ```
 
+## Fast Smoke Run (before full jobs)
+
+Use this first to verify setup -> SFT -> midtraining -> eval pipeline:
+
+```powershell
+modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_pipeline_smoke.yaml
+```
+
+This run is deliberately small:
+- 20 SFT iterations
+- 20 midtraining iterations
+- GSM8K eval capped to 32 problems
+- small BPB token budget in custom eval
+
 ## Runner Notes
 
 - Runner now supports checkpoint branching via training args:
