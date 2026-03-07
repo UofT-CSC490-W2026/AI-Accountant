@@ -151,10 +151,14 @@ def _log_eval_result(result: dict):
     s = result.get("step", "?")
     val_bpb = result.get("val_bpb", "N/A")
     core = result.get("core_metric", "N/A")
+    custom_acc = result.get("custom_accuracy")
     print(f"[pipeline]   {tag}@{s}: BPB={val_bpb}, CORE={core}")
+    if custom_acc is not None:
+        print(f"[pipeline]   Custom accuracy: {custom_acc:.4f}")
     if "custom_eval" in result:
         ppl = result["custom_eval"].get("aggregate_perplexity")
-        print(f"[pipeline]   Positional PPL: {ppl:.2f}" if ppl else "[pipeline]   Positional PPL: N/A")
+        if ppl is not None:
+            print(f"[pipeline]   Positional PPL: {ppl:.2f}")
 
 
 def _print_summary(experiment_name: str, stage_results: dict, eval_results: list):

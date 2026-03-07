@@ -81,6 +81,13 @@ class Evaluate:
         if custom_eval_script:
             custom_result = _run_custom_eval(custom_eval_script, checkpoint_tag, step)
             results["custom_eval"] = custom_result
+            if isinstance(custom_result, dict):
+                # Promote common custom metrics so pipeline summaries are informative.
+                for key in ("train_bpb", "val_bpb", "core_metric"):
+                    if key in custom_result and key not in results:
+                        results[key] = custom_result[key]
+                if "accuracy" in custom_result:
+                    results["custom_accuracy"] = custom_result["accuracy"]
             _save_custom_eval(checkpoint_tag, step, custom_result)
 
         # [5] Commit: persist eval results to the volume
