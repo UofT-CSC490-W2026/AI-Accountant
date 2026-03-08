@@ -29,15 +29,63 @@ All configs are in `a4/p2/configs/`.
 2. `a4p2_sft_original.yaml`
    - SFT run from pretrained checkpoint with original SFT recipe
    - Runs custom GSM8K + custom BPB
-3. `a4p2_sft_altmix.yaml`
-   - SFT run from pretrained checkpoint with altered supervision mix (`mmlu_epochs`, `gsm8k_epochs`)
+3. `a4p2_sft_metamath.yaml`
+   - SFT run from pretrained checkpoint with the original SFT recipe plus a MetaMathQA subset
+   - Uses `a4.p2.scripts.chat_sft_with_extra_jsonl`
    - Runs custom GSM8K + custom BPB
 4. `a4p2_midtrain_original.yaml`
    - Midtraining run from pretrained checkpoint using base-train continuation recipe
    - Runs standard `bpb` + custom GSM8K/BPB
-5. `a4p2_midtrain_altmix.yaml`
-   - Midtraining ablation variant (reduced shard budget via `data_shards: 8`)
+5. `a4p2_midtrain_finemath.yaml`
+   - Midtraining run with the original base-train recipe over a FineMath-augmented parquet corpus
+   - Uses `a4.p2.scripts.base_train_with_data_dir`
    - Runs standard `bpb` + custom GSM8K/BPB
+
+## Alternative Dataset Strategy
+
+The alternative runs are dataset augmentation experiments, not architecture changes:
+
+- SFT alternative:
+  - original SFT mixture
+  - plus a sampled `meta-math/MetaMathQA` subset converted to CustomJSON JSONL
+- Midtraining alternative:
+  - original continued-pretraining recipe
+  - but read from a parquet corpus augmented with `HuggingFaceTB/finemath` (`finemath-4plus`)
+
+This keeps the training recipe fixed while changing only the data.
+
+## Data Preparation
+
+The two prep scripts are:
+
+- `a4/p2/scripts/prepare_metamath_jsonl.py`
+- `a4/p2/scripts/prepare_finemath_parquet.py`
+- `a4/shared/scripts/prepare_p2_data.py` (Modal entrypoint that writes prepared data to volume)
+
+Expected outputs on the Modal volume:
+
+- `/data/checkpoints/a4_p2_data/metamathqa_50k.jsonl`
+- `/data/checkpoints/a4_p2_data/metamathqa_5k.jsonl`
+- `/data/checkpoints/a4_p2_data/finemath_4plus_mix/`
+- `/data/checkpoints/a4_p2_data/finemath_4plus_mix_smoke/`
+
+Prep commands:
+
+```powershell
+modal run a4/shared/scripts/prepare_p2_data.py --dataset metamath --smoke
+modal run a4/shared/scripts/prepare_p2_data.py --dataset metamath
+modal run a4/shared/scripts/prepare_p2_data.py --dataset finemath --smoke
+modal run a4/shared/scripts/prepare_p2_data.py --dataset finemath
+```
+
+CustomJSON format note:
+
+- Each JSONL line must be a raw JSON array of alternating messages, e.g.
+  `[{"role":"user","content":"..."},{"role":"assistant","content":"..."}]`
+
+Parquet format note:
+
+- Each row must contain a single `text` column.
 
 ## Custom Eval Hooks
 
@@ -61,9 +109,9 @@ From repo root:
 ```powershell
 modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_pretrained_gsm8k_eval.yaml
 modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_sft_original.yaml
-modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_sft_altmix.yaml
+modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_sft_metamath.yaml
 modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_midtrain_original.yaml
-modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_midtrain_altmix.yaml
+modal run --detach a4/shared/scripts/main.py --config a4/p2/configs/a4p2_midtrain_finemath.yaml
 ```
 
 ## Fast Smoke Run (before full jobs)

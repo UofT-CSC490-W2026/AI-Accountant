@@ -152,11 +152,11 @@ def _log_git_hash_to_wandb(run_name: str | None, git_hash: str):
 
 
 def _checkpoint_subdir_for_script(script: str) -> str:
-    if script == "scripts.base_train":
+    if script == "scripts.base_train" or "base_train" in script:
         return CKPT_SUBDIR
-    if script == "scripts.chat_sft":
+    if script == "scripts.chat_sft" or "chat_sft" in script:
         return "chatsft_checkpoints"
-    if script == "scripts.chat_rl":
+    if script == "scripts.chat_rl" or "chat_rl" in script:
         return "chatrl_checkpoints"
     return CKPT_SUBDIR
 
@@ -168,7 +168,7 @@ def _init_destination_subdir(script: str, init_from_source: str) -> str:
     so init copies must land in base_checkpoints, even though outputs are saved
     to chatsft_checkpoints.
     """
-    if script == "scripts.chat_sft":
+    if _checkpoint_subdir_for_script(script) == "chatsft_checkpoints":
         return "base_checkpoints"
     return {
         "base": "base_checkpoints",

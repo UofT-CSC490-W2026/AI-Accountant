@@ -1,0 +1,38 @@
+experiment_name: a4p2-midtrain-finemath-smoke
+nanochat_ref: a4-p2
+gpu: H100
+timeout_hours: 1
+data_shards: 1
+data_workers: 2
+
+train:
+  - name: midtrain_finemath_smoke
+    args:
+      script: a4.p2.scripts.base_train_with_data_dir
+      init_from_source: base
+      init_from_tag: nano-swiglu-fp8-full
+      init_from_step: 4357
+      data_dir: /data/checkpoints/a4_p2_data/finemath_4plus_mix_smoke
+      depth: 20
+      max_seq_len: 512
+      num_iterations: 4365
+      resume_from_step: 4357
+      model_tag: a4p2-midtrain-finemath-smoke-swiglu-v1
+      device_batch_size: 16
+      total_batch_size: 65536
+      eval_every: -1
+      save_every: -1
+      core_metric_every: -1
+      sample_every: -1
+      run: a4p2-midtrain-finemath-smoke
+      window_pattern: L
+      mlp_variant: swiglu
+      residual_variant: standard
+      fp8: true
+      fp8_recipe: tensorwise
+
+eval:
+  - checkpoint: a4p2-midtrain-finemath-smoke-swiglu-v1
+    after_stage: midtrain_finemath_smoke
+    evals: [custom]
+    custom_eval: p2/evals/gsm8k_eval_base_smoke.py

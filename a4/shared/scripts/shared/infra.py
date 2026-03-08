@@ -47,7 +47,7 @@ image = (
         "zstandard>=0.25.0",
     )
     .run_commands("git clone https://github.com/seonghyunban/nanochat.git /root/nanochat")
-    .add_local_python_source("shared", "runners")
+    .add_local_python_source("shared", "runners", "a4")
 )
 
 eval_image = image

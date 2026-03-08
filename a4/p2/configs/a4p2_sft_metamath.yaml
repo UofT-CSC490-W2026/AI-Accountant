@@ -1,0 +1,27 @@
+experiment_name: a4p2-sft-metamath
+nanochat_ref: a4-p2
+gpu: H100
+timeout_hours: 24
+data_shards: -1
+data_workers: 8
+
+train:
+  - name: sft_metamath
+    args:
+      script: a4.p2.scripts.chat_sft_with_extra_jsonl
+      init_from_source: base
+      init_from_tag: nano-swiglu-fp8-full
+      init_from_step: 4357
+      model_tag: a4p2-sft-metamath-swiglu
+      model_step: 4357
+      load_optimizer: 1
+      num_iterations: -1
+      extra_conversations_jsonl: /data/checkpoints/a4_p2_data/metamathqa_50k.jsonl
+      extra_conversations_repeats: 1
+      run: a4p2-sft-metamath
+
+eval:
+  - checkpoint: a4p2-sft-metamath-swiglu
+    after_stage: sft_metamath
+    evals: [custom]
+    custom_eval: p2/evals/gsm8k_eval_sft.py
