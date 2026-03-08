@@ -3,6 +3,7 @@
 
 import os
 import re
+import time
 from contextlib import nullcontext
 
 import torch
@@ -87,6 +88,7 @@ def run_eval(
     strict_passed = 0
     relaxed_passed = 0
     samples = []
+    t0 = time.time()
 
     for i in range(n):
         conversation = task[i]
@@ -118,6 +120,16 @@ def run_eval(
                 "strict_completion": completion,
             }
         )
+        done = i + 1
+        if done == 1 or done % 10 == 0 or done == n:
+            elapsed = time.time() - t0
+            eta = (elapsed / done) * (n - done) if done else 0.0
+            print(
+                f"[gsm8k_eval] {done}/{n} ({100*done/n:.2f}%) | "
+                f"strict={strict_passed/done:.4f} | relaxed={relaxed_passed/done:.4f} | "
+                f"elapsed={elapsed/60:.1f}m | eta={eta/60:.1f}m",
+                flush=True,
+            )
 
     strict_accuracy = strict_passed / n if n else 0.0
     relaxed_accuracy = relaxed_passed / n if n else 0.0

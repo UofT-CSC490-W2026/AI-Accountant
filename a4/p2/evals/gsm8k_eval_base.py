@@ -7,6 +7,7 @@ Runner entrypoint:
 
 import os
 import re
+import time
 from contextlib import nullcontext
 
 import torch
@@ -106,6 +107,7 @@ def run_eval(
     parseable = 0
     samples = []
     sample_cap = min(debug_n, eval_n) if debug_n > 0 else 0
+    t0 = time.time()
 
     for i in range(eval_n):
         conversation = task[i]
@@ -137,6 +139,16 @@ def run_eval(
                     "relaxed_pred_num": relaxed_pred,
                     "completion_head": completion[:220],
                 }
+            )
+        done = i + 1
+        if done == 1 or done % 10 == 0 or done == eval_n:
+            elapsed = time.time() - t0
+            eta = (elapsed / done) * (eval_n - done) if done else 0.0
+            print(
+                f"[gsm8k_eval] {done}/{eval_n} ({100*done/eval_n:.2f}%) | "
+                f"strict={strict_passed/done:.4f} | relaxed={relaxed_passed/done:.4f} | "
+                f"elapsed={elapsed/60:.1f}m | eta={eta/60:.1f}m",
+                flush=True,
             )
 
     strict_accuracy = strict_passed / eval_n if eval_n else 0.0
