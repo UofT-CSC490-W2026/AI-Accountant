@@ -1,0 +1,205 @@
+\documentclass[9pt]{extarticle}
+\usepackage[margin=0.65in, headheight=14pt]{geometry}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{lmodern}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titlespacing*{\subsection}{1.5em}{6pt}{2pt}
+\setlist[itemize]{leftmargin=3em}
+\setlist[enumerate]{leftmargin=3em}
+
+\title{\vspace{-1.2cm}\huge\textbf{Configuring Your Experiment}\vspace{-0.5em}}
+\author{\normalsize Autobook}
+\date{\vspace{-1.5em}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Configuring Your Experiment}
+\fancyhead[R]{\small Autobook}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  framerule=0pt,
+  breaklines=true,
+  xleftmargin=3em,
+  xrightmargin=8pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+  commentstyle=\color{green!50!black}\itshape,
+  morecomment=[l]{\#},
+}
+
+\newcommand{\cmd}[1]{\colorbox{gray!10}{\texttt{#1}}}
+\newcommand{\field}[1]{\texttt{\textbf{#1}}}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+Everything you train and evaluate is controlled by a single YAML config file. This document explains what each field does and how to set up your config.
+
+\leftskip=0pt
+\section*{1. Your Config File}
+\leftskip=1.5em
+
+Each YAML file defines one experiment: the model to train, the GPU to use, and what to evaluate afterward. You write the config, run one command, and the pipeline handles the rest.
+
+Place your config at \cmd{a3/<part>/configs/<name>.yaml}.\\
+Convention: \cmd{p2\_baseline.yaml}, \cmd{p2\_ablation1.yaml}, \cmd{p4\_final.yaml}.\\
+See the templates at \cmd{a3/p2/configs/p2\_template.yaml} and \cmd{a3/p4/configs/p4\_template.yaml}.
+
+\leftskip=0pt
+\section*{2. General Structure}
+\leftskip=1.5em
+
+\begin{lstlisting}
+experiment_name: <string>          # W&B group name
+nanochat_ref: <branch-or-tag>      # git ref on the nanochat fork
+gpu: <gpu-type>                    # Modal GPU type
+timeout_hours: <number>            # max wall time per stage (hours)
+
+train:                             # list of training stages
+  - name: <string>                 # stage identifier
+    depends_on: <stage-name>       # advanced, optional
+    extra_iterations: <number>     # advanced, optional
+    args:                          # nanochat CLI arguments
+      depth: <number>              # model depth
+      max_seq_len: <number>        # context length in tokens
+      model_tag: <string>          # checkpoint folder name
+      device_batch_size: <number>  # sequences per forward pass
+      run: <string>                # W&B run name
+      num_iterations: <number>     # optional, auto-computed
+      save_every: <number>         # optional, checkpoint interval
+      eval_every: <number>         # optional, val BPB interval
+      log_every: <number>          # optional, W&B log interval
+
+eval:                              # list of post-training evals
+  - checkpoint: <model-tag>        # must match a model_tag above
+    after_stage: <stage-name>      # which stage's checkpoint to eval
+    evals: [bpb, core]             # built-in evals to run
+    custom_eval: <path>            # optional, your eval script
+\end{lstlisting}
+
+The \field{train:} list can have one or more stages. Each stage runs on its own GPU container. The \field{eval:} list runs after all training completes. YAML keys in \field{args} use underscores; the runner converts them to CLI flags automatically (e.g.\ \cmd{max\_seq\_len} becomes \cmd{-{}-max-seq-len}).
+
+\textbf{Multiple stages and evals.} If you list multiple stages under \field{train:}, independent stages run in parallel on separate GPUs. Each eval entry under \field{eval:} targets one checkpoint (identified by \field{checkpoint} + \field{after\_stage}), so add one entry per checkpoint you want to evaluate. All evals run in parallel after training finishes. For P2, you typically have one stage and one eval per YAML file (one file per ablation). For P4, one stage and one eval in a single file.
+
+\leftskip=0pt
+\section*{3. Field Reference}
+\leftskip=1.5em
+
+\field{experiment\_name} --- Any string. Becomes the W\&B group name and appears in pipeline logs.
+
+\field{nanochat\_ref} --- Branch or tag on the nanochat fork to check out. Use \cmd{baseline-v0} for unmodified nanochat, or your own branch name for modified code (see the \textit{Getting Started} doc).
+
+\field{gpu} --- Modal GPU type. Options: \cmd{A100-80GB}, \cmd{A10G}, \cmd{H100}. Default: \cmd{A100-80GB}.
+
+\field{timeout\_hours} --- Maximum wall time (in hours) per training or eval stage. Increase for larger models (depth 20 may need 6). Default: \cmd{3}.
+
+\vspace{4pt}
+\field{train:} --- List of training stages. Each stage has:
+
+\leftskip=3em
+\field{name} --- Any string. Referenced by \field{after\_stage} in eval entries and by \field{depends\_on} in later stages.
+
+\field{depends\_on} --- \textit{(Advanced, optional.)} Name of a prior stage to resume from. The runner auto-computes the resume checkpoint. P2 and P4 don't need this.
+
+\field{extra\_iterations} --- \textit{(Advanced, optional.)} Used with \field{depends\_on}. Number of additional training steps beyond the prior stage's final step.
+
+\field{args} --- Dict of nanochat training arguments. Fields:
+
+\leftskip=4.5em
+\field{depth} --- Model depth. 6 = picochat ($\sim$136M params), 20 = full nanochat. Default: \cmd{20}.
+
+\field{max\_seq\_len} --- Context length in tokens. Default: \cmd{2048}.
+
+\field{model\_tag} --- Checkpoint folder name. Pick something unique per experiment (e.g.\ \cmd{pico-baseline}, \cmd{d20-final}). Must match the \field{checkpoint} field in your eval entry. Default: \cmd{d\{depth\}}.
+
+\field{device\_batch\_size} --- Sequences per forward pass. If you get OOM errors, halve this value (e.g.\ 512 $\to$ 256 $\to$ 128). This does not change training dynamics --- it only affects how many gradient accumulation steps are used. Default: \cmd{32}.
+
+\field{num\_iterations} --- Total training steps. Omit to let nanochat auto-compute from scaling law. Default: auto-computed.
+
+\field{run} --- W\&B run name. Use \cmd{"dummy"} to disable W\&B logging. Pick something unique per run. Default: \cmd{"dummy"}.
+
+\field{save\_every} --- Checkpoint save interval in steps. \cmd{-1} saves only at the end. Default: \cmd{-1}.
+
+\field{eval\_every} --- Validation BPB evaluation interval during training. \cmd{-1} disables. Default: \cmd{-1}.
+
+\field{log\_every} --- W\&B logging interval in steps. \cmd{-1} disables. Default: \cmd{-1}.
+
+\field{core\_metric\_every} --- CORE benchmark interval during training. \cmd{-1} disables (run post-hoc via eval instead). Default: \cmd{-1}.
+
+\field{sample\_every} --- Text generation sampling interval during training. \cmd{-1} disables. Default: \cmd{-1}.
+
+\leftskip=1.5em
+\vspace{4pt}
+\field{eval:} --- List of evaluation entries. Each entry has:
+
+\leftskip=3em
+\field{checkpoint} --- Must match a \field{model\_tag} from one of your training stages.
+
+\field{after\_stage} --- Stage name whose final checkpoint to evaluate. The runner auto-resolves the step number. Alternatively, use \field{step: <number>} for an explicit step.
+
+\field{evals} --- List of evals to run. Options: \cmd{bpb}, \cmd{core}, \cmd{custom}. See Section 4 for what each does.
+
+\field{custom\_eval} --- Path to your custom eval script, relative to \cmd{a3/}. Required when \field{evals} includes \cmd{custom}.
+
+\leftskip=0pt
+\section*{4. Evaluation}
+\leftskip=1.5em
+
+\subsection*{4.1 Custom eval}
+\leftskip=3em
+
+A custom eval is a Python script you write that loads a checkpoint and computes whatever metrics you need. Place it at \cmd{a3/<part>/evals/<name>.py}. The script must define a \field{run\_eval} function:
+
+\begin{lstlisting}[language=Python]
+def run_eval(checkpoint_dir: str, model_tag: str, step: int) -> dict:
+    """Return a dict of results. Saved as JSON on the Volume."""
+    return {"score": 0.42}
+\end{lstlisting}
+
+Reference it in your YAML by adding \cmd{custom} to the \field{evals} list and setting the \field{custom\_eval} path:
+
+\begin{lstlisting}
+eval:
+  - checkpoint: pico-baseline
+    after_stage: train
+    evals: [bpb, core, custom]
+    custom_eval: p3/evals/context_length_eval.py
+\end{lstlisting}
+
+The return dict is automatically saved as JSON on the Modal Volume.
+
+\subsection*{4.2 Built-in evals}
+\leftskip=3em
+
+Two built-in evals are available:
+
+\field{bpb} --- Bits per byte on the training and validation splits. Always safe to run.
+
+\field{core} --- 22-task benchmark (HellaSwag, ARC, PIQA, BoolQ, etc.). Only use if the model was trained with \field{max\_seq\_len: 2048} or higher --- shorter contexts may crash because CORE prompts exceed the RoPE cache.
+
+Use them in the \field{evals} list:
+
+\begin{lstlisting}
+eval:
+  - checkpoint: pico-baseline
+    after_stage: train
+    evals: [bpb, core]
+\end{lstlisting}
+
+\end{document}

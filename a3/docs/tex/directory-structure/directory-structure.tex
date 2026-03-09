@@ -1,0 +1,179 @@
+\documentclass[9pt]{extarticle}
+\usepackage[margin=0.65in, headheight=14pt]{geometry}
+\usepackage{enumitem}
+\usepackage{forest}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+% === Style Guide (for AI-assisted updates) ===
+%
+% Tree layout
+%   - forest package, monospace font, dot-and-line connectors
+%   - each nesting level indented 19.5pt
+%   - 9pt body, 0.65in margins, fancy header/footer
+%
+% Annotations
+%   - \cmt{...}  → grey (#6A737D) italic — directory descriptions
+%   - \fcmt{...} → orange (#FF9966) italic — file descriptions
+%
+% Writing style
+%   - one short phrase per item: capture the high-level responsibility
+%   - directories: what the folder contains or who it serves
+%   - files: what the file does, not how it works
+%
+% Expansion rules
+%   - docs/ directories: never expand, just annotate the directory
+%   - shared/configs/: never expand, just annotate the directory
+%   - results/ subdirs: list subdirectory names with annotations, don't list individual result files
+%   - everything else: expand and annotate each file
+
+% Unless explicitly prompted, do not modifiy p3, p4 directory structure
+
+\definecolor{dircmt}{HTML}{6A737D}
+\definecolor{filecmt}{HTML}{FF9966}
+\newcommand{\cmt}[1]{\normalfont{\textcolor{dircmt}{\textit{#1}}}}
+\newcommand{\fcmt}[1]{\normalfont{\textcolor{filecmt}{\textit{#1}}}}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titlespacing*{\subsection}{1.5em}{6pt}{2pt}
+\setlist[itemize]{leftmargin=1.5em}
+
+\title{\vspace{-1.2cm}\huge\textbf{A3: Directory Structure}\vspace{-0.5em}}
+\author{\normalsize Autobook}
+\date{\vspace{-1.5em}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small A3: Directory Structure}
+\fancyhead[R]{\small Autobook}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+How the \texttt{a3/} folder is organized inside the AI-Accountant repo.
+
+\subsection*{Layout}
+
+\begin{forest}
+  for tree={
+    font=\ttfamily,
+    grow'=0,
+    child anchor=west,
+    parent anchor=south,
+    anchor=west,
+    calign=first,
+    edge path={
+      \noexpand\path [draw, -{|}] (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
+    },
+    before typesetting nodes={
+      if n=1 {insert before={[,phantom]}} {}
+    },
+    fit=band,
+    before computing xy={l=19.5pt},
+    s sep=4pt,
+  }
+  [a3/
+    [docs/ \cmt{teammate onboarding and shared references}]
+    [shared/ \cmt{pipeline infrastructure used by all parts}
+      [configs/ \cmt{smoke-test YAMLs for pipeline validation}]
+      [scripts/ \cmt{Modal pipeline code}
+        [main.py \fcmt{local entrypoint: reads YAML config, launches Modal run}]
+        [shared/
+          [infra.py \fcmt{Modal app, image, volume, and secrets definitions}]
+          [helpers.py \fcmt{pure utilities: git checkout, checkpoint discovery, eval parsing}]
+        ]
+        [runners/
+          [run.py \fcmt{orchestrator: dispatches training stages and evals in parallel}]
+          [train.py \fcmt{runs nanochat training on a Modal GPU}]
+          [evaluate.py \fcmt{runs BPB, CORE, and custom evals on a Modal GPU}]
+        ]
+      ]
+    ]
+    [p2/ \cmt{picochat ablation}
+      [configs/
+        [p2\_baseline.yaml \fcmt{vanilla picochat baseline}]
+        [p2\_swiglu.yaml \fcmt{SwiGLU activation ablation}]
+        [p2\_layerscale.yaml \fcmt{LayerScale ablation}]
+        [p2\_swiglu\_layerscale.yaml \fcmt{combined SwiGLU + LayerScale ablation}]
+        [p2\_*\_eval\_bpb\_core.yaml \fcmt{eval-only configs for each ablation}]
+        [p2\_swiglu\_layerscale\_smoke.yaml \fcmt{quick smoke test for combined variant}]
+      ]
+      [training-troubleshooting.md \fcmt{notes on training issues encountered}]
+    ]
+    [p3/ \cmt{continued on next page}]
+    [p4/ \cmt{continued on next page}]
+  ]
+\end{forest}
+
+\newpage
+
+\subsection*{Layout (continued)}
+
+\begin{forest}
+  for tree={
+    font=\ttfamily,
+    grow'=0,
+    child anchor=west,
+    parent anchor=south,
+    anchor=west,
+    calign=first,
+    edge path={
+      \noexpand\path [draw, -{|}] (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
+    },
+    before typesetting nodes={
+      if n=1 {insert before={[,phantom]}} {}
+    },
+    fit=band,
+    before computing xy={l=19.5pt},
+    s sep=4pt,
+  }
+  [a3/
+    [p3/ \cmt{context window extension}
+      [docs/ \cmt{literature review, training config, eval design, final spec}]
+      [configs/
+        [p3\_baseline.yaml \fcmt{three-stage context extension experiment}]
+        [p3\_eval\_only.yaml \fcmt{re-run evals on existing checkpoints}]
+        [p3\_core\_evals.yaml \fcmt{CORE-only eval variant}]
+        [p3\_from\_p2\_template.yaml \fcmt{template to eval P2's best model on P3 evals}]
+      ]
+      [evals/
+        [context\_length\_eval.py \fcmt{positional perplexity eval on PG19 test split}]
+      ]
+      [results/ \cmt{run outputs}
+        [core\_csvs/ \cmt{CORE per-task accuracy CSVs}]
+        [custom\_evals/ \cmt{positional perplexity JSONs}]
+        [figures/ \cmt{plots and summary tables}]
+        [tex/ \cmt{compiled writeup PDF}]
+      ]
+      [analysis/
+        [generate\_plots.py \fcmt{builds figures and tables from fetched results}]
+      ]
+    ]
+    [p4/ \cmt{scaling laws and emergent abilities}
+      [configs/
+        [p4\_nano\_baseline\_fp8.yaml \fcmt{nanochat baseline with FP8 training}]
+        [p4\_nano\_swiglu\_fp8.yaml \fcmt{nanochat SwiGLU variant with FP8 training}]
+        [p4\_pipeline\_smoke\_20min.yaml \fcmt{quick smoke test for nano-scale runs}]
+        [p4\_*\_eval\_only.yaml \fcmt{eval-only configs for each nano model}]
+        [p4\_template.yaml \fcmt{template YAML for scaling runs}]
+      ]
+      [scripts/
+        [compare\_emergent\_abilities.py \fcmt{finds questions nanochat answers but picochat cannot}]
+      ]
+      [results/ \cmt{run outputs}
+        [final/ \cmt{final eval CSVs and JSONs per model}]
+      ]
+      [emergent\_abilities\_results.txt \fcmt{emergent abilities comparison output}]
+    ]
+  ]
+\end{forest}
+
+\end{document}

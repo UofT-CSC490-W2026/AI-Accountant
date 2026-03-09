@@ -1,0 +1,179 @@
+\documentclass[9pt]{extarticle}
+\usepackage[margin=0.65in, headheight=14pt]{geometry}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{lmodern}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titlespacing*{\subsection}{1.5em}{6pt}{2pt}
+\setlist[itemize]{leftmargin=3em}
+\setlist[enumerate]{leftmargin=3em}
+
+\title{\vspace{-1.2cm}\huge\textbf{Running, Monitoring \& Troubleshooting}\vspace{-0.5em}}
+\author{\normalsize Autobook}
+\date{\vspace{-1.5em}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Running, Monitoring \& Troubleshooting}
+\fancyhead[R]{\small Autobook}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  framerule=0pt,
+  breaklines=true,
+  xleftmargin=3em,
+  xrightmargin=8pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+  commentstyle=\color{green!50!black}\itshape,
+  morecomment=[l]{\#},
+}
+
+\newcommand{\cmd}[1]{\colorbox{gray!10}{\texttt{#1}}}
+\newcommand{\field}[1]{\texttt{\textbf{#1}}}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+How to launch a training run, check its progress, collect results, and fix common issues --- all from your terminal or the web.
+
+\leftskip=0pt
+\section*{1. Running}
+\leftskip=1.5em
+
+\begin{lstlisting}
+modal run --detach a3/shared/scripts/main.py --config a3/<part>/configs/<name>.yaml
+\end{lstlisting}
+
+The \cmd{-{}-detach} flag sends the entire pipeline to Modal's cloud so it survives laptop close, Wi-Fi drops, and terminal exit. Without it, output streams to your terminal but the run dies if you disconnect. Always use \cmd{-{}-detach} for real runs; omit it only for quick debugging where you want immediate output.
+
+\leftskip=0pt
+\section*{2. Monitoring}
+\leftskip=1.5em
+
+\subsection*{2.1 On the website}
+\leftskip=3em
+
+\textbf{Modal dashboard} (\url{https://modal.com}): go to your workspace $\to$ \textbf{Apps} $\to$ \cmd{a3-nanochat}. You can see running, completed, and failed function calls. Click any function call and open the \textbf{Logs} tab for live output. The pipeline prints \cmd{[pipeline]}, \cmd{[train]}, and \cmd{[eval]} prefixed lines so you can follow progress.
+
+\textbf{W\&B} (\url{https://wandb.ai}): go to project \cmd{490-autobook-a3} and find your run by the \field{run} name from your YAML config. The \textbf{Charts} tab shows \cmd{train/loss} and \cmd{val/bpb} over steps in real time.
+
+\subsection*{2.2 On the terminal}
+\leftskip=3em
+
+You can monitor everything without leaving the terminal.
+
+\textbf{Check if your run is still going:}
+
+\begin{lstlisting}
+modal app list
+\end{lstlisting}
+
+Shows all your apps with their status (running, stopped, errored).
+
+\textbf{Stream live logs from a detached run:}
+
+\begin{lstlisting}
+modal app logs <app-id>
+\end{lstlisting}
+
+Reconnects to a running (or recently finished) app and streams its output --- same output you would see without \cmd{-{}-detach}. The app ID is printed when you launch with \cmd{-{}-detach}. Logs include training progress, eval results, and the final summary, so you can tell in real time whether the run is succeeding, how far along it is, and when it finishes.
+
+\textbf{Stop a run:}
+
+\begin{lstlisting}
+modal app stop <app-id>
+\end{lstlisting}
+
+\leftskip=0pt
+\section*{3. Results}
+\leftskip=1.5em
+
+\subsection*{3.1 On the website}
+\leftskip=3em
+
+\textbf{W\&B}: training curves (\cmd{train/loss}, \cmd{val/bpb}) are on the \textbf{Charts} tab. The \textbf{Config} tab shows all training args and \cmd{git\_hash} for reproducibility. To export data, go to the project page $\to$ \textbf{Table} view $\to$ \textbf{Export CSV}.
+
+\textbf{Modal Volume}: you can browse files at \url{https://modal.com} $\to$ your workspace $\to$ \textbf{Volumes} $\to$ \cmd{a3-checkpoints}, but the terminal is easier.
+
+\subsection*{3.2 On the terminal}
+\leftskip=3em
+
+All eval outputs are stored on your Modal Volume (\cmd{a3-checkpoints}).
+
+\textbf{Browse files:}
+
+\begin{lstlisting}
+modal volume ls a3-checkpoints base_checkpoints/         # checkpoints
+modal volume ls a3-checkpoints base_eval/                # CORE CSVs
+modal volume ls a3-checkpoints custom_evals/             # custom eval JSONs
+\end{lstlisting}
+
+\textbf{Download files:}
+
+\begin{lstlisting}
+modal volume get a3-checkpoints base_eval/<file> ./results/
+modal volume get a3-checkpoints custom_evals/<file> ./results/
+\end{lstlisting}
+
+\textbf{Fetch W\&B metrics} (loss, bpb) via Python:
+
+\begin{lstlisting}[language=Python]
+import wandb
+api = wandb.Api()
+run = api.run("<team>/490-autobook-a3/<run-id>")
+df = run.history()       # pandas DataFrame with loss, bpb, etc.
+df.to_csv("metrics.csv")
+\end{lstlisting}
+
+Find your \cmd{<run-id>} on the W\&B run page URL or via \cmd{api.runs("team/490-autobook-a3")}.
+
+\leftskip=0pt
+\section*{4. Troubleshooting}
+\leftskip=1.5em
+
+\subsection*{OOM (out of memory)}
+\leftskip=3em
+
+\textbf{Symptom}: \cmd{CUDA out of memory} in logs.\\
+\textbf{Fix}: halve \field{device\_batch\_size} in your YAML (e.g.\ 512 $\to$ 256 $\to$ 128) and rerun. This does not change training dynamics.
+
+\subsection*{Secret not found}
+\leftskip=3em
+
+\textbf{Symptom}: \cmd{Secret 'wandb-secret' not found}.\\
+\textbf{Fix}: run \cmd{modal secret list} and check that the name is exactly \cmd{wandb-secret}. If missing, create it (see the \textit{Getting Started} doc).
+
+\subsection*{Checkpoint not found}
+\leftskip=3em
+
+\textbf{Symptom}: \cmd{No checkpoints found in ...}\\
+\textbf{Fix}: run \cmd{modal volume ls a3-checkpoints base\_checkpoints/} and verify that \field{model\_tag} in your eval config matches a directory that exists.
+
+\subsection*{Git ref not found}
+\leftskip=3em
+
+\textbf{Symptom}: \cmd{error: pathspec '<ref>' did not match ...}\\
+\textbf{Fix}: push your branch to the nanochat fork first. Verify it appears on GitHub before rerunning.
+
+\subsection*{Timeout}
+\leftskip=3em
+
+\textbf{Symptom}: run killed mid-training, Modal dashboard shows timeout.\\
+\textbf{Fix}: increase \field{timeout\_hours} in your YAML config and rerun.
+
+\end{document}
