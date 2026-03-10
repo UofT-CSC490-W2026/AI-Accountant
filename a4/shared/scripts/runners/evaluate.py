@@ -32,6 +32,7 @@ class Evaluate:
         custom_eval_script: str | None = None,
         max_per_task: int = -1,
         custom_eval_output_name: str | None = None,
+        eval_env: dict | None = None,
     ) -> dict:
         """Run standard evals and optionally a custom eval on one checkpoint.
 
@@ -81,6 +82,9 @@ class Evaluate:
 
         # [4] Custom eval: run user-provided eval script if specified
         if custom_eval_script:
+            if eval_env:
+                for k, v in eval_env.items():
+                    os.environ[k] = str(v)
             custom_result = _run_custom_eval(custom_eval_script, checkpoint_tag, step)
             results["custom_eval"] = custom_result
             if isinstance(custom_result, dict):

@@ -59,6 +59,13 @@ def _get_max_problems() -> int | None:
     return None if value <= 0 else value
 
 
+def _get_shard_config() -> tuple[int, int]:
+    """Return (shard_idx, num_shards). Defaults to (0, 1) = no sharding."""
+    num_shards = int(os.getenv("P4_EVAL_NUM_SHARDS", "1"))
+    shard_idx = int(os.getenv("P4_EVAL_SHARD_IDX", "0"))
+    return shard_idx, max(1, num_shards)
+
+
 def run_eval(
     checkpoint_dir: str,
     model_tag: str,
@@ -90,8 +97,17 @@ def run_eval(
 
     num_samples = _get_num_samples()
     max_problems = _get_max_problems()
+    shard_idx, num_shards = _get_shard_config()
     task = GSM8K(subset="main", split="test")
-    eval_n = len(task) if max_problems is None else min(max_problems, len(task))
+    total_n = len(task) if max_problems is None else min(max_problems, len(task))
+
+    # Build list of problem indices for this shard
+    all_indices = list(range(total_n))
+    shard_indices = [i for i in all_indices if i % num_shards == shard_idx]
+    eval_n = len(shard_indices)
+
+    if num_shards > 1:
+        print(f"[gsm8k_eval_rl] Shard {shard_idx}/{num_shards}: {eval_n} problems", flush=True)
 
     # Batch size for generation — generate all N samples in one call if possible,
     # otherwise loop in chunks to avoid OOM.
@@ -100,7 +116,7 @@ def run_eval(
     samples = []
     t0 = time.time()
 
-    for i in range(eval_n):
+    for i in shard_indices:
         conversation = task[i]
         prompt_ids = tokenizer.render_for_completion(conversation)
         prefix_length = len(prompt_ids)
@@ -145,7 +161,7 @@ def run_eval(
             "responses": responses,
         })
 
-        done = i + 1
+        done = len(samples)
         if done == 1 or done % 50 == 0 or done == eval_n:
             elapsed = time.time() - t0
             eta = (elapsed / done) * (eval_n - done) if done else 0.0
@@ -160,7 +176,7 @@ def run_eval(
                 flush=True,
             )
 
-    return {
+    result = {
         "task": "GSM8K",
         "source": "rl",
         "model_tag": model_tag,
@@ -173,3 +189,8 @@ def run_eval(
             "samples": samples,
         },
     }
+    if num_shards > 1:
+        result["shard_idx"] = shard_idx
+        result["num_shards"] = num_shards
+        result["total_problems"] = total_n
+    return result

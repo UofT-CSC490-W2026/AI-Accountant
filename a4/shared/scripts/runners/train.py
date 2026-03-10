@@ -104,9 +104,14 @@ class Train:
 def _build_cli(args: dict) -> list[str]:
     """Convert underscore args to kebab-case CLI flags."""
     script = args.get("script", "scripts.base_train")
-    cmd = ["python", "-u", "-m", script]
+    nproc = int(args.get("nproc", 1))
+    if nproc > 1:
+        cmd = ["torchrun", "--standalone", f"--nproc_per_node={nproc}", "-m", script]
+    else:
+        cmd = ["python", "-u", "-m", script]
     reserved = {
         "script",
+        "nproc",
         "init_from_source",
         "init_from_tag",
         "init_from_step",

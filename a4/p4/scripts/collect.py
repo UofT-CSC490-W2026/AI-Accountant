@@ -39,21 +39,30 @@ def load_config(config_path: str) -> dict:
 def collect_eval(run_cfg: dict, volume_name: str, output_dir: str) -> str | None:
     """Download custom eval JSON from Modal Volume for one run.
 
+    Supports sharded eval files: if num_eval_shards is set, downloads all shard
+    files and merges them into one combined JSON.
+
     Returns local path to downloaded file, or None on failure.
     """
     tag = run_cfg["checkpoint_tag"]
     step = run_cfg["eval_step"]
     name = run_cfg["name"]
+    num_shards = int(run_cfg.get("num_eval_shards", 1))
 
-    # Custom eval JSON lives at custom_evals/{tag}_{step:06d}.json on the volume
-    remote_path = f"custom_evals/{tag}_{step:06d}.json"
     local_path = os.path.join(output_dir, "eval", f"{name}.json")
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
 
     # Also try with custom output name if specified
     custom_name = run_cfg.get("eval_output_name")
+
+    if num_shards > 1:
+        return _collect_sharded_eval(tag, step, name, num_shards, volume_name, output_dir, local_path)
+
+    # Single file download
     if custom_name:
         remote_path = f"custom_evals/{custom_name}"
+    else:
+        remote_path = f"custom_evals/{tag}_{step:06d}.json"
 
     print(f"[collect] {name}: downloading {remote_path} from volume '{volume_name}'")
     result = subprocess.run(
@@ -67,6 +76,56 @@ def collect_eval(run_cfg: dict, volume_name: str, output_dir: str) -> str | None
 
     print(f"[collect] {name}: saved to {local_path}")
     return local_path
+
+
+def _collect_sharded_eval(
+    tag: str, step: int, name: str, num_shards: int,
+    volume_name: str, output_dir: str, merged_path: str,
+) -> str | None:
+    """Download and merge sharded eval JSONs."""
+    shard_dir = os.path.join(output_dir, "eval", "shards", name)
+    os.makedirs(shard_dir, exist_ok=True)
+
+    shard_data = []
+    for i in range(num_shards):
+        remote_path = f"custom_evals/{tag}_{step:06d}_shard{i}of{num_shards}.json"
+        local_shard = os.path.join(shard_dir, f"shard{i}.json")
+
+        print(f"[collect] {name}: downloading shard {i}/{num_shards}")
+        result = subprocess.run(
+            ["modal", "volume", "get", volume_name, remote_path, local_shard],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            print(f"[collect] {name}: shard {i} FAILED — {result.stderr.strip()}")
+            return None
+
+        with open(local_shard) as f:
+            shard_data.append(json.load(f))
+
+    # Merge: concatenate samples, sort by idx
+    base = dict(shard_data[0])
+    all_samples = []
+    for shard in shard_data:
+        debug = shard.get("gsm8k_debug", {})
+        all_samples.extend(debug.get("samples", []))
+    all_samples.sort(key=lambda s: s["idx"])
+
+    base["gsm8k_debug"] = {
+        "n": len(all_samples),
+        "sample_count": base.get("gsm8k_debug", {}).get("sample_count", 8),
+        "samples": all_samples,
+    }
+    base.pop("shard_idx", None)
+    base.pop("num_shards", None)
+    base.pop("total_problems", None)
+
+    with open(merged_path, "w") as f:
+        json.dump(base, f, indent=2)
+
+    print(f"[collect] {name}: merged {num_shards} shards ({len(all_samples)} problems) -> {merged_path}")
+    return merged_path
 
 
 def collect_wandb(run_cfg: dict, wandb_project: str, output_dir: str) -> str | None:

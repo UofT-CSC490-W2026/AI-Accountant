@@ -53,7 +53,7 @@ def resolve_eval_inputs(
       dynamically at checkpoint positions (multiples of save interval).
 
     Returns list of tuples:
-    (nanochat_ref, checkpoint, step, standard_evals, custom_script, max_per_task, custom_eval_output_name)
+    (nanochat_ref, checkpoint, step, standard_evals, custom_script, max_per_task, custom_eval_output_name, num_eval_shards)
     """
     eval_inputs = []
 
@@ -76,6 +76,7 @@ def resolve_eval_inputs(
         custom_script = entry.get("custom_eval") if "custom" in evals else None
         max_per_task = int(entry.get("max_per_task", -1))
         custom_eval_output_name = entry.get("custom_eval_output_name")
+        num_eval_shards = int(entry.get("num_eval_shards", 1))
 
         eval_inputs.append(
             (
@@ -86,6 +87,7 @@ def resolve_eval_inputs(
                 custom_script,
                 max_per_task,
                 custom_eval_output_name,
+                num_eval_shards,
             )
         )
 
@@ -103,7 +105,7 @@ def resolve_eval_inputs(
             # Snap to next multiple of interval (checkpoints at step % save_every == 0)
             first = ((start_step // interval) + 1) * interval
             for rc_step in range(first, end_step, interval):
-                eval_inputs.append((nanochat_ref, checkpoint, rc_step, "bpb", rc_custom, -1, None))
+                eval_inputs.append((nanochat_ref, checkpoint, rc_step, "bpb", rc_custom, -1, None, 1))
 
     return eval_inputs
 
