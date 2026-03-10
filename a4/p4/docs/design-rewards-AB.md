@@ -6,6 +6,24 @@ This document specifies Reward A and Reward B — two additional reward function
 
 Each reward function follows the interface `reward(conversation, assistant_response) -> float` and composes with the original binary correctness reward via summation.
 
+## Motivation: What Binary Reward Leaves on the Table
+
+Karpathy's nanochat uses a binary correctness reward for RL on GSM8K: 1.0 if the extracted answer matches gold, 0.0 otherwise. Across multiple configurations, this produces consistent results:
+
+| Configuration | SFT → RL | Lift |
+|--------------|----------|------|
+| Speedrun (~$100) | 4.55% → 7.58% | +3.0pp |
+| $1000 tier (d32) | 12.74% → 19.94% | +7.2pp |
+| d34 (~$2,500) | 12.96% → 23.05% | +10.1pp |
+
+Binary reward roughly doubles accuracy — but two structural weaknesses persist regardless of training duration:
+
+1. **Format and correctness are conflated**: A response without `#### <number>` gets 0.0, same as a response with `#### <wrong_number>`. The model can only learn formatting as a byproduct of getting answers correct. There is no independent signal for format compliance.
+
+2. **Zero gradient on hard problems**: With 16 samples per example, if 0/16 are correct, all advantages are 0 and no gradient flows. Binary reward provides no partial credit — a response computing 98 when gold is 100 gets the same 0.0 as gibberish. The persistent pass@8 >> pass@1 gap in Karpathy's results confirms the model has latent capability it can't reliably produce, yet binary reward gives no signal to improve reliability.
+
+Our SFT checkpoint starts at 15.39% accuracy with 11% format failure and 74% wrong-answer-with-format. Rewards A and B target these two structural weaknesses.
+
 ---
 
 ## Reward A: Format Compliance
@@ -33,9 +51,9 @@ def reward_format_compliance(conversation, assistant_response):
 - **Scale**: Binary {0.0, 1.0} — same scale as original correctness reward
 
 ### Expected Effect
-- Reduces format failure rate from ~11% toward 0%
-- Decouples format learning from reasoning learning: model gets credit for attempting an answer even when wrong
+- Decouples format learning from reasoning learning: model gets explicit credit for producing `#### <number>` even when the answer is wrong, rather than only learning format as a byproduct of correctness
 - Creates gradient signal on examples where all 16 samples fail correctness (0/16 correct → all advantage = 0 with original reward only), as long as some samples have format and others don't
+- Addresses the format-correctness conflation in Karpathy's binary reward: with binary reward alone, a model that can't format can never get reward, creating a chicken-and-egg problem
 
 ### Interaction with Original Reward
 When summed: correct answer gets 2.0 (1.0 correctness + 1.0 format), wrong answer with format gets 1.0 (0.0 + 1.0), no format gets 0.0 (0.0 + 0.0). This creates a 3-tier ranking that is strictly better than binary for advantage computation — more variance across the 16 samples.
@@ -112,8 +130,8 @@ def reward_numeric_proximity(conversation, assistant_response):
 
 ### Expected Effect
 - Provides graded signal for the ~74% of responses that have correct format but wrong answer
-- Creates variance in the 16 samples even when 0/16 are exactly correct — samples with closer answers get higher reward, which translates to positive advantage after mean subtraction
-- Encourages the model to improve incrementally toward correctness rather than only rewarding binary success
+- Breaks the sparse reward barrier that limits Karpathy's binary RL: creates variance in the 16 samples even when 0/16 are exactly correct — samples with closer answers get higher reward, which translates to positive advantage after mean subtraction
+- Addresses the persistent pass@8 >> pass@1 gap observed in Karpathy's results: proximity reward gives the model a signal to improve incrementally toward correctness, potentially improving consistency (narrowing the gap) rather than only expanding the knowledge frontier
 
 ### Interaction with Original Reward
 When summed: correct answer gets 2.0 (1.0 correctness + 1.0 proximity), close-but-wrong answer gets partial credit (0.0 + 0.95 = 0.95), far-wrong answer gets ~0.0, no format gets 0.0. Combined with Reward A: correct = 3.0, wrong-but-close-and-formatted = ~1.95, wrong-and-far-but-formatted = ~1.0, no format = 0.0. This creates a rich gradient landscape across the 16 samples.
@@ -156,3 +174,6 @@ Reward A and B target different failure modes:
 4. Gao et al. (2024). "On Designing Effective RL Reward at Training Time for LLM Reasoning." arXiv:2410.15115.
 5. Ng et al. (1999). "Policy Invariance Under Reward Transformations: Theory and Application to Reward Shaping." ICML 1999.
 6. Wei et al. (2022). "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models." NeurIPS 2022.
+7. Karpathy. "Introducing nanochat." GitHub discussions/1. https://github.com/karpathy/nanochat/discussions/1
+8. Karpathy. "$1000 tier nanochat run." GitHub discussions/8. https://github.com/karpathy/nanochat/discussions/8
+9. Karpathy. "d34 model (~$2,500)." GitHub discussions/314. https://github.com/karpathy/nanochat/discussions/314

@@ -82,6 +82,10 @@ These questions will be answered during research execution (step 1.11) by inspec
 
 ### Baseline Behavior Analysis
 
+We examine behavior at two stages: (1) our SFT checkpoint (where RL training starts), and (2) Karpathy's RL results (what binary reward achieves — and fails to achieve).
+
+#### Pre-RL: Our SFT Checkpoint
+
 **Source**: P2 eval results (`final_sft_metamath_eval.json`) — our SFT checkpoint before RL, 1319 GSM8K test problems, greedy decoding.
 
 | Metric | Value | Implication |
@@ -96,7 +100,37 @@ These questions will be answered during research execution (step 1.11) by inspec
 - **Calculator usage is inconsistent**: Some samples use `<|python_start|>` tags for arithmetic (idx 7, 10, 12), others do all computation in natural language and make errors.
 - **Reasoning quality varies**: Some responses show structured step-by-step reasoning (idx 11, 15, 21), others ramble, repeat, or set up the problem incorrectly (idx 0, 5, 20).
 
-**Key insight for reward design**: At 15% accuracy, binary reward is extremely sparse. With 16 samples per example, many examples will have 0/16 correct (all advantage = 0, no gradient). A denser reward signal would give non-zero gradients on more examples.
+#### Post-RL: Karpathy's Binary Reward Results
+
+**Source**: Karpathy's nanochat GitHub discussions (#1, #8, #314) — RL training with binary correctness reward on GSM8K.
+
+| Configuration | SFT Accuracy | RL Accuracy | Lift |
+|--------------|-------------|-------------|------|
+| Speedrun (~$100, ~560M params) | 4.55% | 7.58% | +3.0pp |
+| $1000 tier (d32) | 12.74% | 19.94% | +7.2pp |
+| d34 (~$2,500, community RL) | 12.96% | 23.05% | +10.1pp |
+
+**What binary reward RL achieves**:
+- Roughly doubles accuracy from SFT baseline (consistent across configurations)
+- pass@1 climbs steadily during training
+- pass@8 >> pass@1, indicating the model has latent capability it can't reliably produce
+- Karpathy on the $1000 tier: "almost at 20% gsm8k" — presented as a positive result
+
+**What binary reward RL does NOT address** (limitations observable from the data):
+
+1. **Format failure signal is indirect**: Binary reward gives 1.0 only for correct answers. A response with `#### 42` (wrong) gets the same 0.0 as a response with no `####` at all. The model must simultaneously learn format AND correctness to get any reward. There is no dedicated signal for format compliance — the model can only learn formatting as a byproduct of correct answers.
+
+2. **Sparse gradient on hard problems**: With binary reward and 16 samples per example, if 0/16 samples are correct (likely for hard problems at 15-20% accuracy), all advantages are 0 and no gradient flows. Karpathy's observation that pass@8 >> pass@1 confirms the model "knows" answers it can't reliably produce — but binary reward provides no gradient signal to improve reliability on these near-miss cases.
+
+3. **No partial credit for close answers**: A response that computes 98 when the answer is 100 (arithmetic slip) gets 0.0 — identical to a response that outputs 999999 or gibberish. Binary reward gives no learning signal about "how wrong" an answer is.
+
+4. **pass@8 >> pass@1 gap persists**: Across all configurations, the gap remains large after RL. This means RL with binary reward improves the success rate but does not close the consistency gap — the model still fails to reliably produce answers it demonstrably can compute.
+
+**Critical gap in available data**: Karpathy's results report only aggregate accuracy (pass@1, pass@8). No error category breakdown, format failure rate, or per-problem analysis is published. We cannot directly measure whether format failure drops from 11% to (say) 3% after RL. However, the structural argument stands: binary reward conflates format and correctness into one signal, and provides zero gradient on examples where all 16 samples are wrong.
+
+**Key insight for reward design**: The reward design should target two weaknesses that binary reward structurally cannot address:
+1. **Format compliance as an independent signal** — gives gradient even when the answer is wrong, decoupling format learning from reasoning learning
+2. **Partial credit for near-miss answers** — gives gradient on hard problems where 0/16 samples are correct but some are close, breaking the sparse reward barrier
 
 ### Literature Findings
 
@@ -207,7 +241,13 @@ Rewards unlikely to help in 467 steps:
 | 3. Calculator Usage | Medium (binary per sample) | Medium (meaningless calls) | Very low (string match) | Moderate (Wei et al. error taxonomy) |
 | 4. Reasoning Structure | Medium (heuristic counting) | High (padding with steps) | Medium (parsing heuristic) | Moderate (CoT literature) |
 
-**Recommendation for selection (step 1.12)**: Candidates 1 and 2 are the strongest pair — they target different weaknesses (format vs reasoning quality), have low hack risk, and provide complementary gradient signal. Candidate 1 helps the ~11% with format failure. Candidate 2 helps the ~74% with wrong answers. Together, they cover ~85% of failure cases.
+**Recommendation for selection (step 1.12)**: Candidates 1 and 2 are the strongest pair. They target two structural weaknesses of binary reward that persist regardless of RL training duration:
+
+1. **Candidate 1 (Format Compliance)** provides an independent format signal. Binary reward conflates format and correctness — the model can only learn `####` format as a byproduct of getting correct answers. Format Compliance gives explicit credit for formatting even when the answer is wrong, decoupling format learning from reasoning learning.
+
+2. **Candidate 2 (Numeric Proximity)** breaks the sparse reward barrier. On hard problems where 0/16 samples are correct, binary reward produces zero gradient. Proximity gives graded signal — a sample answering 98 when gold is 100 gets higher reward than one answering 5000, enabling gradient flow on every example with parseable output.
+
+These weaknesses are structural properties of binary reward, not artifacts of training duration — they persist whether the model trains for 467 steps or 4670. Karpathy's RL results confirm: even after RL, pass@8 >> pass@1 (consistency gap persists) and accuracy remains modest (7-23% depending on model size), suggesting binary reward leaves significant room for improvement.
 
 ### Sources
 
@@ -220,3 +260,5 @@ Rewards unlikely to help in 467 steps:
 7. veRL documentation. "GSM8K Example." https://verl.readthedocs.io/en/latest/examples/gsm8k_example.html
 8. Unsloth documentation. "Reinforcement Learning (RL) Guide." https://docs.unsloth.ai/get-started/reinforcement-learning-rl-guide
 9. Karpathy. "Introducing nanochat." GitHub discussions/1. https://github.com/karpathy/nanochat/discussions/1
+10. Karpathy. "$1000 tier nanochat run." GitHub discussions/8. https://github.com/karpathy/nanochat/discussions/8
+11. Karpathy. "d34 model (~$2,500)." GitHub discussions/314. https://github.com/karpathy/nanochat/discussions/314
