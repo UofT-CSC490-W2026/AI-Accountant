@@ -97,16 +97,20 @@ def collect_wandb(run_cfg: dict, wandb_project: str, output_dir: str) -> str | N
         return None
 
     # Pull training history — all logged scalars
-    # Keys we care about: mean_reward, reward_* (per-component), mean_seq_length
+    # chat_rl.py logs: "reward", "reward/{name}", "sequence_length"
+    # We normalize to: "mean_reward", "reward/{name}", "mean_seq_length"
+    KEY_NORMALIZE = {
+        "reward": "mean_reward",
+        "sequence_length": "mean_seq_length",
+    }
     history = run.scan_history()
     rows = []
     for row in history:
         entry = {"_step": row.get("_step")}
         for key in row:
-            if any(
-                key.startswith(prefix)
-                for prefix in ("mean_reward", "reward_", "mean_seq_length", "seq_length")
-            ):
+            if key in KEY_NORMALIZE:
+                entry[KEY_NORMALIZE[key]] = row[key]
+            elif key.startswith("reward/"):
                 entry[key] = row[key]
         # Only keep rows that have at least one metric we care about
         if len(entry) > 1:
