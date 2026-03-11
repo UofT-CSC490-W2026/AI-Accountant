@@ -374,11 +374,13 @@ def produce_f3(wandb_data: dict, output_dir: str):
 def produce_f4(wandb_data: dict, output_dir: str):
     """Per-component reward curves for Combined run only."""
     _apply_rc()
-    if "combined" not in wandb_data:
+    # Use "combined" if available, fall back to "combined_ab"
+    combined_key = "combined" if "combined" in wandb_data else "combined_ab"
+    if combined_key not in wandb_data:
         print("[produce] F4 skipped — no combined W&B data")
         return
 
-    history = wandb_data["combined"].get("history", [])
+    history = wandb_data[combined_key].get("history", [])
     if not history:
         print("[produce] F4 skipped — empty combined history")
         return
