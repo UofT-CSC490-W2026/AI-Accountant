@@ -1,9 +1,12 @@
-# P4 Combined All: Correctness + A + B + C + D + E (all 6 rewards)
+# P4 Combined CD: Correctness + Coherence + Entity Grounding
+#
+# Tests the dependency: C (coherence) enables D (entity grounding)
+# by pushing gibberish -> coherent text, unlocking D's gradient.
 #
 # Run:
-#   modal run --detach a4/shared/scripts/main.py --config a4/p4/configs/p4_combined.yaml
+#   modal run --detach a4/shared/scripts/main.py --config a4/p4/configs/p4_combined_cd.yaml
 
-experiment_name: p4-combined-all
+experiment_name: p4-combined-cd
 nanochat_ref: a4-p4
 gpu: "H100:8"
 timeout_hours: 8
@@ -15,22 +18,19 @@ train:
     args:
       script: scripts.chat_rl
       nproc: 8
-      model_tag: p4-combined-all
+      model_tag: p4-combined-cd
       model_step: 24633
-      run: p4-combined-all
+      run: p4-combined-cd
       rewards:
         - correctness
-        - format_compliance
-        - numeric_proximity
         - coherence
         - entity_grounding
-        - number_grounding
       init_from_source: sft
       init_from_tag: a4p2-sft-metamath-swiglu
       init_from_step: 24633
 
 eval:
-  - checkpoint: p4-combined-all
+  - checkpoint: p4-combined-cd
     after_stage: train
     evals: [custom]
     custom_eval: p4/evals/gsm8k_eval_rl.py

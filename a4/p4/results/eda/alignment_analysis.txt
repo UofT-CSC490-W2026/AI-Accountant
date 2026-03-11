@@ -1,0 +1,96 @@
+================================================================================
+QUESTION-RESPONSE ALIGNMENT ANALYSIS
+================================================================================
+
+Do correct responses actually solve the given question, or do they
+solve a different problem that happens to produce the same number?
+
+--- Baseline ---
+  Correct responses: 997
+  Question-aligned (shared proper nouns): 176 (17.7%)
+  Misaligned (different problem): 821 (82.3%)
+  Random collision pass@1: 1.06%
+  Actual pass@1:           9.70%
+  Ratio (actual/random):   9.1x
+
+--- + Format (A) ---
+  Correct responses: 1236
+  Question-aligned (shared proper nouns): 222 (18.0%)
+  Misaligned (different problem): 1014 (82.0%)
+  Random collision pass@1: 1.06%
+  Actual pass@1:           12.28%
+  Ratio (actual/random):   11.6x
+
+--- + Proximity (B) ---
+  Correct responses: 1023
+  Question-aligned (shared proper nouns): 188 (18.4%)
+  Misaligned (different problem): 835 (81.6%)
+  Random collision pass@1: 1.07%
+  Actual pass@1:           10.39%
+  Ratio (actual/random):   9.7x
+
+--- A + B ---
+  Correct responses: 1203
+  Question-aligned (shared proper nouns): 204 (17.0%)
+  Misaligned (different problem): 999 (83.0%)
+  Random collision pass@1: 1.07%
+  Actual pass@1:           11.90%
+  Ratio (actual/random):   11.1x
+
+--- Model answer distribution (baseline, all parseable) ---
+  Total parseable: 4194
+  Distinct values: 577
+  Top 15:
+          10:  144 times
+           5:  116 times
+          30:  115 times
+           3:  111 times
+           6:  109 times
+          12:   96 times
+           4:   95 times
+          16:   86 times
+          20:   86 times
+          15:   84 times
+           2:   84 times
+          60:   78 times
+           7:   75 times
+           8:   67 times
+           9:   65 times
+
+--- Examples: 'correct' but solving a DIFFERENT problem ---
+  [3] Question: James decides to run 3 sprints 3 times a week.  He runs 60 meters each sprint.  How many total meter...
+       Response: Bethany can run 10 laps on the track in one hour. Trey can run 4 more laps than Bethany, so Trey can run 10 + 4 = 14 laps in one hour. Shaelyn can run...
+       Gold=5, Pred=5 (MATCH but wrong problem)
+
+  [11] Question: Toula went to the bakery and bought various types of pastries. She bought 3 dozen donuts which cost ...
+       Response: If Kira bought 3 apples, 5 bananas, and 6 oranges, then she bought a total of 3 + 5 + 6 = 14 items. If Lola ate 2 pieces of the fruit, then she has 14...
+       Gold=12, Pred=12 (MATCH but wrong problem)
+
+  [13] Question: Melanie is a door-to-door saleswoman. She sold a third of her vacuum cleaners at the green house, 2 ...
+       Response: On Saturday, Jill and her friends watch 4 movies every Saturday. On Sunday, they watch half the number of movies on Saturday, so they watch 4/2 = 2 mo...
+       Gold=24, Pred=24 (MATCH but wrong problem)
+
+  [15] Question: A merchant wants to make a choice of purchase between 2 purchase plans: jewelry worth $5,000 or elec...
+       Response: If Lily made 50 friends, Amy made 20 more friends than Lily, so Amy made 50 + 20 = 70 friends. Therefore, Lily and Amy have a total of 50 + 70 = 120 f...
+       Gold=120, Pred=120 (MATCH but wrong problem)
+
+  [42] Question: Grandma Jones baked 5 apple pies for the fireman's luncheon.  She cut each pie into 8 pieces and set...
+       Response: Johnny took his allowance of $20 and added an extra $10, so he had a total of $20 + $10 = $30. He then invested this sum of money tripled in a year, s...
+       Gold=90, Pred=90 (MATCH but wrong problem)
+
+================================================================================
+INTERPRETATION
+================================================================================
+
+The model is NOT solving the given test questions. ~82% of 'correct'
+responses solve a completely different GSM8K-style problem that happens
+to produce the same numeric answer. However, pass@1 is ~9x better than
+random collision, suggesting the model has SOME signal about what number
+to produce (possibly from answer magnitude cues in the question).
+
+This is a form of reward hacking: the binary correctness reward only
+checks if #### <number> matches gold. The model learned to generate
+GSM8K-style solutions producing specific numbers, without conditioning
+on the actual input question. The format reward (A) increases pass@1
+primarily by making more responses parseable (#### present), not by
+improving reasoning — the alignment rate stays ~82% misaligned.
