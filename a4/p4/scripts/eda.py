@@ -30,10 +30,21 @@ import seaborn as sns
 RUNS = ["baseline", "separate_a", "separate_b", "combined_ab"]
 RUN_LABELS = {
     "baseline": "Baseline",
-    "separate_a": "+ Format (A)",
-    "separate_b": "+ Proximity (B)",
-    "combined_ab": "A + B",
+    "separate_a": "+ A",
+    "separate_b": "+ B",
+    "combined_ab": "+ A+B",
 }
+# Project palette — must match produce.py
+RUN_COLORS = {
+    "baseline": "#001219",
+    "separate_a": "#005f73",
+    "separate_b": "#0a9396",
+    "combined_ab": "#94d2bd",
+}
+CONTRAST_1A = ["#f72585", "#b5179e", "#7209b7", "#560bad"]
+CONTRAST_1B = ["#3f37c9", "#4361ee", "#4895ef", "#4cc9f0"]
+CONTRAST_2A = ["#0466c8", "#0353a4", "#023e7d", "#002855"]
+CONTRAST_2B = ["#33415c", "#5c677d", "#7d8597", "#979dac"]
 EVAL_DIR = "a4/p4/results/collected/eval"
 PROCESSED_PATH = "a4/p4/results/processed.json"
 
@@ -251,8 +262,9 @@ def fig_difficulty_tiers(prob_df: pd.DataFrame, resp_df: pd.DataFrame, out: str)
         (axes[1], pass8_pivot["n_runs_pass8"], "Pass@8: Runs solving each problem"),
     ]:
         counts = col.value_counts().sort_index()
-        ax.bar(counts.index, counts.values, color=sns.color_palette("Blues_d", 5),
-               edgecolor="black", linewidth=0.5)
+        tier_colors = [CONTRAST_2A[0], CONTRAST_2A[1], CONTRAST_2A[2], CONTRAST_2A[3], CONTRAST_2B[0]]
+        ax.bar(counts.index, counts.values, color=[tier_colors[i] for i in counts.index],
+               edgecolor="white", linewidth=0.3)
         ax.set_xlabel("Number of runs solving the problem (out of 4)")
         ax.set_ylabel("Number of problems")
         ax.set_title(title)
@@ -297,8 +309,8 @@ def fig_complexity_vs_difficulty(prob_df: pd.DataFrame, out: str):
         vals = prob_df.loc[prob_df["n_runs_pass8"] == tier, "n_steps"].values
         tiers.append(vals)
     bp = ax.boxplot(tiers, labels=[str(i) for i in range(5)], patch_artist=True)
-    colors = sns.color_palette("Blues", 5)
-    for patch, color in zip(bp["boxes"], colors):
+    box_colors = [CONTRAST_2A[0], CONTRAST_2A[1], CONTRAST_2A[2], CONTRAST_2A[3], CONTRAST_2B[0]]
+    for patch, color in zip(bp["boxes"], box_colors):
         patch.set_facecolor(color)
     ax.set_xlabel("Runs solving (pass@8)")
     ax.set_ylabel("Reasoning steps")
@@ -312,7 +324,7 @@ def fig_complexity_vs_difficulty(prob_df: pd.DataFrame, out: str):
         # Clip for visualization
         tiers_mag.append(np.clip(vals, 0, 10000))
     bp2 = ax.boxplot(tiers_mag, labels=[str(i) for i in range(5)], patch_artist=True)
-    for patch, color in zip(bp2["boxes"], colors):
+    for patch, color in zip(bp2["boxes"], box_colors):
         patch.set_facecolor(color)
     ax.set_xlabel("Runs solving (pass@8)")
     ax.set_ylabel("Answer magnitude (clipped at 10k)")
@@ -333,8 +345,11 @@ def fig_topic_breakdown(prob_df: pd.DataFrame, out: str):
     # 1. Topic distribution
     ax = axes[0]
     topic_counts = prob_df["topic"].value_counts()
+    n_topics = len(topic_counts)
+    topic_colors = [CONTRAST_2A[i % len(CONTRAST_2A)] if i < len(CONTRAST_2A)
+                    else CONTRAST_2B[i % len(CONTRAST_2B)] for i in range(n_topics)]
     bars = ax.barh(topic_counts.index, topic_counts.values,
-                   color=sns.color_palette("Set2", len(topic_counts)))
+                   color=topic_colors, edgecolor="white", linewidth=0.3)
     ax.set_xlabel("Number of problems")
     ax.set_title("Problem topic distribution")
     for bar, v in zip(bars, topic_counts.values):
@@ -345,8 +360,11 @@ def fig_topic_breakdown(prob_df: pd.DataFrame, out: str):
     topic_pass8 = prob_df.groupby("topic")["n_runs_pass8"].apply(
         lambda x: (x > 0).mean()
     ).sort_values(ascending=True)
+    n_topics2 = len(topic_pass8)
+    topic_colors2 = [CONTRAST_2A[i % len(CONTRAST_2A)] if i < len(CONTRAST_2A)
+                     else CONTRAST_2B[i % len(CONTRAST_2B)] for i in range(n_topics2)]
     bars2 = ax.barh(topic_pass8.index, topic_pass8.values,
-                    color=sns.color_palette("Set2", len(topic_pass8)))
+                    color=topic_colors2, edgecolor="white", linewidth=0.3)
     ax.set_xlabel("Fraction solved by at least 1 run (pass@8)")
     ax.set_title("Solve rate by topic")
     ax.set_xlim(0, 1)
@@ -362,18 +380,17 @@ def fig_failure_modes_by_run(resp_df: pd.DataFrame, eval_data: dict, processed: 
     """D9 failure mode distribution comparison across runs."""
     _apply_rc()
 
-    categories = ["no_answer", "format_only", "arithmetic_error", "wrong_setup", "gibberish"]
-    cat_labels = ["No answer", "Format only", "Arithmetic", "Wrong setup", "Gibberish"]
+    categories = ["no_answer", "format_only", "arithmetic_error", "large_error", "gibberish"]
+    cat_labels = ["No answer", "Format only", "Arithmetic", "Large error", "Gibberish"]
 
     fig, ax = plt.subplots(figsize=(10, 6))
     x = np.arange(len(categories))
     width = 0.2
-    colors = sns.color_palette("Set1", 4)
 
     for i, run in enumerate(RUNS):
         pcts = [processed["runs"][run]["mistake_pcts"].get(c, 0) for c in categories]
-        ax.bar(x + i * width, pcts, width, label=RUN_LABELS[run], color=colors[i],
-               edgecolor="black", linewidth=0.5)
+        ax.bar(x + i * width, pcts, width, label=RUN_LABELS[run], color=RUN_COLORS[run],
+               edgecolor="white", linewidth=0.3)
 
     ax.set_xticks(x + width * 1.5)
     ax.set_xticklabels(cat_labels)
@@ -396,7 +413,8 @@ def fig_coherence_analysis(resp_df: pd.DataFrame, out: str):
     ax = axes[0]
     for run in RUNS:
         vals = resp_df.loc[resp_df["run"] == run, "avg_response_len"]
-        ax.hist(vals, bins=50, alpha=0.5, label=RUN_LABELS[run], density=True)
+        ax.hist(vals, bins=50, alpha=0.5, label=RUN_LABELS[run], density=True,
+                color=RUN_COLORS[run])
     ax.set_xlabel("Average response length (chars)")
     ax.set_ylabel("Density")
     ax.set_title("Response length distribution")
@@ -408,7 +426,7 @@ def fig_coherence_analysis(resp_df: pd.DataFrame, out: str):
     marker_rates = resp_df.groupby("run")["marker_rate"].mean()
     bars = ax.bar([RUN_LABELS[r] for r in RUNS],
                   [marker_rates[r] for r in RUNS],
-                  color=sns.color_palette("Set1", 4), edgecolor="black", linewidth=0.5)
+                  color=[RUN_COLORS[r] for r in RUNS], edgecolor="white", linewidth=0.3)
     ax.set_ylabel("Avg fraction of responses with ####")
     ax.set_title("Format marker (####) presence")
     ax.set_ylim(0, 1)
@@ -420,7 +438,7 @@ def fig_coherence_analysis(resp_df: pd.DataFrame, out: str):
     gib_rates = resp_df.groupby("run")["gibberish_count"].apply(lambda x: (x > 0).mean())
     bars = ax.bar([RUN_LABELS[r] for r in RUNS],
                   [gib_rates[r] for r in RUNS],
-                  color=sns.color_palette("Set1", 4), edgecolor="black", linewidth=0.5)
+                  color=[RUN_COLORS[r] for r in RUNS], edgecolor="white", linewidth=0.3)
     ax.set_ylabel("Fraction of problems with any gibberish response")
     ax.set_title("Gibberish rate")
     ax.set_ylim(0, 1)
@@ -443,19 +461,20 @@ def fig_near_miss_analysis(resp_df: pd.DataFrame, out: str):
     for run in RUNS:
         vals = resp_df.loc[(resp_df["run"] == run) & resp_df["min_rel_err"].notna(), "min_rel_err"]
         vals_clipped = vals.clip(upper=5)
-        ax.hist(vals_clipped, bins=50, alpha=0.5, label=RUN_LABELS[run], density=True)
+        ax.hist(vals_clipped, bins=50, alpha=0.5, label=RUN_LABELS[run], density=True,
+                color=RUN_COLORS[run])
     ax.set_xlabel("Minimum relative error (clipped at 5)")
     ax.set_ylabel("Density")
     ax.set_title("Closest wrong answer per problem")
     ax.legend(fontsize=8)
-    ax.axvline(0.1, color="red", linestyle="--", alpha=0.5, label="10% threshold")
+    ax.axvline(0.1, color="#f72585", linestyle="--", alpha=0.5, label="10% threshold")
 
     # 2. Near-miss rate by run
     ax = axes[1]
     nm_rates = resp_df.groupby("run")["has_near_miss"].mean()
     bars = ax.bar([RUN_LABELS[r] for r in RUNS],
                   [nm_rates[r] for r in RUNS],
-                  color=sns.color_palette("Set1", 4), edgecolor="black", linewidth=0.5)
+                  color=[RUN_COLORS[r] for r in RUNS], edgecolor="white", linewidth=0.3)
     ax.set_ylabel("Fraction of problems with a near-miss (<10% rel error)")
     ax.set_title("Near-miss rate")
     ax.set_ylim(0, 0.5)
@@ -520,7 +539,7 @@ def fig_cross_run_transitions(resp_df: pd.DataFrame, out: str):
 
         labels = ["Both correct", "Gained", "Lost", "Both wrong"]
         values = [both_correct, gained, lost, both_wrong]
-        colors_pie = ["#2ecc71", "#3498db", "#e74c3c", "#95a5a6"]
+        colors_pie = ["#4895ef", "#4cc9f0", "#f72585", "#979dac"]
 
         wedges, texts, autotexts = ax.pie(
             values, labels=labels, autopct=lambda p: f"{p:.1f}%\n({int(p*len(common)/100)})",
@@ -652,7 +671,7 @@ def table_summary(prob_df: pd.DataFrame, resp_df: pd.DataFrame, processed: dict,
 
     # Failure mode comparison
     lines.append("\n--- Failure mode % (D9 taxonomy) ---")
-    cats = ["no_answer", "format_only", "arithmetic_error", "wrong_setup", "gibberish"]
+    cats = ["no_answer", "format_only", "arithmetic_error", "large_error", "gibberish"]
     header = f"{'Run':<20}" + "".join(f"{c:>15s}" for c in cats)
     lines.append(header)
     for run in RUNS:
@@ -868,70 +887,71 @@ def analysis_question_alignment(eval_data: dict, questions: list[dict], out: str
 
 
 def fig_alignment(eval_data: dict, questions: list[dict], out: str):
-    """Figure: alignment rate and random baseline comparison across runs."""
-    _apply_rc()
+    """Figure 1: baseline-only alignment rate and random collision comparison.
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    Shows only the RL baseline — reward runs belong in Results, not EDA.
+    Styled to match produce.py palette (serif font, clean spines).
+    """
+    plt.rcParams.update({
+        "font.size": 9,
+        "font.family": "serif",
+        "lines.linewidth": 1.0,
+        "axes.linewidth": 0.5,
+        "mathtext.fontset": "stix",
+        "savefig.dpi": 300,
+        "savefig.bbox": "tight",
+    })
 
-    # 1. Alignment rate
+    run = "baseline"
+    samples = eval_data[run]
+
+    fig, axes = plt.subplots(1, 2, figsize=(7, 3.5))
+
+    # 1. Alignment rate (single bar)
     ax = axes[0]
-    aligned_rates = []
-    for run in RUNS:
-        samples = eval_data[run]
-        aligned = 0
-        total = 0
-        for s in samples:
-            for r in s["responses"]:
-                if r["correct"]:
-                    total += 1
-                    q_nouns = _get_key_nouns(questions[s["idx"]]["question"])
-                    r_nouns = _get_key_nouns(r["completion"])
-                    if q_nouns & r_nouns:
-                        aligned += 1
-        aligned_rates.append(aligned / total * 100 if total else 0)
+    aligned = 0
+    total = 0
+    for s in samples:
+        for r in s["responses"]:
+            if r["correct"]:
+                total += 1
+                q_nouns = _get_key_nouns(questions[s["idx"]]["question"])
+                r_nouns = _get_key_nouns(r["completion"])
+                if q_nouns & r_nouns:
+                    aligned += 1
+    aligned_pct = aligned / total * 100 if total else 0
+    misaligned_pct = 100 - aligned_pct
 
-    colors = sns.color_palette("Set1", 4)
-    bars = ax.bar([RUN_LABELS[r] for r in RUNS], aligned_rates, color=colors,
-                  edgecolor="black", linewidth=0.5)
-    ax.set_ylabel("% of correct responses aligned to question")
-    ax.set_title("Question-response alignment\n(shared proper nouns)")
+    bars = ax.bar(["Aligned", "Misaligned"], [aligned_pct, misaligned_pct],
+                  color=["#4895ef", "#f72585"], edgecolor="white", linewidth=0.3, width=0.5)
+    ax.set_ylabel("% of correct responses")
+    ax.set_title("(a) Question-response alignment\n(RL baseline)")
     ax.set_ylim(0, 100)
-    for bar, v in zip(bars, aligned_rates):
-        ax.text(bar.get_x() + bar.get_width()/2, v + 2, f"{v:.1f}%", ha="center", fontsize=10)
+    for bar, v in zip(bars, [aligned_pct, misaligned_pct]):
+        ax.text(bar.get_x() + bar.get_width()/2, v + 2, f"{v:.1f}%", ha="center", fontsize=8)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
 
-    # 2. Actual vs random collision pass@1
+    # 2. Actual vs random collision pass@1 (single pair)
     ax = axes[1]
-    actual_rates = []
-    random_rates = []
-    for run in RUNS:
-        samples = eval_data[run]
-        from collections import Counter
-        model_answers = Counter()
-        for s in samples:
-            for r in s["responses"]:
-                if r["parseable"]:
-                    model_answers[r["pred_num"]] += 1
-        total_p = sum(model_answers.values())
-        exp = sum(model_answers.get(s["ref_num"], 0) / total_p if total_p else 0
-                  for s in samples) / len(samples) * 100
-        act = sum(1 for s in samples if s["responses"][0]["correct"]) / len(samples) * 100
-        actual_rates.append(act)
-        random_rates.append(exp)
+    model_answers = Counter()
+    for s in samples:
+        for r in s["responses"]:
+            if r["parseable"]:
+                model_answers[r["pred_num"]] += 1
+    total_p = sum(model_answers.values())
+    random_rate = sum(model_answers.get(s["ref_num"], 0) / total_p if total_p else 0
+                      for s in samples) / len(samples) * 100
+    actual_rate = sum(1 for s in samples if s["responses"][0]["correct"]) / len(samples) * 100
 
-    x = np.arange(len(RUNS))
-    width = 0.35
-    ax.bar(x - width/2, actual_rates, width, label="Actual pass@1", color="#3498db",
-           edgecolor="black", linewidth=0.5)
-    ax.bar(x + width/2, random_rates, width, label="Random collision", color="#e74c3c",
-           edgecolor="black", linewidth=0.5)
-    ax.set_xticks(x)
-    ax.set_xticklabels([RUN_LABELS[r] for r in RUNS])
+    bars = ax.bar(["Actual Pass@1", "Random collision"], [actual_rate, random_rate],
+                  color=["#0466c8", "#9b2226"], edgecolor="white", linewidth=0.3, width=0.5)
     ax.set_ylabel("Pass@1 (%)")
-    ax.set_title("Actual vs random collision baseline")
-    ax.legend()
-    for i, (a, r) in enumerate(zip(actual_rates, random_rates)):
-        ax.text(i - width/2, a + 0.3, f"{a:.1f}%", ha="center", fontsize=9)
-        ax.text(i + width/2, r + 0.3, f"{r:.1f}%", ha="center", fontsize=9)
+    ax.set_title("(b) Actual vs random baseline\n(RL baseline)")
+    for bar, v in zip(bars, [actual_rate, random_rate]):
+        ax.text(bar.get_x() + bar.get_width()/2, v + 0.3, f"{v:.1f}%", ha="center", fontsize=8)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
 
     plt.tight_layout()
     plt.savefig(os.path.join(out, "fig_alignment.pdf"))
