@@ -1,0 +1,32 @@
+# Smoke test — P2/P4 pattern: single train → CORE eval.
+# Tests CORE eval end-to-end and the simplest pipeline path.
+# Uses seq_len=1024 so RoPE cache (10240) fits CORE's longest prompts (~5540).
+# BPB skipped — OOMs at seq_len>=1024 on A10G (tested separately by smoke_test.yaml).
+# Takes ~35 min (CORE eval is slow — 22 tasks at seq_len=1024).
+#
+#   modal run a3/shared/scripts/main.py --config a3/shared/configs/smoke_test_p2.yaml
+
+experiment_name: smoke-p2
+nanochat_ref: baseline-v0                 # tag, not branch — tests tag-based refs
+gpu: A10G
+timeout_hours: 1
+
+train:
+  - name: train
+    args:
+      depth: 6
+      max_seq_len: 1024
+      model_tag: smoke-p2
+      device_batch_size: 16              # 16 * 1024 = 16384 = total_batch_size
+      total_batch_size: 16384
+      num_iterations: 3
+      save_every: 3
+      eval_every: -1
+      core_metric_every: -1
+      sample_every: -1
+      run: dummy
+
+eval:
+  - checkpoint: smoke-p2
+    after_stage: train
+    evals: [core]

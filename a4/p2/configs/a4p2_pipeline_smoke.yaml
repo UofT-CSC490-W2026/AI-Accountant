@@ -1,0 +1,62 @@
+experiment_name: a4p2-pipeline-smoke
+nanochat_ref: a4-p2
+gpu: H100
+timeout_hours: 1
+data_shards: 1
+data_workers: 2
+
+train:
+  - name: sft_smoke
+    args:
+      script: scripts.chat_sft
+      init_from_source: base
+      init_from_tag: nano-swiglu-fp8-full
+      init_from_step: 4357
+      model_tag: a4p2-sft-smoke-v7
+      model_step: 4357
+      load_optimizer: 0
+      num_iterations: 40
+      device_batch_size: 8
+      total_batch_size: 4096
+      eval_every: -1
+      chatcore_every: -1
+      run: a4p2-smoke-sft
+
+  - name: midtrain_smoke
+    args:
+      script: scripts.base_train
+      init_from_source: base
+      init_from_tag: nano-swiglu-fp8-full
+      init_from_step: 4357
+      depth: 20
+      max_seq_len: 512
+      num_iterations: 4365
+      resume_from_step: 4357
+      model_tag: a4p2-midtrain-smoke-v7
+      device_batch_size: 16
+      total_batch_size: 65536
+      eval_every: -1
+      save_every: -1
+      core_metric_every: -1
+      sample_every: -1
+      run: a4p2-smoke-midtrain
+      window_pattern: L
+      mlp_variant: swiglu
+      fp8: true
+      fp8_recipe: tensorwise
+
+eval:
+  - checkpoint: nano-swiglu-fp8-full
+    step: 4357
+    evals: [custom]
+    custom_eval: p2/evals/gsm8k_eval_base_smoke.py
+
+  - checkpoint: a4p2-sft-smoke-v7
+    after_stage: sft_smoke
+    evals: [custom]
+    custom_eval: p2/evals/gsm8k_eval_sft_smoke.py
+
+  - checkpoint: a4p2-midtrain-smoke-v7
+    after_stage: midtrain_smoke
+    evals: [custom]
+    custom_eval: p2/evals/gsm8k_eval_base_smoke.py

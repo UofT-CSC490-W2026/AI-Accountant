@@ -1,0 +1,37 @@
+experiment_name: a4p2-midtrain-altmix
+nanochat_ref: a4-p2
+gpu: H100
+timeout_hours: 24
+data_shards: 8
+data_workers: 8
+
+train:
+  - name: midtrain_altmix
+    args:
+      script: scripts.base_train
+      init_from_source: base
+      init_from_tag: nano-swiglu-fp8-full
+      init_from_step: 4357
+      depth: 20
+      max_seq_len: 512
+      num_iterations: 5357
+      resume_from_step: 4357
+      model_tag: a4p2-midtrain-altmix-swiglu
+      device_batch_size: 32
+      total_batch_size: 1048576
+      eval_every: -1
+      save_every: 200
+      core_metric_every: -1
+      sample_every: -1
+      run: a4p2-midtrain-altmix
+      window_pattern: L
+      mlp_variant: swiglu
+      residual_variant: standard
+      fp8: true
+      fp8_recipe: tensorwise
+
+eval:
+  - checkpoint: a4p2-midtrain-altmix-swiglu
+    after_stage: midtrain_altmix
+    evals: [bpb, custom]
+    custom_eval: p2/evals/gsm8k_eval_base.py
