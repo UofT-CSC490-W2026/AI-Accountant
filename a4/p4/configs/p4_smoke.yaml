@@ -1,0 +1,53 @@
+# P4 Smoke Test: identical to real config, just capped iterations + eval.
+#
+# Tests: nanochat checkout, --rewards CLI, reward dispatch, per-component W&B
+#        logging, custom eval, EMA progress/ETA in logs, W&B connection.
+#
+# Differences from real config:
+#   - 1 GPU (not 8)
+#   - num_iterations: 2 (2 steps instead of full epoch)
+#   - eval capped to 5 problems
+#   - Everything else matches real setup
+#
+# Expected runtime: ~3-5 min on H100.
+#
+# Run:
+#   cd AI-Accountant
+#   modal run a4/shared/scripts/main.py --config a4/p4/configs/p4_smoke.yaml
+#
+# Check Modal logs for:
+#   - "--rewards correctness format_compliance" in CLI command
+#   - "Step 0/2 (50.0%) | reward: ... | correctness: ... | format_compliance: ... | elapsed | remaining"
+#   - "[gsm8k_eval_rl] 1/5 | pass@1=..."
+#   - W&B run created at p4-smoke
+
+experiment_name: p4-smoke
+nanochat_ref: a4-p4
+gpu: H100
+timeout_hours: 1
+data_shards: 1
+data_workers: 1
+
+train:
+  - name: train
+    args:
+      script: scripts.chat_rl
+      model_tag: p4-smoke
+      model_step: 24633
+      run: p4-smoke
+      rewards:
+        - correctness
+        - format_compliance
+      num_iterations: 2
+      eval_examples: 5
+      init_from_source: sft
+      init_from_tag: a4p2-sft-metamath-swiglu
+      init_from_step: 24633
+
+eval:
+  - checkpoint: p4-smoke
+    after_stage: train
+    evals: [custom]
+    custom_eval: p4/evals/gsm8k_eval_rl.py
+    eval_env:
+      P4_EVAL_MAX_PROBLEMS: "5"

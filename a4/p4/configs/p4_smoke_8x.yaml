@@ -1,0 +1,53 @@
+# P4 Smoke Test (8X): validates 8-GPU torchrun training + 8-shard eval on Modal.
+#
+# Tests: torchrun DDP launch, multi-GPU gradient sync, sharded eval dispatch,
+#        shard result merging, per-component reward logging from rank 0.
+#
+# Expected runtime: ~5-10 min on 8×H100 (2 train steps + 8-shard eval on 5 problems each).
+#
+# Run:
+#   modal run a4/shared/scripts/main.py --config a4/p4/configs/p4_smoke_8x.yaml
+#
+# After completion, check Modal logs for:
+#   - "[train] Running: torchrun --standalone --nproc_per_node=8 -m scripts.chat_rl --rewards correctness format_compliance ..."
+#   - "Step 0/2 ..." and "Step 1/2 ..." from rank 0 only (no duplicate lines)
+#   - "[gsm8k_eval_rl] Shard X/8: N problems" from each of 8 eval containers
+#   - "[pipeline] Merged 8 shards for p4-smoke-8x@..." in orchestrator logs
+
+experiment_name: p4-smoke-8x
+nanochat_ref: a4-p4
+gpu: "H100:8"
+timeout_hours: 1
+data_shards: 1
+data_workers: 1
+
+train:
+  - name: train
+    args:
+      script: scripts.chat_rl
+      nproc: 8
+      model_tag: p4-smoke-8x
+      model_step: 24633
+      run: dummy
+      rewards:
+        - correctness
+        - format_compliance
+      num_iterations: 2
+      examples_per_step: 8
+      num_samples: 2
+      device_batch_size: 2
+      eval_every: 999
+      eval_examples: 5
+      save_every: 1
+      init_from_source: sft
+      init_from_tag: a4p2-sft-metamath-swiglu
+      init_from_step: 24633
+
+eval:
+  - checkpoint: p4-smoke-8x
+    after_stage: train
+    evals: [custom]
+    custom_eval: p4/evals/gsm8k_eval_rl.py
+    num_eval_shards: 8
+    eval_env:
+      P4_EVAL_MAX_PROBLEMS: "15"

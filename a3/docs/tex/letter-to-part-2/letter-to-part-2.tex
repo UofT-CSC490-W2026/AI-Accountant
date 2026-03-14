@@ -1,0 +1,110 @@
+\documentclass[9pt]{extarticle}
+\usepackage[margin=0.65in, headheight=14pt]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titlespacing*{\subsection}{1.5em}{6pt}{2pt}
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.5em}
+
+\title{\vspace{-1.2cm}\huge\textbf{A3: Part 3 to Part 2}\vspace{-0.5em}}
+\author{\normalsize Autobook}
+\date{\vspace{-1.5em}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small A3: Part 3 to Part 2}
+\fancyhead[R]{\small Autobook}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+P3 extends picochat's context window by training short, then resuming at longer sequence length.
+
+\begin{itemize}[nosep]
+  \item How to use the shared nanochat fork
+  \item What P3 needs from P2
+  \item A constraint P2's architecture changes must satisfy
+  \item Timeline and how the two parts interact
+\end{itemize}
+
+\leftskip=0pt
+\section*{Fork and Branch Setup}
+\leftskip=1.5em
+
+\begin{enumerate}[nosep]
+  \item \textbf{Fork URL}: \url{https://github.com/seonghyunban/nanochat}
+  \item \textbf{Your branch}: \texttt{p2} --- push architecture changes here
+  \item \textbf{Never push to} \texttt{master} --- it is frozen as the baseline
+  \item \textbf{Baseline tag}: \texttt{baseline-v0} on \texttt{master} --- immutable reference to vanilla nanochat
+  \item Clone: \texttt{git clone https://github.com/seonghyunban/nanochat.git}
+  \item Switch to your branch: \texttt{git checkout p2}
+\end{enumerate}
+
+\leftskip=0pt
+\section*{What P3 Requires from P2}
+\leftskip=1.5em
+
+\subsection*{Required}
+\leftskip=3em
+
+\begin{itemize}[nosep]
+  \item Picochat depth (\texttt{--depth} value used for P2 ablations)
+\end{itemize}
+
+\subsection*{Optional}
+\leftskip=3em
+
+\begin{itemize}[nosep]
+  \item Checkpoint (model\_tag + step number) --- if P2 wants P3 to resume from a P2-trained checkpoint
+  \item Nanochat branch name --- defaults to \texttt{p2}; specify if using a different branch
+\end{itemize}
+
+\subsection*{Confirmation Needed}
+\leftskip=3em
+
+\begin{itemize}[nosep]
+  \item That your architecture changes do not break \texttt{--max-seq-len} change on resume (see below)
+\end{itemize}
+
+\leftskip=0pt
+\section*{Timeline}
+\leftskip=1.5em
+
+\begin{itemize}[nosep]
+  \item P3 runs independently using the baseline (\texttt{baseline-v0}) --- no blocking dependency on P2
+  \item If P2 delivers a stable config before the deadline, P3 will also run context extension on P2's model (Phase 7) and compare results against the baseline
+\end{itemize}
+
+\leftskip=0pt
+\section*{Critical Constraint}
+\leftskip=1.5em
+
+P3's task is to extend picochat's context window mid-training:
+
+\begin{enumerate}[nosep]
+  \item Train picochat at a short context window
+  \item Resume from that checkpoint with a longer context window
+  \item Eval both checkpoints to show the model now handles longer context
+\end{enumerate}
+
+This works because nanochat uses RoPE for positional encoding --- a fixed math formula that computes each token's position at runtime. Nothing about position is learned or stored in the checkpoint, so changing the context window on resume just means computing more rotations.
+
+This breaks if P2's modified architecture introduces any parameter whose shape depends on \texttt{max\_seq\_len}. When P3 resumes at the longer context length, the model expects weights shaped for the new length, but the checkpoint only has weights shaped for the shorter length. PyTorch requires exact shape matches when loading checkpoints, so it refuses to load.
+
+Even then, context extension on P2's model is not impossible --- we could interpolate or pad the shorter weights to fit the longer shape before loading. But this requires custom checkpoint loading code, and quality is uncertain since the new positions were never trained. It also undermines the narrative of P3: the whole point is that context extension is seamless with RoPE. Patching around a shape mismatch contradicts that.
+
+\textbf{Please avoid adding any parameter whose shape depends on \texttt{max\_seq\_len}.} If that is unavoidable, let me know so we can plan accordingly.
+
+\end{document}

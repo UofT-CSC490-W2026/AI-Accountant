@@ -1,0 +1,279 @@
+\documentclass[9pt]{extarticle}
+\usepackage[margin=0.65in, headheight=14pt]{geometry}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usepackage{forest}
+\usetikzlibrary{arrows.meta, positioning, fit, backgrounds, calc}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titlespacing*{\subsection}{1.5em}{6pt}{2pt}
+\setlist[itemize]{leftmargin=3em}
+\setlist[enumerate]{leftmargin=3em}
+
+\title{\vspace{-1.2cm}\huge\textbf{Getting Started}\vspace{-0.5em}}
+\author{\normalsize Autobook}
+\date{\vspace{-1.5em}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Getting Started}
+\fancyhead[R]{\small Autobook}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  framerule=0pt,
+  breaklines=true,
+  xleftmargin=3em,
+  xrightmargin=8pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+}
+
+\newcommand{\cmd}[1]{\colorbox{gray!10}{\texttt{#1}}}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+One-time setup, how the pipeline works, and the nanochat fork workflow.
+
+\leftskip=0pt
+\section*{1. Prerequisites and One-Time Setup}
+\leftskip=1.5em
+
+Three accounts needed: GitHub (you already have this), Modal (\url{https://modal.com}) for GPU compute, and Weights \& Biases (\url{https://wandb.ai}) for experiment tracking. Create your Modal and W\&B accounts, then send your W\&B username to a teammate so they can add you to project \texttt{490-autobook-a3}. Modal gives \$30 free credits on signup; we also have a shared \$500 academic credit pool.
+
+\subsection*{1.1 Install W\&B and get your API key}
+\leftskip=3em
+
+Run \cmd{pip install wandb}. Find your API key at \url{https://wandb.ai/authorize} --- you will need it in the next step. You also need the local package to fetch training metrics (loss, bpb) for your writeup.
+
+\subsection*{1.2 Install Modal CLI and authenticate}
+\leftskip=3em
+
+Run \cmd{pip install modal}, then \cmd{modal token new} (opens browser to authenticate). Create a secret so Modal can log to W\&B on your behalf: \cmd{modal secret create wandb-secret WANDB\_API\_KEY=<your-key>}. Verify with \cmd{modal secret list} --- should show \cmd{wandb-secret}.
+
+\leftskip=0pt
+\section*{2. How the Pipeline Works}
+\leftskip=1.5em
+
+You write a YAML config. The pipeline reads it, sends training and eval jobs to Modal GPUs, and writes results to a Modal Volume and W\&B. You never need to edit the pipeline code --- everything is controlled via your config.
+
+\subsection*{2.1 Files and call graph}
+\leftskip=3em
+
+\begin{forest}
+  for tree={
+    font=\ttfamily\small,
+    grow'=0,
+    child anchor=west,
+    parent anchor=south,
+    anchor=west,
+    calign=first,
+    edge path={
+      \noexpand\path [draw, -{|}] (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
+    },
+    before typesetting nodes={
+      if n=1 {insert before={[,phantom]}} {}
+    },
+    fit=band,
+    before computing xy={l=15pt},
+    s sep=4pt,
+  }
+  [a3/shared/scripts/
+    [main.py \normalfont{\textit{--- parses YAML, calls} \texttt{run.remote()}}]
+    [shared/
+      [infra.py \normalfont{\textit{--- app, image, volume, secrets, setup()}}]
+      [helpers.py \normalfont{\textit{--- pure Python utilities}}]
+    ]
+    [runners/
+      [run.py \normalfont{\textit{--- orchestrator: spawns stages then evals}}]
+      [train.py \normalfont{\textit{--- one training stage per GPU}}]
+      [evaluate.py \normalfont{\textit{--- one checkpoint eval per GPU}}]
+    ]
+  ]
+\end{forest}
+
+\vspace{6pt}
+\begin{center}
+% --- Custom palette ---
+\definecolor{powderblush}{HTML}{E8C4C4}
+\definecolor{parchment}{HTML}{F1E9D2}
+\definecolor{silver}{HTML}{C0C0C0}
+\definecolor{greyolive}{HTML}{A2A38B}
+\definecolor{taupe}{HTML}{8B7E74}
+\definecolor{sunflowergold}{HTML}{FFD700}
+\definecolor{darkteal}{HTML}{005F5F}
+\begin{tikzpicture}[
+  node distance=5mm and 6mm,
+  base/.style={draw=taupe, rounded corners=2pt, minimum height=6mm, font=\small\ttfamily},
+  pyfile/.style={base, fill=powderblush},
+  worker/.style={base, fill=greyolive!30, minimum width=14mm},
+  wbnode/.style={base, fill=sunflowergold!50, minimum width=18mm},
+  volnode/.style={base, fill=darkteal!25, minimum width=18mm},
+  arr/.style={-{Stealth[length=2.5mm]}, thick, color=taupe},
+  dataarr/.style={-{Stealth[length=2mm]}, thick, color=taupe, opacity=0.3},
+  lbl/.style={font=\sffamily\scriptsize\itshape, text=black!60},
+]
+  % === LOCAL ===
+  \node[pyfile] (yaml) {your.yaml};
+  \node[pyfile, right=8mm of yaml] (main) {main.py};
+  \draw[arr] (yaml) -- (main);
+  \node[lbl, above=1pt of main, text=white] {parses YAML};
+
+  % === MODAL: orchestrator ===
+  \node[pyfile, right=30mm of main, minimum width=16mm] (run) {run.py};
+  \draw[arr] (main) -- node[lbl, above] {.remote()} (run);
+  \node[lbl, above=1pt of run] {orchestrator};
+
+  % W&B — same y as run.py
+  \node[wbnode, right=60mm of run] (wandb) {W\&B};
+  \node[lbl, below=1pt of wandb] {\scriptsize curves};
+
+  % Setup
+  \node[worker, below=8mm of run] (setup) {setup};
+  \draw[arr] (run) -- (setup);
+  \node[lbl, right=2mm of setup] {tokenizer + data};
+
+  % train.py — closer to setup's x
+  \node[pyfile, minimum width=20mm, right=4.5mm of setup, yshift=-12mm] (trainpy) {train.py};
+
+  % evaluate.py — same x as train.py, more distance below
+  \node[pyfile, minimum width=20mm, below=22mm of trainpy] (evalpy) {evaluate.py};
+
+  % Straight vertical spine from setup, horizontal branches to .py nodes
+  \draw[color=taupe, thick] (setup.south) -- (setup.south |- evalpy.west);
+  \draw[arr] (setup.south |- trainpy.west) -- (trainpy.west);
+  \draw[arr] (setup.south |- evalpy.west) -- (evalpy.west);
+
+  % Trains — stacked to the right of train.py
+  \node[worker, right=8mm of trainpy, yshift=8mm] (t1) {train 1};
+  \node[worker, below=2mm of t1] (t2) {train 2};
+  \node[worker, below=2mm of t2] (t3) {train 3};
+  % Arrows from train.py branching to all three trains
+  \coordinate (tfork) at ([xshift=4mm]trainpy.east);
+  \draw[color=taupe, thick] (trainpy.east) -- (tfork);
+  \draw[arr] (tfork) |- (t1.west);
+  \draw[arr] (tfork) -- (t2.west);
+  \draw[arr] (tfork) |- (t3.west);
+
+  % Evals — same x as trains, stacked below evaluate.py
+  \coordinate (eval-anchor) at ([yshift=8mm]evalpy.east);
+  \node[worker, anchor=center] at (t1 |- eval-anchor) (e1) {eval 1};
+  \node[worker, below=2mm of e1] (e2) {eval 2};
+  \node[worker, below=2mm of e2] (e3) {eval 3};
+
+  % Arrows from evaluate.py branching to all three evals
+  \coordinate (efork) at ([xshift=4mm]evalpy.east);
+  \draw[color=taupe, thick] (evalpy.east) -- (efork);
+  \draw[arr] (efork) |- (e1.west);
+  \draw[arr] (efork) -- (e2.west);
+  \draw[arr] (efork) |- (e3.west);
+
+  % Volume — right side, between train and eval groups
+  \coordinate (mid) at ($(t3.south)!0.5!(e1.north)$);
+  \node[volnode] at (wandb |- mid) (vol) {Volume};
+  \node[lbl, below=1pt of vol] {\scriptsize checkpoints, CSVs};
+
+  % Low-opacity curvy: trains → W&B
+  \draw[dataarr] (t1.east) to[out=15, in=170] (wandb.west);
+  \draw[dataarr] (t2.east) to[out=10, in=180] (wandb.west);
+  \draw[dataarr] (t3.east) to[out=5, in=190] (wandb.west);
+
+  % Low-opacity curvy: trains → Volume
+  \draw[dataarr] (t1.east) to[out=-5, in=150] (vol.west);
+  \draw[dataarr] (t2.east) to[out=-10, in=160] (vol.west);
+  \draw[dataarr] (t3.east) to[out=-15, in=170] (vol.west);
+
+  % Low-opacity curvy: evals → Volume
+  \draw[dataarr] (e1.east) to[out=15, in=190] (vol.west);
+  \draw[dataarr] (e2.east) to[out=10, in=200] (vol.west);
+  \draw[dataarr] (e3.east) to[out=5, in=210] (vol.west);
+
+  % === BACKGROUND BOXES ===
+  % Local — parchment
+  \begin{scope}[on background layer]
+    \definecolor{localbox}{HTML}{1B1B1B}
+    \node[draw=localbox, rounded corners=4pt, fill=localbox,
+          fit=(yaml)(main),
+          inner sep=5mm, label={[font=\scriptsize\color{parchment!40!black}]above:local}] {};
+  \end{scope}
+
+  % Modal — silver
+  \begin{scope}[on background layer]
+    \node[draw=silver!60!black, dashed, rounded corners=4pt, fill=silver!20,
+          fit=(run)(setup)(trainpy)(t1)(t3)(evalpy)(e1)(e3)(wandb)(vol),
+          inner sep=5mm, label={[xshift=13mm, anchor=south east, font=\scriptsize\color{silver!30!black}]above right:Modal cloud}] {};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\subsection*{2.2 Workflow}
+\leftskip=3em
+
+From your perspective, using the pipeline is two steps:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Write a YAML config} describing what to train and what to evaluate. The config specifies your model depth, sequence length, GPU type, W\&B run name, and which evals to run. See the \textit{Configuring Your Experiment} doc for the full reference and templates.
+  \item \textbf{Run one command}, passing your config as a parameter:
+\end{enumerate}
+
+\begin{lstlisting}
+modal run --detach a3/shared/scripts/main.py --config a3/<part>/configs/<your-config>.yaml
+\end{lstlisting}
+
+That's it. Modal spins up GPU containers, trains your model, runs evals, and writes results to a Modal Volume (checkpoints, CSVs, JSONs) and W\&B (training curves). You can close your laptop --- \texttt{--detach} keeps the pipeline running on Modal. Check progress on the Modal dashboard or W\&B.
+
+\leftskip=0pt
+\section*{3. Nanochat Fork}
+\leftskip=1.5em
+
+Nanochat is an LLM training codebase by Karpathy. We maintain a fork at \url{https://github.com/seonghyunban/nanochat} so that teammates can modify the architecture without touching the original code. The pipeline clones this fork into every Modal container and checks out whichever branch or tag your config specifies.
+
+\subsection*{How to modify vanilla nanochat}
+\leftskip=3em
+
+\begin{enumerate}[nosep]
+  \item Clone the fork: \texttt{git clone https://github.com/seonghyunban/nanochat.git}
+  \item Create a branch: \texttt{git checkout -b p2}
+  \item Make your architecture changes, commit, and push: \texttt{git push origin p2}
+\end{enumerate}
+
+Never push to \texttt{master} --- it is frozen as the unmodified baseline.
+
+\subsection*{How to use your modified nanochat}
+\leftskip=3em
+
+Set \texttt{nanochat\_ref} in your YAML config to your branch name:
+
+\begin{lstlisting}
+nanochat_ref: p2
+\end{lstlisting}
+
+\textbf{Push before you run.} Modal runs \texttt{git fetch} + \texttt{checkout} on the remote fork --- it does not see your local changes. Forgetting to push means Modal silently runs old code.
+
+\subsection*{How to use vanilla nanochat}
+\leftskip=3em
+
+Use the immutable baseline tag:
+
+\begin{lstlisting}
+nanochat_ref: baseline-v0
+\end{lstlisting}
+
+This tag points to unmodified nanochat and never moves, even if someone pushes to \texttt{master}.
+
+\end{document}

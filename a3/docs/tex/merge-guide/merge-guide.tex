@@ -1,0 +1,134 @@
+\documentclass[9pt]{extarticle}
+\usepackage[margin=0.75in, headheight=14pt]{geometry}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{forest}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titlespacing*{\subsection}{1.5em}{6pt}{2pt}
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.5em}
+
+\title{\vspace{-1.2cm}\huge\textbf{A3: Merge Guide}\vspace{-0.5em}}
+\author{\normalsize Autobook}
+\date{\vspace{-1.5em}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small A3: Merge Guide}
+\fancyhead[R]{\small Autobook}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  framerule=0pt,
+  breaklines=true,
+  xleftmargin=8pt,
+  xrightmargin=8pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+How branches are organized for A3 and how to assemble the final submission.
+
+\begin{itemize}[nosep]
+  \item Branch structure and what lives where
+  \item How to create a feature branch for your part
+  \item How to merge all parts and submit the final PR
+\end{itemize}
+
+\leftskip=0pt
+\section*{Branch Structure}
+\leftskip=1.5em
+
+\begin{forest}
+  for tree={
+    font=\ttfamily,
+    grow'=0,
+    child anchor=west,
+    parent anchor=south,
+    anchor=west,
+    calign=first,
+    edge path={
+      \noexpand\path [draw, -{|}] (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
+    },
+    before typesetting nodes={
+      if n=1 {insert before={[,phantom]}} {}
+    },
+    fit=band,
+    before computing xy={l=15pt},
+    s sep=4pt,
+  }
+  [main
+    [a3 \normalfont{\textit{--- shared: docs, infra, configs}}
+      [a3-p2 \normalfont{\textit{--- architecture changes}}]
+      [a3-p3 \normalfont{\textit{--- context window extension}}]
+      [a3-p4 \normalfont{\textit{--- final nanochat training}}]
+    ]
+  ]
+\end{forest}
+
+\leftskip=0pt
+\section*{Creating a Feature Branch}
+\leftskip=1.5em
+
+\begin{lstlisting}
+git checkout a3
+git pull origin a3
+git checkout -b a3-pN    # replace N with your part number
+\end{lstlisting}
+
+Branch names use hyphens (\texttt{a3-pN}), not slashes (\texttt{a3/pN}), because git cannot create \texttt{a3/p3} when \texttt{a3} already exists as a branch.
+
+Work inside your \texttt{pN/} directory. Merge conflicts should be rare --- if they occur, they will be in \texttt{a3/docs/} (shared files).
+
+\leftskip=0pt
+\section*{Merging All Parts}
+\leftskip=1.5em
+
+The person assembling the final submission should run:
+
+\begin{lstlisting}
+git checkout a3
+git merge a3-p2 --no-ff -m "Merge P2: architecture changes"
+git merge a3-p3 --no-ff -m "Merge P3: context window extension"
+git merge a3-p4 --no-ff -m "Merge P4: final nanochat training"
+\end{lstlisting}
+
+\texttt{--no-ff} preserves branch history for the reviewer.
+
+\subsection*{Verify}
+\leftskip=3em
+
+\begin{lstlisting}
+git log --oneline --graph a3
+ls a3/    # should show docs/ shared/ p2/ p3/ p4/
+\end{lstlisting}
+
+\leftskip=0pt
+\section*{Submitting to Course Repo}
+\leftskip=1.5em
+
+Ensure \texttt{a3.pdf} is on the \texttt{a3} branch, then:
+
+\begin{lstlisting}
+gh pr create --base main --head a3 \
+  --title "A3: Nanochat Pre-training"
+\end{lstlisting}
+
+\end{document}

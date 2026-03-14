@@ -1,0 +1,154 @@
+\documentclass[9pt]{extarticle}
+\usepackage[margin=0.75in, headheight=14pt]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\titlespacing*{\section}{0pt}{8pt}{3pt}
+\titlespacing*{\subsection}{1.5em}{6pt}{2pt}
+\setlist[itemize]{leftmargin=1.5em, nosep}
+\setlist[enumerate]{leftmargin=1.5em, nosep}
+
+\title{\vspace{-1.2cm}\huge\textbf{A3: Part 3 to Part 4}\vspace{-0.5em}}
+\author{\normalsize Autobook}
+\date{\vspace{-1.5em}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small A3: Part 3 to Part 4}
+\fancyhead[R]{\small Autobook}
+\fancyfoot[C]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  framerule=0pt,
+  breaklines=true,
+  xleftmargin=8pt,
+  xrightmargin=8pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+  language=Python,
+}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+P3 produces the picochat checkpoints and metrics that P4 needs for scaling law prediction and emergent abilities comparison.
+
+\leftskip=0pt
+\section*{1. Picochat Config}
+\leftskip=1.5em
+
+\begin{tabular}{@{}ll@{}}
+\toprule
+Field & Value \\
+\midrule
+Depth & 6 \\
+Model dim & 384 \\
+Attention heads & 3 \\
+Total parameters & ${\sim}136$M \\
+Scaling parameters & ${\sim}35.8$M \\
+Short seq\_len (Stage 1) & 512 \\
+Extended seq\_len (Stage 2) & 2048 \\
+Nanochat branch/tag & \texttt{baseline-v0} \\
+\bottomrule
+\end{tabular}
+
+\leftskip=0pt
+\section*{2. Checkpoints}
+\leftskip=1.5em
+
+Three final checkpoints from P3's three training stages:
+
+\begin{tabular}{@{}llrlrl@{}}
+\toprule
+Checkpoint & Model tag & Step & How trained & seq\_len & Val BPB \\
+\midrule
+Short & \texttt{pico-short} & 1433 & From scratch, seq\_len=512 & 512 & 1.0586 \\
+Extended & \texttt{pico-short} & 1933 & Resumed from Short, seq\_len=2048, +500 steps & 2048 & 1.0540 \\
+Full & \texttt{pico-full} & 1433 & From scratch, seq\_len=2048 & 2048 & 1.0499 \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\textbf{Recommended for P4}: \texttt{pico-full} @ step 1433 --- strongest picochat model (best BPB and CORE).
+
+\subsection*{All available checkpoints}
+\leftskip=3em
+
+P3 saved checkpoints every 50 steps. Each step has three files: \texttt{model\_*.pt} (weights), \texttt{optim\_*\_rank0.pt} (optimizer state, only needed to resume training), \texttt{meta\_*.json} (metadata).
+
+\begin{itemize}
+  \item \textbf{pico-short} (39 checkpoints): Steps 50--1433 at seq\_len=512 (Stage~1), steps 1450--1933 at seq\_len=2048 (Stage~2)
+  \item \textbf{pico-full} (29 checkpoints): Steps 50--1433 at seq\_len=2048 (Stage~3)
+\end{itemize}
+
+The checkpoints are on a personal Modal workspace. Ask Seonghyun for any checkpoint you need --- he will download and share it.
+
+\leftskip=0pt
+\section*{3. Key Metrics}
+\leftskip=1.5em
+
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Metric & Short (1433) & Extended (1933) & Full (1433) \\
+\midrule
+Val BPB & 1.0586 & 1.0540 & 1.0499 \\
+PG19 Aggregate CE & 4.4029 & 4.2980 & 4.0500 \\
+PG19 Aggregate PPL & 81.69 & 73.55 & 57.40 \\
+CORE & N/A & 0.0766 & 0.0789 \\
+\bottomrule
+\end{tabular}
+
+\leftskip=0pt
+\section*{4. Cost}
+\leftskip=1.5em
+
+\begin{tabular}{@{}ll@{}}
+\toprule
+Field & Value \\
+\midrule
+GPU type & A100-80GB \\
+Total GPU-hours & 4.67 \\
+Estimated cost & \$29.77 \\
+\bottomrule
+\end{tabular}
+
+\leftskip=0pt
+\section*{5. W\&B Runs}
+\leftskip=1.5em
+
+\begin{itemize}
+  \item \textbf{p3-baseline-short}: \url{https://wandb.ai/seonghyun-ban-uoft/490-autobook-a3/runs/mpaiemt0}
+  \item \textbf{p3-baseline-extended}: \url{https://wandb.ai/seonghyun-ban-uoft/490-autobook-a3/runs/woxwtud7}
+  \item \textbf{p3-baseline-full}: \url{https://wandb.ai/seonghyun-ban-uoft/490-autobook-a3/runs/wy8sw0zf}
+\end{itemize}
+
+W\&B project: \texttt{490-autobook-a3}
+
+\leftskip=0pt
+\section*{6. What P4 Needs This For}
+\leftskip=1.5em
+
+\subsection*{Scaling Law Prediction}
+\leftskip=3em
+Use picochat scaling param count (35.8M) + val\_bpb (1.0499 for full, or 1.0540 for extended) to predict nanochat (depth=20) performance. Compare predicted vs actual after P4 training.
+
+\leftskip=1.5em
+\subsection*{Emergent Abilities Comparison}
+\leftskip=3em
+Find 10 questions nanochat answers but picochat cannot. Use the \texttt{pico-full} checkpoint as the ``smaller model'' baseline.
+
+\end{document}

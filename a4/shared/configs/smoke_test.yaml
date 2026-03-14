@@ -1,0 +1,65 @@
+# Smoke test — exercises the full pipeline (setup → train → eval) in ~1 minute.
+# Tests parallel stages, sequential (dependent) stages, and parallel evals.
+#
+#   modal run a3/shared/scripts/main.py --config a3/shared/configs/smoke_test.yaml
+
+experiment_name: smoke-test
+nanochat_ref: p2                      # use p2 branch on the nanochat fork
+gpu: A10G                             # cheapest GPU that supports BF16
+timeout_hours: 1
+
+train:
+  # These two run in parallel (no depends_on)
+  - name: stage-a
+    args:
+      depth: 6
+      max_seq_len: 512
+      model_tag: smoke-a
+      device_batch_size: 32
+      total_batch_size: 16384
+      num_iterations: 3
+      save_every: 3
+      eval_every: -1
+      core_metric_every: -1
+      sample_every: -1
+      run: dummy
+
+  - name: stage-b
+    args:
+      depth: 6
+      max_seq_len: 512
+      model_tag: smoke-b
+      device_batch_size: 32
+      total_batch_size: 16384
+      num_iterations: 3
+      save_every: 3
+      eval_every: -1
+      core_metric_every: -1
+      sample_every: -1
+      run: dummy
+
+  # This one runs after stage-a (sequential)
+  - name: stage-c
+    depends_on: stage-a
+    extra_iterations: 2               # train 2 more steps beyond stage-a's final step
+    args:
+      depth: 6
+      max_seq_len: 512
+      model_tag: smoke-a              # same tag — resumes from stage-a's checkpoint
+      device_batch_size: 32
+      total_batch_size: 16384
+      save_every: 5
+      eval_every: -1
+      core_metric_every: -1
+      sample_every: -1
+      run: dummy
+
+eval:
+  # These two run in parallel
+  - checkpoint: smoke-a
+    after_stage: stage-c              # eval the resumed checkpoint
+    evals: [bpb]
+
+  - checkpoint: smoke-b
+    after_stage: stage-b
+    evals: [bpb]

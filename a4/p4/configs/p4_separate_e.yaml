@@ -1,0 +1,33 @@
+# P4 Separate E: Correctness + Number Grounding
+#
+# Run:
+#   modal run --detach a4/shared/scripts/main.py --config a4/p4/configs/p4_separate_e.yaml
+
+experiment_name: p4-separate-e
+nanochat_ref: a4-p4
+gpu: "H100:8"
+timeout_hours: 8
+data_shards: 1
+data_workers: 1
+
+train:
+  - name: train
+    args:
+      script: scripts.chat_rl
+      nproc: 8
+      model_tag: p4-separate-e
+      model_step: 24633
+      run: p4-separate-e
+      rewards:
+        - correctness
+        - number_grounding
+      init_from_source: sft
+      init_from_tag: a4p2-sft-metamath-swiglu
+      init_from_step: 24633
+
+eval:
+  - checkpoint: p4-separate-e
+    after_stage: train
+    evals: [custom]
+    custom_eval: p4/evals/gsm8k_eval_rl.py
+    num_eval_shards: 8
