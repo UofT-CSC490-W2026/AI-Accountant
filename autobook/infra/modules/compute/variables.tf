@@ -110,6 +110,17 @@ variable "client_id" {
   description = "Cognito app client ID (passed to frontend config)"
 }
 
+# --- From queuing module ---
+
+# Map of queue name → SQS URL. Each service gets only the queue URLs it needs
+# as environment variables (e.g. API gets SQS_QUEUE_FILES_URL, File Worker gets
+# SQS_QUEUE_FILES_URL + SQS_QUEUE_PRECEDENT_URL).
+# Example: {"files" = "https://sqs.ca-central-1.amazonaws.com/123.../autobook-dev-files", ...}
+variable "queue_urls" {
+  type        = map(string)
+  description = "Map of SQS queue name → URL from queuing module — injected as container env vars"
+}
+
 # =============================================================================
 # OPTIONAL INPUTS — safe defaults provided
 # =============================================================================

@@ -69,6 +69,7 @@ module "iam" {
   oidc_provider_arn = data.terraform_remote_state.global.outputs.oidc_provider_arn # GitHub OIDC from global
   github_repo       = var.github_repo                                              # "UofT-CSC490-W2026/AI-Accountant"
   s3_bucket_arn     = module.storage.bucket_arn                                    # Scopes S3 permissions to our bucket
+  queue_arns        = module.queuing.queue_arns                                    # Scopes SQS permissions per service
 }
 
 # =============================================================================
@@ -132,12 +133,31 @@ module "database" {
 }
 
 # =============================================================================
+# QUEUING — SQS queues for inter-service message passing
+# =============================================================================
+# Creates 7 SQS standard queues + 7 dead-letter queues for the pipeline:
+#   files → precedent → model → llm → resolution → post → flywheel
+#
+# Each queue connects two services (e.g. API enqueues to files, File Worker
+# dequeues from files). Messages are durable, retried automatically, and
+# moved to a DLQ after 3 failed attempts.
+#
+# Standalone — no dependency on networking (SQS is a managed service).
+module "queuing" {
+  source = "../../modules/queuing"
+
+  project     = var.project
+  environment = var.environment
+  # Dev uses all defaults: 30s visibility, 4-day retention, 14-day DLQ retention,
+  # 3 max receives, 20s long polling
+}
+
+# =============================================================================
 # CACHE — ElastiCache Redis
 # =============================================================================
-# Creates the Redis cluster that serves three roles:
-#   1. Job queues (7 queues: files, precedent, model, llm, resolution, post, flywheel)
-#   2. Caches (per-user tier 1 cache, shared tier 2 cache, reference data)
-#   3. Pub/sub (real-time event notifications between services)
+# Creates the Redis cluster that serves two roles:
+#   1. Caches (per-user tier 1 cache, shared tier 2 cache, reference data)
+#   2. Pub/sub (real-time event notifications to WebSocket clients)
 #
 # Depends on networking: placed in private subnets, secured by Redis security group.
 module "cache" {
@@ -204,8 +224,11 @@ module "compute" {
   # --- From global ---
   cert_arn = data.terraform_remote_state.global.outputs.cert_arn # TLS cert for HTTPS on ALB
 
+  # --- From queuing ---
+  queue_urls = module.queuing.queue_urls # SQS queue URLs per service
+
   # --- From cache ---
-  redis_endpoint = module.cache.redis_endpoint # Redis hostname for queue/cache/pubsub
+  redis_endpoint = module.cache.redis_endpoint # Redis hostname for cache/pubsub
   redis_port     = module.cache.redis_port     # 6379
 
   # --- From storage ---

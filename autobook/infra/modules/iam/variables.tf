@@ -34,3 +34,12 @@ variable "s3_bucket_arn" {
   type        = string
   description = "S3 bucket ARN from storage module — used to scope S3 IAM policies"
 }
+
+# Map of queue name → ARN from the queuing module.
+# Used to create per-service SQS policies (each service only gets access
+# to the queues it sends to / receives from).
+# Example: {"files" = "arn:aws:sqs:...:autobook-dev-files", "precedent" = "arn:...", ...}
+variable "queue_arns" {
+  type        = map(string)
+  description = "Map of SQS queue name → ARN from queuing module — scopes per-service SQS permissions"
+}

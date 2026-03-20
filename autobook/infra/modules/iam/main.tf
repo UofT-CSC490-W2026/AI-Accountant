@@ -189,6 +189,174 @@ resource "aws_iam_role_policy" "flywheel_sagemaker" {
   })
 }
 
+# --- SQS policies (all services) ---
+# Each service only gets access to the queues it reads from and writes to.
+# Send = sqs:SendMessage (enqueue to the next queue in the pipeline)
+# Receive = sqs:ReceiveMessage + sqs:DeleteMessage + sqs:GetQueueAttributes
+#   (dequeue, delete after processing, check queue depth for health)
+
+# API service: enqueue incoming transactions to the files queue
+resource "aws_iam_role_policy" "api_sqs" {
+  name = "sqs-send-files"
+  role = aws_iam_role.task["api"].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "sqs:SendMessage"
+      Resource = var.queue_arns["files"]
+    }]
+  })
+}
+
+# File worker: dequeue from files, enqueue normalized transactions to precedent
+resource "aws_iam_role_policy" "file_sqs" {
+  name = "sqs-files-to-precedent"
+  role = aws_iam_role.task["file"].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
+        Resource = var.queue_arns["files"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = "sqs:SendMessage"
+        Resource = var.queue_arns["precedent"]
+      }
+    ]
+  })
+}
+
+# Precedent matcher (tier 1): dequeue from precedent, enqueue to model (miss) or post (hit)
+resource "aws_iam_role_policy" "precedent_sqs" {
+  name = "sqs-precedent-to-model-or-post"
+  role = aws_iam_role.task["precedent"].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
+        Resource = var.queue_arns["precedent"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = "sqs:SendMessage"
+        Resource = [var.queue_arns["model"], var.queue_arns["post"]]
+      }
+    ]
+  })
+}
+
+# Model worker (tier 2): dequeue from model, enqueue to llm (miss) or post (hit)
+resource "aws_iam_role_policy" "model_sqs" {
+  name = "sqs-model-to-llm-or-post"
+  role = aws_iam_role.task["model"].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
+        Resource = var.queue_arns["model"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = "sqs:SendMessage"
+        Resource = [var.queue_arns["llm"], var.queue_arns["post"]]
+      }
+    ]
+  })
+}
+
+# LLM worker (tier 3): dequeue from llm, enqueue to resolution (stuck) or post (confident)
+resource "aws_iam_role_policy" "llm_sqs" {
+  name = "sqs-llm-to-resolution-or-post"
+  role = aws_iam_role.task["llm"].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
+        Resource = var.queue_arns["llm"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = "sqs:SendMessage"
+        Resource = [var.queue_arns["resolution"], var.queue_arns["post"]]
+      }
+    ]
+  })
+}
+
+# Resolution worker (tier 4): dequeue human resolutions, enqueue to post
+resource "aws_iam_role_policy" "resolution_sqs" {
+  name = "sqs-resolution-to-post"
+  role = aws_iam_role.task["resolution"].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
+        Resource = var.queue_arns["resolution"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = "sqs:SendMessage"
+        Resource = var.queue_arns["post"]
+      }
+    ]
+  })
+}
+
+# Posting service: dequeue validated entries, enqueue to flywheel for learning
+resource "aws_iam_role_policy" "posting_sqs" {
+  name = "sqs-post-to-flywheel"
+  role = aws_iam_role.task["posting"].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
+        Resource = var.queue_arns["post"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = "sqs:SendMessage"
+        Resource = var.queue_arns["flywheel"]
+      }
+    ]
+  })
+}
+
+# Flywheel worker: dequeue posted entries, writes to caches/stores (terminal — no next queue)
+resource "aws_iam_role_policy" "flywheel_sqs" {
+  name = "sqs-flywheel-receive"
+  role = aws_iam_role.task["flywheel"].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
+      Resource = var.queue_arns["flywheel"]
+    }]
+  })
+}
+
 # --- Bedrock policy (llm) ---
 
 # LLM worker: call foundation models (Claude, etc.) via AWS Bedrock for tier 3
