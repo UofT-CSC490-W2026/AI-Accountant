@@ -31,10 +31,10 @@ resource "aws_db_instance" "main" {
 
   # --- Size: controlled by caller ---
   instance_class    = var.db_instance_class # Machine size
-  allocated_storage = var.allocated_storage  # Disk space in GB
+  allocated_storage = var.allocated_storage # Disk space in GB
   storage_type      = "gp3"                 # General Purpose SSD v3 — cheaper and faster than gp2
-                                            # gp3: 3000 IOPS baseline (free), $0.08/GB
-                                            # gp2: IOPS tied to size (3 IOPS/GB), $0.10/GB
+  # gp3: 3000 IOPS baseline (free), $0.08/GB
+  # gp2: IOPS tied to size (3 IOPS/GB), $0.10/GB
 
   # --- Credentials ---
   # Database name and username both use the project name ("autobook").
@@ -59,7 +59,7 @@ resource "aws_db_instance" "main" {
   # Essential for identifying slow queries before they become production issues.
   # Free tier retains 7 days of data — no cost unless extended.
   performance_insights_enabled          = true
-  performance_insights_retention_period = 7  # Days to retain (7 = free tier)
+  performance_insights_retention_period = 7 # Days to retain (7 = free tier)
 
   # --- Availability: controlled by caller ---
   multi_az = var.multi_az

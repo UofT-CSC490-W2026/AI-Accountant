@@ -24,9 +24,9 @@ locals {
 #
 # The client never polls — updates arrive instantly over the open WebSocket.
 resource "aws_apigatewayv2_api" "websocket" {
-  name                       = local.name                        # e.g. "autobook-dev-ws"
-  protocol_type              = "WEBSOCKET"                       # WebSocket (not HTTP)
-  route_selection_expression = var.route_selection_expression     # How to pick a route from incoming messages
+  name                       = local.name                     # e.g. "autobook-dev-ws"
+  protocol_type              = "WEBSOCKET"                    # WebSocket (not HTTP)
+  route_selection_expression = var.route_selection_expression # How to pick a route from incoming messages
 
   tags = { Name = local.name }
 }
@@ -46,7 +46,7 @@ resource "aws_apigatewayv2_api" "websocket" {
 #   - "HTTP_PROXY" for an HTTP endpoint (e.g. ALB)
 resource "aws_apigatewayv2_integration" "mock" {
   api_id           = aws_apigatewayv2_api.websocket.id
-  integration_type = "MOCK"              # Static response, no backend
+  integration_type = "MOCK" # Static response, no backend
 
   # Template that returns a 200 status — required for $connect to succeed
   template_selection_expression = "200"
@@ -74,8 +74,8 @@ resource "aws_apigatewayv2_route" "main" {
   for_each = toset(local.routes)
 
   api_id    = aws_apigatewayv2_api.websocket.id
-  route_key = each.key                                                      # "$connect", "$disconnect", or "$default"
-  target    = "integrations/${aws_apigatewayv2_integration.mock.id}"         # Points to the MOCK integration
+  route_key = each.key                                               # "$connect", "$disconnect", or "$default"
+  target    = "integrations/${aws_apigatewayv2_integration.mock.id}" # Points to the MOCK integration
 }
 
 # Route response — required for bidirectional communication on $connect
@@ -96,8 +96,8 @@ resource "aws_apigatewayv2_route_response" "connect" {
 # without needing a separate deployment resource.
 resource "aws_apigatewayv2_stage" "main" {
   api_id      = aws_apigatewayv2_api.websocket.id
-  name        = var.environment  # e.g. "dev" or "prod"
-  auto_deploy = true             # Deploy changes automatically (no manual deployment step)
+  name        = var.environment # e.g. "dev" or "prod"
+  auto_deploy = true            # Deploy changes automatically (no manual deployment step)
 
   # Throttling — protect backend from message floods
   default_route_settings {
@@ -110,14 +110,14 @@ resource "aws_apigatewayv2_stage" "main" {
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.websocket.arn
     format = jsonencode({
-      requestId      = "$context.requestId"
-      ip             = "$context.identity.sourceIp"
-      routeKey       = "$context.routeKey"
-      status         = "$context.status"
-      connectionId   = "$context.connectionId"
-      requestTime    = "$context.requestTime"
-      eventType      = "$context.eventType"
-      error          = "$context.error.message"
+      requestId    = "$context.requestId"
+      ip           = "$context.identity.sourceIp"
+      routeKey     = "$context.routeKey"
+      status       = "$context.status"
+      connectionId = "$context.connectionId"
+      requestTime  = "$context.requestTime"
+      eventType    = "$context.eventType"
+      error        = "$context.error.message"
     })
   }
 
@@ -130,8 +130,8 @@ resource "aws_apigatewayv2_stage" "main" {
 # Stores connection events, message routing, and errors for debugging.
 # Retained for 30 days — enough for troubleshooting without unbounded cost.
 resource "aws_cloudwatch_log_group" "websocket" {
-  name              = "/aws/apigateway/${local.name}"  # e.g. "/aws/apigateway/autobook-dev-ws"
-  retention_in_days = 30                                # Auto-delete after 30 days
+  name              = "/aws/apigateway/${local.name}" # e.g. "/aws/apigateway/autobook-dev-ws"
+  retention_in_days = 30                              # Auto-delete after 30 days
   # Hardcoded (not a variable) because there is only one WebSocket log group.
   # The compute module uses a variable because it applies to 8 service log groups.
 

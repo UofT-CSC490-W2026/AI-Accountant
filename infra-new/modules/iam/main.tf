@@ -37,7 +37,7 @@ data "aws_region" "current" {}
 # This role is shared by all 8 services — they all need the same agent permissions.
 resource "aws_iam_role" "execution" {
   name               = "${local.name}-ecs-execution" # e.g. "autobook-dev-ecs-execution"
-  assume_role_policy = local.ecs_trust_policy         # Only ECS can assume this role
+  assume_role_policy = local.ecs_trust_policy        # Only ECS can assume this role
 
   tags = { Name = "${local.name}-ecs-execution" }
 }
@@ -60,7 +60,7 @@ resource "aws_iam_role_policy" "execution_secrets" {
     Statement = [{
       Effect   = "Allow"
       Action   = "secretsmanager:GetSecretValue"
-      Resource = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${local.name}-*"
+      Resource = "arn:aws:secretsmanager:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:secret:${local.name}-*"
     }]
   })
 }
@@ -78,7 +78,7 @@ resource "aws_iam_role" "task" {
   for_each = toset(local.service_names)
 
   name               = "${local.name}-${each.key}-task" # e.g. "autobook-dev-api-task"
-  assume_role_policy = local.ecs_trust_policy            # Only ECS can assume this role
+  assume_role_policy = local.ecs_trust_policy           # Only ECS can assume this role
 
   tags = { Name = "${local.name}-${each.key}-task" }
 }
@@ -104,7 +104,7 @@ resource "aws_iam_role_policy" "api_s3" {
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
-      Action   = "s3:PutObject"         # Upload only — can't read or delete
+      Action   = "s3:PutObject"           # Upload only — can't read or delete
       Resource = "${var.s3_bucket_arn}/*" # Any object in the data bucket
     }]
   })
@@ -140,8 +140,8 @@ resource "aws_iam_role_policy" "flywheel_s3" {
       Effect = "Allow"
       Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"] # Full read/write
       Resource = [
-        var.s3_bucket_arn,          # ListBucket needs the bucket itself
-        "${var.s3_bucket_arn}/*"    # Get/Put needs the objects
+        var.s3_bucket_arn,       # ListBucket needs the bucket itself
+        "${var.s3_bucket_arn}/*" # Get/Put needs the objects
       ]
     }]
   })
@@ -159,7 +159,7 @@ resource "aws_iam_role_policy" "model_sagemaker" {
     Statement = [{
       Effect   = "Allow"
       Action   = "sagemaker:InvokeEndpoint" # Call the model for predictions
-      Resource = "arn:aws:sagemaker:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:endpoint/${local.name}-*"
+      Resource = "arn:aws:sagemaker:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:endpoint/${local.name}-*"
     }]
   })
 }
@@ -177,10 +177,10 @@ resource "aws_iam_role_policy" "flywheel_sagemaker" {
         Effect = "Allow"
         Action = [
           "sagemaker:CreateTrainingJob",   # Start a training job
-          "sagemaker:DescribeTrainingJob",  # Check training status
-          "sagemaker:StopTrainingJob"       # Cancel if needed
+          "sagemaker:DescribeTrainingJob", # Check training status
+          "sagemaker:StopTrainingJob"      # Cancel if needed
         ]
-        Resource = "arn:aws:sagemaker:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:training-job/${local.name}-*"
+        Resource = "arn:aws:sagemaker:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:training-job/${local.name}-*"
       },
       {
         # SageMaker training jobs need to assume their own role — we must allow
@@ -208,12 +208,12 @@ resource "aws_iam_role_policy" "llm_bedrock" {
     Statement = [{
       Effect = "Allow"
       Action = [
-        "bedrock:InvokeModel",                     # Synchronous model calls
-        "bedrock:InvokeModelWithResponseStream"     # Streaming responses
+        "bedrock:InvokeModel",                  # Synchronous model calls
+        "bedrock:InvokeModelWithResponseStream" # Streaming responses
       ]
       # Foundation models are AWS-managed — the ARN has no account ID
       # Scoped to our region (ca-central-1) for least privilege
-      Resource = "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/*"
+      Resource = "arn:aws:bedrock:${data.aws_region.current.region}::foundation-model/*"
     }]
   })
 }
@@ -274,17 +274,17 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
           "ecr:InitiateLayerUpload",         # Start uploading a layer
           "ecr:UploadLayerPart",             # Upload layer chunks
           "ecr:CompleteLayerUpload",         # Finish layer upload
-          "ecr:BatchGetImage",              # Read image manifests
-          "ecr:GetDownloadUrlForLayer"      # Download layer data
+          "ecr:BatchGetImage",               # Read image manifests
+          "ecr:GetDownloadUrlForLayer"       # Download layer data
         ]
-        Resource = "arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/${local.name}-*"
+        Resource = "arn:aws:ecr:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:repository/${local.name}-*"
       },
       {
         # ECS task definitions — account-level operations, cannot be scoped to specific resources
         Effect = "Allow"
         Action = [
-          "ecs:RegisterTaskDefinition",   # Create new version of task definition
-          "ecs:DescribeTaskDefinition"    # Read current task definition
+          "ecs:RegisterTaskDefinition", # Create new version of task definition
+          "ecs:DescribeTaskDefinition"  # Read current task definition
         ]
         Resource = "*" # These are account-level APIs — AWS does not support resource-level scoping
       },
@@ -292,10 +292,10 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
         # ECS service operations — scoped to our project's services only
         Effect = "Allow"
         Action = [
-          "ecs:UpdateService",            # Tell service to use new task definition
-          "ecs:DescribeServices"          # Check deployment status
+          "ecs:UpdateService",   # Tell service to use new task definition
+          "ecs:DescribeServices" # Check deployment status
         ]
-        Resource = "arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:service/${local.name}/*"
+        Resource = "arn:aws:ecs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:service/${local.name}/*"
       },
       {
         # PassRole — allows GitHub Actions to pass our IAM roles to ECS
@@ -303,8 +303,8 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
         Effect = "Allow"
         Action = "iam:PassRole"
         Resource = concat(
-          [aws_iam_role.execution.arn],                    # Execution role
-          [for role in aws_iam_role.task : role.arn]        # All 8 task roles
+          [aws_iam_role.execution.arn],              # Execution role
+          [for role in aws_iam_role.task : role.arn] # All 8 task roles
         )
         Condition = {
           StringEquals = { "iam:PassedToService" = "ecs-tasks.amazonaws.com" }

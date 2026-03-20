@@ -13,8 +13,8 @@ locals {
 # This is similar to how AWS has instance types (t3.micro, m5.large) —
 # Qdrant Cloud has packages that bundle CPU, RAM, and disk together.
 data "qdrant-cloud_booking_packages" "available" {
-  cloud_provider = "aws"             # We run on AWS (matches our ECS/RDS/Redis)
-  cloud_region   = var.cloud_region   # Same region as our other infrastructure
+  cloud_provider = "aws"            # We run on AWS (matches our ECS/RDS/Redis)
+  cloud_region   = var.cloud_region # Same region as our other infrastructure
 }
 
 # Filter packages to find the one matching our desired CPU and RAM
@@ -55,9 +55,9 @@ check "package_exists" {
 # This is a managed cluster on Qdrant Cloud — no VPC, no EC2, no Kubernetes.
 # ECS services connect over HTTPS using the URL and API key.
 resource "qdrant-cloud_accounts_cluster" "main" {
-  name           = "${local.name}-qdrant"                                          # e.g. "autobook-dev-qdrant"
-  cloud_provider = data.qdrant-cloud_booking_packages.available.cloud_provider     # "aws"
-  cloud_region   = data.qdrant-cloud_booking_packages.available.cloud_region       # e.g. "ca-central-1"
+  name           = "${local.name}-qdrant"                                      # e.g. "autobook-dev-qdrant"
+  cloud_provider = data.qdrant-cloud_booking_packages.available.cloud_provider # "aws"
+  cloud_region   = data.qdrant-cloud_booking_packages.available.cloud_region   # e.g. "ca-central-1"
 
   # Cluster configuration — node count, database settings, and package selection
   configuration {

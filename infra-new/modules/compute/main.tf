@@ -73,9 +73,9 @@ resource "aws_ecr_lifecycle_policy" "main" {
       rulePriority = 1
       description  = "Keep only the 20 most recent images"
       selection = {
-        tagStatus   = "any"          # Apply to both tagged and untagged images
+        tagStatus   = "any" # Apply to both tagged and untagged images
         countType   = "imageCountMoreThan"
-        countNumber = 20             # Keep 20, delete older ones
+        countNumber = 20 # Keep 20, delete older ones
       }
       action = {
         type = "expire"
@@ -94,7 +94,7 @@ resource "aws_cloudwatch_log_group" "main" {
   for_each = toset(local.service_names)
 
   name              = "/ecs/${local.name}-${each.key}" # e.g. "/ecs/autobook-dev-api"
-  retention_in_days = var.log_retention_days            # Default: 30 days, then auto-deleted
+  retention_in_days = var.log_retention_days           # Default: 30 days, then auto-deleted
 
   tags = { Name = "${local.name}-${each.key}" }
 }
@@ -107,7 +107,7 @@ resource "aws_cloudwatch_log_group" "main" {
 # API service containers. Only the API service sits behind the ALB —
 # workers consume from Redis queues and don't receive HTTP traffic.
 resource "aws_lb" "main" {
-  name               = local.name           # e.g. "autobook-dev"
+  name               = local.name            # e.g. "autobook-dev"
   internal           = false                 # Internet-facing (not internal)
   load_balancer_type = "application"         # Layer 7 (HTTP/HTTPS), not Layer 4 (TCP)
   security_groups    = [var.alb_sg_id]       # Allows HTTPS from the internet
@@ -121,22 +121,22 @@ resource "aws_lb" "main" {
 # The ALB distributes incoming requests across all healthy targets.
 # Fargate requires target_type = "ip" (not "instance") because there are no EC2 instances.
 resource "aws_lb_target_group" "api" {
-  name        = "${local.name}-api"   # e.g. "autobook-dev-api"
-  port        = var.container_port    # Port the container listens on (8000)
-  protocol    = "HTTP"                # ALB terminates TLS, forwards plain HTTP to containers
+  name        = "${local.name}-api" # e.g. "autobook-dev-api"
+  port        = var.container_port  # Port the container listens on (8000)
+  protocol    = "HTTP"              # ALB terminates TLS, forwards plain HTTP to containers
   vpc_id      = var.vpc_id
-  target_type = "ip"                  # Required for Fargate (containers get their own IPs)
+  target_type = "ip" # Required for Fargate (containers get their own IPs)
 
   # Health check — ALB pings this endpoint to decide if a container is healthy
   # Unhealthy containers are removed from the target group (no traffic sent to them)
   health_check {
     path                = var.health_check_path # Default: "/health"
     protocol            = "HTTP"
-    matcher             = "200"                 # Only 200 = healthy
-    interval            = 30                    # Check every 30 seconds
-    timeout             = 5                     # Fail if no response in 5 seconds
-    healthy_threshold   = 2                     # 2 consecutive passes = healthy
-    unhealthy_threshold = 3                     # 3 consecutive fails = unhealthy
+    matcher             = "200" # Only 200 = healthy
+    interval            = 30    # Check every 30 seconds
+    timeout             = 5     # Fail if no response in 5 seconds
+    healthy_threshold   = 2     # 2 consecutive passes = healthy
+    unhealthy_threshold = 3     # 3 consecutive fails = unhealthy
   }
 
   # Create new target group before destroying old one (avoids downtime during changes)
@@ -152,10 +152,10 @@ resource "aws_lb_target_group" "api" {
 # TLS using the ACM certificate, and forwards the plain HTTP request to containers.
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.main.arn
-  port              = 443        # HTTPS port
+  port              = 443 # HTTPS port
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06" # TLS 1.3 (latest, most secure)
-  certificate_arn   = var.cert_arn                            # ACM wildcard cert from global stack
+  certificate_arn   = var.cert_arn                          # ACM wildcard cert from global stack
 
   # Default action: forward all HTTPS traffic to the API target group
   default_action {
@@ -182,11 +182,11 @@ resource "aws_lb_listener" "https" {
 resource "aws_ecs_task_definition" "main" {
   for_each = toset(local.service_names)
 
-  family                   = "${local.name}-${each.key}"  # e.g. "autobook-dev-api"
-  network_mode             = "awsvpc"                      # Each task gets its own IP (required for Fargate)
-  requires_compatibilities = ["FARGATE"]                   # Run on Fargate (serverless, no EC2 to manage)
-  cpu                      = var.cpu                       # CPU units (256 = 0.25 vCPU)
-  memory                   = var.memory                    # Memory in MB
+  family                   = "${local.name}-${each.key}" # e.g. "autobook-dev-api"
+  network_mode             = "awsvpc"                    # Each task gets its own IP (required for Fargate)
+  requires_compatibilities = ["FARGATE"]                 # Run on Fargate (serverless, no EC2 to manage)
+  cpu                      = var.cpu                     # CPU units (256 = 0.25 vCPU)
+  memory                   = var.memory                  # Memory in MB
 
   # Execution role: used by the ECS AGENT — pull images, write logs, read secrets
   execution_role_arn = var.execution_role_arn
@@ -198,9 +198,9 @@ resource "aws_ecs_task_definition" "main" {
   # --- Container definition (JSON) ---
   # Defines what runs inside the task. One container per task in our case.
   container_definitions = jsonencode([{
-    name      = each.key                                                        # Container name = service name
-    image     = "${aws_ecr_repository.main[each.key].repository_url}:latest"    # Bootstrap placeholder — CI/CD overrides via new task definition revisions
-    essential = true                                                             # If this container dies, the task dies
+    name      = each.key                                                     # Container name = service name
+    image     = "${aws_ecr_repository.main[each.key].repository_url}:latest" # Bootstrap placeholder — CI/CD overrides via new task definition revisions
+    essential = true                                                         # If this container dies, the task dies
 
     # Port mappings — only the API service exposes a port (for ALB traffic)
     # Workers don't receive HTTP traffic — they pull from Redis queues
@@ -243,8 +243,8 @@ resource "aws_ecs_task_definition" "main" {
       logDriver = "awslogs" # AWS CloudWatch Logs driver (built into Fargate)
       options = {
         "awslogs-group"         = aws_cloudwatch_log_group.main[each.key].name # Log group per service
-        "awslogs-region"        = data.aws_region.current.name                  # Same region as the cluster
-        "awslogs-stream-prefix" = each.key                                      # Prefix for log stream names
+        "awslogs-region"        = data.aws_region.current.region                 # Same region as the cluster
+        "awslogs-stream-prefix" = each.key                                     # Prefix for log stream names
       }
     }
   }])
@@ -263,11 +263,11 @@ resource "aws_ecs_task_definition" "main" {
 resource "aws_ecs_service" "main" {
   for_each = toset(local.service_names)
 
-  name            = "${local.name}-${each.key}"                     # e.g. "autobook-dev-api"
-  cluster         = aws_ecs_cluster.main.id                         # Which cluster to run in
-  task_definition = aws_ecs_task_definition.main[each.key].arn      # Which task definition to use
-  desired_count   = var.desired_count                                # How many copies (0 = none until CI/CD deploys)
-  launch_type     = "FARGATE"                                        # Serverless — no EC2 to manage
+  name            = "${local.name}-${each.key}"                # e.g. "autobook-dev-api"
+  cluster         = aws_ecs_cluster.main.id                    # Which cluster to run in
+  task_definition = aws_ecs_task_definition.main[each.key].arn # Which task definition to use
+  desired_count   = var.desired_count                          # How many copies (0 = none until CI/CD deploys)
+  launch_type     = "FARGATE"                                  # Serverless — no EC2 to manage
 
   # --- Network: private subnets, app security group ---
   network_configuration {
@@ -283,8 +283,8 @@ resource "aws_ecs_service" "main" {
     for_each = each.key == local.api_service ? [1] : []
     content {
       target_group_arn = aws_lb_target_group.api.arn # Register container as ALB target
-      container_name   = each.key                     # Must match container name in task definition
-      container_port   = var.container_port            # Must match containerPort in task definition
+      container_name   = each.key                    # Must match container name in task definition
+      container_port   = var.container_port          # Must match containerPort in task definition
     }
   }
 

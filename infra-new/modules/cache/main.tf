@@ -28,7 +28,7 @@ resource "aws_elasticache_subnet_group" "main" {
 #   - Multi-node with automatic failover for prod (num_cache_clusters = 2+)
 #   - Same resource type either way — no code change between environments
 resource "aws_elasticache_replication_group" "main" {
-  replication_group_id = local.name              # Unique name in AWS
+  replication_group_id = local.name # Unique name in AWS
   description          = "${local.name} — queues, caches, pub/sub"
 
   # --- Engine: always Redis ---

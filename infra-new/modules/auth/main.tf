@@ -28,12 +28,12 @@ resource "aws_cognito_user_pool" "main" {
 
   # --- Password policy ---
   password_policy {
-    minimum_length                   = var.password_min_length         # Default: 8
-    require_uppercase                = var.password_require_uppercase  # Default: true
-    require_lowercase                = var.password_require_lowercase  # Default: true
-    require_numbers                  = var.password_require_numbers    # Default: true
-    require_symbols                  = var.password_require_symbols    # Default: true
-    temporary_password_validity_days = 7                               # Admin-created passwords expire in 7 days
+    minimum_length                   = var.password_min_length        # Default: 8
+    require_uppercase                = var.password_require_uppercase # Default: true
+    require_lowercase                = var.password_require_lowercase # Default: true
+    require_numbers                  = var.password_require_numbers   # Default: true
+    require_symbols                  = var.password_require_symbols   # Default: true
+    temporary_password_validity_days = 7                              # Admin-created passwords expire in 7 days
   }
 
   # --- MFA (multi-factor authentication) ---
@@ -69,8 +69,8 @@ resource "aws_cognito_user_pool" "main" {
   schema {
     name                = "email"
     attribute_data_type = "String"
-    required            = true  # Users must provide an email
-    mutable             = true  # Email can be changed later
+    required            = true # Users must provide an email
+    mutable             = true # Email can be changed later
 
     string_attribute_constraints {
       min_length = 1
@@ -100,17 +100,17 @@ resource "aws_cognito_user_pool_client" "main" {
 
   # --- Auth flows: which login methods are allowed ---
   explicit_auth_flows = [
-    "ALLOW_USER_SRP_AUTH",       # Secure Remote Password — password never sent over the wire
-    "ALLOW_REFRESH_TOKEN_AUTH"   # Allow refreshing expired access tokens without re-login
+    "ALLOW_USER_SRP_AUTH",     # Secure Remote Password — password never sent over the wire
+    "ALLOW_REFRESH_TOKEN_AUTH" # Allow refreshing expired access tokens without re-login
   ]
 
   # --- OAuth settings ---
-  allowed_oauth_flows                  = ["code"]              # Authorization Code Grant (most secure)
-  allowed_oauth_flows_user_pool_client = true                  # Enable OAuth for this client
+  allowed_oauth_flows                  = ["code"]                       # Authorization Code Grant (most secure)
+  allowed_oauth_flows_user_pool_client = true                           # Enable OAuth for this client
   allowed_oauth_scopes                 = ["openid", "email", "profile"] # What user info the app can access
-  callback_urls                        = var.callback_urls     # Where to redirect after login
-  logout_urls                          = var.logout_urls       # Where to redirect after logout
-  supported_identity_providers         = ["COGNITO"]           # Only Cognito (no Google/Facebook login)
+  callback_urls                        = var.callback_urls              # Where to redirect after login
+  logout_urls                          = var.logout_urls                # Where to redirect after logout
+  supported_identity_providers         = ["COGNITO"]                    # Only Cognito (no Google/Facebook login)
 
   # --- Token lifetimes ---
   access_token_validity  = var.access_token_validity_hours # Default: 1 hour
@@ -139,6 +139,6 @@ resource "aws_cognito_user_pool_client" "main" {
 #
 # For production, you can replace this with a custom domain (e.g. auth.autobook.tech).
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = local.name              # e.g. "autobook-dev" → autobook-dev.auth.ca-central-1.amazoncognito.com
+  domain       = local.name # e.g. "autobook-dev" → autobook-dev.auth.ca-central-1.amazoncognito.com
   user_pool_id = aws_cognito_user_pool.main.id
 }

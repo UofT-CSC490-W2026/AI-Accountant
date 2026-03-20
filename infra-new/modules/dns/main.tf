@@ -17,9 +17,9 @@ locals {
 #   3. Health-aware — Route53 checks ALB health automatically
 #   4. Works at zone apex — CNAMEs can't be used for root domains (DNS spec)
 resource "aws_route53_record" "api" {
-  zone_id = var.zone_id                                    # DNS zone for autobook.tech
-  name    = "${local.api_subdomain}.${var.domain_name}"    # e.g. "api.autobook.tech" or "api-dev.autobook.tech"
-  type    = "A"                                            # A record (returns IP addresses)
+  zone_id = var.zone_id                                 # DNS zone for autobook.tech
+  name    = "${local.api_subdomain}.${var.domain_name}" # e.g. "api.autobook.tech" or "api-dev.autobook.tech"
+  type    = "A"                                         # A record (returns IP addresses)
 
   # Alias block — tells Route53 "resolve this to the ALB's current IPs"
   # Unlike a regular A record (static IP), alias automatically updates when ALB IPs change

@@ -8,8 +8,8 @@ resource "aws_route53_zone" "main" {
 # --- ACM: TLS certificate for HTTPS ---
 resource "aws_acm_certificate" "main" {
   domain_name               = var.domain_name          # "autobook.tech"
-  subject_alternative_names = ["*.${var.domain_name}"]  # Wildcard covers all subdomains
-  validation_method         = "DNS"                     # Prove ownership via DNS record
+  subject_alternative_names = ["*.${var.domain_name}"] # Wildcard covers all subdomains
+  validation_method         = "DNS"                    # Prove ownership via DNS record
 
   tags = { Name = "${var.project}-wildcard-cert" }
 }
@@ -27,9 +27,9 @@ resource "aws_route53_record" "cert_validation" {
   zone_id         = aws_route53_zone.main.zone_id
   name            = each.value.name
   type            = each.value.type
-  ttl             = 300          # 5 minutes
+  ttl             = 300 # 5 minutes
   records         = [each.value.record]
-  allow_overwrite = true         # Safe to overwrite if record already exists
+  allow_overwrite = true # Safe to overwrite if record already exists
 }
 
 # Wait until ACM verifies the DNS records and issues the cert
@@ -41,10 +41,10 @@ resource "aws_acm_certificate_validation" "main" {
 # --- Frontend DNS: root domain → Netlify ---
 resource "aws_route53_record" "frontend" {
   zone_id = aws_route53_zone.main.zone_id
-  name    = var.domain_name      # "autobook.tech"
+  name    = var.domain_name # "autobook.tech"
   type    = "A"
   ttl     = 300
-  records = [var.frontend_ip]    # Netlify IP
+  records = [var.frontend_ip] # Netlify IP
 }
 
 # www subdomain → Netlify
@@ -53,12 +53,12 @@ resource "aws_route53_record" "www" {
   name    = "www.${var.domain_name}" # "www.autobook.tech"
   type    = "CNAME"
   ttl     = 300
-  records = [var.frontend_cname]     # Netlify CNAME target
+  records = [var.frontend_cname] # Netlify CNAME target
 }
 
 # --- GitHub OIDC: lets GitHub Actions assume AWS roles without storing credentials ---
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com"]           # Required audience
+  client_id_list  = ["sts.amazonaws.com"]                        # Required audience
   thumbprint_list = ["ffffffffffffffffffffffffffffffffffffffff"] # Placeholder — AWS ignores this for GitHub since July 2023
 }

@@ -29,9 +29,9 @@ data "terraform_remote_state" "global" {
   backend = "s3"
 
   config = {
-    bucket = "autobook-tfstate-609092547371"  # Same S3 bucket as our backend
-    key    = "global/terraform.tfstate"       # The global stack's state file key
-    region = var.region                       # ca-central-1
+    bucket = "autobook-tfstate-609092547371" # Same S3 bucket as our backend
+    key    = "global/terraform.tfstate"      # The global stack's state file key
+    region = var.region                      # ca-central-1
   }
 }
 
@@ -64,11 +64,11 @@ module "networking" {
 module "iam" {
   source = "../../modules/iam"
 
-  project          = var.project
-  environment      = var.environment
+  project           = var.project
+  environment       = var.environment
   oidc_provider_arn = data.terraform_remote_state.global.outputs.oidc_provider_arn # GitHub OIDC from global
-  github_repo      = var.github_repo                                               # "UofT-CSC490-W2026/AI-Accountant"
-  s3_bucket_arn    = module.storage.bucket_arn                                      # Scopes S3 permissions to our bucket
+  github_repo       = var.github_repo                                              # "UofT-CSC490-W2026/AI-Accountant"
+  s3_bucket_arn     = module.storage.bucket_arn                                    # Scopes S3 permissions to our bucket
 }
 
 # =============================================================================
@@ -83,9 +83,9 @@ module "iam" {
 module "storage" {
   source = "../../modules/storage"
 
-  project     = var.project
-  environment = var.environment
-  account_id  = var.account_id   # Makes bucket name globally unique
+  project       = var.project
+  environment   = var.environment
+  account_id    = var.account_id # Makes bucket name globally unique
   force_destroy = true           # Dev: allow easy teardown (prod: false)
 }
 
@@ -191,15 +191,15 @@ module "compute" {
   environment = var.environment
 
   # --- From networking ---
-  vpc_id             = module.networking.vpc_id              # ALB target group needs VPC
-  public_subnet_ids  = module.networking.public_subnet_ids   # ALB sits in public subnets
-  private_subnet_ids = module.networking.private_subnet_ids  # ECS tasks run in private subnets
-  alb_sg_id          = module.networking.alb_sg_id           # ALB firewall (allows HTTPS from internet)
-  app_sg_id          = module.networking.app_sg_id           # ECS firewall (allows traffic from ALB only)
+  vpc_id             = module.networking.vpc_id             # ALB target group needs VPC
+  public_subnet_ids  = module.networking.public_subnet_ids  # ALB sits in public subnets
+  private_subnet_ids = module.networking.private_subnet_ids # ECS tasks run in private subnets
+  alb_sg_id          = module.networking.alb_sg_id          # ALB firewall (allows HTTPS from internet)
+  app_sg_id          = module.networking.app_sg_id          # ECS firewall (allows traffic from ALB only)
 
   # --- From IAM ---
-  execution_role_arn = module.iam.execution_role_arn  # Shared role: pull images, read secrets, write logs
-  task_role_arns     = module.iam.task_role_arns      # Per-service roles: {"api" = "arn:...", ...}
+  execution_role_arn = module.iam.execution_role_arn # Shared role: pull images, read secrets, write logs
+  task_role_arns     = module.iam.task_role_arns     # Per-service roles: {"api" = "arn:...", ...}
 
   # --- From global ---
   cert_arn = data.terraform_remote_state.global.outputs.cert_arn # TLS cert for HTTPS on ALB
@@ -235,10 +235,10 @@ module "dns" {
 
   project      = var.project
   environment  = var.environment
-  domain_name  = var.domain_name                                            # "autobook.tech"
-  zone_id      = data.terraform_remote_state.global.outputs.zone_id         # Route53 zone from global
-  alb_dns_name = module.compute.alb_dns_name                                # ALB hostname
-  alb_zone_id  = module.compute.alb_zone_id                                 # ALB hosted zone (AWS internal)
+  domain_name  = var.domain_name                                    # "autobook.tech"
+  zone_id      = data.terraform_remote_state.global.outputs.zone_id # Route53 zone from global
+  alb_dns_name = module.compute.alb_dns_name                        # ALB hostname
+  alb_zone_id  = module.compute.alb_zone_id                         # ALB hosted zone (AWS internal)
   # Dev default: api_subdomain = null → auto-resolves to "api-dev"
 }
 
@@ -320,8 +320,8 @@ module "monitoring" {
 
   # --- From compute ---
   cluster_name   = module.compute.cluster_name   # ECS cluster for metric dimensions
-  service_names  = module.compute.service_names   # 8 service names for per-service alarms
-  alb_arn_suffix = module.compute.alb_arn_suffix  # ALB identifier for 5xx alarm
+  service_names  = module.compute.service_names  # 8 service names for per-service alarms
+  alb_arn_suffix = module.compute.alb_arn_suffix # ALB identifier for 5xx alarm
 
   # --- From database ---
   db_instance_id = module.database.db_instance_id # RDS instance for DB alarms

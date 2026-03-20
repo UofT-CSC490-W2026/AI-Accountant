@@ -10,5 +10,5 @@ output "sns_topic_arn" {
 # The dashboard URL for quick access from documentation or runbooks
 output "dashboard_url" {
   description = "CloudWatch dashboard URL — direct link to the monitoring dashboard"
-  value       = "https://${data.aws_region.current.name}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${aws_cloudwatch_dashboard.main.dashboard_name}"
+  value       = "https://${data.aws_region.current.region}.console.aws.amazon.com/cloudwatch/home#dashboards:name=${aws_cloudwatch_dashboard.main.dashboard_name}"
 }

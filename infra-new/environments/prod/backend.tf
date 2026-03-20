@@ -13,10 +13,10 @@
 # The key must be unique per stack — two stacks sharing a key = data loss.
 terraform {
   backend "s3" {
-    bucket         = "autobook-tfstate-609092547371"  # From bootstrap output (includes account ID for uniqueness)
-    key            = "env/prod/terraform.tfstate"      # Unique path — prod gets its own key (dev uses env/dev/)
-    region         = "ca-central-1"                    # Must match the bucket's region
-    dynamodb_table = "autobook-terraform-locks"        # From bootstrap output
-    encrypt        = true                              # Encrypt state at rest (contains sensitive values)
+    bucket         = "autobook-tfstate-609092547371" # From bootstrap output (includes account ID for uniqueness)
+    key            = "env/prod/terraform.tfstate"    # Unique path — prod gets its own key (dev uses env/dev/)
+    region         = "ca-central-1"                  # Must match the bucket's region
+    dynamodb_table = "autobook-terraform-locks"      # From bootstrap output
+    encrypt        = true                            # Encrypt state at rest (contains sensitive values)
   }
 }

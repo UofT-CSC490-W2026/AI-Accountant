@@ -56,17 +56,17 @@ resource "aws_iam_role_policy" "sagemaker_ecr" {
     Statement = [{
       Effect = "Allow"
       Action = [
-        "ecr:GetDownloadUrlForLayer", # Download image layers
-        "ecr:BatchGetImage",          # Get image manifest
+        "ecr:GetDownloadUrlForLayer",     # Download image layers
+        "ecr:BatchGetImage",              # Get image manifest
         "ecr:BatchCheckLayerAvailability" # Check if layers exist
       ]
       # Scoped to our project's ECR repos — no access to other repos
-      Resource = "arn:aws:ecr:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:repository/${local.name}-*"
-    },
-    {
-      Effect   = "Allow"
-      Action   = "ecr:GetAuthorizationToken" # Get login credentials for ECR
-      Resource = "*"                          # This action doesn't support resource-level restrictions
+      Resource = "arn:aws:ecr:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:repository/${local.name}-*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = "ecr:GetAuthorizationToken" # Get login credentials for ECR
+        Resource = "*"                         # This action doesn't support resource-level restrictions
     }]
   })
 }
@@ -87,7 +87,7 @@ resource "aws_iam_role_policy" "sagemaker_logs" {
         "logs:PutLogEvents"     # Write log entries
       ]
       # Scoped to /aws/sagemaker/ prefix — SageMaker's default log location
-      Resource = "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/sagemaker/*"
+      Resource = "arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/sagemaker/*"
     }]
   })
 }
@@ -103,9 +103,9 @@ resource "aws_iam_role_policy" "sagemaker_s3" {
     Statement = [{
       Effect = "Allow"
       Action = [
-        "s3:GetObject",    # Read model artifacts (model.tar.gz)
-        "s3:PutObject",    # Write training output
-        "s3:ListBucket"    # List objects in bucket
+        "s3:GetObject", # Read model artifacts (model.tar.gz)
+        "s3:PutObject", # Write training output
+        "s3:ListBucket" # List objects in bucket
       ]
       # Scoped to our project's bucket — model artifacts stored under models/ prefix
       Resource = [
@@ -162,9 +162,9 @@ resource "aws_sagemaker_endpoint_configuration" "main" {
 
   # Production variant — defines the model and compute resources
   production_variants {
-    variant_name           = "primary"                          # Name for this variant (required even with one)
-    model_name             = aws_sagemaker_model.main[0].name   # Which model to serve
-    initial_variant_weight = 1.0                                # 100% of traffic to this variant
+    variant_name           = "primary"                        # Name for this variant (required even with one)
+    model_name             = aws_sagemaker_model.main[0].name # Which model to serve
+    initial_variant_weight = 1.0                              # 100% of traffic to this variant
 
     # --- Serverless config (scale-to-zero, no GPU) ---
     # Used in dev: no cost when idle, ~1 min cold start on first request
@@ -172,7 +172,7 @@ resource "aws_sagemaker_endpoint_configuration" "main" {
       for_each = var.serverless ? [1] : [] # Only add this block when serverless = true
 
       content {
-        memory_size_in_mb = var.serverless_memory_mb     # RAM allocation (1024-6144 MB)
+        memory_size_in_mb = var.serverless_memory_mb       # RAM allocation (1024-6144 MB)
         max_concurrency   = var.serverless_max_concurrency # Max parallel invocations
       }
     }
@@ -180,7 +180,7 @@ resource "aws_sagemaker_endpoint_configuration" "main" {
     # --- Real-time config (always-on instances) ---
     # Used in prod: consistent latency, GPU available, higher cost
     # These fields are only set when serverless = false
-    instance_type         = var.serverless ? null : var.instance_type  # e.g. ml.g4dn.xlarge
+    instance_type          = var.serverless ? null : var.instance_type  # e.g. ml.g4dn.xlarge
     initial_instance_count = var.serverless ? null : var.instance_count # Number of instances
   }
 

@@ -28,9 +28,9 @@ data "terraform_remote_state" "global" {
   backend = "s3"
 
   config = {
-    bucket = "autobook-tfstate-609092547371"  # Same S3 bucket as our backend
-    key    = "global/terraform.tfstate"       # The global stack's state file key
-    region = var.region                       # ca-central-1
+    bucket = "autobook-tfstate-609092547371" # Same S3 bucket as our backend
+    key    = "global/terraform.tfstate"      # The global stack's state file key
+    region = var.region                      # ca-central-1
   }
 }
 
@@ -104,16 +104,16 @@ module "auth" {
 module "database" {
   source = "../../modules/database"
 
-  project            = var.project
-  environment        = var.environment
-  private_subnet_ids = module.networking.private_subnet_ids
-  db_sg_id           = module.networking.db_sg_id
-  db_instance_class  = var.db_instance_class         # "db.t4g.large"
-  db_password        = var.db_password                # From TF_VAR_db_password
-  multi_az              = true                        # PROD: standby replica in second AZ
-  deletion_protection   = true                        # PROD: block accidental deletion
-  backup_retention_period = 30                        # PROD: 30 days of backups (dev = 7)
-  skip_final_snapshot   = false                       # PROD: snapshot before deletion
+  project                 = var.project
+  environment             = var.environment
+  private_subnet_ids      = module.networking.private_subnet_ids
+  db_sg_id                = module.networking.db_sg_id
+  db_instance_class       = var.db_instance_class # "db.t4g.large"
+  db_password             = var.db_password       # From TF_VAR_db_password
+  multi_az                = true                  # PROD: standby replica in second AZ
+  deletion_protection     = true                  # PROD: block accidental deletion
+  backup_retention_period = 30                    # PROD: 30 days of backups (dev = 7)
+  skip_final_snapshot     = false                 # PROD: snapshot before deletion
 }
 
 # =============================================================================
@@ -129,12 +129,12 @@ module "cache" {
   environment        = var.environment
   private_subnet_ids = module.networking.private_subnet_ids
   redis_sg_id        = module.networking.redis_sg_id
-  node_type          = "cache.r7g.large"                    # PROD: 13 GB RAM, handles queues + caches under load
+  node_type          = "cache.r7g.large" # PROD: 13 GB RAM, handles queues + caches under load
   # Hardcoded (not a tfvars variable) — cache sizing is set once per environment, not tuned per-deploy
-  num_cache_clusters          = 3     # PROD: 1 primary + 2 replicas (dev = 1)
-  automatic_failover_enabled  = true  # PROD: auto-promote replica on failure (dev = false)
-  multi_az_enabled            = true  # PROD: spread across AZs (dev = false)
-  snapshot_retention_limit    = 7     # PROD: 7 days of Redis snapshots (dev = 0)
+  num_cache_clusters         = 3    # PROD: 1 primary + 2 replicas (dev = 1)
+  automatic_failover_enabled = true # PROD: auto-promote replica on failure (dev = false)
+  multi_az_enabled           = true # PROD: spread across AZs (dev = false)
+  snapshot_retention_limit   = 7    # PROD: 7 days of Redis snapshots (dev = 0)
 }
 
 # =============================================================================
@@ -146,11 +146,11 @@ module "cache" {
 module "secrets" {
   source = "../../modules/secrets"
 
-  project                  = var.project
-  environment              = var.environment
-  db_address               = module.database.db_address
-  db_password              = var.db_password
-  recovery_window_in_days  = 7 # PROD: 7-day recovery window (dev = 0)
+  project                 = var.project
+  environment             = var.environment
+  db_address              = module.database.db_address
+  db_password             = var.db_password
+  recovery_window_in_days = 7 # PROD: 7-day recovery window (dev = 0)
 }
 
 # =============================================================================
@@ -245,9 +245,9 @@ module "ml" {
   environment        = var.environment
   private_subnet_ids = module.networking.private_subnet_ids
   sagemaker_sg_id    = module.networking.sagemaker_sg_id
-  serverless         = false              # PROD: real-time GPU (dev = serverless)
-  instance_type      = "ml.g5.xlarge"     # PROD: 1x A10G, 24 GB VRAM, 4 vCPUs ($1.41/hr)
-  instance_count     = 1                  # Single instance (scale up if needed)
+  serverless         = false          # PROD: real-time GPU (dev = serverless)
+  instance_type      = "ml.g5.xlarge" # PROD: 1x A10G, 24 GB VRAM, 4 vCPUs ($1.41/hr)
+  instance_count     = 1              # Single instance (scale up if needed)
   # model_image = null (default) → no endpoint until model is pushed to ECR
 }
 
@@ -288,8 +288,8 @@ module "monitoring" {
   db_instance_id = module.database.db_instance_id
 
   # --- Prod thresholds ---
-  rds_connections_threshold = 200  # PROD: db.t4g.large supports ~700 connections (dev = 50)
-  alb_5xx_threshold         = 50   # PROD: higher tolerance at scale (dev = 10)
+  rds_connections_threshold = 200 # PROD: db.t4g.large supports ~700 connections (dev = 50)
+  alb_5xx_threshold         = 50  # PROD: higher tolerance at scale (dev = 10)
 
   # --- Budget ---
   monthly_budget_usd = var.monthly_budget_usd # "$300.0"

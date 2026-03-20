@@ -87,7 +87,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "main" {
 
     transition {
       days          = var.ia_transition_days # Default: 90 days
-      storage_class = "STANDARD_IA"         # Infrequent Access
+      storage_class = "STANDARD_IA"          # Infrequent Access
     }
   }
 
@@ -127,12 +127,12 @@ resource "aws_s3_bucket_policy" "tls_only" {
       Principal = "*"
       Action    = "s3:*"
       Resource = [
-        aws_s3_bucket.main.arn,        # The bucket itself
-        "${aws_s3_bucket.main.arn}/*"   # All objects in the bucket
+        aws_s3_bucket.main.arn,       # The bucket itself
+        "${aws_s3_bucket.main.arn}/*" # All objects in the bucket
       ]
       Condition = {
         Bool = {
-          "aws:SecureTransport" = "false"  # Deny when NOT using HTTPS
+          "aws:SecureTransport" = "false" # Deny when NOT using HTTPS
         }
       }
     }]

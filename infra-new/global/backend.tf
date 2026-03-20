@@ -4,7 +4,7 @@ terraform {
     bucket         = "autobook-tfstate-609092547371" # From bootstrap output
     key            = "global/terraform.tfstate"      # Unique per stack
     region         = "ca-central-1"
-    dynamodb_table = "autobook-terraform-locks"      # From bootstrap output
-    encrypt        = true                            # Encrypt state at rest
+    dynamodb_table = "autobook-terraform-locks" # From bootstrap output
+    encrypt        = true                       # Encrypt state at rest
   }
 }

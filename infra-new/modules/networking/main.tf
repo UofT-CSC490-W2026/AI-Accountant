@@ -1,6 +1,6 @@
 # Naming convention used throughout
 locals {
-  name = "${var.project}-${var.environment}" # e.g. "autobook-dev"
+  name = "${var.project}-${var.environment}"  # e.g. "autobook-dev"
   azs  = ["${var.region}a", "${var.region}b"] # Two availability zones for redundancy
 }
 
@@ -9,9 +9,9 @@ locals {
 # =============================================================================
 # Everything lives inside this. Without it, resources have no network.
 resource "aws_vpc" "main" {
-  cidr_block           = var.vpc_cidr          # IP range for the entire network
-  enable_dns_support   = true                  # Allow DNS resolution inside the VPC
-  enable_dns_hostnames = true                  # Give resources DNS names (needed by RDS)
+  cidr_block           = var.vpc_cidr # IP range for the entire network
+  enable_dns_support   = true         # Allow DNS resolution inside the VPC
+  enable_dns_hostnames = true         # Give resources DNS names (needed by RDS)
 
   tags = { Name = local.name }
 }
@@ -71,8 +71,8 @@ resource "aws_eip" "nat" {
 # Single NAT to save cost (~$32/mo). If this AZ goes down, private subnet outbound fails —
 # acceptable for this project. For HA, add a second NAT in the other AZ (~$64/mo total).
 resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id                              # Use the Elastic IP above
-  subnet_id     = aws_subnet.public[local.azs[0]].id          # Place in first public subnet
+  allocation_id = aws_eip.nat.id                     # Use the Elastic IP above
+  subnet_id     = aws_subnet.public[local.azs[0]].id # Place in first public subnet
 
   tags = { Name = local.name }
 
@@ -89,7 +89,7 @@ resource "aws_route_table" "public" {
 
   route {
     cidr_block = "0.0.0.0/0"                  # All internet-bound traffic
-    gateway_id = aws_internet_gateway.main.id  # Goes through IGW
+    gateway_id = aws_internet_gateway.main.id # Goes through IGW
   }
 
   tags = { Name = "${local.name}-public" }
@@ -100,8 +100,8 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block     = "0.0.0.0/0"              # All internet-bound traffic
-    nat_gateway_id = aws_nat_gateway.main.id   # Goes through NAT (outbound only)
+    cidr_block     = "0.0.0.0/0"             # All internet-bound traffic
+    nat_gateway_id = aws_nat_gateway.main.id # Goes through NAT (outbound only)
   }
 
   tags = { Name = "${local.name}-private" }
@@ -149,7 +149,7 @@ resource "aws_security_group" "alb" {
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"          # All protocols
+    protocol    = "-1" # All protocols
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -263,8 +263,8 @@ resource "aws_security_group" "sagemaker" {
 # Gateway endpoint routes S3 traffic directly over AWS internal network.
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.${var.region}.s3" # S3 service in our region
-  vpc_endpoint_type = "Gateway"                         # Free, no hourly charge
+  service_name      = "com.amazonaws.${var.region}.s3"                        # S3 service in our region
+  vpc_endpoint_type = "Gateway"                                               # Free, no hourly charge
   route_table_ids   = [aws_route_table.public.id, aws_route_table.private.id] # Both route tables use it
 
   tags = { Name = "${local.name}-s3" }
