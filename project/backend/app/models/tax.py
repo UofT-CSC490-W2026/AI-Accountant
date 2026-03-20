@@ -3,12 +3,17 @@ from __future__ import annotations
 import uuid
 from datetime import date
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import MONEY, AuditMixin, Base
 from app.models.enums import TaxObligationStatus, TaxType
+
+if TYPE_CHECKING:
+    from app.models.journal import JournalEntry
+    from app.models.organization import Organization
 
 
 class TaxObligation(AuditMixin, Base):
@@ -31,7 +36,9 @@ class TaxObligation(AuditMixin, Base):
     )
 
     # ── relationships ──────────────────────────────────────────────
-    organization: Mapped[Organization] = relationship(
-        back_populates="tax_obligations"
+    organization: Mapped["Organization"] = relationship(
+        "Organization", back_populates="tax_obligations"
     )
-    payment_journal_entry: Mapped[JournalEntry | None] = relationship()
+    payment_journal_entry: Mapped["JournalEntry | None"] = relationship(
+        "JournalEntry"
+    )

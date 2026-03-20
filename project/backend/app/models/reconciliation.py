@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -9,6 +10,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import MONEY, AuditMixin, Base
 from app.models.enums import ReconciliationStatus
+
+if TYPE_CHECKING:
+    from app.models.journal import JournalEntry
+    from app.models.organization import Organization
 
 
 class ReconciliationRecord(AuditMixin, Base):
@@ -29,7 +34,7 @@ class ReconciliationRecord(AuditMixin, Base):
     )
 
     # ── relationships ──────────────────────────────────────────────
-    organization: Mapped[Organization] = relationship(
-        back_populates="reconciliation_records"
+    organization: Mapped["Organization"] = relationship(
+        "Organization", back_populates="reconciliation_records"
     )
-    journal_entry: Mapped[JournalEntry | None] = relationship()
+    journal_entry: Mapped["JournalEntry | None"] = relationship("JournalEntry")

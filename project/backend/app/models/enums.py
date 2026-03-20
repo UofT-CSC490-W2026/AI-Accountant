@@ -1,9 +1,9 @@
-import enum
+from enum import Enum
 
 
-# ── Chart of Accounts ──────────────────────────────────────────────
+# ── Chart of Accounts ────────────────────────────────────────────
 
-class AccountType(str, enum.Enum):
+class AccountType(str, Enum):
     ASSET = "asset"
     LIABILITY = "liability"
     EQUITY = "equity"
@@ -11,7 +11,7 @@ class AccountType(str, enum.Enum):
     EXPENSE = "expense"
 
 
-class AccountSubType(str, enum.Enum):
+class AccountSubType(str, Enum):
     # Assets
     CURRENT_ASSET = "current_asset"
     FIXED_ASSET = "fixed_asset"
@@ -20,107 +20,123 @@ class AccountSubType(str, enum.Enum):
     CURRENT_LIABILITY = "current_liability"
     LONG_TERM_LIABILITY = "long_term_liability"
     # Equity
-    EQUITY = "equity"
+    SHARE_CAPITAL = "share_capital"
+    RETAINED_EARNINGS = "retained_earnings"
+    DIVIDENDS = "dividends"
     # Revenue
-    REVENUE = "revenue"
-    # Expenses
+    SALES_REVENUE = "sales_revenue"
+    SERVICE_REVENUE = "service_revenue"
+    # Expense
     OPERATING_EXPENSE = "operating_expense"
     COST_OF_GOODS_SOLD = "cost_of_goods_sold"
+    CCA_EXPENSE = "cca_expense"
     # Other
     OTHER_INCOME = "other_income"
     OTHER_EXPENSE = "other_expense"
 
 
-class AccountCreator(str, enum.Enum):
-    SYSTEM = "system"
+class AccountCreator(str, Enum):
     USER = "user"
-
-
-# ── Journal Entries ────────────────────────────────────────────────
-
-class JournalEntrySource(str, enum.Enum):
-    MANUAL = "manual"
-    STRIPE = "stripe"
-    WISE = "wise"
-    PLAID = "plaid"
     SYSTEM = "system"
 
 
-class JournalEntryStatus(str, enum.Enum):
+# ── Journal Entries ──────────────────────────────────────────────
+
+class JournalEntryStatus(str, Enum):
     DRAFT = "draft"
     PENDING_REVIEW = "pending_review"
     POSTED = "posted"
     REVERSED = "reversed"
 
 
-# ── Assets / CCA ──────────────────────────────────────────────────
+class JournalEntrySource(str, Enum):
+    MANUAL = "manual"
+    STRIPE = "stripe"
+    WISE = "wise"
+    PLAID = "plaid"
+    SYSTEM = "system"
 
-class AssetStatus(str, enum.Enum):
+
+# ── Assets ───────────────────────────────────────────────────────
+
+class AssetStatus(str, Enum):
     ACTIVE = "active"
     DISPOSED = "disposed"
 
 
-# ── Tax ───────────────────────────────────────────────────────────
+# ── Tax ──────────────────────────────────────────────────────────
 
-class TaxType(str, enum.Enum):
+class TaxType(str, Enum):
     HST = "hst"
+    GST = "gst"
+    PST = "pst"
     CORPORATE_INCOME = "corporate_income"
 
 
-class TaxObligationStatus(str, enum.Enum):
+class TaxObligationStatus(str, Enum):
     ACCRUING = "accruing"
     CALCULATED = "calculated"
     FILED = "filed"
     PAID = "paid"
 
 
-# ── Corporate Documents ───────────────────────────────────────────
+# ── Corporate Documents ─────────────────────────────────────────
 
-class DocumentType(str, enum.Enum):
+class DocumentType(str, Enum):
     DIVIDEND_RESOLUTION = "dividend_resolution"
+    DIRECTORS_RESOLUTION = "directors_resolution"
+    ANNUAL_RETURN = "annual_return"
+    ARTICLES_OF_AMENDMENT = "articles_of_amendment"
+    T5_SLIP = "t5_slip"
 
 
-class DocumentStatus(str, enum.Enum):
+class DocumentStatus(str, Enum):
     DRAFT = "draft"
     SIGNED = "signed"
 
 
-# ── Scheduled Entries ─────────────────────────────────────────────
+# ── Scheduled Entries ────────────────────────────────────────────
 
-class ScheduleFrequency(str, enum.Enum):
+class ScheduleFrequency(str, Enum):
     MONTHLY = "monthly"
     QUARTERLY = "quarterly"
     YEARLY = "yearly"
 
 
-class ScheduleSource(str, enum.Enum):
+class ScheduleSource(str, Enum):
     CCA = "cca"
     PRORATION = "proration"
+    DEFERRED_REVENUE = "deferred_revenue"
+    RECURRING = "recurring"
 
 
-class ScheduleStatus(str, enum.Enum):
+class ScheduleStatus(str, Enum):
     ACTIVE = "active"
     PAUSED = "paused"
     COMPLETED = "completed"
 
 
-# ── Integrations ──────────────────────────────────────────────────
+# ── Integrations ─────────────────────────────────────────────────
 
-class IntegrationPlatform(str, enum.Enum):
+class IntegrationPlatform(str, Enum):
     STRIPE = "stripe"
     WISE = "wise"
     PLAID = "plaid"
+    SHOPIFY = "shopify"
+    LEMONSQUEEZY = "lemonsqueezy"
+    PADDLE = "paddle"
 
 
-class IntegrationStatus(str, enum.Enum):
+class IntegrationStatus(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     ERROR = "error"
 
 
-# ── Reconciliation ────────────────────────────────────────────────
+# ── Reconciliation ──────────────────────────────────────────────
 
-class ReconciliationStatus(str, enum.Enum):
+class ReconciliationStatus(str, Enum):
     AUTO_MATCHED = "auto_matched"
     USER_CONFIRMED = "user_confirmed"
     MANUAL = "manual"
+    DISCREPANCY = "discrepancy"

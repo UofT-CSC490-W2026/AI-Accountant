@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
@@ -9,6 +10,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import AuditMixin, Base
 from app.models.enums import IntegrationPlatform, IntegrationStatus
+
+if TYPE_CHECKING:
+    from app.models.organization import Organization
 
 
 class IntegrationConnection(AuditMixin, Base):
@@ -27,6 +31,6 @@ class IntegrationConnection(AuditMixin, Base):
     config: Mapped[dict | None] = mapped_column(JSONB)
 
     # ── relationships ──────────────────────────────────────────────
-    organization: Mapped[Organization] = relationship(
-        back_populates="integration_connections"
+    organization: Mapped["Organization"] = relationship(
+        "Organization", back_populates="integration_connections"
     )

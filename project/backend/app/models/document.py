@@ -2,12 +2,17 @@ from __future__ import annotations
 
 import uuid
 from datetime import date
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import AuditMixin, Base
 from app.models.enums import DocumentStatus, DocumentType
+
+if TYPE_CHECKING:
+    from app.models.journal import JournalEntry
+    from app.models.organization import Organization
 
 
 class CorporateDocument(AuditMixin, Base):
@@ -26,7 +31,9 @@ class CorporateDocument(AuditMixin, Base):
     status: Mapped[DocumentStatus] = mapped_column(default=DocumentStatus.DRAFT)
 
     # ── relationships ──────────────────────────────────────────────
-    organization: Mapped[Organization] = relationship(
-        back_populates="corporate_documents"
+    organization: Mapped["Organization"] = relationship(
+        "Organization", back_populates="corporate_documents"
     )
-    related_journal_entry: Mapped[JournalEntry | None] = relationship()
+    related_journal_entry: Mapped["JournalEntry | None"] = relationship(
+        "JournalEntry"
+    )

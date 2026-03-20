@@ -3,12 +3,17 @@ from __future__ import annotations
 import uuid
 from datetime import date
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import MONEY, AuditMixin, Base
 from app.models.enums import JournalEntrySource, JournalEntryStatus
+
+if TYPE_CHECKING:
+    from app.models.account import ChartOfAccounts
+    from app.models.organization import Organization
 
 
 class JournalEntry(AuditMixin, Base):
@@ -31,10 +36,10 @@ class JournalEntry(AuditMixin, Base):
     approved_by: Mapped[str | None] = mapped_column(String(255))
 
     # ── relationships ──────────────────────────────────────────────
-    organization: Mapped[Organization] = relationship(
-        back_populates="journal_entries"
+    organization: Mapped["Organization"] = relationship(
+        "Organization", back_populates="journal_entries"
     )
-    lines: Mapped[list[JournalEntryLine]] = relationship(
+    lines: Mapped[list["JournalEntryLine"]] = relationship(
         back_populates="journal_entry",
         cascade="all, delete-orphan",
         order_by="JournalEntryLine.line_order",
@@ -47,8 +52,7 @@ class JournalEntryLine(AuditMixin, Base):
         CheckConstraint("debit_amount >= 0", name="ck_jel_debit_non_negative"),
         CheckConstraint("credit_amount >= 0", name="ck_jel_credit_non_negative"),
         CheckConstraint(
-            "(debit_amount > 0 AND credit_amount = 0) "
-            "OR (debit_amount = 0 AND credit_amount > 0)",
+            "NOT (debit_amount > 0 AND credit_amount > 0)",
             name="ck_jel_one_side_only",
         ),
     )
@@ -66,7 +70,9 @@ class JournalEntryLine(AuditMixin, Base):
     line_order: Mapped[int] = mapped_column(Integer, default=0)
 
     # ── relationships ──────────────────────────────────────────────
-    journal_entry: Mapped[JournalEntry] = relationship(back_populates="lines")
-    account: Mapped[ChartOfAccounts] = relationship(
-        back_populates="journal_entry_lines"
+    journal_entry: Mapped["JournalEntry"] = relationship(
+        "JournalEntry", back_populates="lines"
+    )
+    account: Mapped["ChartOfAccounts"] = relationship(
+        "ChartOfAccounts", back_populates="journal_entry_lines"
     )

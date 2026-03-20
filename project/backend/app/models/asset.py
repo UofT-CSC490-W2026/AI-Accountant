@@ -3,12 +3,17 @@ from __future__ import annotations
 import uuid
 from datetime import date
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import MONEY, AuditMixin, Base
 from app.models.enums import AssetStatus
+
+if TYPE_CHECKING:
+    from app.models.journal import JournalEntry
+    from app.models.organization import Organization
 
 
 class Asset(AuditMixin, Base):
@@ -30,9 +35,11 @@ class Asset(AuditMixin, Base):
     status: Mapped[AssetStatus] = mapped_column(default=AssetStatus.ACTIVE)
 
     # ── relationships ──────────────────────────────────────────────
-    organization: Mapped[Organization] = relationship(back_populates="assets")
-    cca_schedule_entries: Mapped[list[CCAScheduleEntry]] = relationship(
-        back_populates="asset", cascade="all, delete-orphan"
+    organization: Mapped["Organization"] = relationship(
+        "Organization", back_populates="assets"
+    )
+    cca_schedule_entries: Mapped[list["CCAScheduleEntry"]] = relationship(
+        "CCAScheduleEntry", back_populates="asset", cascade="all, delete-orphan"
     )
 
 
@@ -55,5 +62,7 @@ class CCAScheduleEntry(AuditMixin, Base):
     )
 
     # ── relationships ──────────────────────────────────────────────
-    asset: Mapped[Asset] = relationship(back_populates="cca_schedule_entries")
-    journal_entry: Mapped[JournalEntry | None] = relationship()
+    asset: Mapped["Asset"] = relationship(
+        "Asset", back_populates="cca_schedule_entries"
+    )
+    journal_entry: Mapped["JournalEntry | None"] = relationship("JournalEntry")
