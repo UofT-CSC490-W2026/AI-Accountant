@@ -1,7 +1,7 @@
 # Naming convention + data sources
 locals {
   name      = "${var.project}-${var.environment}" # e.g. "autobook-dev"
-  redis_url = "redis://${coalesce(var.redis_endpoint, "placeholder")}:${coalesce(var.redis_port, 6379)}/0"
+  redis_url = "redis://${var.redis_endpoint}:${var.redis_port}/0"
 
   # Service names derived from the IAM module's task_role_arns map keys
   # After Lambda migration, this only contains ["api"]

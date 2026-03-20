@@ -57,11 +57,13 @@ variable "db_credentials_secret_arn" {
 variable "redis_endpoint" {
   type        = string
   description = "Redis primary endpoint hostname"
+  default     = "localhost"
 }
 
 variable "redis_port" {
   type        = number
   description = "Redis port number"
+  default     = 6379
 }
 
 # --- From storage module ---
