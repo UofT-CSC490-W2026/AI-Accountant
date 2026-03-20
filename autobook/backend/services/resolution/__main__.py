@@ -2,14 +2,10 @@ import logging
 
 from config import get_settings
 from queues import dequeue
+from services.resolution.process import process
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger("resolution")
-
-
-def process(message: dict) -> None:
-    logger.info("Processing: %s", message.get("parse_id"))
-    # TODO: resolve tier results and determine final classification (tier 4)
 
 
 def main() -> None:

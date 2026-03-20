@@ -2,14 +2,10 @@ import logging
 
 from config import get_settings
 from queues import dequeue
+from services.normalizer.process import process
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger("normalizer")
-
-
-def process(message: dict) -> None:
-    logger.info("Processing: %s", message.get("parse_id"))
-    # TODO: normalize raw input into structured transactions
 
 
 def main() -> None:
