@@ -27,3 +27,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from api.routes.health import router as health_router
+app.include_router(health_router)
