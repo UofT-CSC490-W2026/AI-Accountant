@@ -15,9 +15,6 @@ class AuthRepository(Protocol):
     def get_user_by_email(self, email: str) -> UserModel | None:
         ...
 
-    def get_user_by_reset_token_hash(self, reset_token_hash: str) -> UserModel | None:
-        ...
-
     def save_user(self, user: UserModel) -> UserModel:
         ...
 

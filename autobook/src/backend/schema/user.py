@@ -16,24 +16,21 @@ class UserSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
-    email: str
+    email: str | None = None
     full_name: str | None = None
     role: UserRole
+    identity_provider: str
     is_verified: bool
     is_suspicious: bool
     is_disabled: bool
 
 
 class MeResponse(UserSummary):
-    last_login_at: datetime | None = None
-    password_changed_at: datetime
-    token_version: int = Field(..., ge=1)
+    last_authenticated_at: datetime | None = None
+    token_use: str
+    cognito_groups: list[str] = Field(default_factory=list)
 
 
 class UserUpdateRequest(BaseModel):
     email: str | None = None
     full_name: str | None = None
-
-
-class UpdateUserRoleRequest(BaseModel):
-    role: UserRole
