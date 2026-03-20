@@ -4,8 +4,7 @@
 # Each worker:
 #   1. Is triggered by its SQS queue via event source mapping (no polling code)
 #   2. Runs in VPC private subnets (DB + Redis access)
-#   3. Reads DB credentials via AWS Parameters and Secrets Lambda Extension
-#   4. Sends results to the next queue in the pipeline
+#   3. Sends results to the next queue in the pipeline
 #
 # Pipeline: normalizer → precedent → ml_inference → agent → resolution → posting → flywheel
 
@@ -54,16 +53,6 @@ locals {
 }
 
 data "aws_region" "current" {}
-
-# =============================================================================
-# SECRETS EXTENSION LAYER — caching proxy for Secrets Manager
-# =============================================================================
-# The AWS Parameters and Secrets Lambda Extension runs as a sidecar.
-# It caches secrets locally at localhost:2773, avoiding a Secrets Manager
-# API call on every invocation. Auto-refreshes on TTL expiry.
-data "aws_lambda_layer_version" "secrets_extension" {
-  layer_name = "AWS-Parameters-and-Secrets-Lambda-Extension"
-}
 
 # =============================================================================
 # PLACEHOLDER ZIP — bootstrap deployment artifact
@@ -116,9 +105,6 @@ resource "aws_lambda_function" "worker" {
     subnet_ids         = var.private_subnet_ids
     security_group_ids = [var.app_sg_id]
   }
-
-  # Secrets Extension layer — caching proxy for Secrets Manager
-  layers = [data.aws_lambda_layer_version.secrets_extension.arn]
 
   environment {
     variables = merge(
