@@ -1,7 +1,6 @@
 import clarificationResolvedFixture from "./fixtures/clarification-resolved.json";
 import clarificationsPendingFixture from "./fixtures/clarifications-pending.json";
 import ledgerFixture from "./fixtures/ledger-sample.json";
-import parseAutoPostedFixture from "./fixtures/parse-auto-posted.json";
 import parseNeedsClarificationFixture from "./fixtures/parse-needs-clarification.json";
 import statementsFixture from "./fixtures/statements-sample.json";
 import type {
@@ -9,12 +8,13 @@ import type {
   ClarificationsResponse,
   LedgerEntry,
   LedgerResponse,
+  ParseAccepted,
   ParseRequest,
-  ParseResponse,
   ResolveClarificationRequest,
   ResolveClarificationResponse,
   StatementsResponse
 } from "../api/types";
+import { emitMockEvent } from "../api/realtime";
 
 let clarificationsStore: ClarificationItem[] = structuredClone(
   clarificationsPendingFixture.items
@@ -68,46 +68,48 @@ function computeBalances(entries: LedgerEntry[]): LedgerResponse["balances"] {
 }
 
 export const mockApi = {
-  async parseTransaction(input: ParseRequest): Promise<ParseResponse> {
+  async parseTransaction(input: ParseRequest): Promise<ParseAccepted> {
     await delay();
 
+    const parseId = `parse_mock_${Date.now()}`;
     const normalized = input.input_text.toLowerCase();
-    if (normalized.includes("transfer")) {
-      return structuredClone(parseNeedsClarificationFixture) as ParseResponse;
-    }
+    const needsClarification = normalized.includes("transfer");
 
-    return structuredClone(parseAutoPostedFixture) as ParseResponse;
+    // Simulate async pipeline: emit event after a short delay
+    setTimeout(() => {
+      if (needsClarification) {
+        emitMockEvent({
+          type: "clarification.created",
+          journal_entry_id: "",
+          occurred_at: new Date().toISOString(),
+        });
+      } else {
+        emitMockEvent({
+          type: "entry.posted",
+          journal_entry_id: `je_mock_${Date.now()}`,
+          occurred_at: new Date().toISOString(),
+        });
+      }
+    }, 500);
+
+    return { parse_id: parseId, status: "accepted" };
   },
 
-  async uploadTransactionFile(file: File): Promise<ParseResponse> {
+  async uploadTransactionFile(file: File): Promise<ParseAccepted> {
     await delay();
 
-    const lowerName = file.name.toLowerCase();
-    const extension = lowerName.split(".").pop() ?? "";
-    const fileText =
-      typeof file.text === "function" ? (await file.text()).toLowerCase() : lowerName;
-    const needsClarification =
-      fileText.includes("transfer") ||
-      lowerName.includes("transfer") ||
-      extension === "png" ||
-      extension === "jpg" ||
-      extension === "jpeg";
-    const response = structuredClone(
-      needsClarification ? parseNeedsClarificationFixture : parseAutoPostedFixture
-    ) as ParseResponse;
+    const parseId = `upload_${file.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}`;
 
-    response.parse_id = `upload_${file.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}`;
-    if (extension === "pdf") {
-      response.explanation = `Imported ${file.name} through the PDF intake path and normalized the extracted text into the standard parsing flow.`;
-    } else if (extension === "png" || extension === "jpg" || extension === "jpeg") {
-      response.explanation = `Imported ${file.name} through the image receipt demo path. OCR is mocked for now, but the result is routed through the same parse contract.`;
-    } else {
-      response.explanation = needsClarification
-        ? `Imported ${file.name} and flagged at least one transaction for clarification review.`
-        : `Imported ${file.name} and staged the transactions for automatic posting review.`;
-    }
+    // Simulate async pipeline: emit event after a short delay
+    setTimeout(() => {
+      emitMockEvent({
+        type: "entry.posted",
+        journal_entry_id: `je_mock_${Date.now()}`,
+        occurred_at: new Date().toISOString(),
+      });
+    }, 500);
 
-    return response;
+    return { parse_id: parseId, status: "accepted" };
   },
 
   async getClarifications(): Promise<ClarificationsResponse> {
@@ -142,8 +144,20 @@ export const mockApi = {
         }
       ];
 
+      emitMockEvent({
+        type: "clarification.resolved",
+        journal_entry_id: clarificationResolvedFixture.journal_entry_id,
+        occurred_at: new Date().toISOString(),
+      });
+
       return structuredClone(clarificationResolvedFixture) as ResolveClarificationResponse;
     }
+
+    emitMockEvent({
+      type: "clarification.resolved",
+      journal_entry_id: "",
+      occurred_at: new Date().toISOString(),
+    });
 
     return {
       clarification_id: clarificationId,

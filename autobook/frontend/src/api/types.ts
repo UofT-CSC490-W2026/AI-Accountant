@@ -1,4 +1,15 @@
-export type Status = "auto_posted" | "needs_clarification" | "rejected";
+export type Status = "auto_posted" | "needs_clarification" | "rejected" | "accepted";
+
+export type RealtimeEvent = {
+  type: "entry.posted" | "clarification.created" | "clarification.resolved";
+  journal_entry_id: string;
+  occurred_at: string;
+};
+
+export type ParseAccepted = {
+  parse_id: string;
+  status: "accepted";
+};
 
 export type JournalLine = {
   account_code: string;

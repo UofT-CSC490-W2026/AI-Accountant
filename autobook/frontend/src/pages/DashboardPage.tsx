@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getClarifications } from "../api/clarifications";
 import { getLedger } from "../api/ledger";
+import { subscribeToRealtimeUpdates } from "../api/realtime";
 import { getStatements } from "../api/statements";
 import type { ClarificationsResponse, LedgerResponse, StatementsResponse } from "../api/types";
 
@@ -26,12 +27,20 @@ export function DashboardPage() {
     statements: null,
   });
 
-  useEffect(() => {
-    void Promise.all([getClarifications(), getLedger(), getStatements()]).then(
+  function loadDashboard() {
+    return Promise.all([getClarifications(), getLedger(), getStatements()]).then(
       ([clarifications, ledger, statements]) => {
         setState({ clarifications, ledger, statements });
       },
     );
+  }
+
+  useEffect(() => {
+    void loadDashboard();
+    const unsub = subscribeToRealtimeUpdates(() => {
+      void loadDashboard();
+    });
+    return unsub;
   }, []);
 
   const latestEntry = state.ledger?.entries[0];

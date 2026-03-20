@@ -8,6 +8,7 @@ const labels: Record<Status, string> = {
   auto_posted: "Auto-posted",
   needs_clarification: "Needs Clarification",
   rejected: "Rejected",
+  accepted: "Processing",
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {

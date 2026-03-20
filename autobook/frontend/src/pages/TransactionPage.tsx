@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { parseTransaction, uploadTransactionFile } from "../api/parse";
-import type { ParseResponse } from "../api/types";
-import { ParseResultCard } from "../components/ParseResultCard";
+import { subscribeToRealtimeUpdates } from "../api/realtime";
+import type { RealtimeEvent } from "../api/types";
 import { TransactionForm } from "../components/TransactionForm";
 
 const sampleTransactions = [
@@ -15,7 +15,8 @@ export function TransactionPage() {
   const navigate = useNavigate();
   const [input, setInput] = useState("Bought a laptop for $2400");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [result, setResult] = useState<ParseResponse | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [resolvedEvent, setResolvedEvent] = useState<RealtimeEvent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
@@ -23,7 +24,8 @@ export function TransactionPage() {
 
   function handleInputChange(value: string) {
     setInput(value);
-    setResult(null);
+    setProcessingId(null);
+    setResolvedEvent(null);
     setError(null);
     setUploadNotice(null);
   }
@@ -34,7 +36,8 @@ export function TransactionPage() {
 
   function handleFileChange(file: File | null) {
     setSelectedFile(file);
-    setResult(null);
+    setProcessingId(null);
+    setResolvedEvent(null);
     setError(null);
     setUploadNotice(null);
   }
@@ -44,12 +47,13 @@ export function TransactionPage() {
       setIsLoading(true);
       setError(null);
       setUploadNotice(null);
+      setResolvedEvent(null);
       const response = await parseTransaction({
         input_text: input,
         source: "manual",
         currency: "CAD",
       });
-      setResult(response);
+      setProcessingId(response.parse_id);
     } catch (submitError) {
       setError(
         submitError instanceof Error ? submitError.message : "Unable to parse transaction.",
@@ -67,9 +71,10 @@ export function TransactionPage() {
     try {
       setIsLoading(true);
       setError(null);
+      setResolvedEvent(null);
       const response = await uploadTransactionFile(selectedFile);
-      setResult(response);
-      setUploadNotice(`Processed ${selectedFile.name} through the uploaded file intake path.`);
+      setProcessingId(response.parse_id);
+      setUploadNotice(`Submitted ${selectedFile.name} for processing.`);
     } catch (submitError) {
       setError(
         submitError instanceof Error ? submitError.message : "Unable to process uploaded file.",
@@ -78,6 +83,17 @@ export function TransactionPage() {
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (!processingId) return;
+    const unsub = subscribeToRealtimeUpdates((event) => {
+      if (event.type === "entry.posted" || event.type === "clarification.created") {
+        setResolvedEvent(event);
+        setProcessingId(null);
+      }
+    });
+    return unsub;
+  }, [processingId]);
 
   return (
     <div className="page-grid">
@@ -136,7 +152,21 @@ export function TransactionPage() {
         </section>
       ) : null}
 
-      {!result && !error ? (
+      {processingId ? (
+        <section className="panel outcome-panel">
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">Status</p>
+              <h2>Processing...</h2>
+            </div>
+          </div>
+          <p className="body-copy">
+            Transaction accepted (ID: {processingId}). Waiting for the pipeline to complete.
+          </p>
+        </section>
+      ) : null}
+
+      {!processingId && !resolvedEvent && !error ? (
         <section className="panel empty-state-panel">
           <div className="panel-header">
             <div>
@@ -161,39 +191,36 @@ export function TransactionPage() {
         </section>
       ) : null}
 
-      {result ? (
-        <>
-          <ParseResultCard result={result} />
-          <section
-            className={
-              result.status === "auto_posted"
-                ? "panel outcome-panel outcome-success"
-                : "panel outcome-panel outcome-warning"
-            }
-          >
-            <div className="panel-header">
-              <div>
-                <p className="eyebrow">Next Step</p>
-                <h2>{result.status === "auto_posted" ? "Entry Posted" : "Human Review Needed"}</h2>
-              </div>
+      {resolvedEvent ? (
+        <section
+          className={
+            resolvedEvent.type === "entry.posted"
+              ? "panel outcome-panel outcome-success"
+              : "panel outcome-panel outcome-warning"
+          }
+        >
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">Next Step</p>
+              <h2>{resolvedEvent.type === "entry.posted" ? "Entry Posted" : "Human Review Needed"}</h2>
             </div>
-            <p className="body-copy">
-              {result.status === "auto_posted"
-                ? "This transaction cleared the confidence threshold and can be inspected in the ledger."
-                : "This transaction should be reviewed before posting to the ledger."}
-            </p>
-            <div className="panel-actions">
-              <button
-                className="primary-button"
-                onClick={() =>
-                  navigate(result.status === "auto_posted" ? "/ledger" : "/clarifications")
-                }
-              >
-                {result.status === "auto_posted" ? "View Ledger" : "Open Clarifications"}
-              </button>
-            </div>
-          </section>
-        </>
+          </div>
+          <p className="body-copy">
+            {resolvedEvent.type === "entry.posted"
+              ? "This transaction cleared the confidence threshold and can be inspected in the ledger."
+              : "This transaction needs clarification before posting to the ledger."}
+          </p>
+          <div className="panel-actions">
+            <button
+              className="primary-button"
+              onClick={() =>
+                navigate(resolvedEvent.type === "entry.posted" ? "/ledger" : "/clarifications")
+              }
+            >
+              {resolvedEvent.type === "entry.posted" ? "View Ledger" : "Open Clarifications"}
+            </button>
+          </div>
+        </section>
       ) : null}
     </div>
   );

@@ -2,8 +2,8 @@ import { mockApi } from "../mocks/mockApi";
 import type {
   ClarificationsResponse,
   LedgerResponse,
+  ParseAccepted,
   ParseRequest,
-  ParseResponse,
   ResolveClarificationRequest,
   ResolveClarificationResponse,
   StatementsResponse,
@@ -27,18 +27,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function parseTransaction(input: ParseRequest): Promise<ParseResponse> {
+export async function parseTransaction(input: ParseRequest): Promise<ParseAccepted> {
   if (USE_MOCK_API) {
     return mockApi.parseTransaction(input);
   }
 
-  return request<ParseResponse>("/parse", {
+  return request<ParseAccepted>("/parse", {
     method: "POST",
     body: JSON.stringify(input),
   });
 }
 
-export async function uploadTransactionFile(file: File): Promise<ParseResponse> {
+export async function uploadTransactionFile(file: File): Promise<ParseAccepted> {
   if (USE_MOCK_API) {
     return mockApi.uploadTransactionFile(file);
   }
@@ -55,7 +55,7 @@ export async function uploadTransactionFile(file: File): Promise<ParseResponse> 
     throw new Error(`Request failed: ${response.status}`);
   }
 
-  return (await response.json()) as ParseResponse;
+  return (await response.json()) as ParseAccepted;
 }
 
 export async function getClarifications(): Promise<ClarificationsResponse> {

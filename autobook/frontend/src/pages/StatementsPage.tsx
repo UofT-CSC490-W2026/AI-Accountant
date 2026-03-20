@@ -1,15 +1,26 @@
 import { useEffect, useState } from "react";
 import { getStatements } from "../api/statements";
+import { subscribeToRealtimeUpdates } from "../api/realtime";
 import type { StatementsResponse } from "../api/types";
 import { downloadStatementsCsv, exportStatementsPdf } from "../utils/statementsExport";
 
 export function StatementsPage() {
   const [statements, setStatements] = useState<StatementsResponse | null>(null);
 
-  useEffect(() => {
-    void getStatements().then((response) => {
+  function loadStatements() {
+    return getStatements().then((response) => {
       setStatements(response);
     });
+  }
+
+  useEffect(() => {
+    void loadStatements();
+    const unsub = subscribeToRealtimeUpdates((event) => {
+      if (event.type === "entry.posted") {
+        void loadStatements();
+      }
+    });
+    return unsub;
   }, []);
 
   return (

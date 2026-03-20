@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getClarifications, resolveClarification } from "../api/clarifications";
+import { subscribeToRealtimeUpdates } from "../api/realtime";
 import type { ClarificationItem } from "../api/types";
 import { ClarificationList } from "../components/ClarificationList";
 
@@ -14,6 +15,12 @@ export function ClarificationPage() {
 
   useEffect(() => {
     void loadClarifications();
+    const unsub = subscribeToRealtimeUpdates((event) => {
+      if (event.type === "clarification.created" || event.type === "clarification.resolved") {
+        void loadClarifications();
+      }
+    });
+    return unsub;
   }, []);
 
   async function loadClarifications() {
