@@ -32,3 +32,8 @@ class ParseResponse(BaseModel):
     parse_time_ms: int
     proposed_entry: ProposedEntry
     clarification_id: str | None = None
+
+
+class ParseAccepted(BaseModel):
+    parse_id: str
+    status: str = "accepted"

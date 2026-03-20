@@ -9,7 +9,11 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     AWS_DEFAULT_REGION: str = "ca-central-1"
     ENV: str = "local"
-    CORS_ORIGINS: list[str] = ["http://localhost:5173"]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:5173",
+        "https://autobook.tech",
+        "https://www.autobook.tech",
+    ]
     AUTO_POST_THRESHOLD: float = 0.95
     SQS_ENDPOINT_URL: str | None = None
     SQS_QUEUE_NORMALIZER: str = "http://elasticmq:9324/queue/normalizer"
