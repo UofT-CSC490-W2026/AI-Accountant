@@ -18,7 +18,7 @@
 # =============================================================================
 # GLOBAL REMOTE STATE — read outputs from the global stack
 # =============================================================================
-# The global stack (infra-new/global/) creates account-level resources:
+# The global stack (infra/global/) creates account-level resources:
 #   - Route53 DNS zone (zone_id)
 #   - ACM wildcard TLS certificate (cert_arn)
 #   - GitHub OIDC provider (oidc_provider_arn)

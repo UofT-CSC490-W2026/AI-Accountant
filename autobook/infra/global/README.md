@@ -13,7 +13,7 @@ Resources that exist once per AWS account, shared by all environments.
 ## Usage
 
 ```bash
-cd infra-new/global
+cd infra/global
 terraform init
 terraform plan
 terraform apply

@@ -12,7 +12,7 @@ Run once. Uses local state (no backend.tf) because the remote backend doesn't ex
 ## Usage
 
 ```bash
-cd infra-new/bootstrap
+cd infra/bootstrap
 terraform init
 terraform plan
 terraform apply
