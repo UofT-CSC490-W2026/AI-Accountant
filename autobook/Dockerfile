@@ -17,7 +17,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Shared source
 COPY backend/config.py backend/config.py
 COPY backend/db/ backend/db/
-COPY backend/queue/ backend/queue/
+COPY backend/queues/ backend/queues/
+COPY backend/cache/ backend/cache/
 COPY backend/utils/ backend/utils/
 COPY backend/schemas/ backend/schemas/
 
@@ -39,10 +40,10 @@ FROM autobook-base AS autobook-api
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project --extra api
 
-COPY backend/services/api/ backend/services/api/
+COPY backend/api/ backend/api/
 USER app
 EXPOSE 8000
-CMD ["uvicorn", "services.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # ── Normalizer (File Worker) ──────────────────────────────────
 FROM autobook-base AS autobook-normalizer
