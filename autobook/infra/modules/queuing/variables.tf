@@ -35,13 +35,12 @@ variable "max_receive_count" {
 }
 
 # How long a message stays invisible after a worker receives it.
-# Must be longer than the slowest worker's processing time.
-# LLM pipeline (tier 3): ~3s per transaction with retries.
-# 30s gives 10x headroom for slow responses or cold starts.
+# Must be >= Lambda function timeout (currently 60s). AWS enforces this
+# for SQS → Lambda event source mappings. 90s gives headroom.
 variable "visibility_timeout_seconds" {
   type        = number
-  description = "Seconds a message is hidden after being received (must exceed worker processing time)"
-  default     = 30
+  description = "Seconds a message is hidden after being received (must be >= Lambda function timeout)"
+  default     = 90
 
   validation {
     condition     = var.visibility_timeout_seconds >= 0 && var.visibility_timeout_seconds <= 43200
