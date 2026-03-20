@@ -40,7 +40,7 @@ def _mock_parse_response(parse_id: str) -> ParseResponse:
 @router.post("/parse", response_model=ParseResponse)
 async def parse(body: ParseRequest, request: Request):
     parse_id = f"parse_{uuid.uuid4().hex[:12]}"
-    await enqueue(request.app.state.redis, "queue:files", {
+    enqueue(get_settings().SQS_QUEUE_NORMALIZER, {
         "parse_id": parse_id,
         "input_text": body.input_text,
         "source": body.source,
@@ -55,7 +55,7 @@ async def parse_upload(file: UploadFile, request: Request):
     contents = await file.read()
     logger.info("Received file %s (%d bytes), stub S3 upload", file.filename, len(contents))
     # TODO: upload to S3, put S3 key in queue message
-    await enqueue(request.app.state.redis, "queue:files", {
+    enqueue(get_settings().SQS_QUEUE_NORMALIZER, {
         "parse_id": parse_id,
         "source": "upload",
         "filename": file.filename,
