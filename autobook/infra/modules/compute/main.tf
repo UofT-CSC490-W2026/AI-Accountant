@@ -243,7 +243,7 @@ resource "aws_ecs_task_definition" "main" {
       logDriver = "awslogs" # AWS CloudWatch Logs driver (built into Fargate)
       options = {
         "awslogs-group"         = aws_cloudwatch_log_group.main[each.key].name # Log group per service
-        "awslogs-region"        = data.aws_region.current.region                 # Same region as the cluster
+        "awslogs-region"        = data.aws_region.current.region               # Same region as the cluster
         "awslogs-stream-prefix" = each.key                                     # Prefix for log stream names
       }
     }

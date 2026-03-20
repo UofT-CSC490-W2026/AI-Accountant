@@ -4,7 +4,7 @@ locals {
 
   # The 8 ECS services — each gets its own task role with least-privilege permissions
   # These are fixed for this project (defined in system design, not per-environment)
-  service_names = ["api", "file", "precedent", "model", "llm", "resolution", "posting", "flywheel"]
+  service_names = ["api", "normalizer", "precedent", "ml_inference", "agent", "resolution", "posting", "flywheel"]
 
   # Shared trust policy — allows the ECS service to assume roles on behalf of containers
   # Both execution role and task roles use this same trust policy
@@ -90,7 +90,7 @@ resource "aws_iam_role" "task" {
 # posting) have empty roles — they talk to PostgreSQL and Redis via credentials
 # and endpoints, not IAM.
 
-# --- S3 policies (api, file, flywheel) ---
+# --- S3 policies (api, normalizer, flywheel) ---
 
 # API service: upload user files to S3
 resource "aws_iam_role_policy" "api_s3" {
@@ -107,10 +107,10 @@ resource "aws_iam_role_policy" "api_s3" {
   })
 }
 
-# File worker: read raw files from S3, delete after processing
-resource "aws_iam_role_policy" "file_s3" {
+# Normalizer worker: read raw files from S3, delete after processing
+resource "aws_iam_role_policy" "normalizer_s3" {
   name = "s3-read"
-  role = aws_iam_role.task["file"].id
+  role = aws_iam_role.task["normalizer"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -140,12 +140,12 @@ resource "aws_iam_role_policy" "flywheel_s3" {
   })
 }
 
-# --- SageMaker policies (model, flywheel) ---
+# --- SageMaker policies (ml_inference, flywheel) ---
 
-# Model worker: call the SageMaker endpoint for ML inference (tier 2 classification)
-resource "aws_iam_role_policy" "model_sagemaker" {
+# ML inference worker: call the SageMaker endpoint for ML inference (tier 2 classification)
+resource "aws_iam_role_policy" "ml_inference_sagemaker" {
   name = "sagemaker-invoke"
-  role = aws_iam_role.task["model"].id
+  role = aws_iam_role.task["ml_inference"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -189,12 +189,12 @@ resource "aws_iam_role_policy" "flywheel_sagemaker" {
   })
 }
 
-# --- Bedrock policy (llm) ---
+# --- Bedrock policy (agent) ---
 
-# LLM worker: call foundation models (Claude, etc.) via AWS Bedrock for tier 3
-resource "aws_iam_role_policy" "llm_bedrock" {
+# Agent worker: call foundation models (Claude, etc.) via AWS Bedrock for tier 3
+resource "aws_iam_role_policy" "agent_bedrock" {
   name = "bedrock-invoke"
-  role = aws_iam_role.task["llm"].id
+  role = aws_iam_role.task["agent"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
