@@ -1,54 +1,160 @@
-name: Deploy Autobook API
+name: Deploy Autobook
 
 on:
   push:
-    branches: [main]
+    branches: [autobook]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deploy target"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
 
 env:
   AWS_REGION: ca-central-1
-  ENV: ${{ vars.ENV }}
-  CLUSTER: ${{ vars.CLUSTER_NAME_PREFIX }}-${{ vars.ENV }}
-  SERVICE: ${{ vars.SERVICE_NAME_PREFIX }}-${{ vars.ENV }}
 
 jobs:
+  # ── Detect which services changed ──────────────────────────────
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.detect.outputs.services }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed services
+        id: detect
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger (prod) — deploy all services
+            echo 'services=["api","normalizer","precedent","ml_inference","agent","resolution","posting","flywheel"]' >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+
+          # Check if shared code changed — triggers all services
+          SHARED_PATTERNS=(
+            "autobook/backend/config.py"
+            "autobook/backend/db/"
+            "autobook/backend/queues/"
+            "autobook/backend/cache/"
+            "autobook/backend/utils/"
+            "autobook/backend/schemas/"
+            "autobook/backend/accounting_engine/"
+            "autobook/pyproject.toml"
+            "autobook/uv.lock"
+            "autobook/Dockerfile"
+          )
+
+          ALL_SERVICES='["api","normalizer","precedent","ml_inference","agent","resolution","posting","flywheel"]'
+
+          for pattern in "${SHARED_PATTERNS[@]}"; do
+            if echo "$CHANGED" | grep -q "^${pattern}"; then
+              echo "services=${ALL_SERVICES}" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+
+          # Check individual service directories
+          SERVICES=()
+          declare -A SERVICE_PATHS=(
+            ["api"]="autobook/backend/api/"
+            ["normalizer"]="autobook/backend/services/normalizer/"
+            ["precedent"]="autobook/backend/services/precedent/"
+            ["ml_inference"]="autobook/backend/services/ml_inference/"
+            ["agent"]="autobook/backend/services/agent/"
+            ["resolution"]="autobook/backend/services/resolution/"
+            ["posting"]="autobook/backend/services/posting/"
+            ["flywheel"]="autobook/backend/services/flywheel/"
+          )
+
+          for svc in "${!SERVICE_PATHS[@]}"; do
+            if echo "$CHANGED" | grep -q "^${SERVICE_PATHS[$svc]}"; then
+              SERVICES+=("\"$svc\"")
+            fi
+          done
+
+          if [ ${#SERVICES[@]} -eq 0 ]; then
+            echo 'services=[]' >> $GITHUB_OUTPUT
+          else
+            JOINED=$(IFS=,; echo "${SERVICES[*]}")
+            echo "services=[${JOINED}]" >> $GITHUB_OUTPUT
+          fi
+
+  # ── Build and deploy changed services ──────────────────────────
   deploy:
+    needs: changes
+    if: needs.changes.outputs.services != '[]'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
 
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.changes.outputs.services) }}
+
+    env:
+      ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'dev' }}
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set deploy variables
+        run: |
+          # Map service name to Dockerfile target
+          declare -A TARGETS=(
+            ["api"]="autobook-api"
+            ["normalizer"]="autobook-normalizer"
+            ["precedent"]="autobook-precedent"
+            ["ml_inference"]="autobook-ml-inference"
+            ["agent"]="autobook-agent"
+            ["resolution"]="autobook-resolution"
+            ["posting"]="autobook-posting"
+            ["flywheel"]="autobook-flywheel"
+          )
+          echo "TARGET=${TARGETS[${{ matrix.service }}]}" >> $GITHUB_ENV
+          echo "CLUSTER=autobook-${ENVIRONMENT}" >> $GITHUB_ENV
+          echo "SERVICE_NAME=autobook-${ENVIRONMENT}-${{ matrix.service }}" >> $GITHUB_ENV
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/autobook-${{ env.ENVIRONMENT }}-github-actions
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set variables
-        run: |
-          echo "ECR_REPO=${{ steps.ecr-login.outputs.registry }}/${{ env.SERVICE }}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
-
       - name: Build and push
         run: |
+          ECR_REPO="${{ steps.ecr-login.outputs.registry }}/${SERVICE_NAME}"
+          IMAGE_TAG="${{ github.sha }}"
+
           docker build \
             -f autobook/Dockerfile \
+            --target $TARGET \
             -t $ECR_REPO:$IMAGE_TAG \
             -t $ECR_REPO:latest \
             autobook/
+
           docker push $ECR_REPO:$IMAGE_TAG
           docker push $ECR_REPO:latest
+
+          echo "ECR_REPO=$ECR_REPO" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Register new task definition revision
         run: |
           TASK_DEF=$(aws ecs describe-task-definition \
-            --task-definition ${{ env.SERVICE }} \
+            --task-definition $SERVICE_NAME \
             --query 'taskDefinition')
 
           NEW_TASK_DEF=$(echo $TASK_DEF | jq \
@@ -68,24 +174,24 @@ jobs:
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
-            --cluster ${{ env.CLUSTER }} \
-            --service ${{ env.SERVICE }} \
+            --cluster $CLUSTER \
+            --service $SERVICE_NAME \
             --task-definition $NEW_TASK_DEF_ARN
 
       - name: Wait for deployment
         run: |
           aws ecs wait services-stable \
-            --cluster ${{ env.CLUSTER }} \
-            --services ${{ env.SERVICE }}
+            --cluster $CLUSTER \
+            --services $SERVICE_NAME
 
       - name: Verify deployment
         run: |
           DEPLOYED=$(aws ecs describe-services \
-            --cluster ${{ env.CLUSTER }} \
-            --services ${{ env.SERVICE }} \
+            --cluster $CLUSTER \
+            --services $SERVICE_NAME \
             --query 'services[0].deployments[?status==`PRIMARY`].taskDefinition' \
             --output text)
           if [[ "$DEPLOYED" != "$NEW_TASK_DEF_ARN" ]]; then
-            echo "::error::Deploy rolled back by circuit breaker"
+            echo "::error::Deploy of ${{ matrix.service }} rolled back by circuit breaker"
             exit 1
           fi
