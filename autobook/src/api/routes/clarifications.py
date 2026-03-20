@@ -6,6 +6,7 @@ from schemas.clarifications import (
     ResolveRequest,
     ResolveResponse,
 )
+from config import get_settings
 from schemas.parse import Confidence, JournalLine, ProposedEntry
 
 router = APIRouter(prefix="/api/v1")
@@ -20,7 +21,7 @@ async def get_clarifications():
             status="pending",
             source_text="Transferred money",
             explanation="Transfer direction is unclear.",
-            confidence=Confidence(overall=0.51, auto_post_threshold=0.85),
+            confidence=Confidence(overall=0.51, auto_post_threshold=get_settings().AUTO_POST_THRESHOLD),
             proposed_entry=ProposedEntry(journal_entry_id="je_pending_001", lines=[]),
         ),
         ClarificationItem(
@@ -28,7 +29,7 @@ async def get_clarifications():
             status="pending",
             source_text="Paid for team lunch",
             explanation="Could be meals & entertainment or employee benefits.",
-            confidence=Confidence(overall=0.62, auto_post_threshold=0.85),
+            confidence=Confidence(overall=0.62, auto_post_threshold=get_settings().AUTO_POST_THRESHOLD),
             proposed_entry=ProposedEntry(
                 journal_entry_id="je_pending_002",
                 lines=[

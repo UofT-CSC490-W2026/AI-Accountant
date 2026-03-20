@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from config import get_settings
 from schemas.ledger import LedgerResponse, LedgerSummary
 
 router = APIRouter(prefix="/api/v1")
@@ -16,7 +17,7 @@ async def get_ledger():
                 "description": "Office Supplies",
                 "status": "auto_posted",
                 "origin_tier": 1,
-                "confidence": {"overall": 0.97, "auto_post_threshold": 0.85},
+                "confidence": {"overall": 0.97, "auto_post_threshold": get_settings().AUTO_POST_THRESHOLD},
                 "lines": [
                     {"account_code": "6100", "account_name": "Office Supplies", "type": "debit", "amount": 49.99},
                     {"account_code": "1000", "account_name": "Cash", "type": "credit", "amount": 49.99},
@@ -28,7 +29,7 @@ async def get_ledger():
                 "description": "Laptop Purchase",
                 "status": "auto_posted",
                 "origin_tier": 2,
-                "confidence": {"overall": 0.92, "auto_post_threshold": 0.85},
+                "confidence": {"overall": 0.92, "auto_post_threshold": get_settings().AUTO_POST_THRESHOLD},
                 "lines": [
                     {"account_code": "1500", "account_name": "Equipment", "type": "debit", "amount": 2400},
                     {"account_code": "1000", "account_name": "Cash", "type": "credit", "amount": 2400},

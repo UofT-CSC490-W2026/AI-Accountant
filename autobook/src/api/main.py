@@ -15,14 +15,12 @@ async def lifespan(app: FastAPI):
     await app.state.redis.aclose()
 
 
+settings = get_settings()
 app = FastAPI(title="Autobook API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://ai-accountant490.netlify.app",
-    ],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

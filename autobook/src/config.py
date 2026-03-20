@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     AWS_DEFAULT_REGION: str = "ca-central-1"
     ENV: str = "local"
+    CORS_ORIGINS: list[str] = ["http://localhost:5173"]
+    AUTO_POST_THRESHOLD: float = 0.95
 
     model_config = {"env_file": ".env", "case_sensitive": False}
 
