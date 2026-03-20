@@ -8,18 +8,6 @@ async def get_redis(url: str) -> aioredis.Redis:
     return aioredis.from_url(url, decode_responses=True)
 
 
-async def enqueue(r: aioredis.Redis, queue_name: str, payload: dict) -> None:
-    await r.lpush(queue_name, json.dumps(payload))
-
-
-async def dequeue(r: aioredis.Redis, queue_name: str, timeout: int = 0) -> dict | None:
-    result = await r.brpop(queue_name, timeout=timeout)
-    if result is None:
-        return None
-    _, message = result
-    return json.loads(message)
-
-
 async def publish(r: aioredis.Redis, channel: str, payload: dict) -> None:
     await r.publish(channel, json.dumps(payload))
 
