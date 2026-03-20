@@ -30,5 +30,11 @@ app.add_middleware(
 
 from api.routes.health import router as health_router
 from api.routes.parse import router as parse_router
+from api.routes.ledger import router as ledger_router
+from api.routes.clarifications import router as clarifications_router
+from api.routes.statements import router as statements_router
 app.include_router(health_router)
 app.include_router(parse_router)
+app.include_router(ledger_router)
+app.include_router(clarifications_router)
+app.include_router(statements_router)
