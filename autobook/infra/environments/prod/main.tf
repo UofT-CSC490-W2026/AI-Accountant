@@ -63,6 +63,7 @@ module "iam" {
   oidc_provider_arn = data.terraform_remote_state.global.outputs.oidc_provider_arn
   github_repo       = var.github_repo
   s3_bucket_arn     = module.storage.bucket_arn
+  queue_arns        = module.queuing.queue_arns
 }
 
 # =============================================================================
@@ -117,6 +118,19 @@ module "database" {
 }
 
 # =============================================================================
+# QUEUING — SQS queues for inter-service message passing
+# =============================================================================
+# Same 7 queues + 7 DLQs as dev. SQS is fully managed — no prod-specific
+# sizing needed. Throughput scales automatically, messages are durable.
+module "queuing" {
+  source = "../../modules/queuing"
+
+  project     = var.project
+  environment = var.environment
+  # Prod uses same defaults as dev — SQS scales automatically
+}
+
+# =============================================================================
 # CACHE — ElastiCache Redis
 # =============================================================================
 # Prod: 3 nodes with automatic failover across AZs.
@@ -129,7 +143,7 @@ module "cache" {
   environment        = var.environment
   private_subnet_ids = module.networking.private_subnet_ids
   redis_sg_id        = module.networking.redis_sg_id
-  node_type          = "cache.r7g.large" # PROD: 13 GB RAM, handles queues + caches under load
+  node_type          = "cache.r7g.large" # PROD: 13 GB RAM, handles caches + pub/sub under load
   # Hardcoded (not a tfvars variable) — cache sizing is set once per environment, not tuned per-deploy
   num_cache_clusters         = 3    # PROD: 1 primary + 2 replicas (dev = 1)
   automatic_failover_enabled = true # PROD: auto-promote replica on failure (dev = false)
@@ -179,6 +193,9 @@ module "compute" {
 
   # --- From global ---
   cert_arn = data.terraform_remote_state.global.outputs.cert_arn
+
+  # --- From queuing ---
+  queue_urls = module.queuing.queue_urls
 
   # --- From cache ---
   redis_endpoint = module.cache.redis_endpoint

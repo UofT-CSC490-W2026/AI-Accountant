@@ -7,8 +7,48 @@ locals {
   service_names = keys(var.task_role_arns)
 
   # Which service sits behind the ALB (receives HTTP traffic from the internet)
-  # All other services are internal workers that consume from Redis queues
+  # All other services are internal workers that consume from SQS queues
   api_service = "api"
+
+  # Per-service SQS queue URL environment variables.
+  # Each service only gets the queue URLs it actually reads from / writes to.
+  # Workers read their input queue URL to call ReceiveMessage, and their
+  # output queue URL(s) to call SendMessage after processing.
+  sqs_env = {
+    api = [
+      { name = "SQS_QUEUE_NORMALIZER", value = var.queue_urls["normalizer"] },
+    ]
+    normalizer = [
+      { name = "SQS_QUEUE_NORMALIZER", value = var.queue_urls["normalizer"] },
+      { name = "SQS_QUEUE_PRECEDENT", value = var.queue_urls["precedent"] },
+    ]
+    precedent = [
+      { name = "SQS_QUEUE_PRECEDENT", value = var.queue_urls["precedent"] },
+      { name = "SQS_QUEUE_ML_INFERENCE", value = var.queue_urls["ml_inference"] },
+      { name = "SQS_QUEUE_POSTING", value = var.queue_urls["posting"] },
+    ]
+    ml_inference = [
+      { name = "SQS_QUEUE_ML_INFERENCE", value = var.queue_urls["ml_inference"] },
+      { name = "SQS_QUEUE_AGENT", value = var.queue_urls["agent"] },
+      { name = "SQS_QUEUE_POSTING", value = var.queue_urls["posting"] },
+    ]
+    agent = [
+      { name = "SQS_QUEUE_AGENT", value = var.queue_urls["agent"] },
+      { name = "SQS_QUEUE_RESOLUTION", value = var.queue_urls["resolution"] },
+      { name = "SQS_QUEUE_POSTING", value = var.queue_urls["posting"] },
+    ]
+    resolution = [
+      { name = "SQS_QUEUE_RESOLUTION", value = var.queue_urls["resolution"] },
+      { name = "SQS_QUEUE_POSTING", value = var.queue_urls["posting"] },
+    ]
+    posting = [
+      { name = "SQS_QUEUE_POSTING", value = var.queue_urls["posting"] },
+      { name = "SQS_QUEUE_FLYWHEEL", value = var.queue_urls["flywheel"] },
+    ]
+    flywheel = [
+      { name = "SQS_QUEUE_FLYWHEEL", value = var.queue_urls["flywheel"] },
+    ]
+  }
 }
 
 # Get current region for log configuration and ECR URLs
@@ -105,7 +145,7 @@ resource "aws_cloudwatch_log_group" "main" {
 # The ALB is the single entry point from the internet to the backend.
 # It receives HTTPS requests, terminates TLS, and forwards HTTP to the
 # API service containers. Only the API service sits behind the ALB —
-# workers consume from Redis queues and don't receive HTTP traffic.
+# workers consume from SQS queues and don't receive HTTP traffic.
 resource "aws_lb" "main" {
   name               = local.name            # e.g. "autobook-dev"
   internal           = false                 # Internet-facing (not internal)
@@ -203,7 +243,7 @@ resource "aws_ecs_task_definition" "main" {
     essential = true                                                         # If this container dies, the task dies
 
     # Port mappings — only the API service exposes a port (for ALB traffic)
-    # Workers don't receive HTTP traffic — they pull from Redis queues
+    # Workers don't receive HTTP traffic — they pull from SQS queues
     portMappings = each.key == local.api_service ? [{
       containerPort = var.container_port # e.g. 8000
       hostPort      = var.container_port # Must match containerPort on Fargate
@@ -223,7 +263,9 @@ resource "aws_ecs_task_definition" "main" {
       each.key == local.api_service ? [
         { name = "COGNITO_USER_POOL_ID", value = var.user_pool_id },
         { name = "COGNITO_CLIENT_ID", value = var.client_id },
-      ] : []
+      ] : [],
+      # Per-service SQS queue URLs — each service only gets the queues it uses
+      lookup(local.sqs_env, each.key, [])
     )
 
     # --- Secrets (from Secrets Manager) ---
@@ -259,7 +301,7 @@ resource "aws_ecs_task_definition" "main" {
 # If a task dies (crash, health check failure), the service starts a new one.
 #
 # Only the API service is attached to the ALB (receives HTTP traffic).
-# Workers run in private subnets and consume from Redis queues — no ALB needed.
+# Workers run in private subnets and consume from SQS queues — no ALB needed.
 resource "aws_ecs_service" "main" {
   for_each = toset(local.service_names)
 
@@ -277,7 +319,7 @@ resource "aws_ecs_service" "main" {
   }
 
   # --- ALB attachment (API service only) ---
-  # Workers don't receive HTTP traffic — they pull from Redis queues.
+  # Workers don't receive HTTP traffic — they pull from SQS queues.
   # The dynamic block creates a load_balancer block only for the API service.
   dynamic "load_balancer" {
     for_each = each.key == local.api_service ? [1] : []
