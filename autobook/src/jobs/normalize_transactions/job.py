@@ -1,43 +1,64 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
 import pandas as pd
 
 from common.ids import stable_txn_id
 from common.schemas.transactions import CanonicalTransaction
 
+REQUIRED_COLUMNS = {"date", "description", "amount"}
 
-def normalize_text(s: str) -> str:
+# A5 deep-test rationale for this module:
+# - `test_normalize_text_*` covers whitespace normalization and null-like inputs because
+#   free-form exports often contain inconsistent spacing or missing descriptions.
+# - `test_normalize_columns_*` and `test_validate_required_columns_*` cover header cleanup
+#   and schema failure modes because third-party CSV exports vary in casing and spacing.
+# - `test_clean_transactions_dataframe_*` covers invalid dates, invalid amounts, and blank
+#   descriptions because these are the most common row-level data quality failures.
+# - `test_build_canonical_records_*` covers ID determinism and normalized descriptions because
+#   downstream deduplication and ledger joins rely on stable IDs and canonical text.
+# - `test_run_*` covers end-to-end output writing, deduplication, and metadata propagation
+#   because those behaviors define the contract this batch job has with the rest of the system.
+
+
+def normalize_text(s: str | None) -> str:
     s = (s or "").strip()
     s = " ".join(s.split())  # collapse repeated whitespace
     return s
 
 
-def run(input_csv: str, output_parquet: str, source_system: str, currency: str) -> None:
-    df = pd.read_csv(input_csv)
+def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    normalized = df.copy()
+    normalized.columns = [str(c).lower().strip() for c in normalized.columns]
+    return normalized
 
-    # ---- Minimal schema mapping (you will expand per bank export) ----
-    # Expected columns (example): date, description, amount
-    # If your CSV differs, adapt the mapping here.
-    required = {"date", "description", "amount"}
-    missing = required - set(c.lower() for c in df.columns)
+
+def validate_required_columns(df: pd.DataFrame) -> None:
+    missing = REQUIRED_COLUMNS - set(df.columns)
     if missing:
         raise ValueError(f"Missing required columns: {missing}. "
-                         f"Expected at least {sorted(required)} (case-insensitive).")
+                         f"Expected at least {sorted(REQUIRED_COLUMNS)} (case-insensitive).")
 
-    # Normalize column names to lowercase
-    df.columns = [c.lower().strip() for c in df.columns]
 
-    # Cleaning / normalization
-    df["description"] = df["description"].astype(str).map(normalize_text)
-    df["date"] = pd.to_datetime(df["date"]).dt.date
-    df["amount"] = pd.to_numeric(df["amount"], errors="coerce")
+def clean_transactions_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    cleaned = normalize_columns(df)
+    validate_required_columns(cleaned)
 
-    # Drop rows with invalid critical fields
-    df = df.dropna(subset=["date", "amount", "description"])
+    # Normalize free-form fields before parsing types so invalid rows can be dropped consistently.
+    cleaned["description"] = cleaned["description"].astype(str).map(normalize_text)
+    cleaned["date"] = pd.to_datetime(cleaned["date"], errors="coerce").dt.date
+    cleaned["amount"] = pd.to_numeric(cleaned["amount"], errors="coerce")
 
-    # Build canonical records
+    cleaned = cleaned.dropna(subset=["date", "amount"])
+    cleaned = cleaned[cleaned["description"] != ""]
+    return cleaned.reset_index(drop=True)
+
+
+def build_canonical_records(
+    df: pd.DataFrame,
+    source_system: str,
+    currency: str,
+) -> list[dict]:
     records = []
     for _, row in df.iterrows():
         raw_desc = row["description"]
@@ -61,11 +82,21 @@ def run(input_csv: str, output_parquet: str, source_system: str, currency: str) 
             source_system=source_system,
         )
         records.append(tx.model_dump())
+    return records
 
+
+def deduplicate_records(records: list[dict]) -> pd.DataFrame:
     out = pd.DataFrame.from_records(records)
+    if out.empty:
+        return out
+    return out.drop_duplicates(subset=["transaction_id"], keep="first").reset_index(drop=True)
 
-    # Deduplicate by stable transaction_id
-    out = out.drop_duplicates(subset=["transaction_id"], keep="first")
+
+def run(input_csv: str, output_parquet: str, source_system: str, currency: str) -> None:
+    raw_df = pd.read_csv(input_csv)
+    cleaned_df = clean_transactions_dataframe(raw_df)
+    records = build_canonical_records(cleaned_df, source_system, currency)
+    out = deduplicate_records(records)
 
     # Write Parquet (good for data lake)
     out.to_parquet(output_parquet, index=False)
