@@ -7,11 +7,16 @@ output "execution_role_arn" {
   value       = aws_iam_role.execution.arn
 }
 
-# Compute module uses this to assign each ECS service its own task role
-# Map of service name → role ARN, e.g. {"api" = "arn:...", "llm" = "arn:..."}
+# Compute module uses this to assign the API ECS service its task role
 output "task_role_arns" {
-  description = "Map of service name → task role ARN — per-service least-privilege permissions"
+  description = "Map of ECS service name → task role ARN (API only)"
   value       = { for name, role in aws_iam_role.task : name => role.arn }
+}
+
+# Lambda module uses this to assign each worker its execution role
+output "lambda_role_arns" {
+  description = "Map of Lambda worker name → role ARN"
+  value       = { for name, role in aws_iam_role.lambda : name => role.arn }
 }
 
 # GitHub Actions workflow uses this to assume AWS permissions for CI/CD deploys

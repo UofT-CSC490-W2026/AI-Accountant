@@ -2,12 +2,14 @@
 locals {
   name = "${var.project}-${var.environment}" # e.g. "autobook-dev"
 
-  # The 8 ECS services — each gets its own task role with least-privilege permissions
-  # These are fixed for this project (defined in system design, not per-environment)
-  service_names = ["api", "normalizer", "precedent", "ml_inference", "agent", "resolution", "posting", "flywheel"]
+  # API runs on ECS Fargate — keeps the ECS trust policy
+  ecs_services = ["api"]
 
-  # Shared trust policy — allows the ECS service to assume roles on behalf of containers
-  # Both execution role and task roles use this same trust policy
+  # Workers run on Lambda — triggered by SQS event source mappings
+  lambda_services = ["normalizer", "precedent", "ml_inference", "agent",
+    "resolution", "posting", "flywheel"]
+
+  # ECS trust policy — allows the ECS service to assume roles on behalf of containers
   ecs_trust_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -15,9 +17,18 @@ locals {
       Principal = { Service = "ecs-tasks.amazonaws.com" }
       Action    = "sts:AssumeRole"
       Condition = {
-        # Prevents confused deputy attacks — only our account can trigger role assumption
         StringEquals = { "aws:SourceAccount" = data.aws_caller_identity.current.account_id }
       }
+    }]
+  })
+
+  # Lambda trust policy — allows Lambda service to assume roles for workers
+  lambda_trust_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
     }]
   })
 }
@@ -29,28 +40,18 @@ data "aws_region" "current" {}
 # =============================================================================
 # ECS EXECUTION ROLE — used by the ECS agent, NOT by your application code
 # =============================================================================
-# The ECS agent runs alongside your container. It needs permissions to:
-#   1. Pull Docker images from ECR (your container registry)
-#   2. Write container logs to CloudWatch
-#   3. Read secrets from Secrets Manager (inject as env vars at container start)
-#
-# This role is shared by all 8 services — they all need the same agent permissions.
 resource "aws_iam_role" "execution" {
-  name               = "${local.name}-ecs-execution" # e.g. "autobook-dev-ecs-execution"
-  assume_role_policy = local.ecs_trust_policy        # Only ECS can assume this role
+  name               = "${local.name}-ecs-execution"
+  assume_role_policy = local.ecs_trust_policy
 
   tags = { Name = "${local.name}-ecs-execution" }
 }
 
-# AWS managed policy — covers ECR image pull + CloudWatch log write
-# This is the standard policy AWS recommends for ECS execution roles
 resource "aws_iam_role_policy_attachment" "execution_base" {
   role       = aws_iam_role.execution.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# Secrets Manager access — read DB credentials to inject as container env vars
-# Scoped to secrets with our naming prefix (e.g. "autobook-dev-*")
 resource "aws_iam_role_policy" "execution_secrets" {
   name = "secrets-access"
   role = aws_iam_role.execution.id
@@ -66,33 +67,66 @@ resource "aws_iam_role_policy" "execution_secrets" {
 }
 
 # =============================================================================
-# ECS TASK ROLES — one per service, least privilege
+# ECS TASK ROLE — API only
 # =============================================================================
-# Unlike the execution role (used by the ECS agent), task roles are used by
-# YOUR APPLICATION CODE running inside the container.
-#
-# Each of the 8 services gets its own role so it only has the AWS permissions
-# it actually needs. Services with no AWS needs (precedent, resolution, posting)
-# still get a role — ECS requires one — but it has no extra policies.
 resource "aws_iam_role" "task" {
-  for_each = toset(local.service_names)
+  for_each = toset(local.ecs_services)
 
-  name               = "${local.name}-${each.key}-task" # e.g. "autobook-dev-api-task"
-  assume_role_policy = local.ecs_trust_policy           # Only ECS can assume this role
+  name               = "${local.name}-${each.key}-task"
+  assume_role_policy = local.ecs_trust_policy
 
   tags = { Name = "${local.name}-${each.key}-task" }
 }
 
 # =============================================================================
+# LAMBDA EXECUTION ROLES — one per worker, least privilege
+# =============================================================================
+resource "aws_iam_role" "lambda" {
+  for_each = toset(local.lambda_services)
+
+  name               = "${local.name}-${each.key}-lambda"
+  assume_role_policy = local.lambda_trust_policy
+
+  tags = { Name = "${local.name}-${each.key}-lambda" }
+}
+
+# CloudWatch Logs — Lambda needs to write logs
+resource "aws_iam_role_policy_attachment" "lambda_basic" {
+  for_each   = toset(local.lambda_services)
+  role       = aws_iam_role.lambda[each.key].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# VPC access — all workers need DB (PostgreSQL) and/or Redis
+resource "aws_iam_role_policy_attachment" "lambda_vpc" {
+  for_each   = toset(local.lambda_services)
+  role       = aws_iam_role.lambda[each.key].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+# Secrets Manager — Lambda Extension reads DB credentials
+resource "aws_iam_role_policy" "lambda_secrets" {
+  for_each = toset(local.lambda_services)
+
+  name = "secrets-access"
+  role = aws_iam_role.lambda[each.key].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "secretsmanager:GetSecretValue"
+      Resource = "arn:aws:secretsmanager:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:secret:${local.name}-*"
+    }]
+  })
+}
+
+# =============================================================================
 # SERVICE-SPECIFIC POLICIES — S3, SageMaker, Bedrock
 # =============================================================================
-# Only services that call AWS APIs get policies. The rest (precedent, resolution,
-# posting) have empty roles — they talk to PostgreSQL and Redis via credentials
-# and endpoints, not IAM.
 
 # --- S3 policies (api, normalizer, flywheel) ---
 
-# API service: upload user files to S3
 resource "aws_iam_role_policy" "api_s3" {
   name = "s3-upload"
   role = aws_iam_role.task["api"].id
@@ -101,40 +135,38 @@ resource "aws_iam_role_policy" "api_s3" {
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
-      Action   = "s3:PutObject"           # Upload only — can't read or delete
-      Resource = "${var.s3_bucket_arn}/*" # Any object in the data bucket
-    }]
-  })
-}
-
-# Normalizer worker: read raw files from S3, delete after processing
-resource "aws_iam_role_policy" "normalizer_s3" {
-  name = "s3-read"
-  role = aws_iam_role.task["normalizer"].id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Effect   = "Allow"
-      Action   = ["s3:GetObject", "s3:DeleteObject"] # Read + cleanup
+      Action   = "s3:PutObject"
       Resource = "${var.s3_bucket_arn}/*"
     }]
   })
 }
 
-# Flywheel worker: read/write training data and model artifacts in S3
+resource "aws_iam_role_policy" "normalizer_s3" {
+  name = "s3-read"
+  role = aws_iam_role.lambda["normalizer"].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["s3:GetObject", "s3:DeleteObject"]
+      Resource = "${var.s3_bucket_arn}/*"
+    }]
+  })
+}
+
 resource "aws_iam_role_policy" "flywheel_s3" {
   name = "s3-training-data"
-  role = aws_iam_role.task["flywheel"].id
+  role = aws_iam_role.lambda["flywheel"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect = "Allow"
-      Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"] # Full read/write
+      Action = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"]
       Resource = [
-        var.s3_bucket_arn,       # ListBucket needs the bucket itself
-        "${var.s3_bucket_arn}/*" # Get/Put needs the objects
+        var.s3_bucket_arn,
+        "${var.s3_bucket_arn}/*"
       ]
     }]
   })
@@ -142,26 +174,23 @@ resource "aws_iam_role_policy" "flywheel_s3" {
 
 # --- SageMaker policies (ml_inference, flywheel) ---
 
-# ML inference worker: call the SageMaker endpoint for ML inference (tier 2 classification)
 resource "aws_iam_role_policy" "ml_inference_sagemaker" {
   name = "sagemaker-invoke"
-  role = aws_iam_role.task["ml_inference"].id
+  role = aws_iam_role.lambda["ml_inference"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
-      Action   = "sagemaker:InvokeEndpoint" # Call the model for predictions
+      Action   = "sagemaker:InvokeEndpoint"
       Resource = "arn:aws:sagemaker:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:endpoint/${local.name}-*"
     }]
   })
 }
 
-# Flywheel worker: create SageMaker training jobs for model retraining
-# (Fast learner every 128 examples, slow learner every 1,280 examples)
 resource "aws_iam_role_policy" "flywheel_sagemaker" {
   name = "sagemaker-training"
-  role = aws_iam_role.task["flywheel"].id
+  role = aws_iam_role.lambda["flywheel"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -169,15 +198,13 @@ resource "aws_iam_role_policy" "flywheel_sagemaker" {
       {
         Effect = "Allow"
         Action = [
-          "sagemaker:CreateTrainingJob",   # Start a training job
-          "sagemaker:DescribeTrainingJob", # Check training status
-          "sagemaker:StopTrainingJob"      # Cancel if needed
+          "sagemaker:CreateTrainingJob",
+          "sagemaker:DescribeTrainingJob",
+          "sagemaker:StopTrainingJob"
         ]
         Resource = "arn:aws:sagemaker:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:training-job/${local.name}-*"
       },
       {
-        # SageMaker training jobs need to assume their own role — we must allow
-        # the flywheel to "pass" that role to SageMaker
         Effect   = "Allow"
         Action   = "iam:PassRole"
         Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.name}-sagemaker-*"
@@ -189,13 +216,9 @@ resource "aws_iam_role_policy" "flywheel_sagemaker" {
   })
 }
 
-# --- SQS policies (all services) ---
-# Each service only gets access to the queues it reads from and writes to.
-# Send = sqs:SendMessage (enqueue to the next queue in the pipeline)
-# Receive = sqs:ReceiveMessage + sqs:DeleteMessage + sqs:GetQueueAttributes
-#   (dequeue, delete after processing, check queue depth for health)
+# --- SQS policies ---
 
-# API service: enqueue incoming transactions to the normalizer queue
+# API: enqueue to normalizer
 resource "aws_iam_role_policy" "api_sqs" {
   name = "sqs-send-normalizer"
   role = aws_iam_role.task["api"].id
@@ -210,10 +233,10 @@ resource "aws_iam_role_policy" "api_sqs" {
   })
 }
 
-# Normalizer worker: dequeue from normalizer, enqueue normalized transactions to precedent
+# Normalizer: receive from normalizer, send to precedent
 resource "aws_iam_role_policy" "normalizer_sqs" {
   name = "sqs-normalizer-to-precedent"
-  role = aws_iam_role.task["normalizer"].id
+  role = aws_iam_role.lambda["normalizer"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -232,10 +255,10 @@ resource "aws_iam_role_policy" "normalizer_sqs" {
   })
 }
 
-# Precedent matcher (tier 1): dequeue from precedent, enqueue to ml_inference (miss) or posting (hit)
+# Precedent (tier 1): receive from precedent, send to ml_inference or posting
 resource "aws_iam_role_policy" "precedent_sqs" {
   name = "sqs-precedent-to-ml-inference-or-posting"
-  role = aws_iam_role.task["precedent"].id
+  role = aws_iam_role.lambda["precedent"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -254,10 +277,10 @@ resource "aws_iam_role_policy" "precedent_sqs" {
   })
 }
 
-# ML inference worker (tier 2): dequeue from ml_inference, enqueue to agent (miss) or posting (hit)
+# ML inference (tier 2): receive from ml_inference, send to agent or posting
 resource "aws_iam_role_policy" "ml_inference_sqs" {
   name = "sqs-ml-inference-to-agent-or-posting"
-  role = aws_iam_role.task["ml_inference"].id
+  role = aws_iam_role.lambda["ml_inference"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -276,10 +299,10 @@ resource "aws_iam_role_policy" "ml_inference_sqs" {
   })
 }
 
-# Agent worker (tier 3): dequeue from agent, enqueue to resolution (stuck) or posting (confident)
+# Agent (tier 3): receive from agent, send to resolution or posting
 resource "aws_iam_role_policy" "agent_sqs" {
   name = "sqs-agent-to-resolution-or-posting"
-  role = aws_iam_role.task["agent"].id
+  role = aws_iam_role.lambda["agent"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -298,10 +321,10 @@ resource "aws_iam_role_policy" "agent_sqs" {
   })
 }
 
-# Resolution worker (tier 4): dequeue human resolutions, enqueue to posting
+# Resolution: receive from resolution, send to posting
 resource "aws_iam_role_policy" "resolution_sqs" {
   name = "sqs-resolution-to-posting"
-  role = aws_iam_role.task["resolution"].id
+  role = aws_iam_role.lambda["resolution"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -320,10 +343,10 @@ resource "aws_iam_role_policy" "resolution_sqs" {
   })
 }
 
-# Posting service: dequeue validated entries, enqueue to flywheel for learning
+# Posting: receive from posting, send to flywheel
 resource "aws_iam_role_policy" "posting_sqs" {
   name = "sqs-posting-to-flywheel"
-  role = aws_iam_role.task["posting"].id
+  role = aws_iam_role.lambda["posting"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -342,10 +365,10 @@ resource "aws_iam_role_policy" "posting_sqs" {
   })
 }
 
-# Flywheel worker: dequeue posted entries, writes to caches/stores (terminal — no next queue)
+# Flywheel: receive from flywheel (terminal — no next queue)
 resource "aws_iam_role_policy" "flywheel_sqs" {
   name = "sqs-flywheel-receive"
-  role = aws_iam_role.task["flywheel"].id
+  role = aws_iam_role.lambda["flywheel"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -359,21 +382,18 @@ resource "aws_iam_role_policy" "flywheel_sqs" {
 
 # --- Bedrock policy (agent) ---
 
-# Agent worker: call foundation models (Claude, etc.) via AWS Bedrock for tier 3
 resource "aws_iam_role_policy" "agent_bedrock" {
   name = "bedrock-invoke"
-  role = aws_iam_role.task["agent"].id
+  role = aws_iam_role.lambda["agent"].id
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect = "Allow"
       Action = [
-        "bedrock:InvokeModel",                  # Synchronous model calls
-        "bedrock:InvokeModelWithResponseStream" # Streaming responses
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream"
       ]
-      # Foundation models are AWS-managed — the ARN has no account ID
-      # Scoped to our region (ca-central-1) for least privilege
       Resource = "arn:aws:bedrock:${data.aws_region.current.region}::foundation-model/*"
     }]
   })
@@ -382,27 +402,20 @@ resource "aws_iam_role_policy" "agent_bedrock" {
 # =============================================================================
 # GITHUB ACTIONS DEPLOY ROLE — CI/CD without stored credentials
 # =============================================================================
-# GitHub Actions authenticates via OIDC (OpenID Connect):
-#   1. GitHub sends a signed JWT token to AWS
-#   2. AWS verifies the token against the OIDC provider (created in global stack)
-#   3. If the repo matches the trust policy, AWS issues temporary credentials
-#   4. Credentials expire after the workflow run — nothing to rotate or leak
 resource "aws_iam_role" "github_actions" {
-  name = "${local.name}-github-actions" # e.g. "autobook-dev-github-actions"
+  name = "${local.name}-github-actions"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect    = "Allow"
-      Principal = { Federated = var.oidc_provider_arn } # Trust GitHub's OIDC provider
-      Action    = "sts:AssumeRoleWithWebIdentity"       # OIDC-specific assume action
+      Principal = { Federated = var.oidc_provider_arn }
+      Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = {
-          # Only accept tokens intended for AWS (audience check)
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         }
         StringLike = {
-          # Only accept tokens from our specific repo (any branch/tag)
           "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:*"
         }
       }
@@ -412,64 +425,68 @@ resource "aws_iam_role" "github_actions" {
   tags = { Name = "${local.name}-github-actions" }
 }
 
-# Deploy permissions — push images to ECR, update ECS services
+# Deploy permissions — ECR + ECS for API, Lambda for workers
 resource "aws_iam_role_policy" "github_actions_deploy" {
-  name = "ecr-ecs-deploy"
+  name = "ecr-ecs-lambda-deploy"
   role = aws_iam_role.github_actions.id
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        # ECR login — account-level operation, cannot be scoped to specific repos
         Effect   = "Allow"
         Action   = "ecr:GetAuthorizationToken"
         Resource = "*"
       },
       {
-        # ECR push — scoped to our project's repositories only
         Effect = "Allow"
         Action = [
-          "ecr:BatchCheckLayerAvailability", # Check if layer already exists
-          "ecr:PutImage",                    # Push the image
-          "ecr:InitiateLayerUpload",         # Start uploading a layer
-          "ecr:UploadLayerPart",             # Upload layer chunks
-          "ecr:CompleteLayerUpload",         # Finish layer upload
-          "ecr:BatchGetImage",               # Read image manifests
-          "ecr:GetDownloadUrlForLayer"       # Download layer data
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:PutImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:BatchGetImage",
+          "ecr:GetDownloadUrlForLayer"
         ]
         Resource = "arn:aws:ecr:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:repository/${local.name}-*"
       },
       {
-        # ECS task definitions — account-level operations, cannot be scoped to specific resources
         Effect = "Allow"
         Action = [
-          "ecs:RegisterTaskDefinition", # Create new version of task definition
-          "ecs:DescribeTaskDefinition"  # Read current task definition
+          "ecs:RegisterTaskDefinition",
+          "ecs:DescribeTaskDefinition"
         ]
-        Resource = "*" # These are account-level APIs — AWS does not support resource-level scoping
+        Resource = "*"
       },
       {
-        # ECS service operations — scoped to our project's services only
         Effect = "Allow"
         Action = [
-          "ecs:UpdateService",   # Tell service to use new task definition
-          "ecs:DescribeServices" # Check deployment status
+          "ecs:UpdateService",
+          "ecs:DescribeServices"
         ]
         Resource = "arn:aws:ecs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:service/${local.name}/*"
       },
       {
-        # PassRole — allows GitHub Actions to pass our IAM roles to ECS
-        # Required when registering task definitions that reference these roles
         Effect = "Allow"
         Action = "iam:PassRole"
-        Resource = concat(
-          [aws_iam_role.execution.arn],              # Execution role
-          [for role in aws_iam_role.task : role.arn] # All 8 task roles
-        )
+        Resource = [
+          aws_iam_role.execution.arn,
+          aws_iam_role.task["api"].arn
+        ]
         Condition = {
           StringEquals = { "iam:PassedToService" = "ecs-tasks.amazonaws.com" }
         }
+      },
+      {
+        # Lambda deploy permissions for workers
+        Effect = "Allow"
+        Action = [
+          "lambda:UpdateFunctionCode",
+          "lambda:GetFunction",
+          "lambda:UpdateFunctionConfiguration"
+        ]
+        Resource = "arn:aws:lambda:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:function:${local.name}-*"
       }
     ]
   })
