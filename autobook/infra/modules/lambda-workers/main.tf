@@ -10,7 +10,8 @@
 # Pipeline: normalizer → precedent → ml_inference → agent → resolution → posting → flywheel
 
 locals {
-  name = "${var.project}-${var.environment}" # e.g. "autobook-dev"
+  name      = "${var.project}-${var.environment}" # e.g. "autobook-dev"
+  redis_url = "redis://${var.redis_endpoint}:${var.redis_port}/0"
 
   worker_names = ["normalizer", "precedent", "ml_inference", "agent",
     "resolution", "posting", "flywheel"]
@@ -124,8 +125,7 @@ resource "aws_lambda_function" "worker" {
       {
         ENVIRONMENT    = var.environment
         DB_SECRET_ARN  = var.db_credentials_secret_arn
-        REDIS_HOST     = var.redis_endpoint
-        REDIS_PORT     = tostring(var.redis_port)
+        REDIS_URL      = local.redis_url
         S3_BUCKET      = var.s3_bucket_id
       },
       local.sqs_env[each.key]

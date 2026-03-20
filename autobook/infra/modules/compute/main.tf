@@ -1,6 +1,7 @@
 # Naming convention + data sources
 locals {
-  name = "${var.project}-${var.environment}" # e.g. "autobook-dev"
+  name      = "${var.project}-${var.environment}" # e.g. "autobook-dev"
+  redis_url = "redis://${var.redis_endpoint}:${var.redis_port}/0"
 
   # Service names derived from the IAM module's task_role_arns map keys
   # After Lambda migration, this only contains ["api"]
@@ -222,8 +223,7 @@ resource "aws_ecs_task_definition" "main" {
     environment = concat(
       [
         { name = "ENVIRONMENT", value = var.environment },
-        { name = "REDIS_HOST", value = var.redis_endpoint },
-        { name = "REDIS_PORT", value = tostring(var.redis_port) },
+        { name = "REDIS_URL", value = local.redis_url },
         { name = "S3_BUCKET", value = var.s3_bucket_id },
       ],
       # Only the API service needs Cognito config (to validate auth tokens)
