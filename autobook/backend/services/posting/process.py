@@ -26,13 +26,12 @@ def process(message: dict) -> None:
     journal_entry_id = f"je_{uuid.uuid4().hex[:8]}"
     parse_time_ms = _compute_parse_time_ms(message)
 
-    publish_sync("accounting.snapshot.updated", {
-        "type": "accounting.snapshot.updated",
-        "reason": "journal_entry.posted",
+    publish_sync("entry.posted", {
+        "type": "entry.posted",
         "journal_entry_id": journal_entry_id,
-        "occurred_at": datetime.now(timezone.utc).isoformat(),
         "parse_id": message.get("parse_id"),
         "input_text": message.get("input_text"),
+        "occurred_at": datetime.now(timezone.utc).isoformat(),
         "confidence": message.get("confidence"),
         "explanation": message.get("explanation"),
         "status": "auto_posted",

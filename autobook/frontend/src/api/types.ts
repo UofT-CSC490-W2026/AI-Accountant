@@ -110,16 +110,11 @@ export type StatementsResponse = {
 };
 
 export type RealtimeEvent = {
-  type: "accounting.snapshot.updated";
-  reason:
-    | "journal_entry.posted"
-    | "clarification.queued"
-    | "clarification.resolved"
-    | "clarification.rejected";
+  type: "entry.posted" | "clarification.created" | "clarification.resolved";
   journal_entry_id?: string;
-  occurred_at: string;
   parse_id?: string;
   input_text?: string;
+  occurred_at: string;
   confidence?: { overall: number };
   explanation?: string;
   status?: string;

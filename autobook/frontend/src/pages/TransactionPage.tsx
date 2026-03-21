@@ -92,10 +92,9 @@ export function TransactionPage() {
     if (!processingId) return;
     const unsub = subscribeToRealtimeUpdates((event) => {
       if (
-        event.type === "accounting.snapshot.updated" &&
-        (event.reason === "journal_entry.posted" ||
-          event.reason === "clarification.queued" ||
-          event.reason === "clarification.resolved")
+        event.type === "entry.posted" ||
+        event.type === "clarification.created" ||
+        event.type === "clarification.resolved"
       ) {
         setResolvedEvent(event);
         setProcessingId(null);
@@ -104,6 +103,13 @@ export function TransactionPage() {
     });
     return unsub;
   }, [processingId]);
+
+  const isPosted =
+    resolvedEvent?.type === "entry.posted" || resolvedEvent?.type === "clarification.resolved";
+
+  function dismissModal() {
+    setResolvedEvent(null);
+  }
 
   return (
     <div className="page-grid">
@@ -207,34 +213,36 @@ export function TransactionPage() {
       ) : null}
 
       {resolvedEvent ? (
-        <section
-          className={
-            resolvedEvent.reason === "journal_entry.posted" ||
-            resolvedEvent.reason === "clarification.resolved"
-              ? "panel outcome-panel outcome-success"
-              : "panel outcome-panel outcome-warning"
-          }
-        >
-          <div className="panel-header">
-            <div>
-              <p className="eyebrow">Next Step</p>
+        <div className="modal-backdrop" onClick={dismissModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <p className="eyebrow">
+                {isPosted ? "Entry Posted" : "Human Review Needed"}
+              </p>
               <h2>
-                {resolvedEvent.reason === "journal_entry.posted" ||
-                resolvedEvent.reason === "clarification.resolved"
-                  ? "Entry Posted"
-                  : "Human Review Needed"}
+                {isPosted ? "Entry Posted" : "Clarification Required"}
               </h2>
             </div>
-          </div>
-          <p className="body-copy">
-            {resolvedEvent.reason === "journal_entry.posted" ||
-            resolvedEvent.reason === "clarification.resolved"
-              ? "This transaction cleared the confidence threshold and can be inspected in the ledger."
-              : "This transaction needs clarification before posting to the ledger."}
-          </p>
 
-          {(resolvedEvent.confidence || resolvedEvent.explanation || resolvedEvent.proposed_entry) && (
             <div className="event-details">
+              {resolvedEvent.journal_entry_id && (
+                <div className="detail-row">
+                  <span className="detail-label">Journal Entry ID</span>
+                  <span className="detail-value">{resolvedEvent.journal_entry_id}</span>
+                </div>
+              )}
+              {resolvedEvent.parse_id && (
+                <div className="detail-row">
+                  <span className="detail-label">Parse ID</span>
+                  <span className="detail-value">{resolvedEvent.parse_id}</span>
+                </div>
+              )}
+              {resolvedEvent.input_text && (
+                <div className="detail-row">
+                  <span className="detail-label">Input</span>
+                  <span className="detail-value">{resolvedEvent.input_text}</span>
+                </div>
+              )}
               {resolvedEvent.status && (
                 <div className="detail-row">
                   <span className="detail-label">Status</span>
@@ -259,48 +267,51 @@ export function TransactionPage() {
                   <span className="detail-value">{resolvedEvent.parse_time_ms} ms</span>
                 </div>
               )}
-              {resolvedEvent.proposed_entry && resolvedEvent.proposed_entry.lines.length > 0 && (
-                <table className="proposed-entry-table">
-                  <thead>
-                    <tr>
-                      <th>Account</th>
-                      <th>Type</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {resolvedEvent.proposed_entry.lines.map((line, i) => (
-                      <tr key={i}>
-                        <td>{line.account_name}</td>
-                        <td>{line.type}</td>
-                        <td>${line.amount.toFixed(2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              {resolvedEvent.occurred_at && (
+                <div className="detail-row">
+                  <span className="detail-label">Timestamp</span>
+                  <span className="detail-value">{resolvedEvent.occurred_at}</span>
+                </div>
               )}
             </div>
-          )}
 
-          <div className="panel-actions">
-            <button
-              className="primary-button"
-              onClick={() =>
-                navigate(
-                  resolvedEvent.reason === "journal_entry.posted" ||
-                    resolvedEvent.reason === "clarification.resolved"
-                    ? "/ledger"
-                    : "/clarifications",
-                )
-              }
-            >
-              {resolvedEvent.reason === "journal_entry.posted" ||
-              resolvedEvent.reason === "clarification.resolved"
-                ? "View Ledger"
-                : "Open Clarifications"}
-            </button>
+            {resolvedEvent.proposed_entry && resolvedEvent.proposed_entry.lines.length > 0 && (
+              <table className="proposed-entry-table">
+                <thead>
+                  <tr>
+                    <th>Account</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {resolvedEvent.proposed_entry.lines.map((line, i) => (
+                    <tr key={i}>
+                      <td>{line.account_name}</td>
+                      <td>{line.type}</td>
+                      <td>${line.amount.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            <div className="modal-actions">
+              <button
+                className="primary-button"
+                onClick={() => {
+                  dismissModal();
+                  navigate(isPosted ? "/ledger" : "/clarifications");
+                }}
+              >
+                {isPosted ? "View Ledger" : "Open Clarifications"}
+              </button>
+              <button className="secondary-button" onClick={dismissModal}>
+                Dismiss
+              </button>
+            </div>
           </div>
-        </section>
+        </div>
       ) : null}
     </div>
   );

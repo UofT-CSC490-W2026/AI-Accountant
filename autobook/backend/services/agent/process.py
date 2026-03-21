@@ -49,9 +49,8 @@ def process(message: dict) -> None:
     if confidence >= settings.AUTO_POST_THRESHOLD:
         enqueue(settings.SQS_QUEUE_POSTING, enriched)
     else:
-        publish_sync("accounting.snapshot.updated", {
-            "type": "accounting.snapshot.updated",
-            "reason": "clarification.queued",
+        publish_sync("clarification.created", {
+            "type": "clarification.created",
             "parse_id": message.get("parse_id"),
             "input_text": message.get("input_text"),
             "occurred_at": datetime.now(timezone.utc).isoformat(),
