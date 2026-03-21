@@ -14,6 +14,7 @@ describe("app routing", () => {
   test("renders dashboard on the home route", async () => {
     renderRoute("/");
     expect(await screen.findByRole("heading", { name: /operations snapshot/i })).toBeInTheDocument();
+    expect(screen.getByText(/live clock/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /new transaction/i })).toBeInTheDocument();
   });
 
