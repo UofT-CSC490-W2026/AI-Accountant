@@ -487,15 +487,6 @@ resource "aws_iam_role_policy" "github_actions_deploy" {
           "lambda:UpdateFunctionConfiguration"
         ]
         Resource = "arn:aws:lambda:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:function:${local.name}-*"
-      },
-      {
-        # S3 upload for Lambda zip packages (via S3 deploy)
-        Effect = "Allow"
-        Action = [
-          "s3:PutObject",
-          "s3:GetObject"
-        ]
-        Resource = "arn:aws:s3:::autobook-tfstate-${data.aws_caller_identity.current.account_id}/lambda-deploy/*"
       }
     ]
   })

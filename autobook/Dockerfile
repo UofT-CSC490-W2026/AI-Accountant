@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ── autobook-base ──────────────────────────────────────────────
-# Shared by all 8 services: pydantic, redis, sqlalchemy, asyncpg, boto3
+# Shared by all 8 services: pydantic, redis, boto3, awslambdaric
 FROM python:3.12-slim AS autobook-base
 
 COPY --from=ghcr.io/astral-sh/uv:0.10 /uv /uvx /bin/
@@ -15,12 +15,14 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 
 # Shared source
+COPY backend/__init__.py backend/__init__.py
 COPY backend/config.py backend/config.py
 COPY backend/db/ backend/db/
 COPY backend/queues/ backend/queues/
 COPY backend/cache/ backend/cache/
 COPY backend/utils/ backend/utils/
 COPY backend/schemas/ backend/schemas/
+COPY backend/services/__init__.py backend/services/__init__.py
 
 RUN groupadd -g 1001 app && useradd -u 1001 -g app -s /bin/false app
 ENV PATH="/app/.venv/bin:$PATH" \
@@ -53,15 +55,17 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project --extra normalizer
 
 COPY backend/services/normalizer/ backend/services/normalizer/
-USER app
-CMD ["python", "-m", "services.normalizer"]
+# Lambda: ENTRYPOINT runs the RIC, CMD is the handler (overridden by Terraform image_config)
+# Local: docker-compose overrides with ["python", "-m", "services.normalizer"]
+ENTRYPOINT ["python", "-m", "awslambdaric"]
+CMD ["services.normalizer.handler.handler"]
 
 # ── Precedent Matcher (Tier 1) ─────────────────────────────────
 FROM autobook-accounting AS autobook-precedent
 
 COPY backend/services/precedent/ backend/services/precedent/
-USER app
-CMD ["python", "-m", "services.precedent"]
+ENTRYPOINT ["python", "-m", "awslambdaric"]
+CMD ["services.precedent.handler.handler"]
 
 # ── ML Inference (Tier 2) ──────────────────────────────────────
 FROM autobook-accounting AS autobook-ml-inference
@@ -70,8 +74,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project --extra ml-inference
 
 COPY backend/services/ml_inference/ backend/services/ml_inference/
-USER app
-CMD ["python", "-m", "services.ml_inference"]
+ENTRYPOINT ["python", "-m", "awslambdaric"]
+CMD ["services.ml_inference.handler.handler"]
 
 # ── Agent / LLM Worker (Tier 3) ────────────────────────────────
 FROM autobook-accounting AS autobook-agent
@@ -80,22 +84,22 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project --extra agent
 
 COPY backend/services/agent/ backend/services/agent/
-USER app
-CMD ["python", "-m", "services.agent"]
+ENTRYPOINT ["python", "-m", "awslambdaric"]
+CMD ["services.agent.handler.handler"]
 
 # ── Resolution Worker (Tier 4) ─────────────────────────────────
 FROM autobook-accounting AS autobook-resolution
 
 COPY backend/services/resolution/ backend/services/resolution/
-USER app
-CMD ["python", "-m", "services.resolution"]
+ENTRYPOINT ["python", "-m", "awslambdaric"]
+CMD ["services.resolution.handler.handler"]
 
 # ── Posting Service ────────────────────────────────────────────
 FROM autobook-base AS autobook-posting
 
 COPY backend/services/posting/ backend/services/posting/
-USER app
-CMD ["python", "-m", "services.posting"]
+ENTRYPOINT ["python", "-m", "awslambdaric"]
+CMD ["services.posting.handler.handler"]
 
 # ── Flywheel Worker ────────────────────────────────────────────
 FROM autobook-base AS autobook-flywheel
@@ -104,5 +108,5 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project --extra flywheel
 
 COPY backend/services/flywheel/ backend/services/flywheel/
-USER app
-CMD ["python", "-m", "services.flywheel"]
+ENTRYPOINT ["python", "-m", "awslambdaric"]
+CMD ["services.flywheel.handler.handler"]

@@ -197,7 +197,7 @@ jobs:
             exit 1
           fi
 
-  # ── Deploy Workers (zip → Lambda) ──────────────────────────────
+  # ── Deploy Workers (Docker → ECR → Lambda) ────────────────────
   deploy-workers:
     needs: changes
     if: needs.changes.outputs.workers != '[]'
@@ -216,70 +216,48 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/autobook-${{ env.ENVIRONMENT }}-github-actions
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Package Lambda zip
-        run: |
-          pip install uv
-          cd autobook
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
 
-          # Map service name to pyproject.toml extra name (hyphens, not underscores)
-          # Workers without extras (precedent, resolution, posting) only get shared deps
-          declare -A EXTRA_MAP=(
-            ["normalizer"]="normalizer"
-            ["ml_inference"]="ml-inference"
-            ["agent"]="agent"
-            ["flywheel"]="flywheel"
+      - name: Build and push worker image
+        run: |
+          # Map service name to Dockerfile target (hyphens, not underscores)
+          declare -A TARGET_MAP=(
+            ["normalizer"]="autobook-normalizer"
+            ["precedent"]="autobook-precedent"
+            ["ml_inference"]="autobook-ml-inference"
+            ["agent"]="autobook-agent"
+            ["resolution"]="autobook-resolution"
+            ["posting"]="autobook-posting"
+            ["flywheel"]="autobook-flywheel"
           )
 
-          EXTRA="${EXTRA_MAP[${{ matrix.service }}]:-}"
+          TARGET="${TARGET_MAP[${{ matrix.service }}]}"
+          ECR_REPO="${{ steps.ecr-login.outputs.registry }}/autobook-${ENVIRONMENT}-${{ matrix.service }}"
+          IMAGE_TAG="${{ github.sha }}"
 
-          if [ -n "$EXTRA" ]; then
-            uv pip compile pyproject.toml \
-              --extra "$EXTRA" \
-              -o /tmp/requirements.txt
-          else
-            # No extra — shared deps only
-            uv pip compile pyproject.toml \
-              -o /tmp/requirements.txt
-          fi
+          docker build \
+            -f autobook/Dockerfile \
+            --target "$TARGET" \
+            -t "$ECR_REPO:$IMAGE_TAG" \
+            -t "$ECR_REPO:latest" \
+            autobook/
 
-          # Install to flat target directory (no venv path fragility)
-          uv pip install --target /tmp/lambda-package -r /tmp/requirements.txt
+          docker push "$ECR_REPO:$IMAGE_TAG"
+          docker push "$ECR_REPO:latest"
 
-          # Copy shared application code (must match import paths)
-          cp backend/config.py /tmp/lambda-package/config.py
-          cp -r backend/db/ /tmp/lambda-package/db/
-          cp -r backend/queues/ /tmp/lambda-package/queues/
-          cp -r backend/cache/ /tmp/lambda-package/cache/
-          cp -r backend/utils/ /tmp/lambda-package/utils/
-          cp -r backend/schemas/ /tmp/lambda-package/schemas/
-          cp -r backend/accounting_engine/ /tmp/lambda-package/accounting_engine/
-
-          # Copy this worker's code (includes process.py + handler.py)
-          mkdir -p /tmp/lambda-package/services/
-          cp backend/services/__init__.py /tmp/lambda-package/services/
-          cp -r backend/services/${{ matrix.service }}/ \
-            /tmp/lambda-package/services/${{ matrix.service }}/
-
-          # Create zip
-          cd /tmp/lambda-package && zip -r /tmp/lambda.zip .
+          echo "ECR_REPO=$ECR_REPO" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Deploy to Lambda
         run: |
-          S3_BUCKET="autobook-tfstate-${{ secrets.AWS_ACCOUNT_ID }}"
-          S3_KEY="lambda-deploy/autobook-${ENVIRONMENT}-${{ matrix.service }}.zip"
-          aws s3 cp /tmp/lambda.zip "s3://${S3_BUCKET}/${S3_KEY}"
           aws lambda update-function-code \
             --function-name autobook-${ENVIRONMENT}-${{ matrix.service }} \
-            --s3-bucket "${S3_BUCKET}" \
-            --s3-key "${S3_KEY}"
+            --image-uri "$ECR_REPO:$IMAGE_TAG"
