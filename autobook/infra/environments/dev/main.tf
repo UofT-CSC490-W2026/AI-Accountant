@@ -70,6 +70,10 @@ module "iam" {
   github_repo       = var.github_repo                                              # "UofT-CSC490-W2026/AI-Accountant"
   s3_bucket_arn     = module.storage.bucket_arn                                    # Scopes S3 permissions to our bucket
   queue_arns        = module.queuing.queue_arns                                    # Scopes SQS permissions per service
+
+  # WS relay permissions
+  ws_connections_table_arn = module.api_gateway.connections_table_arn
+  ws_api_arn               = "arn:aws:execute-api:${var.region}:${var.account_id}:${module.api_gateway.api_id}"
 }
 
 # =============================================================================
@@ -240,6 +244,13 @@ module "compute" {
   # --- From auth ---
   user_pool_id = module.auth.user_pool_id # Cognito pool ID (API validates tokens)
   client_id    = module.auth.client_id    # Cognito client ID (passed to frontend)
+
+  # --- WS relay service ---
+  ws_relay_role_arn          = module.iam.ws_relay_role_arn
+  ws_connections_table_name  = module.api_gateway.connections_table_name
+  ws_connections_table_arn   = module.api_gateway.connections_table_arn
+  ws_api_endpoint            = module.api_gateway.api_endpoint
+  ws_api_id                  = module.api_gateway.api_id
 
   # Dev defaults: 0.25 vCPU, 512 MB memory, 0 desired count (CI/CD deploys first),
   # 30-day log retention, /health check path

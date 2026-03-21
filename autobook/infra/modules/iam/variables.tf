@@ -43,3 +43,13 @@ variable "queue_arns" {
   type        = map(string)
   description = "Map of SQS queue name → ARN from queuing module — scopes per-service SQS permissions"
 }
+
+variable "ws_connections_table_arn" {
+  type        = string
+  description = "DynamoDB table ARN for WebSocket connections — WS relay needs scan + delete"
+}
+
+variable "ws_api_arn" {
+  type        = string
+  description = "API Gateway WebSocket API execution ARN — WS relay needs postToConnection"
+}

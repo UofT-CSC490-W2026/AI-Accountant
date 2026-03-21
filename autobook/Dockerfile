@@ -109,3 +109,12 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY backend/services/flywheel/ backend/services/flywheel/
 ENTRYPOINT ["python", "-m", "awslambdaric"]
 CMD ["services.flywheel.handler.handler"]
+
+# ── WS Relay Service ─────────────────────────────────────────
+# Bridges Redis pub/sub → API Gateway WebSocket (postToConnection)
+# Long-running ECS service, not Lambda
+FROM autobook-base AS autobook-ws-relay
+
+COPY backend/services/ws_relay/ backend/services/ws_relay/
+USER app
+CMD ["python", "-m", "services.ws_relay"]

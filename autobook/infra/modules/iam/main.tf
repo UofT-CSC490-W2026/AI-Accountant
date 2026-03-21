@@ -79,6 +79,46 @@ resource "aws_iam_role" "task" {
 }
 
 # =============================================================================
+# WS RELAY TASK ROLE — ECS service that bridges Redis → API Gateway WebSocket
+# =============================================================================
+resource "aws_iam_role" "ws_relay" {
+  name               = "${local.name}-ws-relay-task"
+  assume_role_policy = local.ecs_trust_policy
+
+  tags = { Name = "${local.name}-ws-relay-task" }
+}
+
+# DynamoDB: scan connections, delete stale ones
+resource "aws_iam_role_policy" "ws_relay_dynamodb" {
+  name = "dynamodb-access"
+  role = aws_iam_role.ws_relay.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["dynamodb:Scan", "dynamodb:DeleteItem"]
+      Resource = var.ws_connections_table_arn
+    }]
+  })
+}
+
+# API Gateway Management API: push messages to connected clients
+resource "aws_iam_role_policy" "ws_relay_apigw" {
+  name = "apigw-manage-connections"
+  role = aws_iam_role.ws_relay.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "execute-api:ManageConnections"
+      Resource = "${var.ws_api_arn}/*"
+    }]
+  })
+}
+
+# =============================================================================
 # LAMBDA EXECUTION ROLES — one per worker, least privilege
 # =============================================================================
 resource "aws_iam_role" "lambda" {
