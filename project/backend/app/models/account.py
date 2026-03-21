@@ -1,47 +1,74 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, ForeignKey, String
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import AuditMixin, Base
-from app.models.enums import AccountCreator, AccountSubType, AccountType
+from app.models.base import Base
 
 if TYPE_CHECKING:
-    from app.models.journal import JournalEntryLine
-    from app.models.organization import Organization
+    from app.models.user import User
 
 
-class ChartOfAccounts(AuditMixin, Base):
+class ChartOfAccounts(Base):
     __tablename__ = "chart_of_accounts"
+    __table_args__ = (
+        UniqueConstraint("user_id", "account_code", name="uq_chart_of_accounts_user_code"),
+        CheckConstraint(
+            "account_type IN ('asset', 'liability', 'equity', 'revenue', 'expense')",
+            name="ck_chart_of_accounts_account_type",
+        ),
+    )
 
-    org_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("organizations.id", ondelete="CASCADE"), index=True
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    account_number: Mapped[str] = mapped_column(String(20))
-    name: Mapped[str] = mapped_column(String(255))
-    account_type: Mapped[AccountType]
-    sub_type: Mapped[AccountSubType | None]
-    parent_account_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("chart_of_accounts.id")
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
-    currency: Mapped[str] = mapped_column(String(3), default="CAD")
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_by: Mapped[AccountCreator] = mapped_column(default=AccountCreator.USER)
-    auto_created: Mapped[bool] = mapped_column(Boolean, default=False)
+    account_code: Mapped[str] = mapped_column(String(20))
+    account_name: Mapped[str] = mapped_column(String(255))
+    account_type: Mapped[str] = mapped_column(String(20))
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="true"
+    )
+    auto_created: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
-    # ── relationships ──────────────────────────────────────────────
-    organization: Mapped["Organization"] = relationship(
-        "Organization", back_populates="accounts"
-    )
-    parent_account: Mapped["ChartOfAccounts | None"] = relationship(
-        back_populates="sub_accounts", remote_side="ChartOfAccounts.id"
-    )
-    sub_accounts: Mapped[list["ChartOfAccounts"]] = relationship(
-        back_populates="parent_account"
-    )
-    journal_entry_lines: Mapped[list["JournalEntryLine"]] = relationship(
-        "JournalEntryLine", back_populates="account"
-    )
+    user: Mapped["User"] = relationship("User", back_populates="chart_of_accounts")
+
+    @property
+    def account_number(self) -> str:
+        return self.account_code
+
+    @account_number.setter
+    def account_number(self, value: str) -> None:
+        self.account_code = value
+
+    @property
+    def name(self) -> str:
+        return self.account_name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self.account_name = value
+
+    @property
+    def org_id(self) -> uuid.UUID:
+        return self.user_id

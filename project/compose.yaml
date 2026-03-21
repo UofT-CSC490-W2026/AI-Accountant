@@ -1,43 +1,40 @@
-
 name: ai-cfo
 
 services:
   backend:
     build:
-      # Build context should always be set to . for consistency & portability:
       context: .
       dockerfile: ./backend/Containerfile
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      # The following env variables are taken from the shell session in development,
-      # and should be injected via CI/CD in production, since they are secrets.
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
     depends_on:
       db:
-        condition: service_healthy  # <- redundant dependency, but a safety measure
-  
-  # Persistent database service: (accessible through localhost:5432)
+        condition: service_healthy
+
   db:
     image: postgres:17.4
     platform: linux/amd64
     restart: always
-    environment:  # (Also env vars from the working shell session)
-      # The following defines the superuser that has all the privileges:
+    ports:
+      - "5433:5432"
+    environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
-      - db_data:/var/lib/postgresql/data  # persistent data storage folder
+      - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]  # $$ escapes to a $ literal in a podman-compose file
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       start_period: 20s
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  # Named volumes, not a folder that you have to specify, but still there regardless:
   db_data:

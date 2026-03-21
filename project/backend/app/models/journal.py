@@ -1,78 +1,100 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date
-from decimal import Decimal
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, Text
+from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Integer, Numeric, String, Text, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import MONEY, AuditMixin, Base
-from app.models.enums import JournalEntrySource, JournalEntryStatus
+from app.models.base import Base
 
 if TYPE_CHECKING:
-    from app.models.account import ChartOfAccounts
-    from app.models.organization import Organization
+    from app.models.transaction import Transaction
+    from app.models.user import User
 
 
-class JournalEntry(AuditMixin, Base):
+class JournalEntry(Base):
     __tablename__ = "journal_entries"
-
-    org_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("organizations.id", ondelete="CASCADE"), index=True
-    )
-    entry_date: Mapped[date]
-    posted_date: Mapped[date | None]
-    description: Mapped[str | None] = mapped_column(Text)
-    source: Mapped[JournalEntrySource] = mapped_column(
-        default=JournalEntrySource.MANUAL
-    )
-    source_reference_id: Mapped[str | None] = mapped_column(String(255))
-    status: Mapped[JournalEntryStatus] = mapped_column(
-        default=JournalEntryStatus.DRAFT
-    )
-    created_by: Mapped[str | None] = mapped_column(String(255))
-    approved_by: Mapped[str | None] = mapped_column(String(255))
-
-    # ── relationships ──────────────────────────────────────────────
-    organization: Mapped["Organization"] = relationship(
-        "Organization", back_populates="journal_entries"
-    )
-    lines: Mapped[list["JournalEntryLine"]] = relationship(
-        back_populates="journal_entry",
-        cascade="all, delete-orphan",
-        order_by="JournalEntryLine.line_order",
-    )
-
-
-class JournalEntryLine(AuditMixin, Base):
-    __tablename__ = "journal_entry_lines"
     __table_args__ = (
-        CheckConstraint("debit_amount >= 0", name="ck_jel_debit_non_negative"),
-        CheckConstraint("credit_amount >= 0", name="ck_jel_credit_non_negative"),
+        CheckConstraint("status IN ('draft', 'posted')", name="ck_journal_entries_status"),
         CheckConstraint(
-            "NOT (debit_amount > 0 AND credit_amount > 0)",
-            name="ck_jel_one_side_only",
+            "origin_tier IS NULL OR origin_tier BETWEEN 1 AND 4",
+            name="ck_journal_entries_origin_tier",
+        ),
+        CheckConstraint(
+            "confidence IS NULL OR (confidence >= 0.000 AND confidence <= 1.000)",
+            name="ck_journal_entries_confidence",
         ),
     )
 
-    journal_entry_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("journal_entries.id", ondelete="CASCADE"), index=True
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    account_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("chart_of_accounts.id"), index=True
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
-    debit_amount: Mapped[Decimal] = mapped_column(MONEY, default=Decimal("0"))
-    credit_amount: Mapped[Decimal] = mapped_column(MONEY, default=Decimal("0"))
-    currency: Mapped[str] = mapped_column(String(3), default="CAD")
-    description: Mapped[str | None] = mapped_column(Text)
-    line_order: Mapped[int] = mapped_column(Integer, default=0)
+    transaction_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("transactions.id", ondelete="SET NULL"), index=True
+    )
+    date: Mapped[date] = mapped_column(Date)
+    description: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(20), default="draft", server_default="draft")
+    origin_tier: Mapped[int | None] = mapped_column(Integer)
+    confidence: Mapped[float | None] = mapped_column(Numeric(4, 3))
+    rationale: Mapped[str | None] = mapped_column(Text)
+    posted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
-    # ── relationships ──────────────────────────────────────────────
+    user: Mapped["User"] = relationship("User", back_populates="journal_entries")
+    transaction: Mapped["Transaction | None"] = relationship(
+        "Transaction", back_populates="journal_entries"
+    )
+    lines: Mapped[list["JournalLine"]] = relationship(
+        "JournalLine",
+        back_populates="journal_entry",
+        cascade="all, delete-orphan",
+        order_by="JournalLine.line_order",
+    )
+
+    @property
+    def entry_date(self) -> date:
+        return self.date
+
+    @entry_date.setter
+    def entry_date(self, value: date) -> None:
+        self.date = value
+
+    @property
+    def posted_date(self) -> date | None:
+        return self.posted_at.date() if self.posted_at is not None else None
+
+
+class JournalLine(Base):
+    __tablename__ = "journal_lines"
+    __table_args__ = (
+        CheckConstraint("type IN ('debit', 'credit')", name="ck_journal_lines_type"),
+        CheckConstraint("amount > 0", name="ck_journal_lines_amount_positive"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    journal_entry_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("journal_entries.id", ondelete="CASCADE"), index=True
+    )
+    account_code: Mapped[str] = mapped_column(String(20))
+    account_name: Mapped[str] = mapped_column(String(255))
+    type: Mapped[str] = mapped_column(String(10))
+    amount: Mapped[float] = mapped_column(Numeric(15, 2))
+    line_order: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+
     journal_entry: Mapped["JournalEntry"] = relationship(
         "JournalEntry", back_populates="lines"
     )
-    account: Mapped["ChartOfAccounts"] = relationship(
-        "ChartOfAccounts", back_populates="journal_entry_lines"
-    )
+
+
+JournalEntryLine = JournalLine

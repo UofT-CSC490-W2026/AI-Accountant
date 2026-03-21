@@ -1,26 +1,21 @@
-# Re-export all models so Alembic can discover them via Base.metadata.
+"""Primary persistence models for the user-scoped accounting pipeline."""
+
 from app.models.account import ChartOfAccounts
 from app.models.asset import Asset, CCAScheduleEntry
-from app.models.document import CorporateDocument
-from app.models.integration import IntegrationConnection
-from app.models.journal import JournalEntry, JournalEntryLine
-from app.models.organization import Organization
-from app.models.reconciliation import ReconciliationRecord
+from app.models.clarification import ClarificationTask
+from app.models.journal import JournalEntry, JournalLine
 from app.models.schedule import ScheduledEntry
-from app.models.shareholder_loan import ShareholderLoanLedger
-from app.models.tax import TaxObligation
+from app.models.transaction import Transaction
+from app.models.user import User
 
 __all__ = [
-    "Organization",
+    "User",
     "ChartOfAccounts",
+    "Transaction",
     "JournalEntry",
-    "JournalEntryLine",
+    "JournalLine",
+    "ClarificationTask",
     "Asset",
     "CCAScheduleEntry",
-    "ShareholderLoanLedger",
-    "TaxObligation",
-    "CorporateDocument",
     "ScheduledEntry",
-    "IntegrationConnection",
-    "ReconciliationRecord",
 ]
