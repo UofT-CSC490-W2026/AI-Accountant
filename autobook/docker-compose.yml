@@ -2,8 +2,16 @@ x-common-env: &common-env
   DATABASE_URL: postgresql://autobook:autobook@db:5432/autobook
   REDIS_URL: redis://redis:6379/0
   SQS_ENDPOINT_URL: http://elasticmq:9324
-  AWS_PROFILE: ${AWS_PROFILE:-default}
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
   AWS_DEFAULT_REGION: ca-central-1
+  S3_ENDPOINT_URL: http://minio:9000
+  S3_BUCKET: autobook-local
+  QDRANT_URL: http://qdrant:6333
+  QDRANT_API_KEY: ""
+  SAGEMAKER_ENDPOINT_URL: http://localstack:4566
+  COGNITO_ENDPOINT_URL: http://localstack:4566
+  SECRETS_MANAGER_ENDPOINT_URL: http://localstack:4566
   ENV: local
   AUTH_ENABLED: "false"
 
@@ -11,8 +19,11 @@ x-common: &common
   depends_on:
     - db
     - redis
-  volumes:
-    - ~/.aws:/home/app/.aws:ro
+    - elasticmq
+    - minio
+    - qdrant
+    - localstack
+  volumes: []
 
 services:
   # ── Infrastructure ──────────────────────────────────────────
@@ -45,6 +56,36 @@ services:
     ports:
       - "9324:9324"
       - "9325:9325"
+    volumes:
+      - ./elasticmq.conf:/opt/elasticmq.conf
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sagemaker,cognito-idp,secretsmanager
+      DEFAULT_REGION: ca-central-1
 
   # ── Application Services ────────────────────────────────────
   api:
@@ -99,3 +140,5 @@ services:
 
 volumes:
   pgdata:
+  minio-data:
+  qdrant-data:

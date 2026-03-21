@@ -23,7 +23,8 @@ COPY backend/utils/ backend/utils/
 COPY backend/schemas/ backend/schemas/
 
 RUN groupadd -g 1001 app && useradd -u 1001 -g app -s /bin/false app
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app/backend"
 
 # ── autobook-accounting ────────────────────────────────────────
 # Tier workers (precedent, ml_inference, agent, resolution) inherit from this
