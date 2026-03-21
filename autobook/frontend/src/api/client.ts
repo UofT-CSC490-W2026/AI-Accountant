@@ -1,4 +1,5 @@
 import { mockApi } from "../mocks/mockApi";
+import { getUserId } from "./realtime";
 import type {
   ClarificationsResponse,
   LedgerResponse,
@@ -34,7 +35,7 @@ export async function parseTransaction(input: ParseRequest): Promise<ParseAccept
 
   return request<ParseAccepted>("/parse", {
     method: "POST",
-    body: JSON.stringify(input),
+    body: JSON.stringify({ ...input, user_id: getUserId() }),
   });
 }
 

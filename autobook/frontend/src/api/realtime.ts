@@ -9,19 +9,33 @@ const realtimeListeners = new Set<RealtimeListener>();
 let socket: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
+export function getUserId(): string {
+  const stored = localStorage.getItem("autobook_user_id");
+  if (stored) return stored;
+  const id = crypto.randomUUID();
+  localStorage.setItem("autobook_user_id", id);
+  return id;
+}
+
 function deriveWebSocketUrl() {
+  const userId = getUserId();
   const configuredUrl = import.meta.env.VITE_WS_URL;
+
+  let baseUrl: string;
   if (configuredUrl) {
-    return configuredUrl;
+    baseUrl = configuredUrl;
+  } else {
+    try {
+      const apiUrl = new URL(API_BASE_URL);
+      const protocol = apiUrl.protocol === "https:" ? "wss:" : "ws:";
+      baseUrl = `${protocol}//${apiUrl.host}/ws`;
+    } catch {
+      baseUrl = "ws://localhost:8000/ws";
+    }
   }
 
-  try {
-    const apiUrl = new URL(API_BASE_URL);
-    const protocol = apiUrl.protocol === "https:" ? "wss:" : "ws:";
-    return `${protocol}//${apiUrl.host}/ws`;
-  } catch {
-    return "ws://localhost:8000/ws";
-  }
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}userId=${userId}`;
 }
 
 function notifyListeners(event: RealtimeEvent) {
@@ -49,7 +63,7 @@ function parseRealtimeEvent(payload: string) {
 }
 
 function scheduleReconnect() {
-  if (reconnectTimer || realtimeListeners.size === 0 || typeof WebSocket === "undefined") {
+  if (reconnectTimer || typeof WebSocket === "undefined") {
     return;
   }
 
@@ -59,8 +73,8 @@ function scheduleReconnect() {
   }, 1000);
 }
 
-function ensureSocketConnection() {
-  if (USE_MOCK_API || socket || realtimeListeners.size === 0 || typeof WebSocket === "undefined") {
+export function ensureSocketConnection() {
+  if (USE_MOCK_API || socket || typeof WebSocket === "undefined") {
     return;
   }
 
@@ -101,20 +115,5 @@ export function subscribeToRealtimeUpdates(listener: RealtimeListener) {
 
   return () => {
     realtimeListeners.delete(listener);
-
-    if (realtimeListeners.size > 0) {
-      return;
-    }
-
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-    }
-
-    if (socket) {
-      const activeSocket = socket;
-      socket = null;
-      activeSocket.close();
-    }
   };
 }

@@ -31,6 +31,7 @@ def process(message: dict) -> None:
         "journal_entry_id": journal_entry_id,
         "parse_id": message.get("parse_id"),
         "input_text": message.get("input_text"),
+        "user_id": message.get("user_id"),
         "occurred_at": datetime.now(timezone.utc).isoformat(),
         "confidence": message.get("confidence"),
         "explanation": message.get("explanation"),

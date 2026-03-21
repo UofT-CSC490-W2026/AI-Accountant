@@ -1,7 +1,8 @@
 """WS Relay Service — bridges Redis pub/sub to API Gateway WebSocket clients.
 
-Subscribes to Redis channels and pushes events to all connected WebSocket
+Subscribes to Redis channels and pushes events to connected WebSocket
 clients via the API Gateway Management API (postToConnection).
+Filters by user_id so each user only receives their own events.
 """
 
 import json
@@ -10,6 +11,7 @@ import os
 
 import boto3
 import redis
+from boto3.dynamodb.conditions import Key
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger("ws-relay")
@@ -40,9 +42,20 @@ def main():
         data = message["data"]
         logger.info("Event on channel %s: %s", message["channel"], data[:100])
 
-        # Get all connected clients
-        connections = table.scan(ProjectionExpression="connectionId")
-        items = connections.get("Items", [])
+        event = json.loads(data)
+        user_id = event.get("user_id")
+
+        # Get connections — filter by userId if present, otherwise broadcast
+        if user_id:
+            response = table.query(
+                IndexName="userId-index",
+                KeyConditionExpression=Key("userId").eq(user_id),
+            )
+        else:
+            response = table.scan(ProjectionExpression="connectionId")
+
+        items = response.get("Items", [])
+        logger.info("Pushing to %d connection(s) for user %s", len(items), user_id or "ALL")
 
         # Push to each client
         stale = []

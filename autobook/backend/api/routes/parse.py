@@ -20,6 +20,7 @@ async def parse(body: ParseRequest, request: Request):
         "input_text": body.input_text,
         "source": body.source,
         "currency": body.currency,
+        "user_id": body.user_id,
         "submitted_at": datetime.now(timezone.utc).isoformat(),
     })
     return ParseAccepted(parse_id=parse_id)

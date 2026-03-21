@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { RealtimeClock } from "../components/RealtimeClock";
+import { ensureSocketConnection } from "../api/realtime";
 
 type AppLayoutProps = {
   children: ReactNode;
@@ -15,6 +16,9 @@ const navItems = [
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {
+  useEffect(() => {
+    ensureSocketConnection();
+  }, []);
   return (
     <div className="app-shell">
       <header className="topbar">
