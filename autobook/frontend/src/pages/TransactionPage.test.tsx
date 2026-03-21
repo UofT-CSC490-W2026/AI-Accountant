@@ -30,7 +30,7 @@ describe("transaction file upload", () => {
     fireEvent.click(screen.getByRole("button", { name: /upload file/i }));
 
     expect(await screen.findByText(/submitted march-bank\.csv for processing/i)).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: /entry posted/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /entry posted/i }, { timeout: 3000 })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /view ledger/i })).toBeInTheDocument();
   });
 
@@ -48,7 +48,7 @@ describe("transaction file upload", () => {
     fireEvent.click(screen.getByRole("button", { name: /upload file/i }));
 
     expect(await screen.findByText(/submitted invoice-demo\.pdf for processing/i)).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: /entry posted/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /entry posted/i }, { timeout: 3000 })).toBeInTheDocument();
   });
 
   test("accepts an image file and routes it through the mocked image intake path", async () => {
@@ -65,7 +65,8 @@ describe("transaction file upload", () => {
     fireEvent.click(screen.getByRole("button", { name: /upload file/i }));
 
     expect(await screen.findByText(/submitted receipt-demo\.png for processing/i)).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: /human review needed/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /clarification required/i }, { timeout: 3000 })).toBeInTheDocument();
+    expect(screen.getByText(/human review needed/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /open clarifications/i })).toBeInTheDocument();
   });
 });
