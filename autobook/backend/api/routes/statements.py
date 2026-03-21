@@ -17,16 +17,16 @@ async def get_statements(
             period=Period(as_of=as_of),
             sections=[
                 {
-                    "name": "Revenue",
-                    "lines": [
-                        {"account_code": "4000", "account_name": "[BACKEND STUB] Sales Revenue", "amount": 6660.00},
+                    "title": "Revenue",
+                    "rows": [
+                        {"label": "[BACKEND STUB] Sales Revenue", "amount": 6660.00},
                     ],
                 },
                 {
-                    "name": "Expenses",
-                    "lines": [
-                        {"account_code": "6100", "account_name": "[BACKEND STUB] Office Supplies", "amount": 66.60},
-                        {"account_code": "6200", "account_name": "[BACKEND STUB] Meals & Entertainment", "amount": 666.00},
+                    "title": "Expenses",
+                    "rows": [
+                        {"label": "[BACKEND STUB] Office Supplies", "amount": 66.60},
+                        {"label": "[BACKEND STUB] Meals & Entertainment", "amount": 666.00},
                     ],
                 },
             ],
@@ -38,20 +38,20 @@ async def get_statements(
         period=Period(as_of=as_of),
         sections=[
             {
-                "name": "Assets",
-                "lines": [
-                    {"account_code": "1000", "account_name": "[BACKEND STUB] Cash", "amount": 5927.40},
-                    {"account_code": "1500", "account_name": "[BACKEND STUB] Equipment", "amount": 666.00},
+                "title": "Assets",
+                "rows": [
+                    {"label": "[BACKEND STUB] Cash", "amount": 5927.40},
+                    {"label": "[BACKEND STUB] Equipment", "amount": 666.00},
                 ],
             },
             {
-                "name": "Liabilities",
-                "lines": [],
+                "title": "Liabilities",
+                "rows": [],
             },
             {
-                "name": "Equity",
-                "lines": [
-                    {"account_code": "3000", "account_name": "[BACKEND STUB] Retained Earnings", "amount": 6593.40},
+                "title": "Equity",
+                "rows": [
+                    {"label": "[BACKEND STUB] Retained Earnings", "amount": 6593.40},
                 ],
             },
         ],

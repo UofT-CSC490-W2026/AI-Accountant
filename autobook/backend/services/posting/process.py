@@ -17,6 +17,8 @@ def process(message: dict) -> None:
     publish_sync("entry.posted", {
         "type": "entry.posted",
         "journal_entry_id": journal_entry_id,
+        "parse_id": message.get("parse_id"),
+        "input_text": message.get("input_text"),
         "occurred_at": datetime.now(timezone.utc).isoformat(),
     })
 
