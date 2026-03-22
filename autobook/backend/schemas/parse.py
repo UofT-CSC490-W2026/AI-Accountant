@@ -5,7 +5,6 @@ class ParseRequest(BaseModel):
     input_text: str
     source: str = "manual"
     currency: str = "CAD"
-    user_id: str | None = None
 
 
 class JournalLine(BaseModel):

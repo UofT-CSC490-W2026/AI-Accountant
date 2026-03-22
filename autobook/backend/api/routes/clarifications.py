@@ -1,5 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from auth.deps import AuthContext, get_current_user, require_role
+from auth.schemas import UserRole
 from schemas.clarifications import (
     ClarificationItem,
     ClarificationsResponse,
@@ -13,7 +15,7 @@ router = APIRouter(prefix="/api/v1")
 
 
 @router.get("/clarifications", response_model=ClarificationsResponse)
-async def get_clarifications():
+async def get_clarifications(current_user: AuthContext = Depends(get_current_user)):
     # TODO: replace with DB query
     items = [
         ClarificationItem(
@@ -43,7 +45,11 @@ async def get_clarifications():
 
 
 @router.post("/clarifications/{clarification_id}/resolve", response_model=ResolveResponse)
-async def resolve_clarification(clarification_id: str, body: ResolveRequest):
+async def resolve_clarification(
+    clarification_id: str,
+    body: ResolveRequest,
+    current_user: AuthContext = Depends(require_role(UserRole.MANAGER)),
+):
     # TODO: replace with DB query
     return ResolveResponse(
         clarification_id=clarification_id,

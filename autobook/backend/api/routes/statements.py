@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 
+from auth.deps import AuthContext, get_current_user
 from schemas.statements import StatementResponse, Period
 
 router = APIRouter(prefix="/api/v1")
@@ -9,6 +10,7 @@ router = APIRouter(prefix="/api/v1")
 async def get_statements(
     statement_type: str = Query(default="balance_sheet"),
     as_of: str = Query(default="2026-03-31"),
+    current_user: AuthContext = Depends(get_current_user),
 ):
     # TODO: replace with DB query
     if statement_type == "income_statement":

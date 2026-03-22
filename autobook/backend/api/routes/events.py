@@ -4,7 +4,10 @@ import logging
 
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
 
+from auth.deps import resolve_auth_context_from_request
+from db.connection import SessionLocal
 from queues import subscribe
 
 logger = logging.getLogger(__name__)
@@ -14,8 +17,13 @@ CHANNELS = ("entry.posted", "clarification.created", "clarification.resolved")
 
 
 @router.get("/api/v1/events")
-async def events(request: Request, userId: str | None = None):
+async def events(request: Request):
     redis = request.app.state.redis
+    db: Session = SessionLocal()
+    try:
+        current_user = resolve_auth_context_from_request(request, db)
+    finally:
+        db.close()
 
     async def event_stream():
         async for event in subscribe(redis, *CHANNELS):
@@ -23,7 +31,7 @@ async def events(request: Request, userId: str | None = None):
                 break
 
             event_user = event.get("user_id")
-            if userId and event_user and event_user != userId:
+            if event_user and event_user != str(current_user.user.id):
                 continue
 
             yield f"data: {json.dumps(event)}\n\n"

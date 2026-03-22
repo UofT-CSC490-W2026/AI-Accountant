@@ -1,4 +1,5 @@
 import { subscribeToRealtimeUpdates as subscribeToMockRealtimeUpdates } from "../mocks/mockApi";
+import { getAccessToken } from "./auth";
 import type { RealtimeEvent, RealtimeListener } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
@@ -8,17 +9,13 @@ const realtimeListeners = new Set<RealtimeListener>();
 
 let eventSource: EventSource | null = null;
 
-export function getUserId(): string {
-  const stored = localStorage.getItem("autobook_user_id");
-  if (stored) return stored;
-  const id = crypto.randomUUID();
-  localStorage.setItem("autobook_user_id", id);
-  return id;
-}
-
 function deriveEventsUrl() {
-  const userId = getUserId();
-  return `${API_BASE_URL}/events?userId=${userId}`;
+  const token = getAccessToken();
+  if (!token) {
+    return null;
+  }
+  const params = new URLSearchParams({ access_token: token });
+  return `${API_BASE_URL}/events?${params.toString()}`;
 }
 
 function notifyListeners(event: RealtimeEvent) {
@@ -50,7 +47,12 @@ export function ensureSocketConnection() {
     return;
   }
 
-  const source = new EventSource(deriveEventsUrl());
+  const url = deriveEventsUrl();
+  if (!url) {
+    return;
+  }
+
+  const source = new EventSource(url);
   eventSource = source;
 
   source.onmessage = (event) => {

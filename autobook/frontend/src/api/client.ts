@@ -1,5 +1,5 @@
 import { mockApi } from "../mocks/mockApi";
-import { getUserId } from "./realtime";
+import { getAccessToken } from "./auth";
 import type {
   ClarificationsResponse,
   LedgerResponse,
@@ -13,11 +13,20 @@ import type {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== "false";
 
+
+function buildHeaders(extraHeaders?: HeadersInit) {
+  const token = getAccessToken();
+  const headers = new Headers(extraHeaders);
+  headers.set("Content-Type", "application/json");
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  return headers;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: buildHeaders(init?.headers),
     ...init,
   });
 
@@ -35,7 +44,7 @@ export async function parseTransaction(input: ParseRequest): Promise<ParseAccept
 
   return request<ParseAccepted>("/parse", {
     method: "POST",
-    body: JSON.stringify({ ...input, user_id: getUserId() }),
+    body: JSON.stringify(input),
   });
 }
 
@@ -49,6 +58,10 @@ export async function uploadTransactionFile(file: File): Promise<ParseAccepted> 
 
   const response = await fetch(`${API_BASE_URL}/parse/upload`, {
     method: "POST",
+    headers: (() => {
+      const token = getAccessToken();
+      return token ? { Authorization: `Bearer ${token}` } : undefined;
+    })(),
     body: formData,
   });
 

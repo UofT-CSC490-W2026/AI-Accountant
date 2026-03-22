@@ -7,8 +7,14 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://autobook:autobook@localhost:5432/autobook"
     DB_SECRET_ARN: str | None = None
     REDIS_URL: str = "redis://localhost:6379/0"
+    AWS_REGION: str | None = None
     AWS_DEFAULT_REGION: str = "ca-central-1"
     ENV: str = "local"
+    COGNITO_POOL_ID: str = "local-test-pool"
+    COGNITO_CLIENT_ID: str = "local-test-client"
+    COGNITO_JWKS_JSON: str | None = None
+    COGNITO_JWT_ALGORITHM: str = "RS256"
+    COGNITO_ROLE_CLAIM_SOURCE: str = "cognito:groups"
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "https://autobook.tech",
@@ -26,6 +32,18 @@ class Settings(BaseSettings):
     SQS_QUEUE_FLYWHEEL: str = "http://elasticmq:9324/queue/flywheel"
 
     model_config = {"env_file": ".env", "case_sensitive": False}
+
+    @property
+    def cognito_region(self) -> str:
+        return self.AWS_REGION or self.AWS_DEFAULT_REGION
+
+    @property
+    def cognito_issuer(self) -> str:
+        return f"https://cognito-idp.{self.cognito_region}.amazonaws.com/{self.COGNITO_POOL_ID}"
+
+    @property
+    def cognito_jwks_url(self) -> str:
+        return f"{self.cognito_issuer}/.well-known/jwks.json"
 
 
 @lru_cache

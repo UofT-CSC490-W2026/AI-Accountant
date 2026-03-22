@@ -14,8 +14,11 @@ locals {
 #   - Password reset flows
 #   - MFA (multi-factor authentication)
 #
-# Our app has two user types (free users, pro/accountant users) — both stored
-# in the same pool, differentiated by a Cognito group or custom attribute.
+# Our backend authorization policy uses Cognito groups as the app role claim.
+# Every authenticated user can be mapped to one of:
+#   - regular
+#   - manager
+#   - superuser
 resource "aws_cognito_user_pool" "main" {
   name = "${local.name}-users" # e.g. "autobook-dev-users"
 
@@ -124,6 +127,21 @@ resource "aws_cognito_user_pool_client" "main" {
   # --- Security: don't leak user existence ---
   # Returns the same error for "user not found" and "wrong password"
   prevent_user_existence_errors = "ENABLED"
+}
+
+# =============================================================================
+# ROLE GROUPS — emitted in Cognito tokens as `cognito:groups`
+# =============================================================================
+# We use groups instead of a custom role attribute because Terraform can
+# provision them directly and the backend can authorize on the resulting claim
+# without any extra token customization Lambda.
+resource "aws_cognito_user_group" "roles" {
+  for_each = var.role_group_names
+
+  user_pool_id = aws_cognito_user_pool.main.id
+  name         = each.key
+  precedence   = each.value
+  description  = "Autobook application role: ${each.key}"
 }
 
 # =============================================================================

@@ -34,6 +34,16 @@ output "cognito_client_id" {
   value       = module.auth.client_id
 }
 
+output "cognito_role_claim_source" {
+  description = "Canonical Cognito claim the backend uses for authorization"
+  value       = module.auth.role_claim_source
+}
+
+output "cognito_role_groups" {
+  description = "Cognito groups and precedence values expected by backend authorization"
+  value       = module.auth.role_group_names
+}
+
 # --- CI/CD ---
 
 # ECR repository URLs — CI/CD pushes Docker images here

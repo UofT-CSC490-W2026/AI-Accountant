@@ -13,3 +13,13 @@ output "client_id" {
   description = "Cognito app client ID — used by frontend to authenticate users"
   value       = aws_cognito_user_pool_client.main.id
 }
+
+output "role_claim_source" {
+  description = "Canonical Cognito claim the backend uses for app authorization"
+  value       = "cognito:groups"
+}
+
+output "role_group_names" {
+  description = "Map of Cognito role group names -> precedence expected by backend authorization"
+  value       = { for name, group in aws_cognito_user_group.roles : name => group.precedence }
+}

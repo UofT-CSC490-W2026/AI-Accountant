@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from auth.deps import AuthContext, get_current_user
 from config import get_settings
 from schemas.ledger import LedgerResponse, LedgerSummary
 
@@ -7,7 +8,7 @@ router = APIRouter(prefix="/api/v1")
 
 
 @router.get("/ledger", response_model=LedgerResponse)
-async def get_ledger():
+async def get_ledger(current_user: AuthContext = Depends(get_current_user)):
     # TODO: replace with DB query
     return LedgerResponse(
         entries=[

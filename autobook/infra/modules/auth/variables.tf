@@ -89,3 +89,15 @@ variable "refresh_token_validity_days" {
   description = "Days before refresh tokens expire (user must re-login)"
   default     = 30
 }
+
+# Backend authorization uses Cognito groups as the canonical app role source.
+# The group names are intentionally the same as the backend's role values.
+variable "role_group_names" {
+  type        = map(number)
+  description = "Map of Cognito role group name -> precedence for backend authorization"
+  default = {
+    regular   = 0
+    manager   = 10
+    superuser = 20
+  }
+}
