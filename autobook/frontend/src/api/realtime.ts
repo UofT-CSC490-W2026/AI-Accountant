@@ -6,8 +6,7 @@ const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== "false";
 
 const realtimeListeners = new Set<RealtimeListener>();
 
-let socket: WebSocket | null = null;
-let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let eventSource: EventSource | null = null;
 
 export function getUserId(): string {
   const stored = localStorage.getItem("autobook_user_id");
@@ -17,25 +16,9 @@ export function getUserId(): string {
   return id;
 }
 
-function deriveWebSocketUrl() {
+function deriveEventsUrl() {
   const userId = getUserId();
-  const configuredUrl = import.meta.env.VITE_WS_URL;
-
-  let baseUrl: string;
-  if (configuredUrl) {
-    baseUrl = configuredUrl;
-  } else {
-    try {
-      const apiUrl = new URL(API_BASE_URL);
-      const protocol = apiUrl.protocol === "https:" ? "wss:" : "ws:";
-      baseUrl = `${protocol}//${apiUrl.host}/ws`;
-    } catch {
-      baseUrl = "ws://localhost:8000/ws";
-    }
-  }
-
-  const separator = baseUrl.includes("?") ? "&" : "?";
-  return `${baseUrl}${separator}userId=${userId}`;
+  return `${API_BASE_URL}/events?userId=${userId}`;
 }
 
 function notifyListeners(event: RealtimeEvent) {
@@ -62,47 +45,25 @@ function parseRealtimeEvent(payload: string) {
   return null;
 }
 
-function scheduleReconnect() {
-  if (reconnectTimer || typeof WebSocket === "undefined") {
-    return;
-  }
-
-  reconnectTimer = setTimeout(() => {
-    reconnectTimer = null;
-    ensureSocketConnection();
-  }, 1000);
-}
-
 export function ensureSocketConnection() {
-  if (USE_MOCK_API || socket || typeof WebSocket === "undefined") {
+  if (USE_MOCK_API || eventSource) {
     return;
   }
 
-  const nextSocket = new WebSocket(deriveWebSocketUrl());
-  socket = nextSocket;
+  const source = new EventSource(deriveEventsUrl());
+  eventSource = source;
 
-  nextSocket.addEventListener("message", (event) => {
-    if (typeof event.data !== "string") {
-      return;
-    }
-
+  source.onmessage = (event) => {
     const parsed = parseRealtimeEvent(event.data);
     if (parsed) {
       notifyListeners(parsed);
     }
-  });
+  };
 
-  nextSocket.addEventListener("close", () => {
-    if (socket === nextSocket) {
-      socket = null;
-    }
-
-    scheduleReconnect();
-  });
-
-  nextSocket.addEventListener("error", () => {
-    nextSocket.close();
-  });
+  source.onerror = () => {
+    // EventSource auto-reconnects by default — no manual reconnect needed
+    // If the connection is permanently dead, the browser keeps retrying
+  };
 }
 
 export function subscribeToRealtimeUpdates(listener: RealtimeListener) {

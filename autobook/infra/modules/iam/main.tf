@@ -97,8 +97,11 @@ resource "aws_iam_role_policy" "ws_relay_dynamodb" {
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
-      Action   = ["dynamodb:Scan", "dynamodb:DeleteItem"]
-      Resource = var.ws_connections_table_arn
+      Action   = ["dynamodb:Scan", "dynamodb:Query", "dynamodb:DeleteItem"]
+      Resource = [
+        var.ws_connections_table_arn,
+        "${var.ws_connections_table_arn}/index/*"
+      ]
     }]
   })
 }
