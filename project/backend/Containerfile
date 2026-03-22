@@ -1,0 +1,18 @@
+FROM python:3.14-slim
+
+ENV UV_NO_DEV=1
+
+RUN pip install --no-cache-dir uv
+
+WORKDIR /app
+
+# Note: source path should be relative from the BUILD CONTEXT (i.e. project root dir),
+# not Containerfile location. Plus the Makefile is there too.
+COPY backend/pyproject.toml .
+COPY backend/uv.lock .
+RUN uv sync --locked --no-install-project
+
+COPY backend .
+RUN uv sync --locked
+
+CMD ["uv", "run", "fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]
