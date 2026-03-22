@@ -2,7 +2,7 @@ import uuid
 import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Request, UploadFile
+from fastapi import APIRouter, Form, Request, UploadFile
 
 from schemas.parse import ParseRequest, ParseAccepted
 from config import get_settings
@@ -27,7 +27,11 @@ async def parse(body: ParseRequest, request: Request):
 
 
 @router.post("/parse/upload", response_model=ParseAccepted)
-async def parse_upload(file: UploadFile, request: Request):
+async def parse_upload(
+    file: UploadFile,
+    request: Request,
+    user_id: str | None = Form(default=None),
+):
     parse_id = f"parse_{uuid.uuid4().hex[:12]}"
     contents = await file.read()
     logger.info("Received file %s (%d bytes), stub S3 upload", file.filename, len(contents))
@@ -36,6 +40,7 @@ async def parse_upload(file: UploadFile, request: Request):
         "parse_id": parse_id,
         "source": "upload",
         "filename": file.filename,
+        "user_id": user_id,
         "submitted_at": datetime.now(timezone.utc).isoformat(),
     })
     return ParseAccepted(parse_id=parse_id)

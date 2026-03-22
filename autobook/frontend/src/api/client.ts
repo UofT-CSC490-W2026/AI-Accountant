@@ -13,8 +13,15 @@ import type {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== "false";
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+function withUserId(path: string) {
+  const url = new URL(`${API_BASE_URL}${path}`);
+  url.searchParams.set("userId", getUserId());
+  return url.toString();
+}
+
+async function request<T>(path: string, init?: RequestInit, includeUserId = false): Promise<T> {
+  const target = includeUserId ? withUserId(path) : `${API_BASE_URL}${path}`;
+  const response = await fetch(target, {
     headers: {
       "Content-Type": "application/json",
     },
@@ -46,6 +53,7 @@ export async function uploadTransactionFile(file: File): Promise<ParseAccepted> 
 
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("user_id", getUserId());
 
   const response = await fetch(`${API_BASE_URL}/parse/upload`, {
     method: "POST",
@@ -64,7 +72,7 @@ export async function getClarifications(): Promise<ClarificationsResponse> {
     return mockApi.getClarifications();
   }
 
-  return request<ClarificationsResponse>("/clarifications");
+  return request<ClarificationsResponse>("/clarifications", undefined, true);
 }
 
 export async function resolveClarification(
@@ -75,10 +83,14 @@ export async function resolveClarification(
     return mockApi.resolveClarification(clarificationId, input);
   }
 
-  return request<ResolveClarificationResponse>(`/clarifications/${clarificationId}/resolve`, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
+  return request<ResolveClarificationResponse>(
+    `/clarifications/${clarificationId}/resolve`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+    },
+    true,
+  );
 }
 
 export async function getLedger(): Promise<LedgerResponse> {
@@ -86,7 +98,7 @@ export async function getLedger(): Promise<LedgerResponse> {
     return mockApi.getLedger();
   }
 
-  return request<LedgerResponse>("/ledger");
+  return request<LedgerResponse>("/ledger", undefined, true);
 }
 
 export async function getStatements(): Promise<StatementsResponse> {
@@ -94,5 +106,5 @@ export async function getStatements(): Promise<StatementsResponse> {
     return mockApi.getStatements();
   }
 
-  return request<StatementsResponse>("/statements");
+  return request<StatementsResponse>("/statements", undefined, true);
 }
