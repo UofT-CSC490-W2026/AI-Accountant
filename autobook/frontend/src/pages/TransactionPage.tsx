@@ -54,7 +54,7 @@ export function TransactionPage() {
       setResolvedEvent(null);
       const response = await parseTransaction({
         input_text: input,
-        source: "manual",
+        source: "manual_text",
         currency: "CAD",
       });
       setProcessingId(response.parse_id);

@@ -22,7 +22,7 @@ export function TransactionForm({
       <div className="panel-header">
         <div>
           <p className="eyebrow">Input</p>
-          <h2>Natural Language Transaction</h2>
+          <h2>Manual Text, CSV, or PDF</h2>
         </div>
       </div>
 
@@ -48,13 +48,13 @@ export function TransactionForm({
             Upload transaction file
           </label>
           <p className="field-help">
-            Accepted demo formats: CSV, text-based PDF, PNG, and JPG. CSV is real in the current frontend flow; PDF and image uploads are mocked to preserve a single pipeline shape.
+            Supported upload paths: CSV and text-based PDF. The frontend labels each upload explicitly so downstream services can dispatch to the right normalizer path.
           </p>
           <input
             id="transaction-file-upload"
             className="text-input"
             type="file"
-            accept=".csv,text/csv,.pdf,application/pdf,.png,image/png,.jpg,.jpeg,image/jpeg"
+            accept=".csv,text/csv,.pdf,application/pdf"
             onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
           />
           <span className="file-selection-copy">
@@ -71,9 +71,6 @@ export function TransactionForm({
               Sample PDF
             </a>
           </div>
-          <span className="field-help file-type-note">
-            Image receipt upload is currently a mock/demo path only.
-          </span>
         </div>
       </div>
 

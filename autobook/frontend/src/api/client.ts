@@ -8,6 +8,7 @@ import type {
   ResolveClarificationRequest,
   ResolveClarificationResponse,
   StatementsResponse,
+  TransactionInputSource,
 } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
@@ -17,6 +18,19 @@ function withUserId(path: string) {
   const url = new URL(`${API_BASE_URL}${path}`);
   url.searchParams.set("userId", getUserId());
   return url.toString();
+}
+
+function deriveUploadSource(file: File): Extract<TransactionInputSource, "csv_upload" | "pdf_upload"> {
+  const fileName = file.name.toLowerCase();
+  if (file.type === "text/csv" || fileName.endsWith(".csv")) {
+    return "csv_upload";
+  }
+
+  if (file.type === "application/pdf" || fileName.endsWith(".pdf")) {
+    return "pdf_upload";
+  }
+
+  throw new Error("Unsupported file type. Upload a CSV or text-based PDF.");
 }
 
 async function request<T>(path: string, init?: RequestInit, includeUserId = false): Promise<T> {
@@ -51,9 +65,11 @@ export async function uploadTransactionFile(file: File): Promise<ParseAccepted> 
     return mockApi.uploadTransactionFile(file);
   }
 
+  const source = deriveUploadSource(file);
   const formData = new FormData();
   formData.append("file", file);
   formData.append("user_id", getUserId());
+  formData.append("source", source);
 
   const response = await fetch(`${API_BASE_URL}/parse/upload`, {
     method: "POST",

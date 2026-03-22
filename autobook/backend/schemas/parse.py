@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class ParseRequest(BaseModel):
     input_text: str
-    source: str = "manual"
+    source: str = "manual_text"
     currency: str = "CAD"
     user_id: str | None = None
 
@@ -16,7 +16,7 @@ class JournalLine(BaseModel):
 
 
 class ProposedEntry(BaseModel):
-    journal_entry_id: str
+    journal_entry_id: str | None = None
     lines: list[JournalLine]
 
 

@@ -51,22 +51,9 @@ describe("transaction file upload", () => {
     expect(await screen.findByRole("heading", { name: /entry posted/i }, { timeout: 3000 })).toBeInTheDocument();
   });
 
-  test("accepts an image file and routes it through the mocked image intake path", async () => {
+  test("does not accept image-only upload paths in the supported intake flow", () => {
     renderTransactionPage();
-
-    const file = new File(["mock image bytes"], "receipt-demo.png", {
-      type: "image/png",
-    });
-
-    fireEvent.change(screen.getByLabelText(/upload transaction file/i), {
-      target: { files: [file] },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /upload file/i }));
-
-    expect(await screen.findByText(/submitted receipt-demo\.png for processing/i)).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: /clarification required/i }, { timeout: 3000 })).toBeInTheDocument();
-    expect(screen.getByText(/human review needed/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /open clarifications/i })).toBeInTheDocument();
+    const fileInput = screen.getByLabelText(/upload transaction file/i);
+    expect(fileInput).toHaveAttribute("accept", ".csv,text/csv,.pdf,application/pdf");
   });
 });

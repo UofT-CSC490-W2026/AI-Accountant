@@ -17,6 +17,7 @@ DATE_PATTERNS = (
 
 NON_PARTY_TOKENS = {"invoice", "tax", "cash", "inventory", "rent", "payment", "expense"}
 NON_QUANTITY_UNITS = {"cash", "cad", "usd", "dollars", "tax", "invoice"}
+STRUCTURED_AMOUNT_SOURCES = {"csv", "csv_upload", "bank_feed"}
 
 
 def _normalize_party_value(candidate: str) -> str:
@@ -148,8 +149,8 @@ class NormalizationService:
             except (TypeError, ValueError):
                 pass
 
-        source = str(message.get("source") or "manual")
-        if source in {"csv", "bank_feed"} and len(amount_mentions) == 1:
+        source = str(message.get("source") or "manual_text")
+        if source in STRUCTURED_AMOUNT_SOURCES and len(amount_mentions) == 1:
             return float(amount_mentions[0]["value"]), True
         return None, False
 
@@ -161,8 +162,8 @@ class NormalizationService:
         explicit = message.get("counterparty")
         if explicit:
             return str(explicit)
-        source = str(message.get("source") or "manual")
-        if source in {"csv", "bank_feed"} and len(party_mentions) == 1:
+        source = str(message.get("source") or "manual_text")
+        if source in STRUCTURED_AMOUNT_SOURCES and len(party_mentions) == 1:
             return str(party_mentions[0]["value"])
         return None
 
@@ -203,7 +204,7 @@ class NormalizationService:
             amount_confident=amount_confident,
             currency=str(message.get("currency") or "CAD"),
             transaction_date=self.extract_transaction_date(message, description),
-            source=str(message.get("source") or "manual"),
+            source=str(message.get("source") or "manual_text"),
             counterparty=self.extract_counterparty(message, party_mentions),
             amount_mentions=amount_mentions,
             date_mentions=date_mentions,

@@ -17,6 +17,7 @@ import type {
   ResolveClarificationRequest,
   ResolveClarificationResponse,
   StatementsResponse,
+  TransactionInputSource,
 } from "../api/types";
 
 function createInitialClarifications() {
@@ -45,6 +46,19 @@ function getTodayDate() {
 
 function getCurrentTimestamp() {
   return new Date().toISOString();
+}
+
+function deriveUploadSource(file: File): Extract<TransactionInputSource, "csv_upload" | "pdf_upload"> {
+  const lowerName = file.name.toLowerCase();
+  if (file.type === "text/csv" || lowerName.endsWith(".csv")) {
+    return "csv_upload";
+  }
+
+  if (file.type === "application/pdf" || lowerName.endsWith(".pdf")) {
+    return "pdf_upload";
+  }
+
+  throw new Error("Unsupported file type. Upload a CSV or text-based PDF.");
 }
 
 function nextParseId() {
@@ -265,25 +279,19 @@ export const mockApi = {
   async uploadTransactionFile(file: File): Promise<ParseAccepted> {
     await delay();
 
+    const source = deriveUploadSource(file);
     const lowerName = file.name.toLowerCase();
-    const extension = lowerName.split(".").pop() ?? "";
     const fileText = typeof file.text === "function" ? (await file.text()).toLowerCase() : lowerName;
     const needsClarification =
-      fileText.includes("transfer") ||
-      lowerName.includes("transfer") ||
-      extension === "png" ||
-      extension === "jpg" ||
-      extension === "jpeg";
+      fileText.includes("transfer") || lowerName.includes("transfer");
     const response = structuredClone(
       needsClarification ? parseNeedsClarificationFixture : parseAutoPostedFixture,
     ) as ParseResponse;
 
     const parseId = `upload_${file.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}`;
     response.parse_id = parseId;
-    if (extension === "pdf") {
+    if (source === "pdf_upload") {
       response.explanation = `Imported ${file.name} through the PDF intake path and normalized the extracted text into the standard parsing flow.`;
-    } else if (extension === "png" || extension === "jpg" || extension === "jpeg") {
-      response.explanation = `Imported ${file.name} through the image receipt demo path. OCR is mocked for now, but the result is routed through the same parse contract.`;
     } else {
       response.explanation = needsClarification
         ? `Imported ${file.name} and flagged at least one transaction for clarification review.`

@@ -1,5 +1,7 @@
 export type Status = "auto_posted" | "needs_clarification" | "rejected" | "accepted";
 
+export type TransactionInputSource = "manual_text" | "csv_upload" | "pdf_upload" | "bank_feed";
+
 export type ParseAccepted = {
   parse_id: string;
   status: "accepted";
@@ -30,7 +32,7 @@ export type ParseResponse = {
 
 export type ParseRequest = {
   input_text: string;
-  source: "manual" | "upload" | "bank_feed";
+  source: Extract<TransactionInputSource, "manual_text" | "bank_feed">;
   currency?: string;
 };
 

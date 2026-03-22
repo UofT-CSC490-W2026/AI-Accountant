@@ -12,6 +12,18 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1")
 
 
+def _infer_upload_source(filename: str | None) -> str:
+    if not filename:
+        return "upload"
+
+    lowered = filename.lower()
+    if lowered.endswith(".csv"):
+        return "csv_upload"
+    if lowered.endswith(".pdf"):
+        return "pdf_upload"
+    return "upload"
+
+
 @router.post("/parse", response_model=ParseAccepted)
 async def parse(body: ParseRequest, request: Request):
     parse_id = f"parse_{uuid.uuid4().hex[:12]}"
@@ -31,6 +43,7 @@ async def parse_upload(
     file: UploadFile,
     request: Request,
     user_id: str | None = Form(default=None),
+    source: str | None = Form(default=None),
 ):
     parse_id = f"parse_{uuid.uuid4().hex[:12]}"
     contents = await file.read()
@@ -38,7 +51,7 @@ async def parse_upload(
     # TODO: upload to S3, put S3 key in queue message
     enqueue(get_settings().SQS_QUEUE_NORMALIZER, {
         "parse_id": parse_id,
-        "source": "upload",
+        "source": source or _infer_upload_source(file.filename),
         "filename": file.filename,
         "user_id": user_id,
         "submitted_at": datetime.now(timezone.utc).isoformat(),

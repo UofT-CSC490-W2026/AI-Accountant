@@ -33,6 +33,8 @@ DATE_PATTERNS = (
     r"\b(\d{4}-\d{2}-\d{2})\b",
     r"\b(\d{1,2}/\d{1,2}/\d{2,4})\b",
 )
+UPLOAD_SOURCES = {"upload", "csv_upload", "pdf_upload"}
+MANUAL_SOURCES = {"manual", "manual_text"}
 
 
 def _normalize_party_value(candidate: str) -> str:
@@ -156,7 +158,7 @@ class BaselineInferenceService:
         for label, keywords, confidence in INTENT_RULES:
             if any(keyword in lowered for keyword in keywords):
                 return ClassificationResult(label, confidence)
-        if source == "upload":
+        if source in UPLOAD_SOURCES:
             return ClassificationResult("bank_transaction", 0.7)
 
         return ClassificationResult("general_expense", 0.6)
@@ -237,7 +239,7 @@ class BaselineInferenceService:
     def enrich(self, message: dict) -> dict:
         text = str(message.get("input_text") or "")
         normalized_text = self.normalize_text(text)
-        source = str(message.get("source") or "manual")
+        source = str(message.get("source") or "manual_text")
 
         entity_result = self.extract_entities(message, text)
         intent = self.classify_intent(text, source)
@@ -251,7 +253,7 @@ class BaselineInferenceService:
         return {
             **message,
             "normalized_text": normalized_text,
-            "input_type": "upload" if source == "upload" else "manual",
+            "input_type": "manual_text" if source in MANUAL_SOURCES else source,
             "transaction_date": str(message.get("transaction_date") or date.today()),
             "amount": entity_result.amount,
             "counterparty": entity_result.vendor,
