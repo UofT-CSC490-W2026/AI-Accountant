@@ -8,14 +8,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.actions.tax import (
-    calculate_hst_net_owing,
-    create_tax_obligation,
-    get_tax_obligation,
-    list_tax_obligations,
-    mark_tax_obligation_filed,
-    mark_tax_obligation_paid,
-)
+from app.actions.tax import TaxDAO
 from app.database import get_db
 from app.models.enums import TaxObligationStatus, TaxType
 
@@ -67,7 +60,8 @@ class HSTSummaryRequest(BaseModel):
 
 @router.post("/", response_model=TaxObligationOut, status_code=201)
 def create(payload: TaxObligationCreate, db: Session = Depends(get_db)):
-    obligation = create_tax_obligation(db, **payload.model_dump())
+    dao = TaxDAO(db)
+    obligation = dao.create(**payload.model_dump())
     db.commit()
     db.refresh(obligation)
     return obligation
@@ -75,7 +69,8 @@ def create(payload: TaxObligationCreate, db: Session = Depends(get_db)):
 
 @router.get("/{tax_id}", response_model=TaxObligationOut)
 def get(tax_id: uuid.UUID, db: Session = Depends(get_db)):
-    return get_tax_obligation(db, tax_id)
+    dao = TaxDAO(db)
+    return dao.get(tax_id)
 
 
 @router.get("/org/{org_id}", response_model=list[TaxObligationOut])
@@ -85,12 +80,14 @@ def list_all(
     status: TaxObligationStatus | None = None,
     db: Session = Depends(get_db),
 ):
-    return list_tax_obligations(db, org_id=org_id, tax_type=tax_type, status=status)
+    dao = TaxDAO(db)
+    return dao.list(org_id=org_id, tax_type=tax_type, status=status)
 
 
 @router.post("/{tax_id}/filed", response_model=TaxObligationOut)
 def mark_filed(tax_id: uuid.UUID, db: Session = Depends(get_db)):
-    obligation = mark_tax_obligation_filed(db, tax_obligation_id=tax_id)
+    dao = TaxDAO(db)
+    obligation = dao.mark_filed(tax_obligation_id=tax_id)
     db.commit()
     db.refresh(obligation)
     return obligation
@@ -102,9 +99,8 @@ def mark_paid(
     payload: MarkPaidRequest,
     db: Session = Depends(get_db),
 ):
-    obligation = mark_tax_obligation_paid(
-        db, tax_obligation_id=tax_id, **payload.model_dump()
-    )
+    dao = TaxDAO(db)
+    obligation = dao.mark_paid(tax_obligation_id=tax_id, **payload.model_dump())
     db.commit()
     db.refresh(obligation)
     return obligation
@@ -112,4 +108,5 @@ def mark_paid(
 
 @router.post("/hst-summary")
 def hst_summary(payload: HSTSummaryRequest, db: Session = Depends(get_db)):
-    return calculate_hst_net_owing(db, **payload.model_dump())
+    dao = TaxDAO(db)
+    return dao.calculate_hst_net_owing(**payload.model_dump())

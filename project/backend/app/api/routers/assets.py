@@ -8,14 +8,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.actions.assets import (
-    calculate_annual_cca,
-    create_asset,
-    create_cca_schedule_entry,
-    dispose_asset,
-    get_asset,
-    list_assets,
-)
+from app.actions.assets import AssetDAO
 from app.database import get_db
 from app.models.enums import AssetStatus
 
@@ -97,7 +90,8 @@ class CCAScheduleEntryOut(BaseModel):
 
 @router.post("/", response_model=AssetOut, status_code=201)
 def create(payload: AssetCreate, db: Session = Depends(get_db)):
-    asset = create_asset(db, **payload.model_dump())
+    dao = AssetDAO(db)
+    asset = dao.create(**payload.model_dump())
     db.commit()
     db.refresh(asset)
     return asset
@@ -105,7 +99,8 @@ def create(payload: AssetCreate, db: Session = Depends(get_db)):
 
 @router.get("/{asset_id}", response_model=AssetOut)
 def get(asset_id: uuid.UUID, db: Session = Depends(get_db)):
-    return get_asset(db, asset_id)
+    dao = AssetDAO(db)
+    return dao.get(asset_id)
 
 
 @router.get("/org/{org_id}", response_model=list[AssetOut])
@@ -114,14 +109,16 @@ def list_all(
     status: AssetStatus | None = None,
     db: Session = Depends(get_db),
 ):
-    return list_assets(db, org_id=org_id, status=status)
+    dao = AssetDAO(db)
+    return dao.list(org_id=org_id, status=status)
 
 
 @router.post("/{asset_id}/dispose", response_model=AssetOut)
 def dispose(
     asset_id: uuid.UUID, payload: DisposeRequest, db: Session = Depends(get_db)
 ):
-    asset = dispose_asset(db, asset_id=asset_id, **payload.model_dump())
+    dao = AssetDAO(db)
+    asset = dao.dispose(asset_id=asset_id, **payload.model_dump())
     db.commit()
     db.refresh(asset)
     return asset
@@ -131,7 +128,8 @@ def dispose(
 def calc_cca(
     asset_id: uuid.UUID, payload: CCACalcRequest, db: Session = Depends(get_db)
 ):
-    entry = calculate_annual_cca(db, asset_id=asset_id, **payload.model_dump())
+    dao = AssetDAO(db)
+    entry = dao.calculate_annual_cca(asset_id=asset_id, **payload.model_dump())
     db.commit()
     db.refresh(entry)
     return entry
@@ -139,7 +137,8 @@ def calc_cca(
 
 @router.post("/cca-schedule", response_model=CCAScheduleEntryOut, status_code=201)
 def create_cca(payload: CCAScheduleEntryCreate, db: Session = Depends(get_db)):
-    entry = create_cca_schedule_entry(db, **payload.model_dump())
+    dao = AssetDAO(db)
+    entry = dao.create_cca_schedule_entry(**payload.model_dump())
     db.commit()
     db.refresh(entry)
     return entry

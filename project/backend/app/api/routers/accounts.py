@@ -6,13 +6,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.actions.accounts import (
-    create_account,
-    get_account,
-    get_or_create_account,
-    list_accounts,
-    seed_chart_of_accounts,
-)
+from app.actions.accounts import AccountDAO
 from app.database import get_db
 from app.models.enums import AccountCreator, AccountSubType, AccountType
 
@@ -62,7 +56,8 @@ class GetOrCreateRequest(BaseModel):
 
 @router.post("/", response_model=AccountOut, status_code=201)
 def create_acct(payload: AccountCreate, db: Session = Depends(get_db)):
-    account = create_account(db, **payload.model_dump())
+    dao = AccountDAO(db)
+    account = dao.create(**payload.model_dump())
     db.commit()
     db.refresh(account)
     return account
@@ -70,17 +65,20 @@ def create_acct(payload: AccountCreate, db: Session = Depends(get_db)):
 
 @router.get("/{account_id}", response_model=AccountOut)
 def get_acct(account_id: uuid.UUID, db: Session = Depends(get_db)):
-    return get_account(db, account_id)
+    dao = AccountDAO(db)
+    return dao.get(account_id)
 
 
 @router.get("/org/{org_id}", response_model=list[AccountOut])
 def list_accts(org_id: uuid.UUID, active_only: bool = True, db: Session = Depends(get_db)):
-    return list_accounts(db, org_id=org_id, active_only=active_only)
+    dao = AccountDAO(db)
+    return dao.list(org_id=org_id, active_only=active_only)
 
 
 @router.post("/get-or-create", response_model=AccountOut)
 def get_or_create(payload: GetOrCreateRequest, db: Session = Depends(get_db)):
-    account = get_or_create_account(db, **payload.model_dump())
+    dao = AccountDAO(db)
+    account = dao.get_or_create(**payload.model_dump())
     db.commit()
     db.refresh(account)
     return account
@@ -88,7 +86,8 @@ def get_or_create(payload: GetOrCreateRequest, db: Session = Depends(get_db)):
 
 @router.post("/seed/{org_id}", response_model=list[AccountOut], status_code=201)
 def seed_coa(org_id: uuid.UUID, db: Session = Depends(get_db)):
-    accounts = seed_chart_of_accounts(db, org_id=org_id)
+    dao = AccountDAO(db)
+    accounts = dao.seed(org_id=org_id)
     db.commit()
     for a in accounts:
         db.refresh(a)

@@ -62,123 +62,111 @@ EXPENSE_TEMPLATE_MAP: dict[str, tuple[str, str, AccountType, AccountSubType]] = 
 }
 
 
-# ── CRUD ─────────────────────────────────────────────────────────
+# ── DAO ─────────────────────────────────────────────────────────
 
 
-def create_account(
-    db: Session,
-    *,
-    org_id: uuid.UUID,
-    account_number: str,
-    name: str,
-    account_type: AccountType,
-    sub_type: AccountSubType | None = None,
-    parent_account_id: uuid.UUID | None = None,
-    currency: str = "CAD",
-    is_active: bool = True,
-    created_by: AccountCreator = AccountCreator.USER,
-    auto_created: bool = False,
-) -> ChartOfAccounts:
-    account = ChartOfAccounts(
-        org_id=org_id,
-        account_number=account_number,
-        name=name,
-        account_type=account_type,
-        sub_type=sub_type,
-        parent_account_id=parent_account_id,
-        currency=currency,
-        is_active=is_active,
-        created_by=created_by,
-        auto_created=auto_created,
-    )
-    db.add(account)
-    db.flush()
-    return account
+class AccountDAO:
+    def __init__(self, db: Session):
+        self._db = db
 
-
-def get_account(db: Session, account_id: uuid.UUID) -> ChartOfAccounts:
-    account = db.get(ChartOfAccounts, account_id)
-    if account is None:
-        raise NotFoundError(f"account {account_id} not found")
-    return account
-
-
-def get_account_by_number(
-    db: Session, *, org_id: uuid.UUID, account_number: str
-) -> ChartOfAccounts | None:
-    stmt = select(ChartOfAccounts).where(
-        ChartOfAccounts.org_id == org_id,
-        ChartOfAccounts.account_number == account_number,
-    )
-    return db.execute(stmt).scalar_one_or_none()
-
-
-def list_accounts(
-    db: Session, *, org_id: uuid.UUID, active_only: bool = True
-) -> list[ChartOfAccounts]:
-    stmt = select(ChartOfAccounts).where(ChartOfAccounts.org_id == org_id)
-    if active_only:
-        stmt = stmt.where(ChartOfAccounts.is_active.is_(True))
-    stmt = stmt.order_by(ChartOfAccounts.account_number)
-    return list(db.execute(stmt).scalars().all())
-
-
-# ── CoA Manager (§0.4) ──────────────────────────────────────────
-
-
-def get_or_create_account(
-    db: Session,
-    *,
-    org_id: uuid.UUID,
-    category: str,
-    currency: str = "CAD",
-) -> ChartOfAccounts:
-    """Lazy-create an expense account from the template map."""
-    template = EXPENSE_TEMPLATE_MAP.get(category)
-    if template is None:
-        raise ValidationError(f"unknown expense category: {category!r}")
-
-    account_number, name, account_type, sub_type = template
-
-    existing = get_account_by_number(db, org_id=org_id, account_number=account_number)
-    if existing is not None:
-        return existing
-
-    return create_account(
-        db,
-        org_id=org_id,
-        account_number=account_number,
-        name=name,
-        account_type=account_type,
-        sub_type=sub_type,
-        currency=currency,
-        created_by=AccountCreator.SYSTEM,
-        auto_created=True,
-    )
-
-
-def seed_chart_of_accounts(
-    db: Session, *, org_id: uuid.UUID
-) -> list[ChartOfAccounts]:
-    """Create the standard Canadian small-business CoA for a new org (§0.3).
-
-    Skips any accounts that already exist (idempotent).
-    """
-    created: list[ChartOfAccounts] = []
-    for acct_num, name, acct_type, sub_type in SEED_ACCOUNTS:
-        existing = get_account_by_number(db, org_id=org_id, account_number=acct_num)
-        if existing is not None:
-            created.append(existing)
-            continue
-        account = create_account(
-            db,
+    def create(
+        self,
+        *,
+        org_id: uuid.UUID,
+        account_number: str,
+        name: str,
+        account_type: AccountType,
+        sub_type: AccountSubType | None = None,
+        parent_account_id: uuid.UUID | None = None,
+        currency: str = "CAD",
+        is_active: bool = True,
+        created_by: AccountCreator = AccountCreator.USER,
+        auto_created: bool = False,
+    ) -> ChartOfAccounts:
+        account = ChartOfAccounts(
             org_id=org_id,
-            account_number=acct_num,
+            account_number=account_number,
             name=name,
-            account_type=acct_type,
+            account_type=account_type,
             sub_type=sub_type,
+            parent_account_id=parent_account_id,
+            currency=currency,
+            is_active=is_active,
+            created_by=created_by,
+            auto_created=auto_created,
+        )
+        self._db.add(account)
+        self._db.flush()
+        return account
+
+    def get(self, account_id: uuid.UUID) -> ChartOfAccounts:
+        account = self._db.get(ChartOfAccounts, account_id)
+        if account is None:
+            raise NotFoundError(f"account {account_id} not found")
+        return account
+
+    def get_by_number(self, *, org_id: uuid.UUID, account_number: str) -> ChartOfAccounts | None:
+        stmt = select(ChartOfAccounts).where(
+            ChartOfAccounts.org_id == org_id,
+            ChartOfAccounts.account_number == account_number,
+        )
+        return self._db.execute(stmt).scalar_one_or_none()
+
+    def list(self, *, org_id: uuid.UUID, active_only: bool = True) -> list[ChartOfAccounts]:
+        stmt = select(ChartOfAccounts).where(ChartOfAccounts.org_id == org_id)
+        if active_only:
+            stmt = stmt.where(ChartOfAccounts.is_active.is_(True))
+        stmt = stmt.order_by(ChartOfAccounts.account_number)
+        return list(self._db.execute(stmt).scalars().all())
+
+    def get_or_create(
+        self,
+        *,
+        org_id: uuid.UUID,
+        category: str,
+        currency: str = "CAD",
+    ) -> ChartOfAccounts:
+        """Lazy-create an expense account from the template map."""
+        template = EXPENSE_TEMPLATE_MAP.get(category)
+        if template is None:
+            raise ValidationError(f"unknown expense category: {category!r}")
+
+        account_number, name, account_type, sub_type = template
+
+        existing = self.get_by_number(org_id=org_id, account_number=account_number)
+        if existing is not None:
+            return existing
+
+        return self.create(
+            org_id=org_id,
+            account_number=account_number,
+            name=name,
+            account_type=account_type,
+            sub_type=sub_type,
+            currency=currency,
             created_by=AccountCreator.SYSTEM,
             auto_created=True,
         )
-        created.append(account)
-    return created
+
+    def seed(self, *, org_id: uuid.UUID) -> list[ChartOfAccounts]:
+        """Create the standard Canadian small-business CoA for a new org (§0.3).
+
+        Skips any accounts that already exist (idempotent).
+        """
+        created: list[ChartOfAccounts] = []
+        for acct_num, name, acct_type, sub_type in SEED_ACCOUNTS:
+            existing = self.get_by_number(org_id=org_id, account_number=acct_num)
+            if existing is not None:
+                created.append(existing)
+                continue
+            account = self.create(
+                org_id=org_id,
+                account_number=acct_num,
+                name=name,
+                account_type=acct_type,
+                sub_type=sub_type,
+                created_by=AccountCreator.SYSTEM,
+                auto_created=True,
+            )
+            created.append(account)
+        return created

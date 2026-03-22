@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.actions.documents import create_corporate_document
+from app.actions.documents import DocumentDAO
 from app.database import get_db
 from app.models.enums import DocumentStatus, DocumentType
 
@@ -45,7 +45,8 @@ class DocumentOut(BaseModel):
 
 @router.post("/", response_model=DocumentOut, status_code=201)
 def create(payload: DocumentCreate, db: Session = Depends(get_db)):
-    doc = create_corporate_document(db, **payload.model_dump())
+    dao = DocumentDAO(db)
+    doc = dao.create(**payload.model_dump())
     db.commit()
     db.refresh(doc)
     return doc

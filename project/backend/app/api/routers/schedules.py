@@ -7,12 +7,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.actions.schedules import (
-    complete_scheduled_entry,
-    create_scheduled_entry,
-    list_scheduled_entries,
-    pause_scheduled_entry,
-)
+from app.actions.schedules import ScheduleDAO
 from app.database import get_db
 from app.models.enums import ScheduleFrequency, ScheduleSource, ScheduleStatus
 
@@ -52,7 +47,8 @@ class ScheduleOut(BaseModel):
 
 @router.post("/", response_model=ScheduleOut, status_code=201)
 def create(payload: ScheduleCreate, db: Session = Depends(get_db)):
-    scheduled = create_scheduled_entry(db, **payload.model_dump())
+    dao = ScheduleDAO(db)
+    scheduled = dao.create(**payload.model_dump())
     db.commit()
     db.refresh(scheduled)
     return scheduled
@@ -64,12 +60,14 @@ def list_all(
     status: ScheduleStatus | None = None,
     db: Session = Depends(get_db),
 ):
-    return list_scheduled_entries(db, org_id=org_id, status=status)
+    dao = ScheduleDAO(db)
+    return dao.list(org_id=org_id, status=status)
 
 
 @router.post("/{entry_id}/pause", response_model=ScheduleOut)
 def pause(entry_id: uuid.UUID, db: Session = Depends(get_db)):
-    entry = pause_scheduled_entry(db, scheduled_entry_id=entry_id)
+    dao = ScheduleDAO(db)
+    entry = dao.pause(scheduled_entry_id=entry_id)
     db.commit()
     db.refresh(entry)
     return entry
@@ -77,7 +75,8 @@ def pause(entry_id: uuid.UUID, db: Session = Depends(get_db)):
 
 @router.post("/{entry_id}/complete", response_model=ScheduleOut)
 def complete(entry_id: uuid.UUID, db: Session = Depends(get_db)):
-    entry = complete_scheduled_entry(db, scheduled_entry_id=entry_id)
+    dao = ScheduleDAO(db)
+    entry = dao.complete(scheduled_entry_id=entry_id)
     db.commit()
     db.refresh(entry)
     return entry

@@ -8,12 +8,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.actions.shareholder_loans import (
-    check_section_15_2_warning,
-    create_shareholder_loan_transaction,
-    get_shareholder_loan_balance,
-    list_shareholder_loan_transactions,
-)
+from app.actions.shareholder_loans import ShareholderLoanDAO
 from app.database import get_db
 
 router = APIRouter(prefix="/shareholder-loans", tags=["shareholder_loans"])
@@ -60,7 +55,8 @@ class Section152Check(BaseModel):
 
 @router.post("/", response_model=LoanTransactionOut, status_code=201)
 def create_transaction(payload: LoanTransactionCreate, db: Session = Depends(get_db)):
-    txn = create_shareholder_loan_transaction(db, **payload.model_dump())
+    dao = ShareholderLoanDAO(db)
+    txn = dao.create_transaction(**payload.model_dump())
     db.commit()
     db.refresh(txn)
     return txn
@@ -72,22 +68,21 @@ def list_transactions(
     shareholder_name: str | None = None,
     db: Session = Depends(get_db),
 ):
-    return list_shareholder_loan_transactions(
-        db, org_id=org_id, shareholder_name=shareholder_name
-    )
+    dao = ShareholderLoanDAO(db)
+    return dao.list_transactions(org_id=org_id, shareholder_name=shareholder_name)
 
 
 @router.get("/balance/{org_id}/{shareholder_name}", response_model=BalanceOut)
 def get_balance(
     org_id: uuid.UUID, shareholder_name: str, db: Session = Depends(get_db)
 ):
-    balance = get_shareholder_loan_balance(
-        db, org_id=org_id, shareholder_name=shareholder_name
-    )
+    dao = ShareholderLoanDAO(db)
+    balance = dao.get_balance(org_id=org_id, shareholder_name=shareholder_name)
     return BalanceOut(shareholder_name=shareholder_name, balance=balance)
 
 
 @router.post("/check-s152")
 def check_s152(payload: Section152Check, db: Session = Depends(get_db)):
-    result = check_section_15_2_warning(db, **payload.model_dump())
+    dao = ShareholderLoanDAO(db)
+    result = dao.check_section_15_2_warning(**payload.model_dump())
     return result or {"warning": None}

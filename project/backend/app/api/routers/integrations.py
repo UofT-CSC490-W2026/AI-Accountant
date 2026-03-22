@@ -7,11 +7,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.actions.integrations import (
-    create_integration_connection,
-    list_integration_connections,
-    update_integration_status,
-)
+from app.actions.integrations import IntegrationDAO
 from app.database import get_db
 from app.models.enums import IntegrationPlatform, IntegrationStatus
 
@@ -52,7 +48,8 @@ class StatusUpdateRequest(BaseModel):
 
 @router.post("/", response_model=IntegrationOut, status_code=201)
 def create(payload: IntegrationCreate, db: Session = Depends(get_db)):
-    conn = create_integration_connection(db, **payload.model_dump())
+    dao = IntegrationDAO(db)
+    conn = dao.create(**payload.model_dump())
     db.commit()
     db.refresh(conn)
     return conn
@@ -60,7 +57,8 @@ def create(payload: IntegrationCreate, db: Session = Depends(get_db)):
 
 @router.get("/org/{org_id}", response_model=list[IntegrationOut])
 def list_all(org_id: uuid.UUID, db: Session = Depends(get_db)):
-    return list_integration_connections(db, org_id=org_id)
+    dao = IntegrationDAO(db)
+    return dao.list(org_id=org_id)
 
 
 @router.post("/{conn_id}/status", response_model=IntegrationOut)
@@ -69,9 +67,8 @@ def update_status(
     payload: StatusUpdateRequest,
     db: Session = Depends(get_db),
 ):
-    conn = update_integration_status(
-        db, connection_id=conn_id, **payload.model_dump()
-    )
+    dao = IntegrationDAO(db)
+    conn = dao.update_status(connection_id=conn_id, **payload.model_dump())
     db.commit()
     db.refresh(conn)
     return conn

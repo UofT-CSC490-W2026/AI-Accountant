@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.actions.organizations import create_organization, get_organization
+from app.actions.organizations import OrganizationDAO
 from app.database import get_db
 
 router = APIRouter(prefix="/organizations", tags=["organizations"])
@@ -42,7 +42,8 @@ class OrganizationOut(BaseModel):
 
 @router.post("/", response_model=OrganizationOut, status_code=201)
 def create_org(payload: OrganizationCreate, db: Session = Depends(get_db)):
-    org = create_organization(db, **payload.model_dump())
+    dao = OrganizationDAO(db)
+    org = dao.create(**payload.model_dump())
     db.commit()
     db.refresh(org)
     return org
@@ -50,4 +51,5 @@ def create_org(payload: OrganizationCreate, db: Session = Depends(get_db)):
 
 @router.get("/{org_id}", response_model=OrganizationOut)
 def get_org(org_id: uuid.UUID, db: Session = Depends(get_db)):
-    return get_organization(db, org_id)
+    dao = OrganizationDAO(db)
+    return dao.get(org_id)

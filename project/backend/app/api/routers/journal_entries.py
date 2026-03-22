@@ -8,14 +8,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.actions.journal_entries import (
-    create_journal_entry,
-    get_journal_entry,
-    list_journal_entries,
-    post_journal_entry,
-    reverse_journal_entry,
-    submit_for_review,
-)
+from app.actions.journal_entries import JournalEntryDAO
 from app.database import get_db
 from app.models.enums import JournalEntrySource, JournalEntryStatus
 
@@ -89,9 +82,10 @@ class ReverseRequest(BaseModel):
 
 @router.post("/", response_model=JournalEntryOut, status_code=201)
 def create_entry(payload: JournalEntryCreate, db: Session = Depends(get_db)):
+    dao = JournalEntryDAO(db)
     data = payload.model_dump()
     data["lines"] = [line.model_dump() for line in payload.lines]
-    entry = create_journal_entry(db, **data)
+    entry = dao.create(**data)
     db.commit()
     db.refresh(entry)
     return entry
@@ -99,7 +93,8 @@ def create_entry(payload: JournalEntryCreate, db: Session = Depends(get_db)):
 
 @router.get("/{entry_id}", response_model=JournalEntryOut)
 def get_entry(entry_id: uuid.UUID, db: Session = Depends(get_db)):
-    return get_journal_entry(db, entry_id)
+    dao = JournalEntryDAO(db)
+    return dao.get(entry_id)
 
 
 @router.get("/org/{org_id}", response_model=list[JournalEntryOut])
@@ -108,7 +103,8 @@ def list_entries(
     status: JournalEntryStatus | None = None,
     db: Session = Depends(get_db),
 ):
-    return list_journal_entries(db, org_id=org_id, status=status)
+    dao = JournalEntryDAO(db)
+    return dao.list(org_id=org_id, status=status)
 
 
 @router.post("/{entry_id}/post", response_model=JournalEntryOut)
@@ -117,9 +113,8 @@ def post_entry(
     payload: PostRequest,
     db: Session = Depends(get_db),
 ):
-    entry = post_journal_entry(
-        db, journal_entry_id=entry_id, **payload.model_dump()
-    )
+    dao = JournalEntryDAO(db)
+    entry = dao.post(journal_entry_id=entry_id, **payload.model_dump())
     db.commit()
     db.refresh(entry)
     return entry
@@ -127,7 +122,8 @@ def post_entry(
 
 @router.post("/{entry_id}/submit-for-review", response_model=JournalEntryOut)
 def submit_review(entry_id: uuid.UUID, db: Session = Depends(get_db)):
-    entry = submit_for_review(db, journal_entry_id=entry_id)
+    dao = JournalEntryDAO(db)
+    entry = dao.submit_for_review(journal_entry_id=entry_id)
     db.commit()
     db.refresh(entry)
     return entry
@@ -139,9 +135,8 @@ def reverse_entry(
     payload: ReverseRequest,
     db: Session = Depends(get_db),
 ):
-    reversal = reverse_journal_entry(
-        db, journal_entry_id=entry_id, **payload.model_dump()
-    )
+    dao = JournalEntryDAO(db)
+    reversal = dao.reverse(journal_entry_id=entry_id, **payload.model_dump())
     db.commit()
     db.refresh(reversal)
     return reversal
