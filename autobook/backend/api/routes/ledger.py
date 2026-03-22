@@ -1,45 +1,68 @@
-from fastapi import APIRouter
+from __future__ import annotations
 
-from config import get_settings
+from decimal import Decimal
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from api.dependencies import get_current_local_user
+from db.connection import get_db
+from db.dao.journal_entries import JournalEntryDAO
+from db.models.journal import JournalEntry
 from schemas.ledger import LedgerResponse, LedgerSummary
 
 router = APIRouter(prefix="/api/v1")
 
 
+def _to_float(value) -> float:
+    return float(value if isinstance(value, Decimal) else value or 0)
+
+
+def _serialize_entry(entry: JournalEntry) -> dict:
+    return {
+        "journal_entry_id": str(entry.id),
+        "date": str(entry.date),
+        "description": entry.description,
+        "status": entry.status,
+        "origin_tier": entry.origin_tier,
+        "confidence": {
+            "overall": _to_float(entry.confidence),
+        }
+        if entry.confidence is not None
+        else None,
+        "lines": [
+            {
+                "account_code": line.account_code,
+                "account_name": line.account_name,
+                "type": line.type,
+                "amount": _to_float(line.amount),
+            }
+            for line in entry.lines
+        ],
+    }
+
+
 @router.get("/ledger", response_model=LedgerResponse)
-async def get_ledger():
-    # TODO: replace with DB query
+async def get_ledger(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_local_user),
+):
+    entries = JournalEntryDAO.list_by_user(db, current_user.id)
+    balances = JournalEntryDAO.compute_balances(db, current_user.id)
+    summary = JournalEntryDAO.compute_summary(db, current_user.id)
+
     return LedgerResponse(
-        entries=[
-            {
-                "journal_entry_id": "je_stub_001",
-                "date": "2026-06-06",
-                "description": "[BACKEND STUB] Equipment Purchase",
-                "status": "auto_posted",
-                "origin_tier": 1,
-                "confidence": {"overall": 0.66, "auto_post_threshold": get_settings().AUTO_POST_THRESHOLD},
-                "lines": [
-                    {"account_code": "1500", "account_name": "Equipment", "type": "debit", "amount": 666.00},
-                    {"account_code": "1000", "account_name": "Cash", "type": "credit", "amount": 666.00},
-                ],
-            },
-            {
-                "journal_entry_id": "je_stub_002",
-                "date": "2026-06-05",
-                "description": "[BACKEND STUB] Office Supplies",
-                "status": "auto_posted",
-                "origin_tier": 2,
-                "confidence": {"overall": 0.96, "auto_post_threshold": get_settings().AUTO_POST_THRESHOLD},
-                "lines": [
-                    {"account_code": "6100", "account_name": "Office Supplies", "type": "debit", "amount": 66.60},
-                    {"account_code": "1000", "account_name": "Cash", "type": "credit", "amount": 66.60},
-                ],
-            },
-        ],
+        entries=[_serialize_entry(entry) for entry in entries],
         balances=[
-            {"account_code": "1000", "account_name": "Cash", "balance": -732.60},
-            {"account_code": "1500", "account_name": "Equipment", "balance": 666.00},
-            {"account_code": "6100", "account_name": "Office Supplies", "balance": 66.60},
+            {
+                "account_code": item["account_code"],
+                "account_name": item["account_name"],
+                "balance": _to_float(item["balance"]),
+            }
+            for item in balances
         ],
-        summary=LedgerSummary(total_debits=732.60, total_credits=732.60),
+        summary=LedgerSummary(
+            total_debits=_to_float(summary.get("total_debits")),
+            total_credits=_to_float(summary.get("total_credits")),
+        ),
     )

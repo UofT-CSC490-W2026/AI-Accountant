@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -8,6 +9,7 @@ from sqlalchemy.orm import Session
 from db.connection import set_current_user_context
 from db.dao.journal_entries import JournalEntryDAO
 from db.models.clarification import ClarificationTask
+from db.models.journal import JournalEntry
 
 
 def _normalize_entry_payload(payload: dict | None) -> tuple[dict, list[dict]]:
@@ -17,6 +19,16 @@ def _normalize_entry_payload(payload: dict | None) -> tuple[dict, list[dict]]:
         return dict(payload["entry"]), list(payload["lines"])
     entry = {key: value for key, value in payload.items() if key != "lines"}
     return entry, list(payload.get("lines", []))
+
+
+def _json_safe_entry_payload(payload: dict) -> dict:
+    normalized: dict = {}
+    for key, value in payload.items():
+        if isinstance(value, UUID):
+            normalized[key] = str(value)
+        else:
+            normalized[key] = value.isoformat() if hasattr(value, "isoformat") else value
+    return normalized
 
 
 class ClarificationDAO:
@@ -59,10 +71,15 @@ class ClarificationDAO:
         return list(db.execute(stmt).scalars().all())
 
     @staticmethod
-    def resolve(db: Session, task_id, action: str, edited_entry: dict | None = None) -> ClarificationTask | None:
+    def resolve(
+        db: Session,
+        task_id,
+        action: str,
+        edited_entry: dict | None = None,
+    ) -> tuple[ClarificationTask | None, JournalEntry | None]:
         task = db.get(ClarificationTask, task_id)
         if task is None:
-            return None
+            return None, None
         set_current_user_context(db, task.user_id)
         normalized_action = action.lower()
         now = datetime.now(timezone.utc)
@@ -71,7 +88,7 @@ class ClarificationDAO:
             task.status = "rejected"
             task.resolved_at = now
             db.flush()
-            return task
+            return task, None
 
         if normalized_action not in {"approve", "post", "resolve"}:
             raise ValueError(f"unsupported clarification action {action!r}")
@@ -81,13 +98,18 @@ class ClarificationDAO:
         entry_payload.setdefault("transaction_id", task.transaction_id)
         entry_payload.setdefault("status", "posted")
 
-        JournalEntryDAO.insert_with_lines(db, task.user_id, entry_payload, line_payload)
+        journal_entry = JournalEntryDAO.insert_with_lines(db, task.user_id, entry_payload, line_payload)
         task.status = "resolved"
         task.resolved_at = now
-        if edited_entry is not None:
-            task.proposed_entry = edited_entry
+        task.proposed_entry = {
+            "entry": {
+                **_json_safe_entry_payload(entry_payload),
+                "journal_entry_id": str(journal_entry.id),
+            },
+            "lines": line_payload,
+        }
         db.flush()
-        return task
+        return task, journal_entry
 
     @staticmethod
     def count_pending(db: Session, user_id) -> int:

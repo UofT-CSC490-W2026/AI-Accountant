@@ -19,6 +19,7 @@ class ClarificationsResponse(BaseModel):
 
 class ResolveRequest(BaseModel):
     action: str  # "approve" or "reject"
+    edited_entry: ProposedEntry | None = None
 
 
 class ResolveResponse(BaseModel):
