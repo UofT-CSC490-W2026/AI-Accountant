@@ -4,7 +4,7 @@ from config import get_settings
 from db.connection import SessionLocal
 from db.dao.transactions import TransactionDAO
 from local_identity import resolve_local_user
-from normalization.service import normalize_message
+from services.normalizer.service import normalize_message
 from services.shared.transaction_persistence import coerce_transaction_date
 from queues import enqueue
 

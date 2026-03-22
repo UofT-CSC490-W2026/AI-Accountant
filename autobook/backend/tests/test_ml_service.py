@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ml.service import BaselineInferenceService, enrich_message
+from services.ml_inference.service import BaselineInferenceService, enrich_message
 
 
 def test_service_prefers_explicit_vendor_pattern() -> None:

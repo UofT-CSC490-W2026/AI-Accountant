@@ -3,7 +3,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 from uuid import uuid4
 
-from normalization.service import NormalizationService
+from services.normalizer.service import NormalizationService
 from services.shared.transaction_persistence import ensure_transaction_for_message
 from services.normalizer import process as normalizer_process
 

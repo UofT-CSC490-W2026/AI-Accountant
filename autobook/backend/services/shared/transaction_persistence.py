@@ -8,7 +8,7 @@ from db.dao.transactions import TransactionDAO
 from db.models.transaction import Transaction
 from db.models.user import User
 from local_identity import resolve_local_user
-from normalization.service import normalize_message
+from services.normalizer.service import normalize_message
 
 
 def coerce_transaction_date(value) -> date:
