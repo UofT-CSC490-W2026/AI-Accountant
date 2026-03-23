@@ -55,7 +55,7 @@ class MockCognito:
         }
         return {
             "AWS_REGION": self.config.region,
-            "COGNITO_POOL_ID": self.config.user_pool_id,
+            "COGNITO_USER_POOL_ID": self.config.user_pool_id,
             "COGNITO_CLIENT_ID": self.config.client_id,
             "COGNITO_JWKS_JSON": json.dumps(jwks),
         }

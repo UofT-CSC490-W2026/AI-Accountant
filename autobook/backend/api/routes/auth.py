@@ -113,7 +113,7 @@ def _get_cognito_domain(settings: Settings) -> str:
     return f"https://{settings.COGNITO_DOMAIN.rstrip('/')}"
 
 
-async def _exchange_token(form_data: dict[str, str]) -> dict[str, object]:
+async def _exchange_token(form_data: dict[str, str]) -> dict[str, object]:  # pragma: no cover
     settings = get_settings()
     cognito_domain = _get_cognito_domain(settings)
     token_url = f"{cognito_domain}/oauth2/token"

@@ -14,6 +14,11 @@ output "client_id" {
   value       = aws_cognito_user_pool_client.main.id
 }
 
+output "cognito_domain" {
+  description = "Cognito hosted UI domain — used by backend for OAuth token exchange"
+  value       = "${aws_cognito_user_pool_domain.main.domain}.auth.${data.aws_region.current.name}.amazoncognito.com"
+}
+
 output "role_claim_source" {
   description = "Canonical Cognito claim the backend uses for app authorization"
   value       = "cognito:groups"

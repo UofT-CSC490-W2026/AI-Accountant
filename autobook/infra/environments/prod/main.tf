@@ -208,8 +208,9 @@ module "compute" {
   db_credentials_secret_arn = module.secrets.db_credentials_secret_arn
 
   # --- From auth ---
-  user_pool_id = module.auth.user_pool_id
-  client_id    = module.auth.client_id
+  user_pool_id    = module.auth.user_pool_id
+  client_id       = module.auth.client_id
+  cognito_domain  = module.auth.cognito_domain
 }
 
 # =============================================================================

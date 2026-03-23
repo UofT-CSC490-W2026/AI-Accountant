@@ -111,6 +111,11 @@ variable "client_id" {
   description = "Cognito app client ID (passed to frontend config)"
 }
 
+variable "cognito_domain" {
+  type        = string
+  description = "Cognito hosted UI domain (API service uses for OAuth token exchange)"
+}
+
 # --- From queuing module ---
 
 # API only needs the normalizer queue URL to enqueue uploaded files.

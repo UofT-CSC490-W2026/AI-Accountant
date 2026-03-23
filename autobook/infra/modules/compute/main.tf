@@ -230,6 +230,7 @@ resource "aws_ecs_task_definition" "main" {
       each.key == local.api_service ? [
         { name = "COGNITO_USER_POOL_ID", value = var.user_pool_id },
         { name = "COGNITO_CLIENT_ID", value = var.client_id },
+        { name = "COGNITO_DOMAIN", value = var.cognito_domain },
       ] : [],
       # Per-service SQS queue URLs — each service only gets the queues it uses
       lookup(local.sqs_env, each.key, [])

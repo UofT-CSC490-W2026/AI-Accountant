@@ -3,6 +3,8 @@ locals {
   name = "${var.project}-${var.environment}" # e.g. "autobook-dev"
 }
 
+data "aws_region" "current" {}
+
 # =============================================================================
 # COGNITO USER POOL — the user directory
 # =============================================================================

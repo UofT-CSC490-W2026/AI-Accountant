@@ -31,15 +31,6 @@ class Organization(AuditMixin, Base):
     business_number: Mapped[str | None] = mapped_column(String(20))
 
     # ── relationships ──────────────────────────────────────────────
-    accounts: Mapped[list["ChartOfAccounts"]] = relationship(
-        "ChartOfAccounts", back_populates="organization", cascade="all, delete-orphan"
-    )
-    journal_entries: Mapped[list["JournalEntry"]] = relationship(
-        "JournalEntry", back_populates="organization", cascade="all, delete-orphan"
-    )
-    assets: Mapped[list["Asset"]] = relationship(
-        "Asset", back_populates="organization", cascade="all, delete-orphan"
-    )
     shareholder_loans: Mapped[list["ShareholderLoanLedger"]] = relationship(
         "ShareholderLoanLedger",
         back_populates="organization",
@@ -50,9 +41,6 @@ class Organization(AuditMixin, Base):
     )
     corporate_documents: Mapped[list["CorporateDocument"]] = relationship(
         "CorporateDocument", back_populates="organization", cascade="all, delete-orphan"
-    )
-    scheduled_entries: Mapped[list["ScheduledEntry"]] = relationship(
-        "ScheduledEntry", back_populates="organization", cascade="all, delete-orphan"
     )
     integration_connections: Mapped[list["IntegrationConnection"]] = relationship(
         "IntegrationConnection",

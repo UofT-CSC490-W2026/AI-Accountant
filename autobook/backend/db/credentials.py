@@ -14,7 +14,10 @@ def get_database_url() -> str:
     secret_arn = os.environ.get("DB_SECRET_ARN")
     if not secret_arn:
         return os.environ["DATABASE_URL"]
+    return _fetch_from_secrets_manager(secret_arn)
 
+
+def _fetch_from_secrets_manager(secret_arn: str) -> str:  # pragma: no cover
     url = f"http://localhost:2773/secretsmanager/get?secretId={secret_arn}"
     headers = {"X-Aws-Parameters-Secrets-Token": os.environ["AWS_SESSION_TOKEN"]}
 

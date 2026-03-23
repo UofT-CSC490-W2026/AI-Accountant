@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
 
 from sqlalchemy import func, select
@@ -78,10 +78,14 @@ class JournalEntryDAO:
         if status == "posted" and posted_at is None:
             posted_at = datetime.now(timezone.utc)
 
+        entry_date = entry["date"]
+        if isinstance(entry_date, str):
+            entry_date = date.fromisoformat(entry_date)
+
         journal_entry = JournalEntry(
             user_id=user_id,
             transaction_id=entry.get("transaction_id"),
-            date=entry["date"],
+            date=entry_date,
             description=str(entry["description"]),
             status=status,
             origin_tier=entry.get("origin_tier"),

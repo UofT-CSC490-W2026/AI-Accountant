@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     AWS_REGION: str | None = None
     AWS_DEFAULT_REGION: str = "ca-central-1"
     ENV: str = "local"
-    COGNITO_POOL_ID: str = "local-test-pool"
+    COGNITO_USER_POOL_ID: str = "local-test-pool"
     COGNITO_CLIENT_ID: str = "local-test-client"
     COGNITO_DOMAIN: str | None = None
     COGNITO_JWKS_JSON: str | None = None
@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     @property
     def cognito_issuer(self) -> str:
-        return f"https://cognito-idp.{self.cognito_region}.amazonaws.com/{self.COGNITO_POOL_ID}"
+        return f"https://cognito-idp.{self.cognito_region}.amazonaws.com/{self.COGNITO_USER_POOL_ID}"
 
     @property
     def cognito_jwks_url(self) -> str:

@@ -242,8 +242,9 @@ module "compute" {
   db_credentials_secret_arn = module.secrets.db_credentials_secret_arn # DB creds JSON ARN
 
   # --- From auth ---
-  user_pool_id = module.auth.user_pool_id # Cognito pool ID (API validates tokens)
-  client_id    = module.auth.client_id    # Cognito client ID (passed to frontend)
+  user_pool_id   = module.auth.user_pool_id   # Cognito pool ID (API validates tokens)
+  client_id      = module.auth.client_id      # Cognito client ID (passed to frontend)
+  cognito_domain = module.auth.cognito_domain # Cognito hosted UI domain (OAuth token exchange)
 
   # --- WS relay service ---
   ws_relay_role_arn          = module.iam.ws_relay_role_arn
