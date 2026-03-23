@@ -47,7 +47,7 @@ def parse_json_output(agent_name: str, raw: str) -> dict | None:
 
     schema = _SCHEMAS.get(agent_name)
     if schema is None:
-        return data
+        return None
 
     # Check required fields
     for field in schema["required"]:
