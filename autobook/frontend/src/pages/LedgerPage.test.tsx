@@ -61,7 +61,7 @@ describe("ledger filters", () => {
     await act(async () => {
       await parseTransaction({
         input_text: "Purchased insurance policy",
-        source: "manual",
+        source: "manual_text",
         currency: "CAD",
       });
     });

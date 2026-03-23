@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 describe("api client auth contract", () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
     localStorage.clear();
@@ -9,7 +9,7 @@ describe("api client auth contract", () => {
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   test("sends bearer auth on protected read APIs and resolve", async () => {
@@ -18,7 +18,7 @@ describe("api client auth contract", () => {
     localStorage.setItem("autobook_access_token", "token-123");
 
     const calls: Array<{ url: string; init?: RequestInit }> = [];
-    global.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ url: String(input), init });
       return new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } });
     }) as typeof fetch;
@@ -48,7 +48,7 @@ describe("api client auth contract", () => {
     localStorage.setItem("autobook_access_token", "token-123");
 
     const calls: Array<{ url: string; init?: RequestInit }> = [];
-    global.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ url: String(input), init });
       return new Response('{"parse_id":"parse_1","status":"accepted"}', {
         status: 200,
@@ -79,7 +79,7 @@ describe("api client auth contract", () => {
     localStorage.setItem("autobook_access_token", "token-123");
 
     const calls: Array<{ url: string; init?: RequestInit }> = [];
-    global.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ url: String(input), init });
       return new Response('{"parse_id":"parse_1","status":"accepted"}', {
         status: 200,

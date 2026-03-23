@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from auth.schemas import TokenPayload, UserRole
 from auth.token_service import decode_access_token
 from config import get_settings
+from db.dao.auth_sessions import AuthSessionDAO
 from db.connection import get_db
 from db.dao.users import UserDAO
 from db.models.user import User
@@ -52,6 +53,20 @@ def resolve_auth_context(token: str, db: Session) -> AuthContext:
         cognito_sub=claims.sub,
         email=claims.email or claims.username,
     )
+    if hasattr(db, "execute"):
+        AuthSessionDAO.record_token(
+            db,
+            user=user,
+            cognito_sub=claims.sub,
+            token=token,
+            token_use=claims.token_use,
+            issued_at=_to_datetime(claims.iat),
+            expires_at=_to_datetime(claims.exp),
+        )
+    if hasattr(db, "commit"):
+        db.commit()
+    if hasattr(db, "refresh"):
+        db.refresh(user)
     role, role_source = _resolve_role(claims)
     return AuthContext(user=user, claims=claims, role=role, role_source=role_source)
 
@@ -135,3 +150,9 @@ def _parse_single_role(value: str | None) -> UserRole | None:
         if normalized == role.value:
             return role
     return None
+
+
+def _to_datetime(epoch_seconds: int) -> object:
+    from datetime import datetime, timezone
+
+    return datetime.fromtimestamp(epoch_seconds, tz=timezone.utc)

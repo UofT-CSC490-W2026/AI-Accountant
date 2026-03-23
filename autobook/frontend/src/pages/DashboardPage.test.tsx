@@ -35,7 +35,7 @@ describe("dashboard key balance cards", () => {
     await act(async () => {
       await parseTransaction({
         input_text: "Paid annual insurance premium",
-        source: "manual",
+        source: "manual_text",
         currency: "CAD",
       });
     });

@@ -1,7 +1,7 @@
 import logging
 
 from config import get_settings
-from ml.service import enrich_message, get_inference_service
+from services.ml_inference.service import get_inference_service
 from queues import enqueue
 
 logger = logging.getLogger(__name__)

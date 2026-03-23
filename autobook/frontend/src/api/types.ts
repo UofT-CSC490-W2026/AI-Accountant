@@ -2,6 +2,23 @@ export type Status = "auto_posted" | "needs_clarification" | "rejected" | "accep
 
 export type TransactionInputSource = "manual_text" | "csv_upload" | "pdf_upload" | "bank_feed";
 
+export type AuthUser = {
+  id: string;
+  cognito_sub: string;
+  email: string;
+  role: string;
+  role_source: string;
+  token_use: string;
+};
+
+export type AuthTokenResponse = {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  id_token?: string | null;
+  refresh_token?: string | null;
+};
+
 export type ParseAccepted = {
   parse_id: string;
   status: "accepted";

@@ -6,6 +6,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -23,6 +24,7 @@ from auth import deps as auth_deps
 from auth import token_service
 from config import get_settings
 import api.main as api_main
+import api.routes.clarifications as clarifications_routes
 import api.routes.parse as parse_routes
 from auth.mock_cognito import MockCognito, MockCognitoConfig
 
@@ -74,15 +76,35 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         return DummyUser(id=user.id, cognito_sub=cognito_sub, email=resolved_email)
 
     def fake_db():
-        yield object()
+        yield SimpleNamespace(commit=lambda: None, rollback=lambda: None)
 
     def fake_enqueue(_queue_url: str, payload: dict) -> str:
         enqueued.append(payload)
         return "queued"
 
+    def fake_resolve(_db, _clarification_id, action: str, edited_entry=None):
+        if action == "reject":
+            status = "rejected"
+            journal_entry = None
+        else:
+            status = "resolved"
+            journal_entry = SimpleNamespace(id=uuid.UUID("22222222-2222-2222-2222-222222222222"))
+
+        task = SimpleNamespace(
+            id=uuid.UUID("33333333-3333-3333-3333-333333333333"),
+            user_id=user.id,
+            status=status,
+            source_text="Need clarification",
+            explanation="manager review",
+            confidence=0.5,
+            proposed_entry={"lines": []},
+        )
+        return task, journal_entry
+
     monkeypatch.setattr(api_main, "get_redis", fake_get_redis)
     monkeypatch.setattr(auth_deps.UserDAO, "get_or_create_from_cognito_claims", staticmethod(fake_user_lookup))
     monkeypatch.setattr(parse_routes, "enqueue", fake_enqueue)
+    monkeypatch.setattr(clarifications_routes.ClarificationDAO, "resolve", staticmethod(fake_resolve))
     api_main.app.dependency_overrides[auth_deps.get_db] = fake_db
     api_main.app.state._test_enqueued = enqueued
 
@@ -177,7 +199,7 @@ def test_manager_role_can_resolve_clarification(client: TestClient) -> None:
     )
 
     response = client.post(
-        "/api/v1/clarifications/cl_stub_001/resolve",
+        "/api/v1/clarifications/33333333-3333-3333-3333-333333333333/resolve",
         headers=_auth_headers(token),
         json={"action": "approve"},
     )
@@ -194,7 +216,7 @@ def test_regular_role_cannot_resolve_clarification(client: TestClient) -> None:
     )
 
     response = client.post(
-        "/api/v1/clarifications/cl_stub_001/resolve",
+        "/api/v1/clarifications/33333333-3333-3333-3333-333333333333/resolve",
         headers=_auth_headers(token),
         json={"action": "approve"},
     )

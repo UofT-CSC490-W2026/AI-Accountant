@@ -12,9 +12,11 @@ class Settings(BaseSettings):
     ENV: str = "local"
     COGNITO_POOL_ID: str = "local-test-pool"
     COGNITO_CLIENT_ID: str = "local-test-client"
+    COGNITO_DOMAIN: str | None = None
     COGNITO_JWKS_JSON: str | None = None
     COGNITO_JWT_ALGORITHM: str = "RS256"
     COGNITO_ROLE_CLAIM_SOURCE: str = "cognito:groups"
+    COGNITO_SCOPES: str = "openid email profile"
     CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "https://autobook.tech",

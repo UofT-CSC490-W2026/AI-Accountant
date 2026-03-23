@@ -2,6 +2,7 @@ import { type ReactNode, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { RealtimeClock } from "../components/RealtimeClock";
 import { ensureSocketConnection } from "../api/realtime";
+import { useAuth } from "../auth/AuthProvider";
 
 type AppLayoutProps = {
   children: ReactNode;
@@ -16,6 +17,8 @@ const navItems = [
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const { user, logout } = useAuth();
+
   useEffect(() => {
     ensureSocketConnection();
   }, []);
@@ -29,6 +32,12 @@ export function AppLayout({ children }: AppLayoutProps) {
         <p className="topbar-copy">
           Natural language bookkeeping with confidence-gated review.
         </p>
+        <div className="topbar-copy">
+          <strong>{user?.email}</strong>
+          <button type="button" className="nav-link" onClick={() => void logout()}>
+            Logout
+          </button>
+        </div>
         <div className="topbar-clock">
           <RealtimeClock variant="surface" />
         </div>
