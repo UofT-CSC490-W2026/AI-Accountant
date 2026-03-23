@@ -1,23 +1,62 @@
-import json
+from __future__ import annotations
+
+from enum import Enum
+from typing import Literal
+
+from pydantic import BaseModel, ValidationError
 
 from services.agent.graph.state import ENTRY_BUILDER, APPROVER, DIAGNOSTICIAN
 
-# Required fields per agent output schema
-_SCHEMAS: dict[str, dict] = {
-    ENTRY_BUILDER: {
-        "required": ["date", "description", "lines"],
-        "types": {"lines": list},
-    },
-    APPROVER: {
-        "required": ["approved", "confidence", "reason"],
-        "types": {"approved": bool, "confidence": (int, float), "reason": str},
-    },
-    DIAGNOSTICIAN: {
-        "required": ["decision", "fix_plans"],
-        "types": {"fix_plans": list},
-        "enums": {"decision": ("FIX", "STUCK")},
-    },
+
+# ── Pydantic schemas per agent output ─────────────────────────────────────
+
+class JournalLine(BaseModel):
+    account_name: str
+    type: Literal["debit", "credit"]
+    amount: float
+
+
+class EntryBuilderOutput(BaseModel):
+    date: str
+    description: str
+    rationale: str | None = None
+    lines: list[JournalLine]
+
+
+class ApproverOutput(BaseModel):
+    approved: bool
+    confidence: float
+    reason: str
+
+
+class FixPlan(BaseModel):
+    agent: int
+    error: str
+    fix_context: str
+
+
+class DiagnosticianOutput(BaseModel):
+    decision: Literal["FIX", "STUCK"]
+    fix_plans: list[FixPlan]
+
+
+_MODELS: dict[str, type[BaseModel]] = {
+    ENTRY_BUILDER: EntryBuilderOutput,
+    APPROVER: ApproverOutput,
+    DIAGNOSTICIAN: DiagnosticianOutput,
 }
+
+
+# ── Parser ────────────────────────────────────────────────────────────────
+
+def _strip_fences(raw: str) -> str:
+    """Remove markdown code fences if present."""
+    cleaned = raw.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.split("\n")
+        lines = [l for l in lines if not l.strip().startswith("```")]
+        cleaned = "\n".join(lines)
+    return cleaned
 
 
 def parse_json_output(agent_name: str, raw: str) -> dict | None:
@@ -30,38 +69,13 @@ def parse_json_output(agent_name: str, raw: str) -> dict | None:
     Returns:
         Parsed dict if valid, None if parsing or schema check fails.
     """
+    model = _MODELS.get(agent_name)
+    if model is None:
+        return None
+
     try:
-        # Strip markdown code fences if present
-        cleaned = raw.strip()
-        if cleaned.startswith("```"):
-            lines = cleaned.split("\n")
-            lines = [l for l in lines if not l.strip().startswith("```")]
-            cleaned = "\n".join(lines)
-
-        data = json.loads(cleaned)
-    except (json.JSONDecodeError, AttributeError):
+        cleaned = _strip_fences(raw)
+        result = model.model_validate_json(cleaned)
+        return result.model_dump()
+    except (ValidationError, ValueError):
         return None
-
-    if not isinstance(data, dict):
-        return None
-
-    schema = _SCHEMAS.get(agent_name)
-    if schema is None:
-        return None
-
-    # Check required fields
-    for field in schema["required"]:
-        if field not in data:
-            return None
-
-    # Check types
-    for field, expected in schema.get("types", {}).items():
-        if field in data and not isinstance(data[field], expected):
-            return None
-
-    # Check enums
-    for field, allowed in schema.get("enums", {}).items():
-        if field in data and data[field] not in allowed:
-            return None
-
-    return data
