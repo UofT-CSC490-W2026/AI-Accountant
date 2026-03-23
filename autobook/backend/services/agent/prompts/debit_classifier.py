@@ -4,6 +4,7 @@ Classifies how many debit-side journal lines fall into each of the 6
 directional categories. Output: 6-tuple (a,b,c,d,e,f).
 """
 from services.agent.graph.state import PipelineState
+from services.agent.utils.prompt import append_fix_context, append_rag_examples
 
 _CACHE_POINT = {"cachePoint": {"type": "default"}}
 
@@ -141,15 +142,10 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     text = state.get("enriched_text") or state["transaction_text"]
     content = [{"text": f"<transaction>{text}</transaction>"}, _CACHE_POINT]
 
-    if fix_context:
-        content.append({"text": f"<fix_context>{fix_context}</fix_context>"})
-
-    if rag_examples:
-        examples_text = "These are similar past transactions with correct debit tuples:\n<examples>\n"
-        for ex in rag_examples:
-            examples_text += f"  Transaction: {ex.get('transaction', '')}\n  Output: {ex.get('debit_tuple', '')}\n\n"
-        examples_text += "</examples>"
-        content.append({"text": examples_text})
+    append_fix_context(content, fix_context)
+    append_rag_examples(content, rag_examples,
+                        "similar past transactions with correct debit tuples",
+                        ["transaction", "debit_tuple"])
 
     return {
         "system": system,

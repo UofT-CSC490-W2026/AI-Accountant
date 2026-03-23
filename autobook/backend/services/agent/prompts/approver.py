@@ -6,6 +6,9 @@ Output: JSON with approved (bool), confidence (float), reason (str).
 import json
 
 from services.agent.graph.state import PipelineState
+from services.agent.utils.prompt import (
+    compile_reasoning_trace, append_fix_context, append_rag_examples,
+)
 
 _CACHE_POINT = {"cachePoint": {"type": "default"}}
 
@@ -131,17 +134,8 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     text = state.get("enriched_text") or state["transaction_text"]
     transaction_block = f"<transaction>{text}</transaction>"
 
-    journal = state["journal_entry"]
-    journal_text = json.dumps(journal, indent=2)
-
-    trace_parts = []
-    for field in ["output_disambiguator", "output_debit_classifier",
-                  "output_credit_classifier", "output_debit_corrector",
-                  "output_credit_corrector", "output_entry_builder"]:
-        val = state.get(field)
-        if val is not None:
-            trace_parts.append(f"{field}: {val}")
-    trace_text = "\n".join(trace_parts)
+    journal_text = json.dumps(state["journal_entry"], indent=2)
+    trace_text = compile_reasoning_trace(state)
 
     dynamic_block = (
         f"<journal_entry>\n{journal_text}\n</journal_entry>\n"
@@ -149,16 +143,10 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     )
 
     content = [{"text": transaction_block}, _CACHE_POINT, {"text": dynamic_block}]
-
-    if fix_context:
-        content.append({"text": f"<fix_context>{fix_context}</fix_context>"})
-
-    if rag_examples:
-        examples_text = "These are similar past corrections for reference:\n<examples>\n"
-        for ex in rag_examples:
-            examples_text += f"  {ex}\n\n"
-        examples_text += "</examples>"
-        content.append({"text": examples_text})
+    append_fix_context(content, fix_context)
+    append_rag_examples(content, rag_examples,
+                        "similar past corrections for reference",
+                        ["entry", "error", "correction"])
 
     return {
         "system": system,

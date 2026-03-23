@@ -4,6 +4,7 @@ Re-evaluates the initial credit tuple using the debit side as cross-validation.
 Fixes misclassifications and missing lines. Output: refined 6-tuple.
 """
 from services.agent.graph.state import PipelineState
+from services.agent.utils.prompt import append_fix_context, append_rag_examples
 
 _CACHE_POINT = {"cachePoint": {"type": "default"}}
 
@@ -154,15 +155,10 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
 
     content = [{"text": transaction_block}, _CACHE_POINT, {"text": dynamic_block}]
 
-    if fix_context:
-        content.append({"text": f"<fix_context>{fix_context}</fix_context>"})
-
-    if rag_examples:
-        examples_text = "These are similar past corrections for reference:\n<examples>\n"
-        for ex in rag_examples:
-            examples_text += f"  Transaction: {ex.get('transaction', '')}\n  Before: {ex.get('before', '')}\n  After: {ex.get('after', '')}\n\n"
-        examples_text += "</examples>"
-        content.append({"text": examples_text})
+    append_fix_context(content, fix_context)
+    append_rag_examples(content, rag_examples,
+                        "similar past corrections for reference",
+                        ["transaction", "before", "after"])
 
     return {
         "system": system,

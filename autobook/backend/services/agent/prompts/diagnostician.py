@@ -6,6 +6,9 @@ Only runs when Agent 6 rejects. Output: JSON with decision and fix_plans.
 import json
 
 from services.agent.graph.state import PipelineState
+from services.agent.utils.prompt import (
+    compile_reasoning_trace, append_fix_context, append_rag_examples,
+)
 
 _CACHE_POINT = {"cachePoint": {"type": "default"}}
 
@@ -136,17 +139,8 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     text = state.get("enriched_text") or state["transaction_text"]
     transaction_block = f"<transaction>{text}</transaction>"
 
-    trace_parts = []
-    for field in ["output_disambiguator", "output_debit_classifier",
-                  "output_credit_classifier", "output_debit_corrector",
-                  "output_credit_corrector", "output_entry_builder"]:
-        val = state.get(field)
-        if val is not None:
-            trace_parts.append(f"{field}: {val}")
-    trace_text = "\n".join(trace_parts)
-
-    approval = state["approval"]
-    rejection_text = json.dumps(approval, indent=2)
+    trace_text = compile_reasoning_trace(state)
+    rejection_text = json.dumps(state["approval"], indent=2)
 
     dynamic_block = (
         f"<generator_trace>\n{trace_text}\n</generator_trace>\n"
@@ -154,16 +148,10 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     )
 
     content = [{"text": transaction_block}, _CACHE_POINT, {"text": dynamic_block}]
-
-    if fix_context:
-        content.append({"text": f"<fix_context>{fix_context}</fix_context>"})
-
-    if rag_examples:
-        examples_text = "These are similar past fix outcomes for reference:\n<examples>\n"
-        for ex in rag_examples:
-            examples_text += f"  {ex}\n\n"
-        examples_text += "</examples>"
-        content.append({"text": examples_text})
+    append_fix_context(content, fix_context)
+    append_rag_examples(content, rag_examples,
+                        "similar past fix outcomes for reference",
+                        ["rejection", "decision", "fix_plans"])
 
     return {
         "system": system,

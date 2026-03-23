@@ -4,6 +4,7 @@ Resolves ambiguous transactions using user context before tuple classification.
 Output: enriched text string (plain text, no JSON).
 """
 from services.agent.graph.state import PipelineState
+from services.agent.utils.prompt import append_fix_context, append_rag_examples
 
 _CACHE_POINT = {"cachePoint": {"type": "default"}}
 
@@ -143,16 +144,10 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     )
 
     content = [{"text": transaction_block}, _CACHE_POINT]
-
-    if fix_context:
-        content.append({"text": f"<fix_context>{fix_context}</fix_context>"})
-
-    if rag_examples:
-        examples_text = "These are similar past disambiguations for reference:\n<examples>\n"
-        for ex in rag_examples:
-            examples_text += f"  Input: {ex.get('input', '')}\n  Output: {ex.get('output', '')}\n\n"
-        examples_text += "</examples>"
-        content.append({"text": examples_text})
+    append_fix_context(content, fix_context)
+    append_rag_examples(content, rag_examples,
+                        "similar past disambiguations for reference",
+                        ["input", "output"])
 
     return {
         "system": system,
