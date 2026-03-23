@@ -1,23 +1,14 @@
 from __future__ import annotations
 
 import os
-import sys
 import uuid
 from dataclasses import dataclass
 from datetime import timedelta
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-BACKEND_ROOT = PROJECT_ROOT / "backend"
-if str(BACKEND_ROOT) not in sys.path:
-    sys.path.insert(0, str(BACKEND_ROOT))
-
-# Some backend modules create the SQLAlchemy engine at import time.
-# Provide a harmless local default so auth tests can collect without a live DB.
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 from auth import deps as auth_deps
