@@ -111,8 +111,18 @@ module "auth" {
 
   project     = var.project
   environment = var.environment
-  # Dev uses all defaults: OPTIONAL MFA, localhost callback URLs,
-  # 1h access token, 30d refresh token
+  callback_urls = [
+    "http://localhost:5173/auth/callback",
+    "https://autobook.tech/auth/callback",
+    "https://www.autobook.tech/auth/callback",
+    "https://ai-accountant490.netlify.app/auth/callback",
+  ]
+  logout_urls = [
+    "http://localhost:5173/login",
+    "https://autobook.tech/login",
+    "https://www.autobook.tech/login",
+    "https://ai-accountant490.netlify.app/login",
+  ]
 }
 
 # =============================================================================
