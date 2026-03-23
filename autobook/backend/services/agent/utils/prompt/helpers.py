@@ -1,30 +1,37 @@
 """Generic prompt content helpers.
 
-Used by all agent build_prompt functions to append fix context and RAG
-examples to the message content list.
+Used by all agent build_prompt functions to build fix context and RAG
+example content blocks.
 """
 
 
-def append_fix_context(content: list, fix_context: str | None) -> None:
-    """Append fix context block if present (rerun guidance from diagnostician)."""
-    if fix_context:
-        content.append({"text": f"<fix_context>{fix_context}</fix_context>"})
+def build_fix_context(fix_context: str | None) -> list[dict]:
+    """Build fix context block (rerun guidance from diagnostician).
+
+    Returns:
+        List with one content block if fix_context provided, empty list otherwise.
+    """
+    if not fix_context:
+        return []
+    return [{"text": f"<fix_context>{fix_context}</fix_context>"}]
 
 
-def append_rag_examples(content: list, rag_examples: list[dict],
-                        label: str, fields: list[str]) -> None:
-    """Append RAG examples block if present.
+def build_rag_examples(rag_examples: list[dict], label: str,
+                       fields: list[str]) -> list[dict]:
+    """Build RAG examples content block.
 
     Args:
-        content: Message content list to append to.
         rag_examples: List of example dicts from RAG retrieval.
         label: Description of what these examples are, e.g.
                "similar past transactions with correct debit tuples".
         fields: Keys to extract from each example dict, e.g.
                 ["transaction", "debit_tuple"].
+
+    Returns:
+        List with one content block if examples provided, empty list otherwise.
     """
     if not rag_examples:
-        return
+        return []
 
     text = f"These are {label}:\n<examples>\n"
     for ex in rag_examples:
@@ -33,4 +40,4 @@ def append_rag_examples(content: list, rag_examples: list[dict],
             text += f"  {field}: {val}\n"
         text += "\n"
     text += "</examples>"
-    content.append({"text": text})
+    return [{"text": text}]

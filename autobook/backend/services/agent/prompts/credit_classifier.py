@@ -4,7 +4,7 @@ Classifies how many credit-side journal lines fall into each of the 6
 directional categories. Output: 6-tuple (a,b,c,d,e,f).
 """
 from services.agent.graph.state import PipelineState
-from services.agent.utils.prompt import append_fix_context, append_rag_examples
+from services.agent.utils.prompt import build_fix_context, build_rag_examples
 
 _CACHE_POINT = {"cachePoint": {"type": "default"}}
 
@@ -142,10 +142,12 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     text = state.get("enriched_text") or state["transaction_text"]
     content = [{"text": f"<transaction>{text}</transaction>"}, _CACHE_POINT]
 
-    append_fix_context(content, fix_context)
-    append_rag_examples(content, rag_examples,
-                        "similar past transactions with correct credit tuples",
-                        ["transaction", "credit_tuple"])
+    content += build_fix_context(fix_context=fix_context)
+    content += build_rag_examples(
+        rag_examples=rag_examples,
+        label="similar past transactions with correct credit tuples",
+        fields=["transaction", "credit_tuple"],
+    )
 
     return {
         "system": system,

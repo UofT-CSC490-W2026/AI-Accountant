@@ -7,7 +7,7 @@ import json
 
 from services.agent.graph.state import PipelineState
 from services.agent.utils.prompt import (
-    compile_reasoning_trace, append_fix_context, append_rag_examples,
+    compile_reasoning_trace, build_fix_context, build_rag_examples,
 )
 
 _CACHE_POINT = {"cachePoint": {"type": "default"}}
@@ -143,10 +143,11 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     )
 
     content = [{"text": transaction_block}, _CACHE_POINT, {"text": dynamic_block}]
-    append_fix_context(content, fix_context)
-    append_rag_examples(content, rag_examples,
-                        "similar past corrections for reference",
-                        ["entry", "error", "correction"])
+    content += build_fix_context(fix_context=fix_context)
+    content += build_rag_examples(rag_examples=rag_examples,
+                                  label="similar past corrections for reference",
+                                  fields=["entry", "error", "correction"],
+    )
 
     return {
         "system": system,
