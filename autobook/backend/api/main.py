@@ -36,6 +36,7 @@ from api.routes.clarifications import router as clarifications_router
 from api.routes.statements import router as statements_router
 from api.routes.ws import router as ws_router
 from api.routes.events import router as events_router
+from api.routes.reports import router as reports_router
 app.include_router(health_router)
 app.include_router(parse_router)
 app.include_router(ledger_router)
@@ -43,3 +44,4 @@ app.include_router(clarifications_router)
 app.include_router(statements_router)
 app.include_router(ws_router)
 app.include_router(events_router)
+app.include_router(reports_router)
