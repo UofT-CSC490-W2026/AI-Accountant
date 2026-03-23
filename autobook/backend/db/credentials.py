@@ -13,7 +13,14 @@ def get_database_url() -> str:
     """
     secret_arn = os.environ.get("DB_SECRET_ARN")
     if not secret_arn:
-        return os.environ["DATABASE_URL"]
+        database_url = os.environ.get("DATABASE_URL")
+        if database_url:
+            return database_url
+        # ECS: construct from individual Secrets Manager fields
+        return (
+            f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}"
+            f"@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}"
+        )
     return _fetch_from_secrets_manager(secret_arn)
 
 
