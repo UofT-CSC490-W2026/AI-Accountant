@@ -1,7 +1,8 @@
+from typing import Any
+
 from langchain_aws import ChatBedrockConverse
 
 from config import get_settings
-from services.agent.graph.state import AblationConfig
 
 # Model IDs — us. prefix required for ca-central-1 cross-region inference
 _SONNET = "us.anthropic.claude-sonnet-4-6-20251001-v1:0"
@@ -35,7 +36,7 @@ MAX_TOKENS: dict[str, int] = {
 
 def get_llm(
     agent_name: str,
-    ablation: AblationConfig | None = None,
+    ablation: dict[str, Any] | None = None,
 ) -> ChatBedrockConverse:
     """Return a configured ChatBedrockConverse client for the given agent.
 

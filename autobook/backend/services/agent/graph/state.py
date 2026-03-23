@@ -1,15 +1,6 @@
 from typing import TypedDict
 
 
-class AblationConfig(TypedDict):
-    chain_of_thought: bool
-    ml_enrichment: bool
-    disambiguator_active: bool
-    correction_pass: bool
-    model_per_agent: dict[str, str]         # agent_name → Bedrock model ID
-    thinking_effort_per_agent: dict[str, str]  # agent_name → "low"|"medium"|"high"
-
-
 class PipelineState(TypedDict):
     # ── Input ──────────────────────────────────────────────────────────────
     transaction_text: str
