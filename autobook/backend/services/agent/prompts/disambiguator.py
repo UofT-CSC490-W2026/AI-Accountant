@@ -7,15 +7,17 @@ from services.agent.graph.state import PipelineState
 
 _CACHE_POINT = {"cachePoint": {"type": "default"}}
 
-SYSTEM_INSTRUCTION = """\
-You are a business context expert in a Canadian automated bookkeeping system.
+_PREAMBLE = """\
+You are a business context expert in a Canadian automated bookkeeping system."""
 
+_ROLE = """
 ## Your Role
 
 You resolve ambiguous transaction descriptions by using the user's business \
 context (business type, province, ownership structure) to produce a clear, \
-unambiguous description that downstream accounting agents can classify correctly.
+unambiguous description that downstream accounting agents can classify correctly."""
 
+_WHY = """
 ## Why This Matters
 
 Raw bank transaction descriptions are often cryptic or ambiguous. The same \
@@ -28,8 +30,9 @@ owner withdrawal
 advertising (marketing agency)
 
 Without disambiguation, downstream classifiers may assign the wrong account \
-categories, leading to incorrect journal entries.
+categories, leading to incorrect journal entries."""
 
+_HOW = """
 ## How to Disambiguate
 
 Use the user's business context to resolve ambiguity:
@@ -49,8 +52,9 @@ Use the user's business context to resolve ambiguity:
 3. **Ownership structure** — affects how owner transactions are classified
    - Sole proprietor: owner draws are equity withdrawals
    - Corporation: shareholder loans, dividends
-   - Partnership: partner distributions
+   - Partnership: partner distributions"""
 
+_EXAMPLES = """
 ## Examples
 
 Input: "Paid $200 to Tim" + (restaurant, sole proprietor, ON)
@@ -81,8 +85,9 @@ Input: "INSURANCE 350 MONTHLY" + (construction, corporation, AB)
 Output: "Monthly business insurance premium of $350, commercial liability or vehicle insurance"
 
 Input: "LOAN PMT 1200" + (retail, corporation, MB)
-Output: "Monthly business loan payment of $1,200, split between principal (liability decrease) and interest (expense)"
+Output: "Monthly business loan payment of $1,200, split between principal (liability decrease) and interest (expense)\""""
 
+_AMBIGUITY_PATTERNS = """
 ## Common Ambiguity Patterns
 
 Watch for these patterns that frequently cause misclassification:
@@ -107,8 +112,9 @@ subscription, or loan payment. Use amount and business type for context.
 
 6. **Mixed-use purchases**: "WALMART" or "COSTCO" — could be office supplies, \
 inventory, or personal. Use business type: restaurant → likely food/supplies, \
-retail → likely inventory, consulting → likely office supplies.
+retail → likely inventory, consulting → likely office supplies."""
 
+_OUTPUT_FORMAT = """
 ## Output Format
 
 Return ONLY the enriched transaction description as plain text. Do not include:
@@ -121,8 +127,11 @@ If the transaction is already clear and unambiguous, return it with minor \
 formatting improvements (e.g., adding tax applicability based on province).
 
 If the transaction is completely uninterpretable even with context, return \
-the original text unchanged.
-"""
+the original text unchanged."""
+
+SYSTEM_INSTRUCTION = "\n".join([
+    _PREAMBLE, _ROLE, _WHY, _HOW, _EXAMPLES, _AMBIGUITY_PATTERNS, _OUTPUT_FORMAT,
+])
 
 
 def build_prompt(state: PipelineState, rag_examples: list[dict]) -> dict:
