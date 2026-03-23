@@ -84,7 +84,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY backend/services/agent/ backend/services/agent/
 ENTRYPOINT ["python", "-m", "awslambdaric"]
-CMD ["services.agent.handler.handler"]
+CMD ["services.agent.aws.handler"]
 
 # ── Resolution Worker (Tier 4) ─────────────────────────────────
 FROM autobook-accounting AS autobook-resolution

@@ -1,7 +1,7 @@
 import json
 import logging
 
-from services.agent.process import process
+from services.agent.execute import process
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

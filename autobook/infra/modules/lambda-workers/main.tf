@@ -126,7 +126,7 @@ resource "aws_lambda_function" "worker" {
 
   # Override the Dockerfile CMD with the Lambda handler
   image_config {
-    command = ["services.${each.key}.handler.handler"]
+    command = [each.key == "agent" ? "services.agent.aws.handler" : "services.${each.key}.handler.handler"]
   }
 
   # VPC access for DB and Redis
