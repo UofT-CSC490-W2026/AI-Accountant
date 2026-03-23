@@ -135,20 +135,25 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     """Build the entry builder prompt with cache breakpoints."""
     # ── Build message parts ──────────────────────────────────────────
     transaction = build_transaction(state=state)
-    refined = build_tuples(state=state, debit_key="refined_debit_tuple", credit_key="refined_credit_tuple")
-    coa = build_coa(coa_results=coa_results)
-    tax = build_tax(tax_results=tax_results)
-    vendor = build_vendor(vendor_results=vendor_results)
-    fix = build_fix_context(fix_context=fix_context)
-    rag = build_rag_examples(
-        rag_examples=rag_examples,
-        label="similar past journal entries for reference",
-        fields=["transaction", "entry"],
-    )
+    refined     = build_tuples(state=state, debit_key="refined_debit_tuple", credit_key="refined_credit_tuple")
+    coa         = build_coa(coa_results=coa_results)
+    tax         = build_tax(tax_results=tax_results)
+    vendor      = build_vendor(vendor_results=vendor_results)
+    fix         = build_fix_context(fix_context=fix_context)
+    rag         = build_rag_examples(rag_examples=rag_examples,
+                                    label="similar past journal entries for reference",
+                                    fields=["transaction", "entry"])
 
     # ── Join ──────────────────────────────────────────────────────
     system = [{"text": SYSTEM_INSTRUCTION}, _CACHE_POINT]
-    message = transaction + refined + coa + tax + vendor + fix + rag
+    message = transaction \
+            + refined \
+            + coa \
+            + tax \
+            + vendor \
+            + fix \
+            + rag
+
     return {
         "system": system,
         "messages": [{"role": "user", "content": message}],

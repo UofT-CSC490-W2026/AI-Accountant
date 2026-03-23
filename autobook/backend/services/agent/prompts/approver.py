@@ -130,18 +130,21 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
     """Build the approver prompt with cache breakpoints."""
     # ── Build message parts ──────────────────────────────────────────
     transaction = build_transaction(state=state)
-    journal = build_journal(state=state)
-    reasoning = build_reasoning(state=state)
-    fix = build_fix_context(fix_context=fix_context)
-    rag = build_rag_examples(
-        rag_examples=rag_examples,
-        label="similar past corrections for reference",
-        fields=["entry", "error", "correction"],
-    )
+    journal     = build_journal(state=state)
+    reasoning   = build_reasoning(state=state)
+    fix         = build_fix_context(fix_context=fix_context)
+    rag         = build_rag_examples(rag_examples=rag_examples,
+                                    label="similar past corrections for reference",
+                                    fields=["entry", "error", "correction"])
 
     # ── Join ──────────────────────────────────────────────────────
     system = [{"text": SYSTEM_INSTRUCTION}, _CACHE_POINT]
-    message = transaction + journal + reasoning + fix + rag
+    message = transaction \
+            + journal \
+            + reasoning \
+            + fix \
+            + rag
+
     return {
         "system": system,
         "messages": [{"role": "user", "content": message}],
