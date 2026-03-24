@@ -5,6 +5,7 @@ from services.agent.utils.prompt.helpers import (
     build_coa, build_tax, build_vendor,
     build_fix_context, build_rag_examples,
 )
+from services.agent.utils.prompt.bedrock_message import to_bedrock_messages
 
 __all__ = [
     "CACHE_POINT",
@@ -12,4 +13,5 @@ __all__ = [
     "build_journal", "build_reasoning", "build_rejection",
     "build_coa", "build_tax", "build_vendor",
     "build_fix_context", "build_rag_examples",
+    "to_bedrock_messages",
 ]

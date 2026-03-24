@@ -5,10 +5,39 @@ from typing import Literal
 
 from pydantic import BaseModel, ValidationError
 
-from services.agent.graph.state import ENTRY_BUILDER, APPROVER, DIAGNOSTICIAN
+from services.agent.graph.state import (
+    DISAMBIGUATOR, DEBIT_CLASSIFIER, CREDIT_CLASSIFIER,
+    DEBIT_CORRECTOR, CREDIT_CORRECTOR, ENTRY_BUILDER,
+    APPROVER, DIAGNOSTICIAN,
+)
 
 
 # ── Pydantic schemas per agent output ─────────────────────────────────────
+
+class DisambiguatorOutput(BaseModel):
+    enriched_text: str
+    reason: str
+
+
+class DebitClassifierOutput(BaseModel):
+    tuple: tuple[int, int, int, int, int, int]
+    reason: str
+
+
+class CreditClassifierOutput(BaseModel):
+    tuple: tuple[int, int, int, int, int, int]
+    reason: str
+
+
+class DebitCorrectorOutput(BaseModel):
+    tuple: tuple[int, int, int, int, int, int]
+    reason: str
+
+
+class CreditCorrectorOutput(BaseModel):
+    tuple: tuple[int, int, int, int, int, int]
+    reason: str
+
 
 class JournalLine(BaseModel):
     account_name: str
@@ -19,7 +48,7 @@ class JournalLine(BaseModel):
 class EntryBuilderOutput(BaseModel):
     date: str
     description: str
-    rationale: str | None = None
+    rationale: str
     lines: list[JournalLine]
 
 
@@ -38,9 +67,15 @@ class FixPlan(BaseModel):
 class DiagnosticianOutput(BaseModel):
     decision: Literal["FIX", "STUCK"]
     fix_plans: list[FixPlan]
+    reason: str
 
 
 _MODELS: dict[str, type[BaseModel]] = {
+    DISAMBIGUATOR: DisambiguatorOutput,
+    DEBIT_CLASSIFIER: DebitClassifierOutput,
+    CREDIT_CLASSIFIER: CreditClassifierOutput,
+    DEBIT_CORRECTOR: DebitCorrectorOutput,
+    CREDIT_CORRECTOR: CreditCorrectorOutput,
     ENTRY_BUILDER: EntryBuilderOutput,
     APPROVER: ApproverOutput,
     DIAGNOSTICIAN: DiagnosticianOutput,

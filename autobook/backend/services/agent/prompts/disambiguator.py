@@ -1,12 +1,12 @@
 """Prompt builder for Agent 0 — Disambiguator.
 
 Resolves ambiguous transactions using user context before tuple classification.
-Output: enriched text string (plain text, no JSON).
+Output: JSON with enriched_text and reason.
 """
 from services.agent.graph.state import PipelineState
 from services.agent.utils.prompt import (
     CACHE_POINT, build_transaction, build_user_context,
-    build_fix_context, build_rag_examples,
+    build_fix_context, build_rag_examples, to_bedrock_messages,
 )
 
 # ── 1. Preamble ──────────────────────────────────────────────────────────
@@ -69,50 +69,27 @@ _EXAMPLES = """
 
 <example>
 Input: "Paid $200 to Tim" + (restaurant, sole proprietor, ON)
-Reasoning: Vague vendor — restaurant context suggests contractor payment.
-Output: Contractor payment to Tim for restaurant services, $200
+Output: {"enriched_text": "Contractor payment to Tim for restaurant services, $200", "reason": "Vague vendor resolved using restaurant context"}
 </example>
 
 <example>
 Input: "TRANSFER 500" + (consulting, corporation, AB)
-Reasoning: Transfer is ambiguous — corporation context, no payee suggests inter-account.
-Output: Inter-account transfer of $500 between business bank accounts
+Output: {"enriched_text": "Inter-account transfer of $500 between business bank accounts", "reason": "No payee, corporation context suggests inter-account"}
 </example>
 
 <example>
 Input: "DEPOSIT 3000" + (retail, sole proprietor, QC)
-Reasoning: Deposit could be revenue, loan, or investment — retail sole proprietor suggests sales.
-Output: Cash deposit of $3,000 from retail sales revenue
-</example>
-
-<example>
-Input: "COSTCO 450.00" + (restaurant, corporation, ON)
-Reasoning: Mixed-use vendor — restaurant context suggests food/supplies.
-Output: Purchase of food supplies and restaurant inventory from Costco, $450.00
-</example>
-
-<example>
-Input: "INSURANCE 350 MONTHLY" + (construction, corporation, AB)
-Reasoning: Recurring charge — construction context suggests commercial insurance.
-Output: Monthly business insurance premium of $350, commercial liability
+Output: {"enriched_text": "Cash deposit of $3,000 from retail sales revenue", "reason": "Retail sole proprietor, deposit likely sales revenue"}
 </example>
 
 <example>
 Input: "TXN REF 449281" + (consulting, sole proprietor, ON)
-Reasoning: Uninterpretable reference number, no vendor or amount context.
-Output: TXN REF 449281
+Output: {"enriched_text": "TXN REF 449281", "reason": "Uninterpretable reference number, returned unchanged"}
 </example>
 
 <example>
 Input: "GROCERY STORE 89.50" + (restaurant, sole proprietor, ON)
-Reasoning: Could be personal groceries or restaurant inventory. Restaurant context — default to business.
-Output: Purchase of restaurant food supplies from grocery store, $89.50
-</example>
-
-<example>
-Input: "PAYMENT TO SARAH 2000" + (consulting, corporation, MB)
-Reasoning: Could be wages, contractor, or personal. Corporation + consulting suggests contractor or employee.
-Output: Payment to Sarah for consulting contractor services, $2,000
+Output: {"enriched_text": "Purchase of restaurant food supplies from grocery store, $89.50", "reason": "Restaurant context, default to business purchase"}
 </example>"""
 
 # ── 7. Output Format ─────────────────────────────────────────────────────
@@ -120,9 +97,8 @@ Output: Payment to Sarah for consulting contractor services, $2,000
 _OUTPUT_FORMAT = """
 ## Output Format
 
-Return ONLY the enriched transaction description in a single sentence.
-If the transaction is already clear, return it with minor improvements.
-If uninterpretable even with context, return it unchanged."""
+Return JSON: {"enriched_text": "...", "reason": "brief explanation"}
+If uninterpretable even with context, return the original text as enriched_text."""
 
 SYSTEM_INSTRUCTION = "\n".join([
     _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES, _OUTPUT_FORMAT,
@@ -141,14 +117,11 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
                                     fields=["input", "output"])
 
     # ── Join ──────────────────────────────────────────────────────
-    system = [{"text": SYSTEM_INSTRUCTION}, CACHE_POINT]
-    message = transaction \
-            + user_ctx \
-            + [CACHE_POINT] \
-            + fix \
-            + rag
-    
-    return {
-        "system": system,
-        "messages": [{"role": "user", "content": message}],
-    }
+    system_blocks = [{"text": SYSTEM_INSTRUCTION}, CACHE_POINT]
+    message_blocks = transaction \
+                   + user_ctx \
+                   + [CACHE_POINT] \
+                   + fix \
+                   + rag
+
+    return to_bedrock_messages(system_blocks, message_blocks)

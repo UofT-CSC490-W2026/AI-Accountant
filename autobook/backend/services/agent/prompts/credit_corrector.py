@@ -1,11 +1,12 @@
 """Prompt builder for Agent 4 — Credit Corrector.
 
 Re-evaluates the initial credit tuple using the debit side as cross-validation.
-Fixes misclassifications and missing lines. Output: refined 6-tuple.
+Fixes misclassifications and missing lines. Output: JSON with tuple and reason.
 """
 from services.agent.graph.state import PipelineState
 from services.agent.utils.prompt import (
     CACHE_POINT, build_transaction, build_tuples, build_fix_context, build_rag_examples,
+    to_bedrock_messages,
 )
 
 # ── 1. Preamble ──────────────────────────────────────────────────────────
@@ -89,42 +90,26 @@ _EXAMPLES = """
 
 <example>
 Transaction: "Owner invests $50,000 into business"
-Initial credit tuple: (1,0,0,0,0,0)
-Debit tuple: (1,0,0,0,0,0)
-Reasoning: Debit is asset increase (cash). Owner investment is equity increase, not liability.
-Output: (0,1,0,0,0,0)
+Initial credit tuple: (1,0,0,0,0,0), Debit tuple: (1,0,0,0,0,0)
+Output: {"tuple": [0,1,0,0,0,0], "reason": "Owner investment is equity increase, not liability"}
 </example>
 
 <example>
 Transaction: "Sell inventory (cost $100k) for $150k cash"
-Initial credit tuple: (0,0,1,0,0,0)
-Debit tuple: (1,0,1,0,0,0)
-Reasoning: Debit has COGS (expense increase) — inventory must leave. Missing asset decrease.
-Output: (0,0,1,1,0,0)
+Initial credit tuple: (0,0,1,0,0,0), Debit tuple: (1,0,1,0,0,0)
+Output: {"tuple": [0,0,1,1,0,0], "reason": "Debit has COGS — inventory must leave, add asset decrease"}
 </example>
 
 <example>
 Transaction: "Receive $1,000 payment from client"
-Initial credit tuple: (0,0,1,0,0,0)
-Debit tuple: (1,0,0,0,0,0)
-Reasoning: Correct. Revenue increase for service payment.
-Output: (0,0,1,0,0,0)
+Initial credit tuple: (0,0,1,0,0,0), Debit tuple: (1,0,0,0,0,0)
+Output: {"tuple": [0,0,1,0,0,0], "reason": "No correction needed, revenue increase is correct"}
 </example>
 
 <example>
 Transaction: "Take out $25,000 bank loan"
-Initial credit tuple: (0,0,1,0,0,0)
-Debit tuple: (1,0,0,0,0,0)
-Reasoning: Loan proceeds are liability increase, not revenue.
-Output: (1,0,0,0,0,0)
-</example>
-
-<example>
-Transaction: "Pay employee wages $3,000 and remit $800 to CRA"
-Initial credit tuple: (0,0,0,1,0,0)
-Debit tuple: (0,0,2,0,0,0)
-Reasoning: Debit has 2 expense lines. Credit should have asset decrease (cash for wages) plus liability decrease (remittance clears payable). Two credit lines.
-Output: (0,0,0,1,0,0)
+Initial credit tuple: (0,0,1,0,0,0), Debit tuple: (1,0,0,0,0,0)
+Output: {"tuple": [1,0,0,0,0,0], "reason": "Loan proceeds are liability increase, not revenue"}
 </example>"""
 
 # ── 7. Output Format ─────────────────────────────────────────────────────
@@ -132,8 +117,8 @@ Output: (0,0,0,1,0,0)
 _OUTPUT_FORMAT = """
 ## Output Format
 
-Return ONLY the corrected 6-tuple as (a,b,c,d,e,f). If the initial tuple \
-is already correct, return it unchanged. No explanation."""
+Return JSON: {"tuple": [a,b,c,d,e,f], "reason": "brief explanation of correction or why no change"}
+If the initial tuple is already correct, return it unchanged with reason."""
 
 SYSTEM_INSTRUCTION = "\n".join([
     _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES, _OUTPUT_FORMAT,
@@ -153,14 +138,11 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
                                     fields=["transaction", "before", "after"])
 
     # ── Join ──────────────────────────────────────────────────────
-    system = [{"text": SYSTEM_INSTRUCTION}, CACHE_POINT]
-    message = transaction \
-            + [CACHE_POINT] \
-            + initial \
-            + fix \
-            + rag
+    system_blocks = [{"text": SYSTEM_INSTRUCTION}, CACHE_POINT]
+    message_blocks = transaction \
+                   + [CACHE_POINT] \
+                   + initial \
+                   + fix \
+                   + rag
 
-    return {
-        "system": system,
-        "messages": [{"role": "user", "content": message}],
-    }
+    return to_bedrock_messages(system_blocks, message_blocks)

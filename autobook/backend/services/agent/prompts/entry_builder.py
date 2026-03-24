@@ -6,7 +6,7 @@ and tool results. Output: JSON with date, description, rationale, lines.
 from services.agent.graph.state import PipelineState
 from services.agent.utils.prompt import (
     CACHE_POINT, build_transaction, build_tuples, build_coa, build_tax, build_vendor,
-    build_fix_context, build_rag_examples,
+    build_fix_context, build_rag_examples, to_bedrock_messages,
 )
 
 # ── 1. Preamble ──────────────────────────────────────────────────────────
@@ -144,17 +144,14 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
                                     fields=["transaction", "entry"])
 
     # ── Join ──────────────────────────────────────────────────────
-    system = [{"text": SYSTEM_INSTRUCTION}, CACHE_POINT]
-    message = transaction \
-            + [CACHE_POINT] \
-            + refined \
-            + coa \
-            + tax \
-            + vendor \
-            + fix \
-            + rag
+    system_blocks = [{"text": SYSTEM_INSTRUCTION}, CACHE_POINT]
+    message_blocks = transaction \
+                   + [CACHE_POINT] \
+                   + refined \
+                   + coa \
+                   + tax \
+                   + vendor \
+                   + fix \
+                   + rag
 
-    return {
-        "system": system,
-        "messages": [{"role": "user", "content": message}],
-    }
+    return to_bedrock_messages(system_blocks, message_blocks)

@@ -1,11 +1,12 @@
 """Prompt builder for Agent 2 — Credit Classifier.
 
 Classifies how many credit-side journal lines fall into each of the 6
-directional categories. Output: 6-tuple (a,b,c,d,e,f).
+directional categories. Output: JSON with tuple and reason.
 """
 from services.agent.graph.state import PipelineState
 from services.agent.utils.prompt import (
     CACHE_POINT, build_transaction, build_fix_context, build_rag_examples,
+    to_bedrock_messages,
 )
 
 # ── 1. Preamble ──────────────────────────────────────────────────────────
@@ -81,44 +82,32 @@ _EXAMPLES = """
 
 <example>
 Transaction: "Sell inventory (cost $100k) for $150k cash"
-Reasoning: Sales Revenue = revenue increase (slot c). Inventory leaving = asset decrease (slot d).
-Output: (0,0,1,1,0,0)
+Output: {"tuple": [0,0,1,1,0,0], "reason": "Revenue increase (sales) + asset decrease (inventory leaving)"}
 </example>
 
 <example>
 Transaction: "Pay monthly rent $2,000"
-Reasoning: Cash leaving = asset decrease (slot d).
-Output: (0,0,0,1,0,0)
+Output: {"tuple": [0,0,0,1,0,0], "reason": "Cash leaving = asset decrease"}
 </example>
 
 <example>
 Transaction: "Owner invests $50,000 into business"
-Reasoning: Owner's Capital = equity increase (slot b).
-Output: (0,1,0,0,0,0)
+Output: {"tuple": [0,1,0,0,0,0], "reason": "Owner capital = equity increase"}
 </example>
 
 <example>
 Transaction: "Take out $25,000 bank loan"
-Reasoning: Loan = liability increase (slot a).
-Output: (1,0,0,0,0,0)
+Output: {"tuple": [1,0,0,0,0,0], "reason": "Loan = liability increase"}
 </example>
 
 <example>
 Transaction: "Purchase equipment $20,000 cash plus $30,000 loan"
-Reasoning: Cash leaving = asset decrease (slot d). Loan = liability increase (slot a). Two credit lines.
-Output: (1,0,0,1,0,0)
+Output: {"tuple": [1,0,0,1,0,0], "reason": "Cash leaving + loan = asset decrease + liability increase"}
 </example>
 
 <example>
 Transaction: "Receive refund $300 for returned office supplies"
-Reasoning: Supplies expense reversed = expense decrease (slot f).
-Output: (0,0,0,0,0,1)
-</example>
-
-<example>
-Transaction: "Client pays $5,000 invoice and $650 HST"
-Reasoning: Both go to cash (asset increase on debit side). Credit side: revenue increase (slot c) for the service, liability increase (slot a) for HST Payable. Two credit lines.
-Output: (1,0,1,0,0,0)
+Output: {"tuple": [0,0,0,0,0,1], "reason": "Supplies expense reversed = expense decrease"}
 </example>"""
 
 # ── 7. Output Format ─────────────────────────────────────────────────────
@@ -126,8 +115,8 @@ Output: (1,0,1,0,0,0)
 _OUTPUT_FORMAT = """
 ## Output Format
 
-Return ONLY the 6-tuple as (a,b,c,d,e,f). Each value must be a non-negative \
-integer. No explanation."""
+Return JSON: {"tuple": [a,b,c,d,e,f], "reason": "brief explanation"}
+Each tuple value must be a non-negative integer."""
 
 SYSTEM_INSTRUCTION = "\n".join([
     _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES, _OUTPUT_FORMAT,
@@ -145,13 +134,10 @@ def build_prompt(state: PipelineState, rag_examples: list[dict],
                                     fields=["transaction", "credit_tuple"])
 
     # ── Join ──────────────────────────────────────────────────────
-    system = [{"text": SYSTEM_INSTRUCTION}, CACHE_POINT]
-    message = transaction \
-            + [CACHE_POINT] \
-            + fix \
-            + rag
+    system_blocks = [{"text": SYSTEM_INSTRUCTION}, CACHE_POINT]
+    message_blocks = transaction \
+                   + [CACHE_POINT] \
+                   + fix \
+                   + rag
 
-    return {
-        "system": system,
-        "messages": [{"role": "user", "content": message}],
-    }
+    return to_bedrock_messages(system_blocks, message_blocks)
