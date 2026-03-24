@@ -42,13 +42,7 @@ def coa_lookup(user_id: str, account_type: str | None = None) -> list[dict]:
 
     Called by: Agent 5 (Entry Builder).
     """
-    return [
-        {"account_code": "1000", "account_name": "Cash", "account_type": "asset"},
-        {"account_code": "1200", "account_name": "Accounts Receivable", "account_type": "asset"},
-        {"account_code": "2000", "account_name": "Accounts Payable", "account_type": "liability"},
-        {"account_code": "4000", "account_name": "Sales Revenue", "account_type": "revenue"},
-        {"account_code": "5000", "account_name": "Cost of Goods Sold", "account_type": "expense"},
-    ]
+    return []
 
 
 def tax_rules_lookup(province: str, transaction_type: str) -> dict:
@@ -66,4 +60,4 @@ def tax_rules_lookup(province: str, transaction_type: str) -> dict:
 
     Called by: Agent 5 (Entry Builder).
     """
-    return {"rate": 0.13, "taxable": True}
+    return {}
