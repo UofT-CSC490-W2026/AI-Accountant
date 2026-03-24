@@ -278,10 +278,17 @@ async def run_variant_async(variant_name: str, test_cases: list[TestCase]) -> li
 # ── Save results ──────────────────────────────────────────────────────────
 
 def _save_results(results: list[TestCaseMetrics], variant_name: str) -> Path:
-    """Save results to JSON."""
+    """Save results to JSON — timestamped + latest symlink."""
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
     out_dir = Path("results/stage1")
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"{variant_name}.json"
+
+    # Timestamped file
+    out_path = out_dir / f"{variant_name}_{timestamp}.json"
+    # Latest symlink (always points to most recent run)
+    latest_path = out_dir / f"{variant_name}.json"
 
     data = []
     for m in results:
@@ -330,8 +337,14 @@ def _save_results(results: list[TestCaseMetrics], variant_name: str) -> Path:
         }
         data.append(d)
 
-    out_path.write_text(json.dumps(data, indent=2, default=str))
+    json_str = json.dumps(data, indent=2, default=str)
+    out_path.write_text(json_str)
+    # Update latest symlink
+    if latest_path.is_symlink() or latest_path.exists():
+        latest_path.unlink()
+    latest_path.symlink_to(out_path.name)
     console.print(f"\nResults saved to [bold]{out_path}[/bold]")
+    console.print(f"Latest: [bold]{latest_path}[/bold] → {out_path.name}")
     return out_path
 
 
