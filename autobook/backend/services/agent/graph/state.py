@@ -77,5 +77,10 @@ class PipelineState(TypedDict):
     status_approver: int
     status_diagnostician: int
 
+    # ── Embedding cache — computed once, reused by all agents
+    embedding_transaction: list[float] | None   # embed(transaction_text), used by agents 0-6
+    embedding_error: list[float] | None         # embed(fix_plans[].error), fix loop only
+    embedding_rejection: list[float] | None     # embed(approval.reason), rejection only
+
 
 

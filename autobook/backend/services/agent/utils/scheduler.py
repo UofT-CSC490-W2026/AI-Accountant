@@ -18,8 +18,8 @@ _AGENT_INDEX_TO_NAME: dict[int, str] = {
 # When an agent is root cause, all downstream agents must rerun.
 DEPENDENCY_TABLE: dict[int, dict] = {
     0: {"downstream": [0, 1, 2, 3, 4, 5], "parallel_with": []},
-    1: {"downstream": [1, 3, 5],           "parallel_with": [2]},
-    2: {"downstream": [2, 4, 5],           "parallel_with": [1]},
+    1: {"downstream": [1, 3, 4, 5],        "parallel_with": [2]},
+    2: {"downstream": [2, 3, 4, 5],        "parallel_with": [1]},
     3: {"downstream": [3, 5],              "parallel_with": [4]},
     4: {"downstream": [4, 5],              "parallel_with": [3]},
     5: {"downstream": [5],                 "parallel_with": []},
