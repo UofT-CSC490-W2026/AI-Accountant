@@ -17,6 +17,7 @@ function renderRoute(path: string) {
 afterEach(() => {
   vi.unstubAllEnvs();
   localStorage.clear();
+  sessionStorage.clear();
 });
 
 function enableMockSession() {
@@ -69,5 +70,14 @@ describe("app routing", () => {
     renderRoute("/ledger");
     expect(await screen.findByRole("heading", { name: /sign in/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /continue with cognito/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /create account/i })).toBeInTheDocument();
+  });
+
+  test("redirects callback without oauth params back to login with a sign-in notice", async () => {
+    vi.stubEnv("VITE_USE_MOCK_API", "false");
+    renderRoute("/auth/callback");
+
+    expect(await screen.findByRole("heading", { name: /sign in/i })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(/account verified\. sign in to continue\./i);
   });
 });

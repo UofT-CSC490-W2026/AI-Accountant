@@ -43,11 +43,34 @@ def test_auth_login_url_builds_cognito_hosted_ui_url(monkeypatch):
     )
 
     assert response.status_code == 200
-    login_url = response.json()["login_url"]
+    login_url = response.json()["hosted_ui_url"]
     assert login_url.startswith("https://autobook-dev.auth.ca-central-1.amazoncognito.com/login?")
     assert "client_id=client-123" in login_url
     assert "code_challenge=challenge-123" in login_url
     assert "state=state-123" in login_url
+
+
+def test_auth_signup_url_builds_cognito_hosted_ui_url(monkeypatch):
+    get_settings.cache_clear()
+    monkeypatch.setenv("COGNITO_DOMAIN", "autobook-dev.auth.ca-central-1.amazoncognito.com")
+    monkeypatch.setenv("COGNITO_CLIENT_ID", "client-123")
+
+    client = create_client()
+    response = client.get(
+        "/api/v1/auth/signup-url",
+        params={
+            "redirect_uri": "http://localhost:5173/auth/callback",
+            "code_challenge": "challenge-123",
+            "state": "state-123",
+        },
+    )
+
+    assert response.status_code == 200
+    signup_url = response.json()["hosted_ui_url"]
+    assert signup_url.startswith("https://autobook-dev.auth.ca-central-1.amazoncognito.com/signup?")
+    assert "client_id=client-123" in signup_url
+    assert "code_challenge=challenge-123" in signup_url
+    assert "state=state-123" in signup_url
 
 
 def test_auth_logout_url_builds_cognito_logout_url(monkeypatch):

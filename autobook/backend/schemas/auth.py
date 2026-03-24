@@ -10,8 +10,8 @@ class AuthMeResponse(BaseModel):
     token_use: str
 
 
-class AuthLoginUrlResponse(BaseModel):
-    login_url: str
+class AuthHostedUiUrlResponse(BaseModel):
+    hosted_ui_url: str
 
 
 class AuthLogoutUrlResponse(BaseModel):

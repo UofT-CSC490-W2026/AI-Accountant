@@ -7,6 +7,20 @@ const REFRESH_TOKEN_KEY = "autobook_refresh_token";
 const PKCE_VERIFIER_KEY = "autobook_pkce_verifier";
 const PKCE_STATE_KEY = "autobook_pkce_state";
 
+type HostedUiMode = "login" | "signup";
+type HostedUiUrlResponse = { hosted_ui_url?: string; login_url?: string };
+export type AuthCallbackErrorCode = "needs_sign_in" | "restart_sign_in" | "provider_error";
+
+export class AuthCallbackError extends Error {
+  code: AuthCallbackErrorCode;
+
+  constructor(code: AuthCallbackErrorCode, message: string) {
+    super(message);
+    this.name = "AuthCallbackError";
+    this.code = code;
+  }
+}
+
 export function getAccessToken(): string | null {
   return localStorage.getItem(ACCESS_TOKEN_KEY);
 }
@@ -50,6 +64,14 @@ export async function fetchAuthMe(): Promise<AuthUser> {
 }
 
 export async function beginHostedLogin(): Promise<void> {
+  await beginHostedAuth("login");
+}
+
+export async function beginHostedSignUp(): Promise<void> {
+  await beginHostedAuth("signup");
+}
+
+async function beginHostedAuth(mode: HostedUiMode): Promise<void> {
   if (USE_MOCK_API) {
     setAccessToken("mock-access-token");
     return;
@@ -62,32 +84,43 @@ export async function beginHostedLogin(): Promise<void> {
   sessionStorage.setItem(PKCE_VERIFIER_KEY, verifier);
   sessionStorage.setItem(PKCE_STATE_KEY, state);
 
-  const url = new URL(`${API_BASE_URL}/auth/login-url`);
+  const url = new URL(`${API_BASE_URL}/auth/${mode}-url`);
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("code_challenge", challenge);
   url.searchParams.set("state", state);
 
-  const response = await fetch(url.toString());
+  let response = await fetch(url.toString());
+  if (mode === "signup" && response.status === 404) {
+    response = await fetch(buildHostedAuthUrl("login", redirectUri, challenge, state));
+  }
   if (!response.ok) {
-    throw new Error(`Unable to start login: ${response.status}`);
+    throw new Error(`Unable to start ${mode}: ${response.status}`);
   }
 
-  const payload = (await response.json()) as { login_url: string };
-  window.location.assign(payload.login_url);
+  const payload = (await response.json()) as HostedUiUrlResponse;
+  window.location.assign(resolveHostedUiRedirectUrl(mode, payload));
 }
 
 export async function completeHostedLogin(search: string): Promise<AuthUser> {
   const params = new URLSearchParams(search);
   const code = params.get("code");
+  const providerError = params.get("error");
+  const providerErrorDescription = params.get("error_description");
   const state = params.get("state");
   const verifier = sessionStorage.getItem(PKCE_VERIFIER_KEY);
   const expectedState = sessionStorage.getItem(PKCE_STATE_KEY);
 
-  if (!code || !verifier) {
-    throw new Error("Missing Cognito callback parameters.");
+  if (providerError) {
+    throw new AuthCallbackError(
+      "provider_error",
+      providerErrorDescription ?? `Cognito sign-in failed: ${providerError}.`,
+    );
   }
-  if (!state || state !== expectedState) {
-    throw new Error("Invalid auth callback state.");
+  if (!code) {
+    throw new AuthCallbackError("needs_sign_in", "Account created or verified. Sign in to continue.");
+  }
+  if (!verifier || !expectedState || !state || state !== expectedState) {
+    throw new AuthCallbackError("restart_sign_in", "Your sign-in session expired. Start again.");
   }
 
   const response = await fetch(`${API_BASE_URL}/auth/token`, {
@@ -154,6 +187,33 @@ export async function beginLogout(): Promise<void> {
 function persistTokenResponse(payload: AuthTokenResponse) {
   setAccessToken(payload.access_token);
   setRefreshToken(payload.refresh_token ?? null);
+}
+
+function buildHostedAuthUrl(
+  mode: HostedUiMode,
+  redirectUri: string,
+  challenge: string,
+  state: string,
+): string {
+  const url = new URL(`${API_BASE_URL}/auth/${mode}-url`);
+  url.searchParams.set("redirect_uri", redirectUri);
+  url.searchParams.set("code_challenge", challenge);
+  url.searchParams.set("state", state);
+  return url.toString();
+}
+
+export function resolveHostedUiRedirectUrl(mode: HostedUiMode, payload: HostedUiUrlResponse): string {
+  const hostedUiUrl = payload.hosted_ui_url ?? payload.login_url;
+  if (!hostedUiUrl) {
+    throw new Error(`Unable to start ${mode}: invalid hosted UI response.`);
+  }
+  return mode === "signup" ? toSignupUrl(hostedUiUrl) : hostedUiUrl;
+}
+
+function toSignupUrl(hostedUiUrl: string): string {
+  const url = new URL(hostedUiUrl);
+  url.pathname = url.pathname.replace(/\/login$/, "/signup");
+  return url.toString();
 }
 
 function randomString(length: number): string {

@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from auth.deps import AuthContext, get_current_user
 from config import Settings, get_settings
 from schemas.auth import (
-    AuthLoginUrlResponse,
+    AuthHostedUiUrlResponse,
     AuthLogoutUrlResponse,
     AuthMeResponse,
     AuthRefreshRequest,
@@ -20,25 +20,36 @@ from schemas.auth import (
 router = APIRouter(prefix="/api/v1")
 
 
-@router.get("/auth/login-url", response_model=AuthLoginUrlResponse)
+@router.get("/auth/login-url", response_model=AuthHostedUiUrlResponse)
 async def get_login_url(
     redirect_uri: str = Query(...),
     code_challenge: str = Query(...),
     state: str | None = Query(default=None),
 ):
-    settings = get_settings()
-    cognito_domain = _get_cognito_domain(settings)
-    params = {
-        "response_type": "code",
-        "client_id": settings.COGNITO_CLIENT_ID,
-        "redirect_uri": redirect_uri,
-        "scope": settings.COGNITO_SCOPES,
-        "code_challenge_method": "S256",
-        "code_challenge": code_challenge,
-    }
-    if state:
-        params["state"] = state
-    return AuthLoginUrlResponse(login_url=f"{cognito_domain}/login?{urlencode(params)}")
+    return AuthHostedUiUrlResponse(
+        hosted_ui_url=_build_hosted_ui_url(
+            path="login",
+            redirect_uri=redirect_uri,
+            code_challenge=code_challenge,
+            state=state,
+        )
+    )
+
+
+@router.get("/auth/signup-url", response_model=AuthHostedUiUrlResponse)
+async def get_signup_url(
+    redirect_uri: str = Query(...),
+    code_challenge: str = Query(...),
+    state: str | None = Query(default=None),
+):
+    return AuthHostedUiUrlResponse(
+        hosted_ui_url=_build_hosted_ui_url(
+            path="signup",
+            redirect_uri=redirect_uri,
+            code_challenge=code_challenge,
+            state=state,
+        )
+    )
 
 
 @router.get("/auth/logout-url", response_model=AuthLogoutUrlResponse)
@@ -111,6 +122,28 @@ def _get_cognito_domain(settings: Settings) -> str:
     if settings.COGNITO_DOMAIN.startswith("http://") or settings.COGNITO_DOMAIN.startswith("https://"):
         return settings.COGNITO_DOMAIN.rstrip("/")
     return f"https://{settings.COGNITO_DOMAIN.rstrip('/')}"
+
+
+def _build_hosted_ui_url(
+    *,
+    path: str,
+    redirect_uri: str,
+    code_challenge: str,
+    state: str | None,
+) -> str:
+    settings = get_settings()
+    cognito_domain = _get_cognito_domain(settings)
+    params = {
+        "response_type": "code",
+        "client_id": settings.COGNITO_CLIENT_ID,
+        "redirect_uri": redirect_uri,
+        "scope": settings.COGNITO_SCOPES,
+        "code_challenge_method": "S256",
+        "code_challenge": code_challenge,
+    }
+    if state:
+        params["state"] = state
+    return f"{cognito_domain}/{path}?{urlencode(params)}"
 
 
 async def _exchange_token(form_data: dict[str, str]) -> dict[str, object]:  # pragma: no cover

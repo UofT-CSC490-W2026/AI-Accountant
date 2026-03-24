@@ -8,6 +8,7 @@ import {
 } from "react";
 import {
   beginHostedLogin,
+  beginHostedSignUp,
   beginLogout,
   clearAuthSession,
   completeHostedLogin,
@@ -24,6 +25,7 @@ type AuthContextValue = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   login: () => Promise<void>;
+  signUp: () => Promise<void>;
   logout: () => Promise<void>;
   completeLogin: (search: string) => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -93,6 +95,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: status === "authenticated",
       login: async () => {
         await beginHostedLogin();
+        if (isMockApiEnabled()) {
+          setUser(MOCK_USER);
+          setStatus("authenticated");
+        }
+      },
+      signUp: async () => {
+        await beginHostedSignUp();
         if (isMockApiEnabled()) {
           setUser(MOCK_USER);
           setStatus("authenticated");
