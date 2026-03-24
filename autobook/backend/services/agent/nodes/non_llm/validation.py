@@ -12,6 +12,10 @@ def validation_node(state: PipelineState) -> dict:
     i = state["iteration"]
     entry = state["output_entry_builder"][i]
 
+    # No-entry case (e.g. "Board resolution") — skip validation
+    if entry is None or not entry.get("lines"):
+        return {}
+
     validation = validate_journal_entry(entry)
     if not validation["valid"]:
         raise ValueError(f"Journal entry validation failed: {validation['errors']}")

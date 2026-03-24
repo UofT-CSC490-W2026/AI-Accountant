@@ -5,14 +5,14 @@ from config import get_settings
 
 # Per-agent max output tokens — accounts for JSON + reason via tool calling
 MAX_TOKENS: dict[str, int] = {
-    "disambiguator":    200,
-    "debit_classifier": 150,
-    "credit_classifier": 150,
-    "debit_corrector":  150,
-    "credit_corrector": 150,
-    "entry_builder":    500,
-    "approver":         200,
-    "diagnostician":    300,
+    "disambiguator":    300,
+    "debit_classifier": 300,
+    "credit_classifier": 300,
+    "debit_corrector":  300,
+    "credit_corrector": 300,
+    "entry_builder":    800,
+    "approver":         400,
+    "diagnostician":    500,
 }
 
 
