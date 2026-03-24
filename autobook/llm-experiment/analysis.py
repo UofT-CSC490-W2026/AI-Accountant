@@ -127,9 +127,38 @@ def export_csv(all_results: dict[str, list[dict]], out_path: Path) -> None:
     print(f"\nCSV exported to {out_path}")
 
 
+def print_single_variant_detail(variant_name: str, test_cases: list[dict]) -> None:
+    """Print detailed report for a single variant."""
+    m = aggregate_variant(variant_name, test_cases)
+
+    print(f"\n{'=' * 70}")
+    print(f"  {variant_name} — {m.num_test_cases} test cases")
+    print(f"{'=' * 70}")
+    print(f"  Exact match rate:     {m.exact_match_rate*100:.1f}%")
+    print(f"  Mean slot accuracy:   {m.mean_slot_accuracy*100:.1f}%")
+    print(f"  Entry valid rate:     {m.entry_valid_rate*100:.1f}%")
+    print(f"  Total cost:           ${m.total_cost_usd:.4f}")
+    print(f"  Cost per correct:     ${m.cost_per_correct_entry:.4f}")
+    print(f"  Mean latency:         {m.mean_latency_ms:.0f}ms")
+    print(f"  Fix rate:             {m.fix_rate*100:.1f}%")
+    print(f"  Fix success rate:     {m.fix_success_rate*100:.1f}%")
+    print(f"  Error rate:           {m.error_rate*100:.1f}%")
+    print(f"{'-' * 70}")
+
+    for tc in test_cases:
+        d = "✓" if tc.get("debit_tuple_exact_match") else "✗"
+        c = "✓" if tc.get("credit_tuple_exact_match") else "✗"
+        err = f"  ERROR: {tc['error']}" if tc.get("error") else ""
+        print(f"  {tc['test_case_id']:<35} D={d} C={c} "
+              f"${tc.get('total_cost_usd', 0):.4f} "
+              f"{tc.get('total_latency_ms', 0)}ms{err}")
+    print(f"{'=' * 70}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Analyze experiment results")
     parser.add_argument("--results", required=True, help="Results directory")
+    parser.add_argument("--variant", default=None, help="Analyze single variant only")
     args = parser.parse_args()
 
     results_dir = Path(args.results)
@@ -142,16 +171,20 @@ def main():
         print("No result files found")
         sys.exit(1)
 
-    # Aggregate
-    variants = {name: aggregate_variant(name, cases) for name, cases in all_results.items()}
-
-    # Reports
-    print_variant_table(variants)
-    print_test_case_breakdown(all_results)
-
-    # CSV export
-    csv_path = results_dir / "comparison.csv"
-    export_csv(all_results, csv_path)
+    if args.variant:
+        # Single variant detail
+        if args.variant not in all_results:
+            print(f"Variant not found: {args.variant}")
+            print(f"Available: {list(all_results.keys())}")
+            sys.exit(1)
+        print_single_variant_detail(args.variant, all_results[args.variant])
+    else:
+        # All variants comparison
+        variants = {name: aggregate_variant(name, cases) for name, cases in all_results.items()}
+        print_variant_table(variants)
+        print_test_case_breakdown(all_results)
+        csv_path = results_dir / "comparison.csv"
+        export_csv(all_results, csv_path)
 
 
 if __name__ == "__main__":
