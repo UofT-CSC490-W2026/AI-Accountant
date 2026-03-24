@@ -1,12 +1,21 @@
 """Full agent pipeline graph.
 
 Single flat StateGraph wiring all 8 agent nodes + validation + fix scheduler
-+ confidence gate. No subgraphs — single shared PipelineState.
++ confidence gate + ablation routing. No subgraphs — single shared PipelineState.
 
-Flow (happy path):
+All ablation is graph-level — nodes are pure (no config checks inside nodes).
+Ablation flags: disambiguator_active, correction_pass, evaluation_active.
+
+Flow (happy path, all features on):
   START → [disambiguator] → debit_classifier ‖ credit_classifier
         → debit_corrector ‖ credit_corrector → entry_builder
         → validation → approver → confidence_gate → END
+
+Flow (correction off):
+  ... → classifiers → corrector_passthrough → entry_builder → ...
+
+Flow (evaluation off):
+  ... → validation → confidence_gate → END (skip approver/diagnostician)
 
 Flow (fix loop):
   ... → approver (rejected) → diagnostician → fix_scheduler
@@ -30,12 +39,16 @@ from services.agent.nodes.diagnostician import diagnostician_node
 # ── Non-LLM nodes ────────────────────────────────────────────────────────
 from services.agent.nodes.non_llm import (
     validation_node, fix_scheduler_node, confidence_gate_node,
+    corrector_passthrough_node,
 )
 
-# ── Routers ───────────────────────────────────────────────────────────────
+# ── Routers (all ablation logic lives here) ───────────────────────────────
 from services.agent.graph.routers import (
-    route_after_start, route_after_approver,
-    route_after_diagnostician, route_after_confidence_gate,
+    route_after_start,
+    route_before_correctors,
+    route_before_approver,
+    route_after_approver,
+    route_after_diagnostician,
 )
 
 
@@ -53,6 +66,7 @@ builder.add_node("debit_classifier", debit_classifier_node, retry=_RETRY)
 builder.add_node("credit_classifier", credit_classifier_node, retry=_RETRY)
 builder.add_node("debit_corrector", debit_corrector_node, retry=_RETRY)
 builder.add_node("credit_corrector", credit_corrector_node, retry=_RETRY)
+builder.add_node("corrector_passthrough", corrector_passthrough_node)
 builder.add_node("entry_builder", entry_builder_node, retry=_RETRY)
 builder.add_node("validation", validation_node)
 builder.add_node("approver", approver_node, retry=_RETRY)
@@ -60,7 +74,7 @@ builder.add_node("diagnostician", diagnostician_node, retry=_RETRY)
 builder.add_node("fix_scheduler", fix_scheduler_node)
 builder.add_node("confidence_gate", confidence_gate_node)
 
-# ── Edges: START → disambiguator or classifiers ──────────────────────────
+# ── Edges: START → disambiguator or classifiers (ablation) ────────────────
 builder.add_conditional_edges("__start__", route_after_start, {
     "disambiguator": "disambiguator",
     "classifiers": "debit_classifier",
@@ -70,19 +84,29 @@ builder.add_conditional_edges("__start__", route_after_start, {
 builder.add_edge("disambiguator", "debit_classifier")
 builder.add_edge("disambiguator", "credit_classifier")
 
-# ── Edges: classifiers → correctors (fan-out, both must complete) ─────────
-builder.add_edge("debit_classifier", "debit_corrector")
-builder.add_edge("debit_classifier", "credit_corrector")
-builder.add_edge("credit_classifier", "debit_corrector")
-builder.add_edge("credit_classifier", "credit_corrector")
+# ── Edges: classifiers → correctors or passthrough (ablation) ─────────────
+builder.add_conditional_edges("debit_classifier", route_before_correctors, {
+    "correctors": "debit_corrector",
+    "corrector_passthrough": "corrector_passthrough",
+})
+builder.add_conditional_edges("credit_classifier", route_before_correctors, {
+    "correctors": "credit_corrector",
+    "corrector_passthrough": "corrector_passthrough",
+})
 
-# ── Edges: correctors → entry builder (fan-in) ───────────────────────────
+# ── Edges: correctors / passthrough → entry builder (fan-in) ─────────────
 builder.add_edge("debit_corrector", "entry_builder")
 builder.add_edge("credit_corrector", "entry_builder")
+builder.add_edge("corrector_passthrough", "entry_builder")
 
-# ── Edges: entry builder → validation → approver ─────────────────────────
+# ── Edges: entry builder → validation ─────────────────────────────────────
 builder.add_edge("entry_builder", "validation")
-builder.add_edge("validation", "approver")
+
+# ── Edges: validation → approver or confidence gate (ablation) ────────────
+builder.add_conditional_edges("validation", route_before_approver, {
+    "approver": "approver",
+    "confidence_gate": "confidence_gate",
+})
 
 # ── Edges: approver → confidence gate or diagnostician ────────────────────
 builder.add_conditional_edges("approver", route_after_approver, {

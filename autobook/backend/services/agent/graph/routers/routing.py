@@ -16,6 +16,22 @@ def route_after_start(state: PipelineState, config=None) -> str:
     return "classifiers"
 
 
+def route_before_correctors(state: PipelineState, config=None) -> str:
+    """Skip correctors if correction_pass is disabled."""
+    configurable = (config or {}).get("configurable", {})
+    if not configurable.get("correction_pass", True):
+        return "corrector_passthrough"
+    return "correctors"
+
+
+def route_before_approver(state: PipelineState, config=None) -> str:
+    """Skip evaluator if evaluation_active is disabled."""
+    configurable = (config or {}).get("configurable", {})
+    if not configurable.get("evaluation_active", True):
+        return "confidence_gate"
+    return "approver"
+
+
 def route_after_approver(state: PipelineState) -> str:
     """Approved → confidence gate. Rejected → diagnostician."""
     i = state["iteration"]

@@ -26,12 +26,6 @@ def disambiguator_node(state: PipelineState, config: RunnableConfig) -> dict:
         history.append(history[i - 1])
         return {"output_disambiguator": history, "status_disambiguator": COMPLETE}
 
-    # ── Ablation check ────────────────────────────────────────────
-    configurable = (config or {}).get("configurable", {})
-    if not configurable.get("disambiguator_active", True):
-        history.append({"enriched_text": state["transaction_text"], "reason": "disambiguator inactive"})
-        return {"output_disambiguator": history, "status_disambiguator": COMPLETE}
-
     # ── RAG retrieval ─────────────────────────────────────────────
     rag_examples = retrieve_transaction_examples(state, "rag_cache_disambiguator")
     fix_ctx = (state.get("fix_context_disambiguator") or [None])[-1]

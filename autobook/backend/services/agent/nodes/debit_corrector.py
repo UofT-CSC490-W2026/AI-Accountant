@@ -26,13 +26,6 @@ def debit_corrector_node(state: PipelineState, config: RunnableConfig) -> dict:
         history.append(history[i - 1])
         return {"output_debit_corrector": history, "status_debit_corrector": COMPLETE}
 
-    # ── Ablation check — pass through classifier output if off ────
-    configurable = (config or {}).get("configurable", {})
-    if not configurable.get("correction_pass", True):
-        classifier_output = state["output_debit_classifier"][i]
-        history.append({"tuple": classifier_output["tuple"], "reason": "correction pass disabled"})
-        return {"output_debit_corrector": history, "status_debit_corrector": COMPLETE}
-
     # ── RAG retrieval (transaction on first run, corrections on rerun)
     cache_key = "rag_cache_debit_corrector"
     if i == 0:
