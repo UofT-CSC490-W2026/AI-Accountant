@@ -236,8 +236,8 @@ async def _run_one(app, tc: TestCase, config_dict: dict,
             common = _extract_common_result(final_state, variant_name, callback, elapsed_ms)
             metrics = _extract_test_case_metrics(final_state, tc, variant_name, common, callback)
 
-            d = "✓" if metrics.debit_tuple_exact_match else "✗"
-            c = "✓" if metrics.credit_tuple_exact_match else "✗"
+            d = "🔵" if metrics.debit_tuple_exact_match else "🔴"
+            c = "🔵" if metrics.credit_tuple_exact_match else "🔴"
             statuses[tc.id] = (f"{STATUS_DONE} done", d, c, f"${common.total_cost_usd:.4f}", f"{elapsed_ms}ms", "")
             return metrics
 
