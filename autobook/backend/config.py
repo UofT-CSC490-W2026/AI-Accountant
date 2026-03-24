@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings
 
 
@@ -10,7 +11,10 @@ class Settings(BaseSettings):
     AWS_REGION: str | None = None
     AWS_DEFAULT_REGION: str = "ca-central-1"
     ENV: str = "local"
-    COGNITO_USER_POOL_ID: str = "local-test-pool"
+    COGNITO_USER_POOL_ID: str = Field(
+        default="local-test-pool",
+        validation_alias=AliasChoices("COGNITO_USER_POOL_ID", "COGNITO_POOL_ID"),
+    )
     COGNITO_CLIENT_ID: str = "local-test-client"
     COGNITO_DOMAIN: str | None = None
     COGNITO_JWKS_JSON: str | None = None
