@@ -1,4 +1,5 @@
 import { mockApi } from "../mocks/mockApi";
+import { isMockApiEnabled } from "../config/env";
 import { getAccessToken } from "./auth";
 import type {
   ClarificationsResponse,
@@ -12,7 +13,6 @@ import type {
 } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== "false";
 
 function deriveUploadSource(file: File): Extract<TransactionInputSource, "csv_upload" | "pdf_upload"> {
   const fileName = file.name.toLowerCase();
@@ -51,7 +51,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function parseTransaction(input: ParseRequest): Promise<ParseAccepted> {
-  if (USE_MOCK_API) {
+  if (isMockApiEnabled()) {
     return mockApi.parseTransaction(input);
   }
 
@@ -62,7 +62,7 @@ export async function parseTransaction(input: ParseRequest): Promise<ParseAccept
 }
 
 export async function uploadTransactionFile(file: File): Promise<ParseAccepted> {
-  if (USE_MOCK_API) {
+  if (isMockApiEnabled()) {
     return mockApi.uploadTransactionFile(file);
   }
 
@@ -86,7 +86,7 @@ export async function uploadTransactionFile(file: File): Promise<ParseAccepted> 
 }
 
 export async function getClarifications(): Promise<ClarificationsResponse> {
-  if (USE_MOCK_API) {
+  if (isMockApiEnabled()) {
     return mockApi.getClarifications();
   }
 
@@ -97,7 +97,7 @@ export async function resolveClarification(
   clarificationId: string,
   input: ResolveClarificationRequest,
 ): Promise<ResolveClarificationResponse> {
-  if (USE_MOCK_API) {
+  if (isMockApiEnabled()) {
     return mockApi.resolveClarification(clarificationId, input);
   }
 
@@ -108,7 +108,7 @@ export async function resolveClarification(
 }
 
 export async function getLedger(): Promise<LedgerResponse> {
-  if (USE_MOCK_API) {
+  if (isMockApiEnabled()) {
     return mockApi.getLedger();
   }
 
@@ -116,7 +116,7 @@ export async function getLedger(): Promise<LedgerResponse> {
 }
 
 export async function getStatements(): Promise<StatementsResponse> {
-  if (USE_MOCK_API) {
+  if (isMockApiEnabled()) {
     return mockApi.getStatements();
   }
 

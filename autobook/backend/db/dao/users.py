@@ -41,5 +41,14 @@ class UserDAO:
                 db.flush()
             return user
 
+        if email:
+            user = UserDAO.get_by_email(db, email)
+            if user:
+                if user.cognito_sub != cognito_sub:
+                    user.cognito_sub = cognito_sub
+                    db.add(user)
+                    db.flush()
+                return user
+
         resolved_email = email or f"{cognito_sub}@autobook.local"
         return UserDAO.create(db, email=resolved_email, cognito_sub=cognito_sub)

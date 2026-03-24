@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     AWS_REGION: str | None = None
     AWS_DEFAULT_REGION: str = "ca-central-1"
     ENV: str = "local"
+    AUTH_DEMO_MODE: bool = False
     COGNITO_USER_POOL_ID: str = Field(
         default="local-test-pool",
         validation_alias=AliasChoices("COGNITO_USER_POOL_ID", "COGNITO_POOL_ID"),

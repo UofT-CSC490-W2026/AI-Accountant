@@ -82,6 +82,9 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         enqueued.append(payload)
         return "queued"
 
+    def fake_publish_sync(_channel: str, _payload: dict) -> None:
+        return None
+
     def fake_resolve(_db, _clarification_id, action: str, edited_entry=None):
         if action == "reject":
             status = "rejected"
@@ -104,6 +107,7 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setattr(api_main, "get_redis", fake_get_redis)
     monkeypatch.setattr(auth_deps.UserDAO, "get_or_create_from_cognito_claims", staticmethod(fake_user_lookup))
     monkeypatch.setattr(parse_routes, "enqueue", fake_enqueue)
+    monkeypatch.setattr(clarifications_routes, "publish_sync", fake_publish_sync)
     monkeypatch.setattr(clarifications_routes.ClarificationDAO, "resolve", staticmethod(fake_resolve))
     api_main.app.dependency_overrides[auth_deps.get_db] = fake_db
     api_main.app.state._test_enqueued = enqueued
@@ -149,6 +153,22 @@ def test_auth_me_accepts_access_tokens_with_at_jwt_header_type(client: TestClien
 
     assert response.status_code == 200, response.text
     assert response.json()["email"] == "user@example.com"
+
+
+def test_auth_me_accepts_demo_token_when_demo_mode_enabled(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AUTH_DEMO_MODE", "true")
+    get_settings.cache_clear()
+
+    response = client.get("/api/v1/auth/me", headers=_auth_headers("demo:teammate@example.com"))
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["cognito_sub"] == "demo:teammate@example.com"
+    assert body["email"] == "teammate@example.com"
+    assert body["role"] == "regular"
 
 
 def test_private_route_rejects_missing_token(client: TestClient) -> None:

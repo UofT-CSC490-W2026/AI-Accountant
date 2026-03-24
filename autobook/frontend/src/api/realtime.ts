@@ -1,9 +1,9 @@
 import { subscribeToRealtimeUpdates as subscribeToMockRealtimeUpdates } from "../mocks/mockApi";
+import { isMockApiEnabled } from "../config/env";
 import { getAccessToken } from "./auth";
 import type { RealtimeEvent, RealtimeListener } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== "false";
 
 const realtimeListeners = new Set<RealtimeListener>();
 
@@ -43,7 +43,7 @@ function parseRealtimeEvent(payload: string) {
 }
 
 export function ensureSocketConnection() {
-  if (USE_MOCK_API || eventSource) {
+  if (isMockApiEnabled() || eventSource) {
     return;
   }
 
@@ -69,7 +69,7 @@ export function ensureSocketConnection() {
 }
 
 export function subscribeToRealtimeUpdates(listener: RealtimeListener) {
-  if (USE_MOCK_API) {
+  if (isMockApiEnabled()) {
     return subscribeToMockRealtimeUpdates(listener);
   }
 

@@ -16,6 +16,7 @@ import {
   getAccessToken,
   refreshAuthSession,
 } from "../api/auth";
+import { isMockApiEnabled, isMockAuthEnabled } from "../config/env";
 import type { AuthUser } from "../api/types";
 
 type AuthStatus = "loading" | "authenticated" | "anonymous";
@@ -24,21 +25,14 @@ type AuthContextValue = {
   status: AuthStatus;
   user: AuthUser | null;
   isAuthenticated: boolean;
-  login: () => Promise<void>;
-  signUp: () => Promise<void>;
+  login: (email?: string) => Promise<void>;
+  signUp: (email?: string) => Promise<void>;
   logout: () => Promise<void>;
   completeLogin: (search: string) => Promise<void>;
   refreshUser: () => Promise<void>;
 };
 
-const MOCK_USER: AuthUser = {
-  id: "mock-user",
-  cognito_sub: "mock-user",
-  email: "demo@autobook.local",
-  role: "regular",
-  role_source: "mock",
-  token_use: "access",
-};
+const MOCK_USER_STORAGE_KEY = "autobook_mock_user_email";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -53,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function bootstrapAuth() {
     if (isMockApiEnabled()) {
       if (getAccessToken()) {
-        setUser(MOCK_USER);
+        setUser(buildMockUser(loadMockUserEmail()));
         setStatus("authenticated");
       } else {
         setUser(null);
@@ -93,28 +87,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       user,
       isAuthenticated: status === "authenticated",
-      login: async () => {
-        await beginHostedLogin();
+      login: async (email?: string) => {
+        await beginHostedLogin(email);
         if (isMockApiEnabled()) {
-          setUser(MOCK_USER);
+          const resolvedUser = buildMockUser(email);
+          persistMockUserEmail(resolvedUser.email);
+          setUser(resolvedUser);
+          setStatus("authenticated");
+          return;
+        }
+        if (isMockAuthEnabled()) {
+          persistMockUserEmail(email ?? "demo@autobook.local");
+          const me = await fetchAuthMe();
+          setUser(me);
           setStatus("authenticated");
         }
       },
-      signUp: async () => {
-        await beginHostedSignUp();
+      signUp: async (email?: string) => {
+        await beginHostedSignUp(email);
         if (isMockApiEnabled()) {
-          setUser(MOCK_USER);
+          const resolvedUser = buildMockUser(email);
+          persistMockUserEmail(resolvedUser.email);
+          setUser(resolvedUser);
+          setStatus("authenticated");
+          return;
+        }
+        if (isMockAuthEnabled()) {
+          persistMockUserEmail(email ?? "demo@autobook.local");
+          const me = await fetchAuthMe();
+          setUser(me);
           setStatus("authenticated");
         }
       },
       logout: async () => {
         await beginLogout();
+        clearMockUserEmail();
         setUser(null);
         setStatus("anonymous");
       },
       completeLogin: async (search: string) => {
         if (isMockApiEnabled()) {
-          setUser(MOCK_USER);
+          const resolvedUser = buildMockUser(loadMockUserEmail());
+          persistMockUserEmail(resolvedUser.email);
+          setUser(resolvedUser);
           setStatus("authenticated");
           return;
         }
@@ -126,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshUser: async () => {
         if (isMockApiEnabled()) {
           if (getAccessToken()) {
-            setUser(MOCK_USER);
+            setUser(buildMockUser(loadMockUserEmail()));
             setStatus("authenticated");
           } else {
             setUser(null);
@@ -154,6 +169,28 @@ export function useAuth() {
   return context;
 }
 
-function isMockApiEnabled() {
-  return import.meta.env.VITE_USE_MOCK_API !== "false";
+function buildMockUser(email?: string): AuthUser {
+  const normalizedEmail = (email ?? "demo@autobook.local").trim() || "demo@autobook.local";
+  const normalizedId = normalizedEmail.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "mock-user";
+  return {
+    id: `mock-${normalizedId}`,
+    cognito_sub: `mock-${normalizedId}`,
+    email: normalizedEmail,
+    role: "regular",
+    role_source: "mock",
+    token_use: "access",
+  };
+}
+
+function loadMockUserEmail(): string | undefined {
+  const storedEmail = localStorage.getItem(MOCK_USER_STORAGE_KEY);
+  return storedEmail ?? undefined;
+}
+
+function persistMockUserEmail(email: string) {
+  localStorage.setItem(MOCK_USER_STORAGE_KEY, email);
+}
+
+function clearMockUserEmail() {
+  localStorage.removeItem(MOCK_USER_STORAGE_KEY);
 }

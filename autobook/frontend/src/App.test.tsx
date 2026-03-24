@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, vi } from "vitest";
@@ -72,6 +72,33 @@ describe("app routing", () => {
     expect(await screen.findByRole("heading", { name: /sign in/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /continue with cognito/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /create account/i })).toBeInTheDocument();
+  });
+
+  test("auth-only demo mode shows demo sign-in controls while leaving full api mock disabled", async () => {
+    vi.stubEnv("VITE_USE_MOCK_API", "false");
+    vi.stubEnv("VITE_USE_MOCK_AUTH", "true");
+    renderRoute("/login");
+
+    expect(await screen.findByRole("heading", { name: /sign in/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /demo sign in/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /demo register/i })).toBeInTheDocument();
+    expect(screen.getByText(/rest of the app still talks to the real backend apis/i)).toBeInTheDocument();
+  });
+
+  test("demo auth mode signs in as the entered email when mock api is enabled", async () => {
+    vi.stubEnv("VITE_USE_MOCK_API", "true");
+    renderRoute("/login");
+
+    fireEvent.change(screen.getByLabelText(/^email$/i), {
+      target: { value: "teammate@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/^password$/i), {
+      target: { value: "anything-works" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /demo sign in/i }));
+
+    expect(await screen.findByRole("heading", { name: /operations snapshot/i })).toBeInTheDocument();
+    expect(screen.getByText(/teammate@example\.com/i)).toBeInTheDocument();
   });
 
   test("redirects callback without oauth params back to login with a sign-in notice", async () => {

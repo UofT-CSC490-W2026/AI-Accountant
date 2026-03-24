@@ -1,7 +1,7 @@
 import type { AuthTokenResponse, AuthUser } from "./types";
+import { isMockAuthEnabled } from "../config/env";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== "false";
 const ACCESS_TOKEN_KEY = "autobook_access_token";
 const REFRESH_TOKEN_KEY = "autobook_refresh_token";
 const PKCE_VERIFIER_KEY = "autobook_pkce_verifier";
@@ -63,17 +63,23 @@ export async function fetchAuthMe(): Promise<AuthUser> {
   return (await response.json()) as AuthUser;
 }
 
-export async function beginHostedLogin(): Promise<void> {
-  await beginHostedAuth("login");
+export async function beginHostedLogin(email?: string): Promise<void> {
+  await beginHostedAuth("login", email);
 }
 
-export async function beginHostedSignUp(): Promise<void> {
-  await beginHostedAuth("signup");
+export async function beginHostedSignUp(email?: string): Promise<void> {
+  await beginHostedAuth("signup", email);
 }
 
-async function beginHostedAuth(mode: HostedUiMode): Promise<void> {
-  if (USE_MOCK_API) {
-    setAccessToken("mock-access-token");
+async function beginHostedAuth(mode: HostedUiMode, email?: string): Promise<void> {
+  if (isMockAuthEnabled()) {
+    persistTokenResponse({
+      access_token: buildDemoAccessToken(email),
+      token_type: "Bearer",
+      expires_in: 86400,
+      refresh_token: null,
+      id_token: null,
+    });
     return;
   }
 
@@ -167,7 +173,7 @@ export async function refreshAuthSession(): Promise<AuthUser> {
 }
 
 export async function beginLogout(): Promise<void> {
-  if (USE_MOCK_API) {
+  if (isMockAuthEnabled()) {
     clearAuthSession();
     return;
   }
@@ -187,6 +193,11 @@ export async function beginLogout(): Promise<void> {
 function persistTokenResponse(payload: AuthTokenResponse) {
   setAccessToken(payload.access_token);
   setRefreshToken(payload.refresh_token ?? null);
+}
+
+function buildDemoAccessToken(email?: string): string {
+  const normalizedEmail = (email ?? "demo@autobook.local").trim() || "demo@autobook.local";
+  return `demo:${normalizedEmail}`;
 }
 
 function buildHostedAuthUrl(

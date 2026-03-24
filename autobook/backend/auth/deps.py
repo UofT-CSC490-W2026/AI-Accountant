@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException, Request, WebSocket, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -44,7 +45,7 @@ def get_current_user(
 
 def resolve_auth_context(token: str, db: Session) -> AuthContext:
     try:
-        claims = decode_access_token(token)
+        claims = _decode_bearer_token(token)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from exc
 
@@ -153,6 +154,46 @@ def _parse_single_role(value: str | None) -> UserRole | None:
 
 
 def _to_datetime(epoch_seconds: int) -> object:
-    from datetime import datetime, timezone
-
     return datetime.fromtimestamp(epoch_seconds, tz=timezone.utc)
+
+
+def _decode_bearer_token(token: str) -> TokenPayload:
+    demo_claims = _decode_demo_token(token)
+    if demo_claims is not None:
+        return demo_claims
+    return decode_access_token(token)
+
+
+def _decode_demo_token(token: str) -> TokenPayload | None:
+    settings = get_settings()
+    if not settings.AUTH_DEMO_MODE:
+        return None
+    if not token.startswith("demo:"):
+        return None
+
+    email = token.removeprefix("demo:").strip().lower()
+    if not email:
+        raise ValueError("Invalid demo auth token.")
+
+    role = _resolve_demo_role(email)
+    now = datetime.now(timezone.utc)
+    return TokenPayload.model_validate(
+        {
+            "sub": f"demo:{email}",
+            "exp": int((now + timedelta(days=1)).timestamp()),
+            "iat": int(now.timestamp()),
+            "iss": "autobook-demo",
+            "token_use": "access",
+            "email": email,
+            "client_id": "autobook-demo-client",
+            "cognito:groups": [role.value],
+        }
+    )
+
+
+def _resolve_demo_role(email: str) -> UserRole:
+    if email.startswith("superuser@") or "+superuser@" in email:
+        return UserRole.SUPERUSER
+    if email.startswith("manager@") or "+manager@" in email:
+        return UserRole.MANAGER
+    return UserRole.REGULAR
