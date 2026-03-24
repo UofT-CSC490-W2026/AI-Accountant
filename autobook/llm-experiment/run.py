@@ -184,22 +184,28 @@ STATUS_DONE = "✅"
 STATUS_ERROR = "❌"
 
 
+_NOTE_WIDTH = 50
+_NOTE_TRUNCATE = int(_NOTE_WIDTH * 0.8)
+
 def _build_table(variant_name: str, statuses: dict[str, str]) -> Table:
     """Build a rich table showing current status of all test cases."""
     table = Table(title=f"Variant: {variant_name}", show_lines=False)
     table.add_column("Test Case", style="cyan", width=35)
-    table.add_column("Status", width=10)
+    table.add_column("Status", width=15)
     table.add_column("D", width=3)
     table.add_column("C", width=3)
     table.add_column("Cost", width=10)
     table.add_column("Latency", width=10)
-    table.add_column("Note", width=50, no_wrap=False)
+    table.add_column("Note", width=_NOTE_WIDTH, no_wrap=True)
 
     for tc_id, info in statuses.items():
         if isinstance(info, str):
             table.add_row(tc_id, info, "", "", "", "", "")
         else:
             status, d, c, cost, latency, note = info
+            # Truncate note to 80% of column width
+            if len(note) > _NOTE_TRUNCATE:
+                note = note[:_NOTE_TRUNCATE] + "…"
             table.add_row(tc_id, status, d, c, cost, latency, note)
 
     return table
@@ -367,13 +373,19 @@ def main():
     results = asyncio.run(run_variant_async(args.variant, cases))
     _save_results(results, args.variant)
 
+    # Error details
+    failed = [m for m in results if m.error]
+    if failed:
+        console.print(f"\n[bold red]Errors ({len(failed)}):[/bold red]")
+        for m in failed:
+            console.print(f"  [red]{m.test_case_id}[/red]: {m.error}")
+
     # Summary
     exact = sum(1 for m in results if m.debit_tuple_exact_match and m.credit_tuple_exact_match)
     total_cost = sum(m.common.total_cost_usd for m in results)
-    errors = sum(1 for m in results if m.error)
     console.print(f"\n[bold]Exact match:[/bold] {exact}/{len(results)} ({exact/len(results)*100:.0f}%)")
     console.print(f"[bold]Total cost:[/bold] ${total_cost:.4f}")
-    console.print(f"[bold]Errors:[/bold] {errors}")
+    console.print(f"[bold]Errors:[/bold] {len(failed)}")
 
 
 if __name__ == "__main__":
