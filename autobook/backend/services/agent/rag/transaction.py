@@ -27,15 +27,17 @@ def retrieve_transaction_examples(state: PipelineState, cache_key: str) -> list[
     if cached:
         return cached
 
-    vector = state.get("embedding_transaction")
-    if vector is None:
-        text = state["transaction_text"]
-        vector = embed_text(text)
+    try:
+        vector = state.get("embedding_transaction")
+        if vector is None:
+            text = state["transaction_text"]
+            vector = embed_text(text)
 
-    results = get_qdrant_client().query_points(
-        collection_name=TRANSACTION_EXAMPLES,
-        query=vector,
-        limit=_TOP_K,
-    )
-
-    return [point.payload for point in results.points]
+        results = get_qdrant_client().query_points(
+            collection_name=TRANSACTION_EXAMPLES,
+            query=vector,
+            limit=_TOP_K,
+        )
+        return [point.payload for point in results.points]
+    except Exception:
+        return []

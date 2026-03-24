@@ -3,16 +3,16 @@ from langchain_core.runnables import RunnableConfig
 
 from config import get_settings
 
-# Per-agent max output tokens (from agent-pipeline.md Constrained Output table)
+# Per-agent max output tokens — accounts for JSON + reason via tool calling
 MAX_TOKENS: dict[str, int] = {
-    "disambiguator":    50,
-    "debit_classifier": 10,
-    "credit_classifier": 10,
-    "debit_corrector":  10,
-    "credit_corrector": 10,
-    "entry_builder":    200,
-    "approver":         50,
-    "diagnostician":    100,
+    "disambiguator":    200,
+    "debit_classifier": 150,
+    "credit_classifier": 150,
+    "debit_corrector":  150,
+    "credit_corrector": 150,
+    "entry_builder":    500,
+    "approver":         200,
+    "diagnostician":    300,
 }
 
 

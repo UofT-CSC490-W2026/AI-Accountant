@@ -4,7 +4,7 @@ import boto3
 
 from config import get_settings
 
-_MODEL_ID = "us.cohere.embed-v4:0"
+_MODEL_ID = "global.cohere.embed-v4:0"
 _bedrock = boto3.client("bedrock-runtime", region_name=get_settings().AWS_DEFAULT_REGION)
 
 

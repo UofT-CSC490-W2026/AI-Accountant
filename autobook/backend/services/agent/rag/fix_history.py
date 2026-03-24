@@ -26,18 +26,20 @@ def retrieve_fix_history(state: PipelineState) -> list[dict]:
     if cached:
         return cached
 
-    vector = state.get("embedding_rejection")
-    if vector is None:
-        i = state["iteration"]
-        approver_outputs = state.get("output_approver", [])
-        if i >= len(approver_outputs) or not approver_outputs[i]:
-            return []
-        vector = embed_text(approver_outputs[i]["reason"])
+    try:
+        vector = state.get("embedding_rejection")
+        if vector is None:
+            i = state["iteration"]
+            approver_outputs = state.get("output_approver", [])
+            if i >= len(approver_outputs) or not approver_outputs[i]:
+                return []
+            vector = embed_text(approver_outputs[i]["reason"])
 
-    results = get_qdrant_client().query_points(
-        collection_name=FIX_HISTORY,
-        query=vector,
-        limit=_TOP_K,
-    )
-
-    return [point.payload for point in results.points]
+        results = get_qdrant_client().query_points(
+            collection_name=FIX_HISTORY,
+            query=vector,
+            limit=_TOP_K,
+        )
+        return [point.payload for point in results.points]
+    except Exception:
+        return []
