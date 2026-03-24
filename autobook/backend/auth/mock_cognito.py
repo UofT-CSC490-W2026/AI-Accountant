@@ -65,6 +65,7 @@ class MockCognito:
         *,
         sub: str,
         token_use: str = "access",
+        header_alg: str = "RS256",
         header_typ: str = "JWT",
         email: str | None = None,
         name: str | None = None,
@@ -97,7 +98,7 @@ class MockCognito:
         if custom_role is not None:
             payload["custom:role"] = custom_role
 
-        header_segment = _b64url_json({"alg": "RS256", "kid": self.config.key_id, "typ": header_typ})
+        header_segment = _b64url_json({"alg": header_alg, "kid": self.config.key_id, "typ": header_typ})
         payload_segment = _b64url_json(payload)
         signing_input = f"{header_segment}.{payload_segment}".encode("ascii")
         signature = self._private_key.sign(signing_input, padding.PKCS1v15(), hashes.SHA256())

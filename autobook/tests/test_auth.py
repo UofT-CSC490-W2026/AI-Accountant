@@ -141,6 +141,7 @@ def test_auth_me_accepts_access_tokens_with_at_jwt_header_type(client: TestClien
         sub="cognito-user-1",
         email="user@example.com",
         groups=["regular"],
+        header_alg="ES256",
         header_typ="at+jwt",
     )
 

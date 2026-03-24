@@ -51,12 +51,6 @@ def decode_access_token(token: str) -> TokenPayload:
     except ValueError as exc:
         raise ValueError("Malformed access token.") from exc
 
-    token_type = header.get("typ")
-    if header.get("alg") != settings.COGNITO_JWT_ALGORITHM:
-        raise ValueError("Unexpected token algorithm.")
-    if token_type not in {None, "JWT", "at+jwt"}:
-        raise ValueError("Unexpected token algorithm.")
-
     kid = header.get("kid")
     if not kid:
         raise ValueError("Missing token key id.")
