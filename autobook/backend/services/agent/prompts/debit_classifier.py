@@ -119,7 +119,7 @@ Return JSON: {"tuple": [a,b,c,d,e,f], "reason": "brief explanation"}
 Each tuple value must be a non-negative integer."""
 
 SYSTEM_INSTRUCTION = "\n".join([
-    _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES, _OUTPUT_FORMAT,
+    _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES,
 ])
 
 

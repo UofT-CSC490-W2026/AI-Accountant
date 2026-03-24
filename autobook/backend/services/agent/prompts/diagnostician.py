@@ -124,7 +124,7 @@ fix_plans is empty when decision is STUCK. Target the ROOT CAUSE agent — \
 downstream agents rerun automatically. No markdown, no preamble."""
 
 SYSTEM_INSTRUCTION = "\n".join([
-    _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES, _OUTPUT_FORMAT,
+    _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES,
 ])
 
 

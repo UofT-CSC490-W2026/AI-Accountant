@@ -101,7 +101,7 @@ Return JSON: {"enriched_text": "...", "reason": "brief explanation"}
 If uninterpretable even with context, return the original text as enriched_text."""
 
 SYSTEM_INSTRUCTION = "\n".join([
-    _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES, _OUTPUT_FORMAT,
+    _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES,
 ])
 
 

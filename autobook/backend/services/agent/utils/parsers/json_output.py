@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 from services.agent.graph.state import (
     DISAMBIGUATOR, DEBIT_CLASSIFIER, CREDIT_CLASSIFIER,
@@ -16,27 +16,27 @@ from services.agent.graph.state import (
 
 class DisambiguatorOutput(BaseModel):
     enriched_text: str
-    reason: str
+    reason: str = Field(description="What was ambiguous and how context resolved it")
 
 
 class DebitClassifierOutput(BaseModel):
     tuple: tuple[int, int, int, int, int, int]
-    reason: str
+    reason: str = Field(description="For each debit line, what account type it falls under and why")
 
 
 class CreditClassifierOutput(BaseModel):
     tuple: tuple[int, int, int, int, int, int]
-    reason: str
+    reason: str = Field(description="For each credit line, what account type it falls under and why")
 
 
 class DebitCorrectorOutput(BaseModel):
     tuple: tuple[int, int, int, int, int, int]
-    reason: str
+    reason: str = Field(description="What was wrong with the initial tuple and how you fixed it, or why it was already correct")
 
 
 class CreditCorrectorOutput(BaseModel):
     tuple: tuple[int, int, int, int, int, int]
-    reason: str
+    reason: str = Field(description="What was wrong with the initial tuple and how you fixed it, or why it was already correct")
 
 
 class JournalLine(BaseModel):
@@ -48,25 +48,26 @@ class JournalLine(BaseModel):
 class EntryBuilderOutput(BaseModel):
     date: str
     description: str
-    rationale: str
+    rationale: str = Field(description="Why these accounts were chosen and how amounts were determined")
     lines: list[JournalLine]
 
 
 class ApproverOutput(BaseModel):
     approved: bool
     confidence: float
-    reason: str
+    reason: str = Field(description="What specific checks passed or which specific issue was found")
 
 
 class FixPlan(BaseModel):
-    agent: int
-    error: str
-    fix_context: str
+    agent: int = Field(description="Agent index 0-5")
+    error: str = Field(description="What the agent got wrong")
+    fix_context: str = Field(description="Guidance for the agent on how to fix it")
 
 
 class DiagnosticianOutput(BaseModel):
     decision: Literal["FIX", "STUCK"]
     fix_plans: list[FixPlan]
+    reason: str = Field(description="Which agent made the mistake, what it was, and why it is the root cause")
     reason: str
 
 
