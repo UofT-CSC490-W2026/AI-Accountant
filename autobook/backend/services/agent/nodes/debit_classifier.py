@@ -15,22 +15,29 @@ from services.agent.utils.parsers.json_output import DebitClassifierOutput
 
 
 def debit_classifier_node(state: PipelineState, config: RunnableConfig) -> dict:
+    """Classify debit lines into 6-tuple directional categories."""
+    # ── Iteration + history ───────────────────────────────────────
     i = state["iteration"]
     history = list(state.get("output_debit_classifier", []))
 
+    # ── Skip if complete (copy previous for alignment) ────────────
     if state.get("status_debit_classifier") == COMPLETE:
         history.append(history[i - 1])
-    else:
-        rag_examples = retrieve_transaction_examples(state, "rag_cache_debit_classifier")
-        fix_ctx = (state.get("fix_context_debit_classifier") or [None])[-1]
+        return {"output_debit_classifier": history, "status_debit_classifier": COMPLETE}
 
-        messages = build_prompt(state, rag_examples, fix_context=fix_ctx)
-        structured_llm = get_llm(DEBIT_CLASSIFIER, config).with_structured_output(DebitClassifierOutput)
-        result = structured_llm.invoke(messages)
-        history.append(result.model_dump())
+    # ── RAG retrieval ─────────────────────────────────────────────
+    rag_examples = retrieve_transaction_examples(state, "rag_cache_debit_classifier")
+    fix_ctx = (state.get("fix_context_debit_classifier") or [None])[-1]
 
+    # ── Build prompt + call LLM ───────────────────────────────────
+    messages = build_prompt(state, rag_examples, fix_context=fix_ctx)
+    structured_llm = get_llm(DEBIT_CLASSIFIER, config).with_structured_output(DebitClassifierOutput)
+    result = structured_llm.invoke(messages)
+    history.append(result.model_dump())
+
+    # ── Return state update ───────────────────────────────────────
     return {
         "output_debit_classifier": history,
-        "rag_cache_debit_classifier": rag_examples if 'rag_examples' in dir() else state.get("rag_cache_debit_classifier", []),
+        "rag_cache_debit_classifier": rag_examples,
         "status_debit_classifier": COMPLETE,
     }

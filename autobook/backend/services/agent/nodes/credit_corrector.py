@@ -16,37 +16,41 @@ from services.agent.utils.parsers.json_output import CreditCorrectorOutput
 
 
 def credit_corrector_node(state: PipelineState, config: RunnableConfig) -> dict:
+    """Re-evaluate credit tuple using debit side as cross-validation."""
+    # ── Iteration + history ───────────────────────────────────────
     i = state["iteration"]
     history = list(state.get("output_credit_corrector", []))
 
+    # ── Skip if complete (copy previous for alignment) ────────────
     if state.get("status_credit_corrector") == COMPLETE:
         history.append(history[i - 1])
+        return {"output_credit_corrector": history, "status_credit_corrector": COMPLETE}
+
+    # ── Ablation check — pass through classifier output if off ────
+    configurable = (config or {}).get("configurable", {})
+    if not configurable.get("correction_pass", True):
+        classifier_output = state["output_credit_classifier"][i]
+        history.append({"tuple": classifier_output["tuple"], "reason": "correction pass disabled"})
+        return {"output_credit_corrector": history, "status_credit_corrector": COMPLETE}
+
+    # ── RAG retrieval (transaction on first run, corrections on rerun)
+    cache_key = "rag_cache_credit_corrector"
+    if i == 0:
+        rag_examples = retrieve_transaction_examples(state, cache_key)
     else:
-        # Ablation check
-        configurable = (config or {}).get("configurable", {})
-        if not configurable.get("correction_pass", True):
-            classifier_output = state["output_credit_classifier"][i]
-            history.append({"tuple": classifier_output["tuple"], "reason": "correction pass disabled"})
-            return {
-                "output_credit_corrector": history,
-                "status_credit_corrector": COMPLETE,
-            }
+        rag_examples = retrieve_correction_examples(state, cache_key)
 
-        cache_key = "rag_cache_credit_corrector"
-        if i == 0:
-            rag_examples = retrieve_transaction_examples(state, cache_key)
-        else:
-            rag_examples = retrieve_correction_examples(state, cache_key)
+    fix_ctx = (state.get("fix_context_credit_corrector") or [None])[-1]
 
-        fix_ctx = (state.get("fix_context_credit_corrector") or [None])[-1]
+    # ── Build prompt + call LLM ───────────────────────────────────
+    messages = build_prompt(state, rag_examples, fix_context=fix_ctx)
+    structured_llm = get_llm(CREDIT_CORRECTOR, config).with_structured_output(CreditCorrectorOutput)
+    result = structured_llm.invoke(messages)
+    history.append(result.model_dump())
 
-        messages = build_prompt(state, rag_examples, fix_context=fix_ctx)
-        structured_llm = get_llm(CREDIT_CORRECTOR, config).with_structured_output(CreditCorrectorOutput)
-        result = structured_llm.invoke(messages)
-        history.append(result.model_dump())
-
+    # ── Return state update ───────────────────────────────────────
     return {
         "output_credit_corrector": history,
-        "rag_cache_credit_corrector": rag_examples if 'rag_examples' in dir() else state.get("rag_cache_credit_corrector", []),
+        "rag_cache_credit_corrector": rag_examples,
         "status_credit_corrector": COMPLETE,
     }
