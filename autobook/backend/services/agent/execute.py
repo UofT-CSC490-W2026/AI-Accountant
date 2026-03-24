@@ -2,7 +2,8 @@ import logging
 from datetime import date, datetime, timezone
 
 from config import get_settings
-from queues import enqueue, publish_sync
+from queues import sqs
+from queues.redis import publish_sync
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -160,7 +161,7 @@ def process(message: dict) -> None:
     }
 
     if confidence >= settings.AUTO_POST_THRESHOLD:
-        enqueue(settings.SQS_QUEUE_POSTING, enriched)
+        sqs.enqueue.posting(enriched)
     else:
         publish_sync("clarification.created", {
             "type": "clarification.created",
@@ -172,4 +173,4 @@ def process(message: dict) -> None:
             "explanation": enriched.get("explanation"),
             "proposed_entry": enriched.get("proposed_entry"),
         })
-        enqueue(settings.SQS_QUEUE_RESOLUTION, enriched)
+        sqs.enqueue.resolution(enriched)

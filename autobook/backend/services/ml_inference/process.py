@@ -2,7 +2,7 @@ import logging
 
 from config import get_settings
 from services.ml_inference.service import get_inference_service
-from queues import enqueue
+from queues import sqs
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -13,4 +13,4 @@ def process(message: dict) -> None:
     # Keep the worker focused on orchestration; the inference implementation
     # lives in the ml service layer so it can be swapped independently later.
     result = get_inference_service().enrich(message)
-    enqueue(settings.SQS_QUEUE_AGENT, result)
+    sqs.enqueue.agent(result)

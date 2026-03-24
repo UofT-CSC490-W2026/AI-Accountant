@@ -1,7 +1,7 @@
 import logging
 
 from config import get_settings
-from queues import enqueue
+from queues import sqs
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -20,4 +20,4 @@ def process(message: dict) -> None:
     # TODO: match transaction against precedent patterns (tier 1)
     # On hit: enqueue to posting. On miss: enqueue to ml_inference.
     result = enrich_message(message)
-    enqueue(settings.SQS_QUEUE_ML_INFERENCE, result)
+    sqs.enqueue.ml_inference(result)

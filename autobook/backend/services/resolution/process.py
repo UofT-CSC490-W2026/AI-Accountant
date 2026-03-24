@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from config import get_settings
 from db.connection import SessionLocal
 from db.dao.clarifications import ClarificationDAO
-from queues import enqueue, publish_sync
+from queues import sqs
+from queues.redis import publish_sync
 from services.shared.transaction_persistence import ensure_transaction_for_message
 
 logger = logging.getLogger(__name__)
@@ -88,4 +89,4 @@ def process(message: dict) -> None:
         "explanation": message.get("explanation"),
         "proposed_entry": message.get("proposed_entry"),
     })
-    enqueue(settings.SQS_QUEUE_POSTING, result)
+    sqs.enqueue.posting(result)

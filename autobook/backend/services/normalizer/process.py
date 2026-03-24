@@ -6,7 +6,7 @@ from db.dao.transactions import TransactionDAO
 from local_identity import resolve_local_user
 from services.normalizer.service import normalize_message
 from services.shared.transaction_persistence import coerce_transaction_date
-from queues import enqueue
+from queues import sqs
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -61,4 +61,4 @@ def _persist_canonical_transaction(message: dict) -> dict:
 def process(message: dict) -> None:
     logger.info("Processing: %s", message.get("parse_id"))
     result = _persist_canonical_transaction(message)
-    enqueue(settings.SQS_QUEUE_PRECEDENT, result)
+    sqs.enqueue.precedent(result)

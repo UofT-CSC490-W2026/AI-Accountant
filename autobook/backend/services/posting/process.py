@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from config import get_settings
 from db.connection import SessionLocal
 from db.dao.journal_entries import JournalEntryDAO
-from queues import enqueue, publish_sync
+from queues import sqs
+from queues.redis import publish_sync
 from services.shared.transaction_persistence import ensure_transaction_for_message
 
 logger = logging.getLogger(__name__)
@@ -111,4 +112,4 @@ def process(message: dict) -> None:
         "journal_entry_id": journal_entry_id,
         "proposed_entry": proposed_entry,
     }
-    enqueue(settings.SQS_QUEUE_FLYWHEEL, result)
+    sqs.enqueue.flywheel(result)
