@@ -88,6 +88,13 @@ output "sagemaker_endpoint_name" {
   value       = module.ml.endpoint_name
 }
 
+# --- Bastion ---
+
+output "bastion_instance_id" {
+  description = "SSM bastion EC2 instance ID — use with aws ssm start-session"
+  value       = module.bastion.instance_id
+}
+
 # --- Monitoring ---
 
 # Direct link to the CloudWatch dashboard

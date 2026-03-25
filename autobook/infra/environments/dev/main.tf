@@ -386,6 +386,26 @@ module "vector_search" {
 }
 
 # =============================================================================
+# BASTION — SSM relay for RDS access (pgAdmin, migrations, debugging)
+# =============================================================================
+# Tiny EC2 in a private subnet. No public IP, no SSH. Access via SSM Session
+# Manager port forwarding only. ~$4/month (can stop when not in use).
+#
+# Usage:
+#   aws ssm start-session --target $(terraform output -raw bastion_instance_id) \
+#     --document-name AWS-StartPortForwardingSessionToRemoteHost \
+#     --parameters '{"host":["<rds-endpoint>"],"portNumber":["5432"],"localPortNumber":["5432"]}'
+#   Then connect pgAdmin to localhost:5432.
+module "bastion" {
+  source = "../../modules/bastion"
+
+  project           = var.project
+  environment       = var.environment
+  private_subnet_id = module.networking.private_subnet_ids[0]
+  app_sg_id         = module.networking.app_sg_id
+}
+
+# =============================================================================
 # MONITORING — CloudWatch alarms, dashboard, SNS alerts, budget
 # =============================================================================
 # Creates the observability layer for the entire system:
