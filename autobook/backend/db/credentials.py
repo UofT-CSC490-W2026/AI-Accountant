@@ -1,15 +1,17 @@
 import json
 import os
-import urllib.request
 from functools import lru_cache
+
+import boto3
 
 
 @lru_cache
 def get_database_url() -> str:
-    """Fetch DB credentials from Secrets Manager via Lambda Extension.
+    """Resolve the database URL from env vars or Secrets Manager.
 
-    In Lambda: DB_SECRET_ARN is set -> fetch from extension at localhost:2773.
+    In Lambda workers: DB_SECRET_ARN is set -> fetch from Secrets Manager.
     Locally: DB_SECRET_ARN is None -> use DATABASE_URL from docker-compose env.
+    In ECS: construct from the individual DB_* secret fields injected by ECS.
     """
     secret_arn = os.environ.get("DB_SECRET_ARN")
     if not secret_arn:
@@ -25,12 +27,12 @@ def get_database_url() -> str:
 
 
 def _fetch_from_secrets_manager(secret_arn: str) -> str:  # pragma: no cover
-    url = f"http://localhost:2773/secretsmanager/get?secretId={secret_arn}"
-    headers = {"X-Aws-Parameters-Secrets-Token": os.environ["AWS_SESSION_TOKEN"]}
-
-    req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req) as resp:
-        secret = json.loads(json.loads(resp.read())["SecretString"])
+    client = boto3.client(
+        "secretsmanager",
+        region_name=os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION"),
+    )
+    response = client.get_secret_value(SecretId=secret_arn)
+    secret = json.loads(response["SecretString"])
 
     return (
         f"postgresql://{secret['username']}:{secret['password']}"
