@@ -7,6 +7,7 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
+from db.dao.chart_of_accounts import ChartOfAccountsDAO
 from db.connection import set_current_user_context
 from db.models.account import ChartOfAccounts
 from db.models.journal import JournalEntry, JournalLine
@@ -25,6 +26,7 @@ class JournalEntryDAO:
         lines: Sequence[Mapping[str, object]],
     ) -> JournalEntry:
         set_current_user_context(db, user_id)
+        ChartOfAccountsDAO.seed_defaults(db, user_id)
         if not lines:
             raise ValueError("journal entry must include at least one line")
 

@@ -43,6 +43,24 @@ def test_normalization_service_marks_ambiguous_amounts_as_not_confident() -> Non
     assert normalized.party_mentions == []
 
 
+def test_normalization_service_extracts_clear_manual_amount_and_counterparty() -> None:
+    service = NormalizationService()
+
+    normalized = service.normalize(
+        {
+            "input_text": "Bought a laptop from Apple for $2400",
+            "source": "manual",
+            "currency": "CAD",
+        }
+    )
+
+    assert normalized.source == "manual_text"
+    assert normalized.amount == 2400.0
+    assert normalized.amount_confident is True
+    assert normalized.counterparty == "Apple"
+    assert normalized.normalized_description == "bought a laptop from apple for $2400"
+
+
 def test_normalizer_persists_canonical_transaction_before_enqueue(monkeypatch) -> None:
     db = FakeDB()
     user = SimpleNamespace(id=uuid4())
@@ -76,14 +94,15 @@ def test_normalizer_persists_canonical_transaction_before_enqueue(monkeypatch) -
 
     assert inserted["user_id"] == user.id
     assert inserted["normalized_description"] == "bought a laptop from apple for $2400"
-    assert inserted["amount"] is None
-    assert inserted["counterparty"] is None
+    assert inserted["amount"] == 2400.0
+    assert inserted["counterparty"] == "Apple"
     assert inserted["amount_mentions"] == [{"text": "$2400", "value": 2400.0}]
     assert inserted["party_mentions"] == [{"text": "Apple", "value": "Apple"}]
     assert db.committed is True
     assert enqueued[0][1]["transaction_id"] == str(transaction.id)
     assert enqueued[0][1]["normalized_description"] == inserted["normalized_description"]
     assert enqueued[0][1]["amount_mentions"] == inserted["amount_mentions"]
+    assert enqueued[0][1]["source"] == "manual_text"
 
 
 def test_pipeline_persistence_updates_existing_transaction_instead_of_reinserting(monkeypatch) -> None:
@@ -145,7 +164,7 @@ def test_pipeline_persistence_updates_existing_transaction_instead_of_reinsertin
     assert resolved_transaction.id == existing_transaction.id
     assert updated["transaction_id"] == existing_transaction.id
     assert updated["normalized_description"] == "paid slack subscription for 39"
-    assert updated["amount"] is None
+    assert updated["amount"] == 39.0
     assert updated["amount_mentions"] == [{"text": "39", "value": 39.0}]
     assert enrichment["transaction_id"] == existing_transaction.id
     assert enrichment["intent_label"] == "software_subscription"

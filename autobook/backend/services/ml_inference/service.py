@@ -33,8 +33,18 @@ DATE_PATTERNS = (
     r"\b(\d{4}-\d{2}-\d{2})\b",
     r"\b(\d{1,2}/\d{1,2}/\d{2,4})\b",
 )
+SOURCE_ALIASES = {
+    "manual": "manual_text",
+    "manual_text": "manual_text",
+    "csv": "csv_upload",
+    "csv_upload": "csv_upload",
+    "pdf": "pdf_upload",
+    "pdf_upload": "pdf_upload",
+    "upload": "upload",
+    "bank_feed": "bank_feed",
+}
 UPLOAD_SOURCES = {"upload", "csv_upload", "pdf_upload"}
-MANUAL_SOURCES = {"manual", "manual_text"}
+MANUAL_SOURCES = {"manual_text"}
 
 
 def _normalize_party_value(candidate: str) -> str:
@@ -57,6 +67,10 @@ class EntityExtractionResult:
 
 class BaselineInferenceService:
     """Rule-based baseline used until trained models replace these methods."""
+
+    def canonicalize_source(self, source: str | None) -> str:
+        normalized = str(source or "manual_text").strip().lower()
+        return SOURCE_ALIASES.get(normalized, normalized or "manual_text")
 
     def normalize_text(self, text: str) -> str:
         return re.sub(r"\s+", " ", text.strip().lower())
@@ -237,9 +251,13 @@ class BaselineInferenceService:
         return round(sum(valid_scores) / len(valid_scores), 3) if valid_scores else 0.6
 
     def enrich(self, message: dict) -> dict:
-        text = str(message.get("input_text") or "")
+        text = str(
+            message.get("input_text")
+            or message.get("description")
+            or ""
+        )
         normalized_text = self.normalize_text(text)
-        source = str(message.get("source") or "manual_text")
+        source = self.canonicalize_source(message.get("source"))
 
         entity_result = self.extract_entities(message, text)
         intent = self.classify_intent(text, source)
@@ -253,7 +271,7 @@ class BaselineInferenceService:
         return {
             **message,
             "normalized_text": normalized_text,
-            "input_type": "manual_text" if source in MANUAL_SOURCES else source,
+            "input_type": source if source not in MANUAL_SOURCES else "manual_text",
             "transaction_date": str(message.get("transaction_date") or date.today()),
             "amount": entity_result.amount,
             "counterparty": entity_result.vendor,

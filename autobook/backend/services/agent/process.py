@@ -1,175 +1,154 @@
 import logging
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 
+from accounting_engine import build_rule_based_entry
 from config import get_settings
 from queues import enqueue, publish_sync
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
-UPLOAD_SOURCES = {"upload", "csv_upload", "pdf_upload"}
 
 
-def _build_entry_metadata(message: dict, confidence: float) -> dict:
+def _coerce_confidence(value, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _reason_over_ml_output(message: dict) -> dict:
+    text = str(message.get("input_text") or message.get("description") or "").lower()
+    current_confidence = _coerce_confidence((message.get("confidence") or {}).get("ml"), default=0.0)
+    entities = dict(message.get("entities") or {})
+
+    inferred_intent = message.get("intent_label")
+    inferred_bank_category = message.get("bank_category")
+    explanation = "Structured reasoning could not raise confidence above the clarification threshold."
+    llm_confidence = current_confidence
+
+    if (
+        inferred_intent == "asset_purchase"
+        and entities.get("amount") is not None
+        and entities.get("asset_name")
+    ):
+        inferred_bank_category = inferred_bank_category or "equipment"
+        llm_confidence = max(current_confidence, 0.97)
+        explanation = "Structured reasoning confirmed a clear asset purchase from the extracted amount and asset name."
+    elif (
+        inferred_intent == "software_subscription"
+        and entities.get("amount") is not None
+        and (entities.get("vendor") or "subscription" in text)
+    ):
+        inferred_bank_category = inferred_bank_category or "software_subscription"
+        llm_confidence = max(current_confidence, 0.96)
+        explanation = "Structured reasoning confirmed a software subscription from the extracted vendor and amount."
+    elif "transfer" in text and inferred_intent in {None, "general_expense", "bank_transaction"}:
+        inferred_intent = "transfer"
+        inferred_bank_category = "transfer"
+        llm_confidence = max(current_confidence, 0.55)
+        explanation = "Structured reasoning confirmed this is a transfer, but the destination account is still unclear."
+    elif "fee" in text and inferred_bank_category is None:
+        inferred_intent = "bank_fee"
+        inferred_bank_category = "bank_fees"
+        llm_confidence = max(current_confidence, 0.9)
+        explanation = "Structured reasoning resolved the transaction as a bank fee."
+    elif "subscription" in text and inferred_intent in {None, "general_expense", "bank_transaction"}:
+        inferred_intent = "software_subscription"
+        inferred_bank_category = "software_subscription"
+        llm_confidence = max(current_confidence, 0.94)
+        explanation = "Structured reasoning resolved the transaction as a software subscription."
+    elif "rent" in text and inferred_intent in {None, "general_expense", "bank_transaction"}:
+        inferred_intent = "rent_expense"
+        inferred_bank_category = "rent"
+        llm_confidence = max(current_confidence, 0.94)
+        explanation = "Structured reasoning resolved the transaction as a rent expense."
+    elif "contractor" in text and inferred_intent in {None, "general_expense", "bank_transaction"}:
+        inferred_intent = "professional_fees"
+        inferred_bank_category = "professional_fees"
+        llm_confidence = max(current_confidence, 0.9)
+        explanation = "Structured reasoning resolved the transaction as a professional-fees expense."
+
+    confidence = dict(message.get("confidence") or {})
+    confidence["llm"] = llm_confidence
+    confidence["overall"] = llm_confidence
+
     return {
-        "date": str(message.get("transaction_date") or date.today()),
-        "description": message.get("input_text") or message.get("normalized_text") or "Autobook generated entry",
-        "origin_tier": 3,
+        **message,
+        "intent_label": inferred_intent,
+        "bank_category": inferred_bank_category,
         "confidence": confidence,
-        "transaction_id": message.get("transaction_id"),
+        "explanation": explanation,
     }
 
 
-def _normalize_proposed_entry(message: dict, proposed_entry: dict | None, confidence: float) -> dict:
-    payload = dict(proposed_entry or {})
-    lines = list(payload.get("lines", []))
-    entry = dict(payload.get("entry", {}))
-    entry.setdefault("date", str(message.get("transaction_date") or date.today()))
-    entry.setdefault(
-        "description",
-        message.get("input_text") or message.get("normalized_text") or "Autobook generated entry",
+def _apply_rule_engine(message: dict, *, origin_tier: int, explanation_prefix: str) -> dict:
+    overall_confidence = _coerce_confidence(
+        (message.get("confidence") or {}).get("overall"),
+        default=_coerce_confidence((message.get("confidence") or {}).get("ml"), default=0.0),
     )
-    entry.setdefault("origin_tier", 3)
-    entry.setdefault("confidence", confidence)
-    if message.get("transaction_id") is not None:
-        entry.setdefault("transaction_id", message.get("transaction_id"))
-    return {"entry": entry, "lines": lines}
-
-
-def _stub_classify(message: dict) -> dict:
-    """Stub: simulate LLM classification with confidence, explanation, and proposed entry."""
-    import re
-
-    existing_confidence = message.get("confidence", {}).get("overall")
-    if existing_confidence is not None:
-        return {
-            "confidence": existing_confidence,
-            "explanation": message.get("explanation", ""),
-            "proposed_entry": _normalize_proposed_entry(
-                message,
-                message.get("proposed_entry"),
-                float(existing_confidence),
-            ),
-        }
-
-    text = message.get("input_text", "")
-    amount_match = re.search(r"\$[\d,]+(?:\.\d+)?", text)
-    amount = (
-        float(amount_match.group().replace("$", "").replace(",", ""))
-        if amount_match
-        else float(message.get("amount") or 1000.00)
+    rule_result = build_rule_based_entry(
+        message,
+        confidence=overall_confidence,
+        origin_tier=origin_tier,
     )
-    intent_label = message.get("intent_label")
+    clarification_required = (
+        overall_confidence < settings.AUTO_POST_THRESHOLD or rule_result.requires_human_review
+    )
 
-    if intent_label == "asset_purchase" or message.get("source") in UPLOAD_SOURCES or amount_match:
-        confidence = 0.97
-        return {
-            "confidence": confidence,
-            "explanation": f"[BACKEND STUB] Classified as equipment purchase. Debiting Equipment, crediting Cash for ${amount:.2f}.",
-            "proposed_entry": _normalize_proposed_entry(message, {
-                "entry": _build_entry_metadata(message, confidence),
-                "lines": [
-                    {"account_code": "1500", "account_name": "Equipment", "type": "debit", "amount": amount},
-                    {"account_code": "1000", "account_name": "Cash", "type": "credit", "amount": amount},
-                ],
-            }, confidence),
-        }
-    if intent_label == "software_subscription":
-        confidence = 0.95
-        return {
-            "confidence": confidence,
-            "explanation": f"[BACKEND STUB] Classified as software expense. Debiting Software & Subscriptions and crediting Cash for ${amount:.2f}.",
-            "proposed_entry": _normalize_proposed_entry(message, {
-                "entry": _build_entry_metadata(message, confidence),
-                "lines": [
-                    {"account_code": "5300", "account_name": "Software & Subscriptions", "type": "debit", "amount": amount},
-                    {"account_code": "1000", "account_name": "Cash", "type": "credit", "amount": amount},
-                ],
-            }, confidence),
-        }
-    if intent_label == "rent_expense":
-        confidence = 0.95
-        return {
-            "confidence": confidence,
-            "explanation": f"[BACKEND STUB] Classified as rent expense. Debiting Rent Expense and crediting Cash for ${amount:.2f}.",
-            "proposed_entry": _normalize_proposed_entry(message, {
-                "entry": _build_entry_metadata(message, confidence),
-                "lines": [
-                    {"account_code": "5200", "account_name": "Rent Expense", "type": "debit", "amount": amount},
-                    {"account_code": "1000", "account_name": "Cash", "type": "credit", "amount": amount},
-                ],
-            }, confidence),
-        }
-    if intent_label == "professional_fees":
-        confidence = 0.92
-        return {
-            "confidence": confidence,
-            "explanation": f"[BACKEND STUB] Classified as professional fees. Debiting Professional Fees and crediting Cash for ${amount:.2f}.",
-            "proposed_entry": _normalize_proposed_entry(message, {
-                "entry": _build_entry_metadata(message, confidence),
-                "lines": [
-                    {"account_code": "5430", "account_name": "Professional Fees", "type": "debit", "amount": amount},
-                    {"account_code": "1000", "account_name": "Cash", "type": "credit", "amount": amount},
-                ],
-            }, confidence),
-        }
-    if intent_label == "meals_entertainment":
-        confidence = 0.9
-        return {
-            "confidence": confidence,
-            "explanation": f"[BACKEND STUB] Classified as meals and entertainment. Debiting Meals & Entertainment and crediting Cash for ${amount:.2f}.",
-            "proposed_entry": _normalize_proposed_entry(message, {
-                "entry": _build_entry_metadata(message, confidence),
-                "lines": [
-                    {"account_code": "5400", "account_name": "Meals & Entertainment", "type": "debit", "amount": amount},
-                    {"account_code": "1000", "account_name": "Cash", "type": "credit", "amount": amount},
-                ],
-            }, confidence),
-        }
-
-    confidence = 0.45
+    explanation = f"{explanation_prefix} {rule_result.explanation}".strip()
     return {
-        "confidence": confidence,
-        "explanation": f"[BACKEND STUB] Transfer direction is unclear. Unable to determine debit/credit accounts from: \"{text}\".",
-        "proposed_entry": _normalize_proposed_entry(
-            message,
-            {"entry": _build_entry_metadata(message, confidence), "lines": []},
-            confidence,
-        ),
+        **message,
+        "confidence": {
+            **dict(message.get("confidence") or {}),
+            "overall": overall_confidence,
+        },
+        "explanation": explanation,
+        "proposed_entry": rule_result.proposed_entry,
+        "clarification": {
+            "required": clarification_required,
+            "clarification_id": None,
+            "reason": rule_result.clarification_reason if clarification_required else None,
+            "status": "pending" if clarification_required else None,
+        },
     }
 
 
 def process(message: dict) -> None:
     logger.info("Processing: %s", message.get("parse_id"))
-    # TODO: call Bedrock LLM for classification (tier 3)
-    classification = _stub_classify(message)
-    confidence = classification["confidence"]
-    confidence_payload = dict(message.get("confidence") or {})
-    confidence_payload["overall"] = confidence
-    confidence_payload.setdefault("ml", confidence_payload.get("ml"))
-    enriched = {
-        **message,
-        "confidence": confidence_payload,
-        "explanation": classification["explanation"],
-        "proposed_entry": classification["proposed_entry"],
-        "clarification": {
-            "required": confidence < settings.AUTO_POST_THRESHOLD,
-            "clarification_id": None,
-            "reason": classification["explanation"] if confidence < settings.AUTO_POST_THRESHOLD else None,
-            "status": "pending" if confidence < settings.AUTO_POST_THRESHOLD else None,
-        },
-    }
+    ml_confidence = _coerce_confidence((message.get("confidence") or {}).get("ml"), default=0.0)
 
-    if confidence >= settings.AUTO_POST_THRESHOLD:
-        enqueue(settings.SQS_QUEUE_POSTING, enriched)
+    if ml_confidence >= settings.AUTO_POST_THRESHOLD:
+        enriched = _apply_rule_engine(
+            {
+                **message,
+                "confidence": {
+                    **dict(message.get("confidence") or {}),
+                    "overall": ml_confidence,
+                },
+            },
+            origin_tier=2,
+            explanation_prefix="ML confidence was high enough to route directly into the rule engine.",
+        )
     else:
-        publish_sync("clarification.created", {
-            "type": "clarification.created",
-            "parse_id": enriched.get("parse_id"),
-            "input_text": enriched.get("input_text"),
-            "user_id": enriched.get("user_id"),
-            "occurred_at": datetime.now(timezone.utc).isoformat(),
-            "confidence": enriched.get("confidence"),
-            "explanation": enriched.get("explanation"),
-            "proposed_entry": enriched.get("proposed_entry"),
-        })
-        enqueue(settings.SQS_QUEUE_RESOLUTION, enriched)
+        reasoned = _reason_over_ml_output(message)
+        enriched = _apply_rule_engine(
+            reasoned,
+            origin_tier=3,
+            explanation_prefix=reasoned["explanation"],
+        )
+
+    if not enriched["clarification"]["required"]:
+        enqueue(settings.SQS_QUEUE_POSTING, enriched)
+        return
+
+    publish_sync("clarification.created", {
+        "type": "clarification.created",
+        "parse_id": enriched.get("parse_id"),
+        "input_text": enriched.get("input_text"),
+        "user_id": enriched.get("user_id"),
+        "occurred_at": datetime.now(timezone.utc).isoformat(),
+        "confidence": enriched.get("confidence"),
+        "explanation": enriched.get("explanation"),
+        "proposed_entry": enriched.get("proposed_entry"),
+    })
+    enqueue(settings.SQS_QUEUE_RESOLUTION, enriched)

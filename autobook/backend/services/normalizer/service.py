@@ -17,7 +17,16 @@ DATE_PATTERNS = (
 
 NON_PARTY_TOKENS = {"invoice", "tax", "cash", "inventory", "rent", "payment", "expense"}
 NON_QUANTITY_UNITS = {"cash", "cad", "usd", "dollars", "tax", "invoice"}
-STRUCTURED_AMOUNT_SOURCES = {"csv", "csv_upload", "bank_feed"}
+CANONICAL_SOURCE_ALIASES = {
+    "manual": "manual_text",
+    "manual_text": "manual_text",
+    "csv": "csv_upload",
+    "csv_upload": "csv_upload",
+    "pdf": "pdf_upload",
+    "pdf_upload": "pdf_upload",
+    "upload": "upload",
+    "bank_feed": "bank_feed",
+}
 
 
 def _normalize_party_value(candidate: str) -> str:
@@ -41,6 +50,10 @@ class NormalizedTransactionCandidate:
 
 
 class NormalizationService:
+    def canonicalize_source(self, source: str | None) -> str:
+        normalized = str(source or "manual_text").strip().lower()
+        return CANONICAL_SOURCE_ALIASES.get(normalized, normalized or "manual_text")
+
     def normalize_text(self, text: str) -> str:
         return re.sub(r"\s+", " ", text.strip().lower())
 
@@ -149,8 +162,7 @@ class NormalizationService:
             except (TypeError, ValueError):
                 pass
 
-        source = str(message.get("source") or "manual_text")
-        if source in STRUCTURED_AMOUNT_SOURCES and len(amount_mentions) == 1:
+        if len(amount_mentions) == 1:
             return float(amount_mentions[0]["value"]), True
         return None, False
 
@@ -162,8 +174,7 @@ class NormalizationService:
         explicit = message.get("counterparty")
         if explicit:
             return str(explicit)
-        source = str(message.get("source") or "manual_text")
-        if source in STRUCTURED_AMOUNT_SOURCES and len(party_mentions) == 1:
+        if len(party_mentions) == 1:
             return str(party_mentions[0]["value"])
         return None
 
@@ -185,6 +196,7 @@ class NormalizationService:
         return str(date.today())
 
     def normalize(self, message: dict) -> NormalizedTransactionCandidate:
+        source = self.canonicalize_source(message.get("source"))
         description = str(
             message.get("input_text")
             or message.get("description")
@@ -204,7 +216,7 @@ class NormalizationService:
             amount_confident=amount_confident,
             currency=str(message.get("currency") or "CAD"),
             transaction_date=self.extract_transaction_date(message, description),
-            source=str(message.get("source") or "manual_text"),
+            source=source,
             counterparty=self.extract_counterparty(message, party_mentions),
             amount_mentions=amount_mentions,
             date_mentions=date_mentions,

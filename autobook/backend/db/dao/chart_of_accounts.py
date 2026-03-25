@@ -11,6 +11,7 @@ DEFAULT_COA: list[tuple[str, str, str]] = [
     ("1100", "Accounts Receivable", "asset"),
     ("1200", "Prepaid Expenses", "asset"),
     ("1500", "Equipment", "asset"),
+    ("9999", "Unknown Destination", "asset"),
     ("2000", "Accounts Payable", "liability"),
     ("2100", "HST/GST Payable", "liability"),
     ("2200", "Corporate Tax Payable", "liability"),

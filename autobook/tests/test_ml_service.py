@@ -105,3 +105,5 @@ def test_enrich_message_uses_service_boundary() -> None:
     assert enriched["bank_category"] == "transfer"
     assert enriched["cca_class_match"] is None
     assert enriched["confidence"]["ml"] > 0.8
+    assert enriched["input_type"] == "manual_text"
+    assert enriched["normalized_text"] == "transferred money"
