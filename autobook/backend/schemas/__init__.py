@@ -2,7 +2,7 @@ from schemas.parse import ParseRequest, ParseResponse, Confidence, JournalLine, 
 from schemas.clarifications import ClarificationItem, ClarificationsResponse, ResolveRequest, ResolveResponse
 from schemas.ledger import LedgerResponse, LedgerSummary
 from schemas.statements import StatementResponse, Period
-from schemas.events import RealtimeEvent
+from schemas.events import EntryPostedEvent, ClarificationCreatedEvent, ClarificationResolvedEvent
 from schemas.health import HealthResponse
 
 __all__ = [
@@ -10,6 +10,6 @@ __all__ = [
     "ClarificationItem", "ClarificationsResponse", "ResolveRequest", "ResolveResponse",
     "LedgerResponse", "LedgerSummary",
     "StatementResponse", "Period",
-    "RealtimeEvent",
+    "EntryPostedEvent", "ClarificationCreatedEvent", "ClarificationResolvedEvent",
     "HealthResponse",
 ]
