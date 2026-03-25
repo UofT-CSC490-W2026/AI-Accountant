@@ -13,9 +13,11 @@ from schemas.events import (
     ClarificationCreatedEvent,
     ClarificationResolvedEvent,
     EntryPostedEvent,
+    PipelineErrorEvent,
+    PipelineResultEvent,
 )
 
-__all__ = ["entry_posted", "clarification_created", "clarification_resolved"]
+__all__ = ["entry_posted", "clarification_created", "clarification_resolved", "pipeline_result", "pipeline_error"]
 
 
 def entry_posted(
@@ -87,3 +89,37 @@ def clarification_resolved(
         proposed_entry=proposed_entry,
     )
     publish_sync("clarification.resolved", event.model_dump())
+
+
+def pipeline_result(
+    *,
+    parse_id: str,
+    user_id: str,
+    stage: str,
+    result: dict,
+) -> None:
+    event = PipelineResultEvent(
+        parse_id=parse_id,
+        user_id=user_id,
+        stage=stage,
+        result=result,
+        occurred_at=datetime.now(timezone.utc).isoformat(),
+    )
+    publish_sync("pipeline.result", event.model_dump())
+
+
+def pipeline_error(
+    *,
+    parse_id: str,
+    user_id: str,
+    stage: str,
+    error: str,
+) -> None:
+    event = PipelineErrorEvent(
+        parse_id=parse_id,
+        user_id=user_id,
+        stage=stage,
+        error=error,
+        occurred_at=datetime.now(timezone.utc).isoformat(),
+    )
+    publish_sync("pipeline.error", event.model_dump())

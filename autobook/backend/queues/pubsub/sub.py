@@ -8,7 +8,7 @@ import redis.asyncio as aioredis
 
 from queues.pubsub.client import subscribe
 
-CHANNELS = ("entry.posted", "clarification.created", "clarification.resolved")
+CHANNELS = ("entry.posted", "clarification.created", "clarification.resolved", "pipeline.result", "pipeline.error")
 
 __all__ = ["events"]
 
