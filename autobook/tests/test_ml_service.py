@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from services.ml_inference.service import BaselineInferenceService, enrich_message
+from services.ml_inference.service import (
+    BaselineInferenceService,
+    HybridInferenceService,
+    build_inference_service,
+    enrich_message,
+)
 
 
 def test_service_prefers_explicit_vendor_pattern() -> None:
@@ -107,3 +112,29 @@ def test_enrich_message_uses_service_boundary() -> None:
     assert enriched["confidence"]["ml"] > 0.8
     assert enriched["input_type"] == "manual_text"
     assert enriched["normalized_text"] == "transferred money"
+
+
+def test_build_inference_service_defaults_to_heuristic() -> None:
+    service = build_inference_service("heuristic")
+
+    assert isinstance(service, BaselineInferenceService)
+
+
+def test_hybrid_service_falls_back_to_heuristics_without_models() -> None:
+    service = build_inference_service("hybrid")
+
+    assert isinstance(service, HybridInferenceService)
+
+    enriched = service.enrich(
+        {
+            "parse_id": "parse_service_2",
+            "input_text": "Bought a printer for $500",
+            "source": "manual_text",
+            "currency": "CAD",
+            "user_id": "user-1",
+        }
+    )
+
+    assert enriched["intent_label"] == "asset_purchase"
+    assert enriched["bank_category"] == "equipment"
+    assert enriched["cca_class_match"] == "class_50"

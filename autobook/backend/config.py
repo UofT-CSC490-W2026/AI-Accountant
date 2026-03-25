@@ -29,6 +29,9 @@ class Settings(BaseSettings):
         "https://ai-accountant490.netlify.app",
     ]
     AUTO_POST_THRESHOLD: float = 0.95  # confidence >= this → auto-post
+    ML_INFERENCE_PROVIDER: str = "heuristic"
+    ML_CLASSIFIER_MODEL_PATH: str | None = None
+    ML_ENTITY_MODEL_PATH: str | None = None
     SQS_ENDPOINT_URL: str | None = None
     SQS_QUEUE_NORMALIZER: str = "http://elasticmq:9324/queue/normalizer"
     SQS_QUEUE_PRECEDENT: str = "http://elasticmq:9324/queue/precedent"
