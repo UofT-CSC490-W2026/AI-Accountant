@@ -101,7 +101,7 @@ def _extract_common_result(state: dict, variant_name: str,
         total_latency_ms=elapsed_ms,
         total_input_tokens=total_input,
         total_output_tokens=total_output,
-        final_decision=state.get("route", "error"),
+        final_decision="validation_failed" if state.get("validation_error") else state.get("route", "error"),
     )
 
 
@@ -112,6 +112,7 @@ def _extract_state_snapshot(state: dict) -> dict:
         if key.startswith("output_") or key.startswith("status_") or key.startswith("fix_context_"):
             snapshot[key] = val
     snapshot["route"] = state.get("route", "error")
+    snapshot["validation_error"] = state.get("validation_error")
     return snapshot
 
 
@@ -365,6 +366,7 @@ def _save_results(results: list[TestCaseMetrics], variant_name: str) -> Path:
             "fix_root_cause_agent": m.fix_root_cause_agent,
             "rejection_reason": m.rejection_reason,
             "diagnostician_decision": m.diagnostician_decision,
+            "validation_error": m.pipeline_state.get("validation_error") if m.pipeline_state else None,
             "error": m.error,
             "pipeline_state": m.pipeline_state,
         }
