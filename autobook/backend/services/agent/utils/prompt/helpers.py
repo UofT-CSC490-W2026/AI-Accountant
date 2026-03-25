@@ -35,6 +35,24 @@ def build_tuples(debit, credit) -> list[dict]:
     )}]
 
 
+def build_labeled_tuples(debit, credit) -> list[dict]:
+    """Tuples with inline slot labels for corrector agents."""
+    return [{"text": (
+        "Initial debit classification from the previous classifier:\n"
+        "<initial_debit_tuple>\n"
+        f"  {debit}\n"
+        "  Slots: a=asset increase, b=dividend increase, c=expense increase, "
+        "d=liability decrease, e=equity decrease, f=revenue decrease\n"
+        "</initial_debit_tuple>\n\n"
+        "Credit classification from a separate classifier (for cross-validation only):\n"
+        "<credit_tuple>\n"
+        f"  {credit}\n"
+        "  Slots: a=liability increase, b=equity increase, c=revenue increase, "
+        "d=asset decrease, e=dividend decrease, f=expense decrease\n"
+        "</credit_tuple>"
+    )}]
+
+
 def build_journal(journal: dict) -> list[dict]:
     """Journal entry as formatted JSON."""
     return [{"text": (
@@ -92,7 +110,11 @@ def build_fix_context(fix_context: str | None) -> list[dict]:
     """Fix context block (rerun guidance from diagnostician)."""
     if not fix_context:
         return []
-    return [{"text": f"<fix_context>{fix_context}</fix_context>"}]
+    return [{"text": (
+        "A previous review rejected this classification. "
+        "The following guidance explains what to fix:\n"
+        f"<fix_context>{fix_context}</fix_context>"
+    )}]
 
 
 def build_rag_examples(rag_examples: list[dict], label: str,
@@ -107,7 +129,7 @@ def build_rag_examples(rag_examples: list[dict], label: str,
     if not rag_examples:
         return []
 
-    text = f"These are {label}:\n<examples>\n"
+    text = f"Reference: {label}:\n<examples>\n"
     for ex in rag_examples:
         for field in fields:
             val = ex.get(field, "")
@@ -115,3 +137,22 @@ def build_rag_examples(rag_examples: list[dict], label: str,
         text += "\n"
     text += "</examples>"
     return [{"text": text}]
+
+
+# ── Section builders for HumanMessage structure ─────────────────────────
+
+def build_context_section(fix: list[dict], rag: list[dict]) -> list[dict]:
+    """## Context section — only present when fix_context or rag_examples exist."""
+    if not fix and not rag:
+        return []
+    return [{"text": "## Context"}] + fix + rag
+
+
+def build_input_section(*content_blocks: list[dict]) -> list[dict]:
+    """## Input section — wraps transaction + tuples or other input data."""
+    blocks: list[dict] = [{"text": "## Input"}]
+    for block in content_blocks:
+        blocks.extend(block)
+    return blocks
+
+
