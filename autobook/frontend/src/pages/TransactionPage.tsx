@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getParseStatus, parseTransaction, uploadTransactionFile } from "../api/parse";
 import { subscribeToRealtimeUpdates, waitForRealtimeConnection } from "../api/realtime";
-import type { ParseStatus, RealtimeEvent } from "../api/types";
+import type { ParseStatus, RealtimeEvent, RunType } from "../api/types";
 import { FreshnessStatus } from "../components/FreshnessStatus";
 import { TransactionForm } from "../components/TransactionForm";
 
@@ -20,6 +20,10 @@ export function TransactionPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [resolvedEvent, setResolvedEvent] = useState<RealtimeEvent | null>(null);
+  const [runType, setRunType] = useState<RunType>("full_pipeline");
+  const [storeTransaction, setStoreTransaction] = useState(true);
+  const [autoPost, setAutoPost] = useState(true);
+  const [pipelineResult, setPipelineResult] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
@@ -49,6 +53,7 @@ export function TransactionPage() {
     setError(null);
     setUploadNotice(null);
     setLastUpdatedAt(null);
+    setPipelineResult(null);
   }
 
   function applyExample(value: string) {
@@ -75,6 +80,9 @@ export function TransactionPage() {
         input_text: input,
         source: "manual_text",
         currency: "CAD",
+        run_type: runType,
+        store_transaction: storeTransaction,
+        auto_post: autoPost,
       });
       setProcessingId(response.parse_id);
     } catch (submitError) {
@@ -112,6 +120,17 @@ export function TransactionPage() {
     if (!processingId) return;
     const unsub = subscribeToRealtimeUpdates((event) => {
       if (event.parse_id !== processingId) {
+        return;
+      }
+      if (event.type === "pipeline.result") {
+        setPipelineResult(event.result ?? {});
+        setProcessingId(null);
+        setLastUpdatedAt(new Date());
+        return;
+      }
+      if (event.type === "pipeline.error") {
+        setError(`[${event.stage}] ${event.error}`);
+        setProcessingId(null);
         return;
       }
       if (
@@ -220,6 +239,56 @@ export function TransactionPage() {
         </div>
       </section>
 
+      <section className="panel compact-panel">
+        <div className="panel-header">
+          <div>
+            <p className="eyebrow">Pipeline</p>
+            <h2>Run Configuration</h2>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
+          <label>
+            Run type:{" "}
+            <select value={runType} onChange={(e) => {
+              const val = e.target.value as RunType;
+              setRunType(val);
+              if (val === "full_pipeline") { setStoreTransaction(true); setAutoPost(true); }
+              if (val === "normalizer") { setAutoPost(false); }
+            }}>
+              <option value="full_pipeline">Full Pipeline</option>
+              <option value="normalizer">Normalizer Only</option>
+              <option value="precedent">Up to Precedent</option>
+              <option value="ml">Up to ML Inference</option>
+              <option value="llm">Up to LLM Agent</option>
+            </select>
+          </label>
+          {runType !== "full_pipeline" && (
+            <label>
+              <input
+                type="checkbox"
+                checked={storeTransaction}
+                onChange={(e) => {
+                  setStoreTransaction(e.target.checked);
+                  if (!e.target.checked) setAutoPost(false);
+                }}
+              />{" "}
+              Store transaction
+            </label>
+          )}
+          {runType !== "full_pipeline" && runType !== "normalizer" && (
+            <label>
+              <input
+                type="checkbox"
+                checked={autoPost}
+                disabled={!storeTransaction}
+                onChange={(e) => setAutoPost(e.target.checked)}
+              />{" "}
+              Auto-post
+            </label>
+          )}
+        </div>
+      </section>
+
       <TransactionForm
         value={input}
         onChange={handleInputChange}
@@ -234,6 +303,23 @@ export function TransactionPage() {
       {uploadNotice ? (
         <section className="panel outcome-panel outcome-success compact-panel">
           <p className="success-copy upload-notice">{uploadNotice}</p>
+        </section>
+      ) : null}
+
+      {pipelineResult ? (
+        <section className="panel outcome-panel">
+          <div className="panel-header">
+            <div>
+              <p className="eyebrow">Pipeline Result</p>
+              <h2>Stage: {runType}</h2>
+            </div>
+          </div>
+          <pre style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", maxHeight: "400px", overflow: "auto" }}>
+            {JSON.stringify(pipelineResult, null, 2)}
+          </pre>
+          <button className="secondary-button" onClick={() => setPipelineResult(null)} style={{ marginTop: "1rem" }}>
+            Dismiss
+          </button>
         </section>
       ) : null}
 

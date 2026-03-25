@@ -75,10 +75,15 @@ export type ParseResponse = {
   clarification_id?: string | null;
 };
 
+export type RunType = "full_pipeline" | "normalizer" | "precedent" | "ml" | "llm";
+
 export type ParseRequest = {
   input_text: string;
   source: Extract<TransactionInputSource, "manual_text" | "bank_feed">;
   currency?: string;
+  run_type?: RunType;
+  store_transaction?: boolean;
+  auto_post?: boolean;
 };
 
 export type ClarificationItem = {
@@ -157,7 +162,7 @@ export type StatementsResponse = {
 };
 
 export type RealtimeEvent = {
-  type: "entry.posted" | "clarification.created" | "clarification.resolved";
+  type: "entry.posted" | "clarification.created" | "clarification.resolved" | "pipeline.result" | "pipeline.error";
   journal_entry_id?: string;
   parse_id?: string;
   input_text?: string;
@@ -167,6 +172,9 @@ export type RealtimeEvent = {
   status?: string;
   proposed_entry?: { lines: JournalLine[] };
   parse_time_ms?: number;
+  stage?: string;
+  result?: Record<string, unknown>;
+  error?: string;
 };
 
 export type RealtimeListener = (event: RealtimeEvent) => void;
