@@ -4,10 +4,10 @@ from datetime import datetime, timezone
 from config import get_settings
 from db.connection import SessionLocal
 from db.dao.journal_entries import JournalEntryDAO
+from db.dao.transactions import TransactionDAO
 from queues import sqs
 from queues.pubsub import pub
 from services.shared.parse_status import set_status_sync
-from services.shared.transaction_persistence import ensure_transaction_for_message
 
 logger = logging.getLogger(__name__)
 
@@ -80,7 +80,12 @@ def execute(message: dict) -> None:
     parse_time_ms = _compute_parse_time_ms(message)
     db = SessionLocal()
     try:
-        user, transaction = ensure_transaction_for_message(db, message)
+        transaction_id = message.get("transaction_id")
+        if not transaction_id:
+            raise ValueError("message is missing transaction_id — normalizer should have set it")
+        transaction = TransactionDAO.get_by_id(db, transaction_id)
+        if transaction is None:
+            raise ValueError(f"transaction {transaction_id} not found — normalizer should have created it")
         proposed_entry = _normalize_proposed_entry({**message, "transaction_id": transaction.id})
         if proposed_entry is None:
             raise ValueError("auto-post path requires a proposed entry")
@@ -90,7 +95,7 @@ def execute(message: dict) -> None:
         entry_payload.setdefault("transaction_id", transaction.id)
         entry_payload.setdefault("status", "posted")
 
-        journal_entry = JournalEntryDAO.insert_with_lines(db, user.id, entry_payload, line_payload)
+        journal_entry = JournalEntryDAO.insert_with_lines(db, transaction.user_id, entry_payload, line_payload)
         db.commit()
     except Exception:
         db.rollback()

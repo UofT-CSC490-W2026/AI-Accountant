@@ -4,10 +4,10 @@ from datetime import datetime, timezone
 from config import get_settings
 from db.connection import SessionLocal
 from db.dao.clarifications import ClarificationDAO
+from db.dao.transactions import TransactionDAO
 from queues import sqs
 from queues.pubsub import pub
 from services.shared.parse_status import set_status_sync
-from services.shared.transaction_persistence import ensure_transaction_for_message
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -32,10 +32,15 @@ def _is_rejected(message: dict) -> bool:
 def _persist_pending_clarification(message: dict) -> str:
     db = SessionLocal()
     try:
-        user, transaction = ensure_transaction_for_message(db, message)
+        transaction_id = message.get("transaction_id")
+        if not transaction_id:
+            raise ValueError("message is missing transaction_id — normalizer should have set it")
+        transaction = TransactionDAO.get_by_id(db, transaction_id)
+        if transaction is None:
+            raise ValueError(f"transaction {transaction_id} not found — normalizer should have created it")
         task = ClarificationDAO.insert(
             db=db,
-            user_id=user.id,
+            user_id=transaction.user_id,
             transaction_id=transaction.id,
             source_text=message.get("input_text") or message.get("normalized_text") or "",
             explanation=message.get("explanation") or "Clarification required",
