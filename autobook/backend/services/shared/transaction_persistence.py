@@ -8,7 +8,6 @@ from db.dao.transactions import TransactionDAO
 from db.models.transaction import Transaction
 from db.models.user import User
 from local_identity import resolve_local_user
-from services.normalizer.logic import normalize_message
 
 
 def coerce_transaction_date(value) -> date:
@@ -23,43 +22,21 @@ def coerce_transaction_date(value) -> date:
 
 
 def ensure_transaction_for_message(db: Session, message: dict) -> tuple[User, Transaction]:
-    user = resolve_local_user(db, message.get("user_id"))
-    normalized = normalize_message(message)
-    transaction_id = message.get("transaction_id")
-    transaction = TransactionDAO.get_by_id(db, transaction_id) if transaction_id else None
+    """Look up the transaction created by the normalizer and update ML fields.
 
+    The normalizer stage creates the transaction and sets transaction_id.
+    Downstream services (posting, resolution) call this to fetch it and
+    attach ML enrichment data. No re-normalization is performed.
+    """
+    user = resolve_local_user(db, message.get("user_id"))
+    transaction_id = message.get("transaction_id")
+
+    if not transaction_id:
+        raise ValueError("message is missing transaction_id — normalizer should have set it")
+
+    transaction = TransactionDAO.get_by_id(db, transaction_id)
     if transaction is None:
-        transaction = TransactionDAO.insert(
-            db=db,
-            user_id=user.id,
-            description=normalized.description,
-            normalized_description=normalized.normalized_description,
-            amount=message.get("amount") if message.get("amount") is not None else normalized.amount,
-            currency=normalized.currency,
-            date=coerce_transaction_date(message.get("transaction_date") or normalized.transaction_date),
-            source=normalized.source,
-            counterparty=message.get("counterparty") or normalized.counterparty,
-            amount_mentions=normalized.amount_mentions,
-            date_mentions=normalized.date_mentions,
-            party_mentions=normalized.party_mentions,
-            quantity_mentions=normalized.quantity_mentions,
-        )
-    else:
-        TransactionDAO.update_normalized_fields(
-            db,
-            transaction.id,
-            description=normalized.description,
-            normalized_description=normalized.normalized_description,
-            amount=message.get("amount") if message.get("amount") is not None else normalized.amount,
-            currency=normalized.currency,
-            date=coerce_transaction_date(message.get("transaction_date") or normalized.transaction_date),
-            source=normalized.source,
-            counterparty=message.get("counterparty") or normalized.counterparty,
-            amount_mentions=normalized.amount_mentions,
-            date_mentions=normalized.date_mentions,
-            party_mentions=normalized.party_mentions,
-            quantity_mentions=normalized.quantity_mentions,
-        )
+        raise ValueError(f"transaction {transaction_id} not found — normalizer should have created it")
 
     TransactionDAO.update_ml_enrichment(
         db,
