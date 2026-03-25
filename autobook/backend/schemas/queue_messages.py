@@ -19,6 +19,9 @@ class NormalizationTask(BaseModel):
     currency: str | None = None
     filename: str | None = None
     submitted_at: str | None = None
+    run_type: str = "full_pipeline"
+    store_transaction: bool = True
+    auto_post: bool = True
 
 
 class PrecedentTask(BaseModel):

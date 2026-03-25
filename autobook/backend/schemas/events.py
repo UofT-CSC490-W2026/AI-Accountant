@@ -40,3 +40,21 @@ class ClarificationResolvedEvent(BaseModel):
     confidence: dict | None = None
     explanation: str | None = None
     proposed_entry: dict | None = None
+
+
+class PipelineResultEvent(BaseModel):
+    type: str = "pipeline.result"
+    parse_id: str
+    user_id: str
+    stage: str
+    result: dict
+    occurred_at: str
+
+
+class PipelineErrorEvent(BaseModel):
+    type: str = "pipeline.error"
+    parse_id: str
+    user_id: str
+    stage: str
+    error: str
+    occurred_at: str
