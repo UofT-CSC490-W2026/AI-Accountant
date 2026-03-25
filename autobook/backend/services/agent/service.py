@@ -1,142 +1,94 @@
 import logging
 from datetime import datetime, timezone
 
-from accounting_engine import build_rule_based_entry
 from config import get_settings
 from queues import sqs
 from queues.redis import publish_sync
+from services.agent.graph.graph import app
+from services.agent.graph.state import NOT_RUN, AGENT_NAMES
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-
-def _coerce_confidence(value, default: float = 0.0) -> float:
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return default
-
-
-def _reason_over_ml_output(message: dict) -> dict:
-    text = str(message.get("input_text") or message.get("description") or "").lower()
-    current_confidence = _coerce_confidence((message.get("confidence") or {}).get("ml"), default=0.0)
-    entities = dict(message.get("entities") or {})
-
-    inferred_intent = message.get("intent_label")
-    inferred_bank_category = message.get("bank_category")
-    explanation = "Structured reasoning could not raise confidence above the clarification threshold."
-    llm_confidence = current_confidence
-
-    if (
-        inferred_intent == "asset_purchase"
-        and entities.get("amount") is not None
-        and entities.get("asset_name")
-    ):
-        inferred_bank_category = inferred_bank_category or "equipment"
-        llm_confidence = max(current_confidence, 0.97)
-        explanation = "Structured reasoning confirmed a clear asset purchase from the extracted amount and asset name."
-    elif (
-        inferred_intent == "software_subscription"
-        and entities.get("amount") is not None
-        and (entities.get("vendor") or "subscription" in text)
-    ):
-        inferred_bank_category = inferred_bank_category or "software_subscription"
-        llm_confidence = max(current_confidence, 0.96)
-        explanation = "Structured reasoning confirmed a software subscription from the extracted vendor and amount."
-    elif "transfer" in text and inferred_intent in {None, "general_expense", "bank_transaction"}:
-        inferred_intent = "transfer"
-        inferred_bank_category = "transfer"
-        llm_confidence = max(current_confidence, 0.55)
-        explanation = "Structured reasoning confirmed this is a transfer, but the destination account is still unclear."
-    elif "fee" in text and inferred_bank_category is None:
-        inferred_intent = "bank_fee"
-        inferred_bank_category = "bank_fees"
-        llm_confidence = max(current_confidence, 0.9)
-        explanation = "Structured reasoning resolved the transaction as a bank fee."
-    elif "subscription" in text and inferred_intent in {None, "general_expense", "bank_transaction"}:
-        inferred_intent = "software_subscription"
-        inferred_bank_category = "software_subscription"
-        llm_confidence = max(current_confidence, 0.94)
-        explanation = "Structured reasoning resolved the transaction as a software subscription."
-    elif "rent" in text and inferred_intent in {None, "general_expense", "bank_transaction"}:
-        inferred_intent = "rent_expense"
-        inferred_bank_category = "rent"
-        llm_confidence = max(current_confidence, 0.94)
-        explanation = "Structured reasoning resolved the transaction as a rent expense."
-    elif "contractor" in text and inferred_intent in {None, "general_expense", "bank_transaction"}:
-        inferred_intent = "professional_fees"
-        inferred_bank_category = "professional_fees"
-        llm_confidence = max(current_confidence, 0.9)
-        explanation = "Structured reasoning resolved the transaction as a professional-fees expense."
-
-    confidence = dict(message.get("confidence") or {})
-    confidence["llm"] = llm_confidence
-    confidence["overall"] = llm_confidence
-
-    return {
-        **message,
-        "intent_label": inferred_intent,
-        "bank_category": inferred_bank_category,
-        "confidence": confidence,
-        "explanation": explanation,
-    }
+# Default ablation config: classify_and_build (best Stage 1 accuracy at lowest cost)
+DEFAULT_PIPELINE_CONFIG = {
+    "correction_pass": False,
+    "evaluation_active": False,
+}
 
 
-def _apply_rule_engine(message: dict, *, origin_tier: int, explanation_prefix: str) -> dict:
-    overall_confidence = _coerce_confidence(
-        (message.get("confidence") or {}).get("overall"),
-        default=_coerce_confidence((message.get("confidence") or {}).get("ml"), default=0.0),
-    )
-    rule_result = build_rule_based_entry(
-        message,
-        confidence=overall_confidence,
-        origin_tier=origin_tier,
-    )
-    clarification_required = (
-        overall_confidence < settings.AUTO_POST_THRESHOLD or rule_result.requires_human_review
-    )
-
-    explanation = f"{explanation_prefix} {rule_result.explanation}".strip()
-    return {
-        **message,
-        "confidence": {
-            **dict(message.get("confidence") or {}),
-            "overall": overall_confidence,
+def _build_initial_state(message: dict) -> dict:
+    """Build PipelineState from incoming queue message."""
+    state: dict = {
+        "transaction_text": message.get("input_text") or message.get("description") or "",
+        "user_context": {
+            "province": "ON",
+            "entity_type": "corporation",
         },
-        "explanation": explanation,
-        "proposed_entry": rule_result.proposed_entry,
+        "ml_enrichment": {
+            "intent_label": message.get("intent_label"),
+            "bank_category": message.get("bank_category"),
+            "entities": message.get("entities"),
+        },
+        "iteration": 0,
+    }
+    for name in AGENT_NAMES:
+        state[f"output_{name}"] = []
+        state[f"status_{name}"] = NOT_RUN
+        state[f"fix_context_{name}"] = []
+        state[f"rag_cache_{name}"] = []
+    state["embedding_transaction"] = None
+    state["embedding_error"] = None
+    state["embedding_rejection"] = None
+    state["route"] = "error"
+    state["validation_error"] = None
+    return state
+
+
+def _extract_result(final_state: dict, message: dict) -> dict:
+    """Extract proposed entry and confidence from pipeline output."""
+    i = final_state["iteration"]
+    entry_out = final_state.get("output_entry_builder", [])
+    journal_entry = entry_out[i] if i < len(entry_out) else None
+
+    route = final_state.get("route", "error")
+    if final_state.get("validation_error"):
+        route = "validation_failed"
+
+    # Determine confidence from approver if available, otherwise default
+    approver_out = final_state.get("output_approver", [])
+    if approver_out and i < len(approver_out) and approver_out[i]:
+        confidence = approver_out[i].get("confidence", 0.0)
+    else:
+        # No approver (classify_and_build skips evaluation) — use high confidence if entry exists
+        confidence = 0.95 if journal_entry and journal_entry.get("lines") else 0.0
+
+    confidence_payload = dict(message.get("confidence") or {})
+    confidence_payload["overall"] = confidence
+
+    return {
+        **message,
+        "confidence": confidence_payload,
+        "explanation": f"LLM pipeline ({route})",
+        "proposed_entry": journal_entry,
         "clarification": {
-            "required": clarification_required,
+            "required": confidence < settings.AUTO_POST_THRESHOLD,
             "clarification_id": None,
-            "reason": rule_result.clarification_reason if clarification_required else None,
-            "status": "pending" if clarification_required else None,
+            "reason": f"LLM pipeline: {route}" if confidence < settings.AUTO_POST_THRESHOLD else None,
+            "status": "pending" if confidence < settings.AUTO_POST_THRESHOLD else None,
         },
     }
 
 
 def execute(message: dict) -> None:
     logger.info("Processing: %s", message.get("parse_id"))
-    ml_confidence = _coerce_confidence((message.get("confidence") or {}).get("ml"), default=0.0)
 
-    if ml_confidence >= settings.AUTO_POST_THRESHOLD:
-        enriched = _apply_rule_engine(
-            {
-                **message,
-                "confidence": {
-                    **dict(message.get("confidence") or {}),
-                    "overall": ml_confidence,
-                },
-            },
-            origin_tier=2,
-            explanation_prefix="ML confidence was high enough to route directly into the rule engine.",
-        )
-    else:
-        reasoned = _reason_over_ml_output(message)
-        enriched = _apply_rule_engine(
-            reasoned,
-            origin_tier=3,
-            explanation_prefix=reasoned["explanation"],
-        )
+    initial_state = _build_initial_state(message)
+    config = {"configurable": DEFAULT_PIPELINE_CONFIG}
+
+    final_state = app.invoke(initial_state, config)
+
+    enriched = _extract_result(final_state, message)
 
     if not enriched["clarification"]["required"]:
         sqs.enqueue.posting(enriched)
