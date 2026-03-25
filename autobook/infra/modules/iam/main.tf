@@ -398,8 +398,8 @@ resource "aws_iam_role_policy" "agent_bedrock" {
           "bedrock:ConverseStream"
         ]
         Resource = [
-          "arn:aws:bedrock:${data.aws_region.current.region}::foundation-model/*",
-          "arn:aws:bedrock:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:inference-profile/*"
+          "arn:aws:bedrock:*::foundation-model/*",
+          "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:inference-profile/*"
         ]
       }
     ]
