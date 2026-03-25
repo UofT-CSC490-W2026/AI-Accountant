@@ -71,9 +71,6 @@ module "iam" {
   s3_bucket_arn     = module.storage.bucket_arn                                    # Scopes S3 permissions to our bucket
   queue_arns        = module.queuing.queue_arns                                    # Scopes SQS permissions per service
 
-  # WS relay permissions
-  ws_connections_table_arn = module.api_gateway.connections_table_arn
-  ws_api_arn               = "arn:aws:execute-api:${var.region}:${var.account_id}:${module.api_gateway.api_id}"
 }
 
 # =============================================================================
@@ -256,13 +253,6 @@ module "compute" {
   client_id      = module.auth.client_id      # Cognito client ID (passed to frontend)
   cognito_domain = module.auth.cognito_domain # Cognito hosted UI domain (OAuth token exchange)
 
-  # --- WS relay service ---
-  ws_relay_role_arn          = module.iam.ws_relay_role_arn
-  ws_connections_table_name  = module.api_gateway.connections_table_name
-  ws_connections_table_arn   = module.api_gateway.connections_table_arn
-  ws_api_endpoint            = module.api_gateway.api_endpoint
-  ws_api_id                  = module.api_gateway.api_id
-
   # Dev defaults: 0.25 vCPU, 512 MB memory, 0 desired count (CI/CD deploys first),
   # 30-day log retention, /health check path
 }
@@ -332,21 +322,6 @@ module "dns" {
 # API GATEWAY — WebSocket API for real-time updates
 # =============================================================================
 # Creates the WebSocket API that pushes real-time updates to the frontend.
-# When an entry is posted, the Posting Service publishes to Redis pub/sub,
-# the API Service receives it and pushes to connected clients via this WebSocket.
-#
-# Currently uses MOCK integrations (placeholder). Real Lambda/HTTP integrations
-# are wired when the application code is ready.
-#
-# Standalone — no dependency on networking (WebSocket API is a managed service).
-module "api_gateway" {
-  source = "../../modules/api-gateway"
-
-  project     = var.project
-  environment = var.environment
-  # Dev defaults: $request.body.action routing, 100 req/sec, 50 burst
-}
-
 # =============================================================================
 # ML — SageMaker inference endpoint
 # =============================================================================

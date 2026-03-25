@@ -13,13 +13,6 @@ output "api_url" {
   value       = "https://${module.dns.api_fqdn}"
 }
 
-# WebSocket URL for real-time push notifications to the frontend
-# Example: "wss://abc123.execute-api.ca-central-1.amazonaws.com/prod"
-output "websocket_url" {
-  description = "WebSocket URL — frontend connects for real-time updates"
-  value       = module.api_gateway.websocket_url
-}
-
 # --- Auth ---
 
 # Cognito user pool ID — frontend needs this to configure Amplify/SDK

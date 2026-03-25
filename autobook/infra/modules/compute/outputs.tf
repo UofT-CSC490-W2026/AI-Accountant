@@ -36,8 +36,3 @@ output "ecr_urls" {
   description = "Map of service name → ECR repository URL — used by CI/CD to push images"
   value       = { for name, repo in aws_ecr_repository.main : name => repo.repository_url }
 }
-
-output "ws_relay_ecr_url" {
-  description = "ECR repository URL for the WS relay service"
-  value       = aws_ecr_repository.ws_relay.repository_url
-}

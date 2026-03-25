@@ -177,35 +177,3 @@ variable "health_check_path" {
   description = "Health check endpoint for the API service"
   default     = "/health"
 }
-
-# --- From api-gateway module (for WS relay service) ---
-
-variable "ws_connections_table_name" {
-  type        = string
-  description = "DynamoDB table name for WebSocket connections"
-  default     = ""
-}
-
-variable "ws_connections_table_arn" {
-  type        = string
-  description = "DynamoDB table ARN for WebSocket connections"
-  default     = ""
-}
-
-variable "ws_api_endpoint" {
-  type        = string
-  description = "API Gateway WebSocket management endpoint URL"
-  default     = ""
-}
-
-variable "ws_api_id" {
-  type        = string
-  description = "API Gateway WebSocket API ID"
-  default     = ""
-}
-
-variable "ws_relay_role_arn" {
-  type        = string
-  description = "IAM task role ARN for the WS relay service"
-  default     = ""
-}

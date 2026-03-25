@@ -19,12 +19,6 @@ output "lambda_role_arns" {
   value       = { for name, role in aws_iam_role.lambda : name => role.arn }
 }
 
-# WS relay ECS service role
-output "ws_relay_role_arn" {
-  description = "WS relay ECS task role ARN"
-  value       = aws_iam_role.ws_relay.arn
-}
-
 # GitHub Actions workflow uses this to assume AWS permissions for CI/CD deploys
 output "github_actions_role_arn" {
   description = "GitHub Actions deploy role ARN — assumed via OIDC for CI/CD"

@@ -231,20 +231,6 @@ module "dns" {
 }
 
 # =============================================================================
-# API GATEWAY — WebSocket API for real-time updates
-# =============================================================================
-# Prod: higher throttle limits to handle production traffic.
-# Dev uses 100 req/sec / 50 burst — prod needs more headroom.
-module "api_gateway" {
-  source = "../../modules/api-gateway"
-
-  project                = var.project
-  environment            = var.environment
-  throttling_rate_limit  = 500 # PROD: 500 req/sec (dev = 100)
-  throttling_burst_limit = 200 # PROD: 200 burst (dev = 50)
-}
-
-# =============================================================================
 # ML — SageMaker inference endpoint
 # =============================================================================
 # Prod: real-time GPU inference with A10G for the 4 ML enrichment models:
