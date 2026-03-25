@@ -11,9 +11,13 @@ from services.agent.utils.calibration import calibrate_confidence
 def confidence_gate_node(state: PipelineState) -> dict:
     """Calibrate confidence and set routing decision."""
     i = state["iteration"]
-    approval = state["output_approver"][i]
-    raw_confidence = approval["confidence"]
+    approver_out = state.get("output_approver", [])
 
+    # When evaluation is off, approver was skipped — auto-post
+    if i >= len(approver_out) or not approver_out[i]:
+        return {"route": "post"}
+
+    raw_confidence = approver_out[i]["confidence"]
     calibrated = calibrate_confidence(raw_confidence)
     threshold = get_settings().AUTO_POST_THRESHOLD
 
