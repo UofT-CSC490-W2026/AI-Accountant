@@ -42,6 +42,14 @@ class ClarificationResolvedEvent(BaseModel):
     proposed_entry: dict | None = None
 
 
+class StageStartedEvent(BaseModel):
+    type: str = "pipeline.stage_started"
+    parse_id: str
+    user_id: str
+    stage: str
+    occurred_at: str
+
+
 class PipelineResultEvent(BaseModel):
     type: str = "pipeline.result"
     parse_id: str

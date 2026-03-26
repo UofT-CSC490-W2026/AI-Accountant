@@ -22,6 +22,11 @@ def handler(event, context):
                 stage="normalizer",
                 input_text=message.get("input_text") or message.get("filename"),
             )
+            pub.stage_started(
+                parse_id=message["parse_id"],
+                user_id=message["user_id"],
+                stage="normalizer",
+            )
             result = execute(message)
 
             nxt = first_stage(result)

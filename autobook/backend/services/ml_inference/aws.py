@@ -24,6 +24,11 @@ def handler(event, context):
                 stage="ml_inference",
                 input_text=message.get("input_text") or message.get("description"),
             )
+            pub.stage_started(
+                parse_id=message["parse_id"],
+                user_id=message["user_id"],
+                stage=STAGE,
+            )
             result = execute(message)
 
             if should_post(STAGE, result):

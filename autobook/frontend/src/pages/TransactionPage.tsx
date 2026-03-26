@@ -39,6 +39,7 @@ export function TransactionPage() {
   const [store, setStore] = useState(false);
   const [stages, setStages] = useState<Record<Branch, boolean>>({ precedent: false, ml: false, llm: false });
   const [post, setPost] = useState<Record<Branch, boolean>>({ precedent: false, ml: false, llm: false });
+  const [activeStage, setActiveStage] = useState<string | null>(null);
 
   function isPostDisabled(branch: Branch): boolean {
     return !stages[branch] || !store;
@@ -163,13 +164,19 @@ export function TransactionPage() {
       if (event.parse_id !== processingId) {
         return;
       }
+      if (event.type === "pipeline.stage_started") {
+        setActiveStage(event.stage ?? null);
+        return;
+      }
       if (event.type === "pipeline.result") {
+        setActiveStage(null);
         setPipelineResult(event.result ?? {});
         setProcessingId(null);
         setLastUpdatedAt(new Date());
         return;
       }
       if (event.type === "pipeline.error") {
+        setActiveStage(null);
         setError(`[${event.stage}] ${event.error}`);
         setProcessingId(null);
         return;
@@ -179,6 +186,7 @@ export function TransactionPage() {
         event.type === "clarification.created" ||
         event.type === "clarification.resolved"
       ) {
+        setActiveStage(null);
         setResolvedEvent(event);
         setProcessingId(null);
         setLastUpdatedAt(new Date());
@@ -296,6 +304,7 @@ export function TransactionPage() {
         </div>
         <PipelineFlow
           state={{ store, stages, post }}
+          activeStage={activeStage}
           onToggleStore={toggleStore}
           onToggleStage={toggleStage}
           onTogglePost={togglePost}

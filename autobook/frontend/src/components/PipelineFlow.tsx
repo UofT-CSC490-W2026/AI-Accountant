@@ -21,6 +21,7 @@ export type PipelineState = {
 
 type PipelineFlowProps = {
   state: PipelineState;
+  activeStage: string | null;
   onToggleStore: () => void;
   onToggleStage: (b: Branch) => void;
   onTogglePost: (b: Branch) => void;
@@ -30,7 +31,7 @@ type PipelineFlowProps = {
 
 type PipelineNodeData = {
   label: string;
-  variant: "static" | "enabled" | "off" | "disabled";
+  variant: "static" | "enabled" | "off" | "disabled" | "processing";
 };
 
 const COLORS = {
@@ -61,6 +62,13 @@ const VARIANT_STYLES: Record<string, React.CSSProperties> = {
     background: COLORS.forest,
     color: "rgba(254,250,224,0.4)",
     cursor: "not-allowed",
+  },
+  processing: {
+    background: "#DDA15E",
+    color: COLORS.forest,
+    cursor: "default",
+    boxShadow: "0 0 0 3px rgba(221,161,94,0.4)",
+    animation: "pulse-node 1.2s ease-in-out infinite",
   },
 };
 
@@ -108,19 +116,39 @@ const Y = { top: 0, p: 120, m: 240, l: 360 };
 
 // --- Build nodes from state ---
 
+// Map node IDs to stage names used by backend events
+const NODE_TO_STAGE: Record<string, string> = {
+  norm: "normalizer",
+  store: "normalizer",
+  precedent: "precedent",
+  ml: "ml",
+  llm: "llm",
+  "post-p": "precedent",
+  "post-m": "ml",
+  "post-l": "llm",
+};
+
 function buildNodes(state: PipelineState, h: PipelineFlowProps): Node<PipelineNodeData>[] {
+  const active = h.activeStage;
+
+  const stageVariant = (nodeId: string, isOn: boolean): PipelineNodeData["variant"] => {
+    if (active && NODE_TO_STAGE[nodeId] === active) return "processing";
+    return isOn ? "enabled" : "off";
+  };
+
   const postVariant = (b: Branch): PipelineNodeData["variant"] => {
     if (!state.stages[b] || !state.store) return "disabled";
+    if (active && NODE_TO_STAGE[`post-${b[0]}`] === active) return "processing";
     return state.post[b] ? "enabled" : "off";
   };
 
   return [
     { id: "parse", type: "pipeline", position: { x: X.parse, y: Y.top }, draggable: false, data: { label: "Parse", variant: "static" } },
-    { id: "norm", type: "pipeline", position: { x: X.norm, y: Y.top }, draggable: false, data: { label: "Normalizer", variant: "static" } },
-    { id: "store", type: "pipeline", position: { x: X.store, y: Y.top }, draggable: false, data: { label: "Store", variant: state.store ? "enabled" : "off" } },
-    { id: "precedent", type: "pipeline", position: { x: STAGE_X.precedent, y: Y.p }, draggable: false, data: { label: "Precedent", variant: state.stages.precedent ? "enabled" : "off" } },
-    { id: "ml", type: "pipeline", position: { x: STAGE_X.ml, y: Y.m }, draggable: false, data: { label: "ML", variant: state.stages.ml ? "enabled" : "off" } },
-    { id: "llm", type: "pipeline", position: { x: STAGE_X.llm, y: Y.l }, draggable: false, data: { label: "LLM", variant: state.stages.llm ? "enabled" : "off" } },
+    { id: "norm", type: "pipeline", position: { x: X.norm, y: Y.top }, draggable: false, data: { label: "Normalizer", variant: active === "normalizer" ? "processing" : "static" } },
+    { id: "store", type: "pipeline", position: { x: X.store, y: Y.top }, draggable: false, data: { label: "Store", variant: stageVariant("store", state.store) } },
+    { id: "precedent", type: "pipeline", position: { x: STAGE_X.precedent, y: Y.p }, draggable: false, data: { label: "Precedent", variant: stageVariant("precedent", state.stages.precedent) } },
+    { id: "ml", type: "pipeline", position: { x: STAGE_X.ml, y: Y.m }, draggable: false, data: { label: "ML", variant: stageVariant("ml", state.stages.ml) } },
+    { id: "llm", type: "pipeline", position: { x: STAGE_X.llm, y: Y.l }, draggable: false, data: { label: "LLM", variant: stageVariant("llm", state.stages.llm) } },
     { id: "post-p", type: "pipeline", position: { x: STAGE_X.precedent + POST_OFFSET, y: Y.p }, draggable: false, data: { label: "Post", variant: postVariant("precedent") } },
     { id: "post-m", type: "pipeline", position: { x: STAGE_X.ml + POST_OFFSET, y: Y.m }, draggable: false, data: { label: "Post", variant: postVariant("ml") } },
     { id: "post-l", type: "pipeline", position: { x: STAGE_X.llm + POST_OFFSET, y: Y.l }, draggable: false, data: { label: "Post", variant: postVariant("llm") } },
