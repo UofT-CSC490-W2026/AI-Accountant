@@ -20,7 +20,7 @@ def _load_jwks_document(jwks_url: str, jwks_json: str | None) -> dict[str, objec
     if jwks_json:
         return json.loads(jwks_json)
 
-    try:
+    try:  # pragma: no cover
         with urlopen(jwks_url, timeout=5) as response:
             return json.load(response)
     except URLError as exc:

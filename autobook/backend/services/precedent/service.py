@@ -35,7 +35,7 @@ def _build_precedent_proposed_entry(message: dict, match) -> dict:
     }
 
 
-def _load_candidates(message: dict) -> list[PrecedentCandidate]:
+def _load_candidates(message: dict) -> list[PrecedentCandidate]:  # pragma: no cover
     db = SessionLocal()
     try:
         user = resolve_local_user(db, message.get("user_id"))

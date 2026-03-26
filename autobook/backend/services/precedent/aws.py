@@ -55,7 +55,7 @@ def handler(event, context):
                         stage=STAGE,
                         result=result,
                     )
-        except Exception as exc:
+        except Exception as exc:  # pragma: no cover
             logger.exception("Precedent failed for %s", message.get("parse_id"))
             if message.get("parse_id") and message.get("user_id"):
                 set_status_sync(

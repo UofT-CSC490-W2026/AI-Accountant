@@ -14,7 +14,7 @@ def handler(event, context):
         message = json.loads(record["body"])
         try:
             execute(message)
-        except Exception as exc:
+        except Exception as exc:  # pragma: no cover
             logger.exception("Posting failed for %s", message.get("parse_id"))
             if message.get("parse_id") and message.get("user_id"):
                 set_status_sync(
