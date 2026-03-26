@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 
@@ -23,9 +22,17 @@ async def events(request: Request):
         db.close()
 
     async def event_stream():
-        async for event in sub.events(redis):
+        # Send initial keepalive so the client knows the connection is live
+        yield ": keepalive\n\n"
+
+        async for event in sub.events(redis, keepalive_interval=30):
             if await request.is_disconnected():
                 break
+
+            if event is None:
+                # Keepalive tick — send SSE comment to prevent ALB idle timeout
+                yield ": keepalive\n\n"
+                continue
 
             event_user = event.get("user_id")
             if event_user and event_user != str(current_user.user.id):

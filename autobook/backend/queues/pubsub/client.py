@@ -35,13 +35,21 @@ async def publish_async(r: aioredis.Redis, channel: str, payload: dict) -> None:
     await r.publish(channel, json.dumps(payload))
 
 
-async def subscribe(r: aioredis.Redis, *channels: str) -> AsyncGenerator[dict, None]:
+async def subscribe(r: aioredis.Redis, *channels: str, keepalive_interval: float = 0) -> AsyncGenerator[dict | None, None]:
     pubsub = r.pubsub()
     await pubsub.subscribe(*channels)
     try:
-        async for message in pubsub.listen():
-            if message["type"] == "message":
-                yield json.loads(message["data"])
+        if keepalive_interval > 0:
+            while True:
+                message = await pubsub.get_message(ignore_subscribe_messages=True, timeout=keepalive_interval)
+                if message is None:
+                    yield None  # keepalive tick
+                elif message["type"] == "message":
+                    yield json.loads(message["data"])
+        else:
+            async for message in pubsub.listen():
+                if message["type"] == "message":
+                    yield json.loads(message["data"])
     finally:
         await pubsub.unsubscribe(*channels)
         await pubsub.aclose()
