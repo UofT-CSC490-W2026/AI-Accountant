@@ -23,6 +23,7 @@ type PipelineFlowProps = {
   state: PipelineState;
   activeStage: string | null;
   completedStages: Set<string>;
+  skippedStages: Set<string>;
   locked: boolean;
   onToggleStore: () => void;
   onToggleStage: (b: Branch) => void;
@@ -35,6 +36,7 @@ type PipelineCtx = {
   state: PipelineState;
   activeStage: string | null;
   completedStages: Set<string>;
+  skippedStages: Set<string>;
   locked: boolean;
 };
 
@@ -42,6 +44,7 @@ const PipelineContext = createContext<PipelineCtx>({
   state: { store: false, stages: { precedent: false, ml: false, llm: false }, post: { precedent: false, ml: false, llm: false } },
   activeStage: null,
   completedStages: new Set(),
+  skippedStages: new Set(),
   locked: false,
 });
 
@@ -60,6 +63,7 @@ const VARIANT_STYLES: Record<string, React.CSSProperties> = {
   disabled: { background: COLORS.forest, color: "rgba(254,250,224,0.4)", cursor: "not-allowed" },
   processing: { background: "#DDA15E", color: COLORS.forest, cursor: "default", boxShadow: "0 0 0 3px rgba(221,161,94,0.4)", animation: "pulse-node 1.2s ease-in-out infinite" },
   completed: { background: "#BC6C25", color: "#ffffff", cursor: "default", boxShadow: "0 4px 10px rgba(188,108,37,0.3)" },
+  skipped: { background: "#9E2A2B", color: "#ffffff", cursor: "default", boxShadow: "0 4px 10px rgba(158,42,43,0.3)" },
 };
 
 const NODE_TO_STAGE: Record<string, string> = {
@@ -75,10 +79,11 @@ const NODE_TO_STAGE: Record<string, string> = {
 
 function resolveVariant(nodeId: string, ctx: PipelineCtx): string {
   const stageName = NODE_TO_STAGE[nodeId];
-  const { state, activeStage, completedStages } = ctx;
+  const { state, activeStage, completedStages, skippedStages } = ctx;
 
   // Progress states take priority
   if (activeStage === stageName) return "processing";
+  if (skippedStages.has(stageName)) return "skipped";
   if (completedStages.has(stageName)) return "completed";
 
   // Base variant per node type
@@ -229,6 +234,7 @@ function PipelineFlowInner(props: PipelineFlowProps) {
       state: props.state,
       activeStage: props.activeStage,
       completedStages: props.completedStages,
+      skippedStages: props.skippedStages,
       locked: props.locked,
     }}>
       <div ref={containerRef} style={{ width: "100%", height: "clamp(300px, 40vw, 520px)" }}>

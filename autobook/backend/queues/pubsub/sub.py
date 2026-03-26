@@ -15,6 +15,7 @@ CHANNELS = (
     "pipeline.result",
     "pipeline.error",
     "pipeline.stage_started",
+    "pipeline.stage_skipped",
 )
 
 __all__ = ["events"]

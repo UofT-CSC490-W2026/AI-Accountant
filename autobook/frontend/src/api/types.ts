@@ -160,7 +160,7 @@ export type StatementsResponse = {
 };
 
 export type RealtimeEvent = {
-  type: "entry.posted" | "clarification.created" | "clarification.resolved" | "pipeline.result" | "pipeline.error" | "pipeline.stage_started";
+  type: "entry.posted" | "clarification.created" | "clarification.resolved" | "pipeline.result" | "pipeline.error" | "pipeline.stage_started" | "pipeline.stage_skipped";
   journal_entry_id?: string;
   parse_id?: string;
   input_text?: string;

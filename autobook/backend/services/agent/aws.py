@@ -39,6 +39,12 @@ def handler(event, context):
                 )
                 sqs.enqueue.posting(result)
             elif result.get("clarification", {}).get("required"):
+                if STAGE in result.get("post_stages", []):
+                    pub.stage_skipped(
+                        parse_id=result["parse_id"],
+                        user_id=result["user_id"],
+                        stage="post-llm",
+                    )
                 set_status_sync(
                     parse_id=result["parse_id"],
                     user_id=result["user_id"],
@@ -59,6 +65,12 @@ def handler(event, context):
                 )
                 sqs.enqueue.resolution(result)
             else:
+                if STAGE in result.get("post_stages", []):
+                    pub.stage_skipped(
+                        parse_id=result["parse_id"],
+                        user_id=result["user_id"],
+                        stage="post-llm",
+                    )
                 nxt = next_stage(STAGE, result)
                 if nxt:
                     sqs.enqueue.by_name(nxt, result)

@@ -15,10 +15,11 @@ from schemas.events import (
     EntryPostedEvent,
     PipelineErrorEvent,
     PipelineResultEvent,
+    StageSkippedEvent,
     StageStartedEvent,
 )
 
-__all__ = ["entry_posted", "clarification_created", "clarification_resolved", "pipeline_result", "pipeline_error", "stage_started"]
+__all__ = ["entry_posted", "clarification_created", "clarification_resolved", "pipeline_result", "pipeline_error", "stage_started", "stage_skipped"]
 
 
 def entry_posted(
@@ -105,6 +106,21 @@ def stage_started(
         occurred_at=datetime.now(timezone.utc).isoformat(),
     )
     publish_sync("pipeline.stage_started", event.model_dump())
+
+
+def stage_skipped(
+    *,
+    parse_id: str,
+    user_id: str,
+    stage: str,
+) -> None:
+    event = StageSkippedEvent(
+        parse_id=parse_id,
+        user_id=user_id,
+        stage=stage,
+        occurred_at=datetime.now(timezone.utc).isoformat(),
+    )
+    publish_sync("pipeline.stage_skipped", event.model_dump())
 
 
 def pipeline_result(

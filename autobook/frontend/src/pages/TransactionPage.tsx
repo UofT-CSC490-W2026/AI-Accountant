@@ -44,6 +44,7 @@ export function TransactionPage() {
   const [activeStage, setActiveStage] = useState<string | null>(null);
   const activeStageRef = useRef<string | null>(null);
   const [completedStages, setCompletedStages] = useState<Set<string>>(new Set());
+  const [skippedStages, setSkippedStages] = useState<Set<string>>(new Set());
   const [pipelineLocked, setPipelineLocked] = useState(false);
 
   function advanceStage(next: string | null) {
@@ -59,6 +60,7 @@ export function TransactionPage() {
     activeStageRef.current = null;
     setActiveStage(null);
     setCompletedStages(new Set());
+    setSkippedStages(new Set());
   }
 
   function isPostDisabled(branch: Branch): boolean {
@@ -200,6 +202,12 @@ export function TransactionPage() {
   function handleSSEEvent(event: RealtimeEvent) {
     if (event.type === "pipeline.stage_started") {
       advanceStage(event.stage ?? null);
+      return;
+    }
+    if (event.type === "pipeline.stage_skipped") {
+      if (event.stage) {
+        setSkippedStages((s) => new Set(s).add(event.stage!));
+      }
       return;
     }
     if (event.type === "pipeline.result") {
@@ -357,6 +365,7 @@ export function TransactionPage() {
           state={{ store, stages, post }}
           activeStage={activeStage}
           completedStages={completedStages}
+          skippedStages={skippedStages}
           locked={pipelineLocked}
           onToggleStore={toggleStore}
           onToggleStage={toggleStage}

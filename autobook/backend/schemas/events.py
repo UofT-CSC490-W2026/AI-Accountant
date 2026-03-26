@@ -50,6 +50,14 @@ class StageStartedEvent(BaseModel):
     occurred_at: str
 
 
+class StageSkippedEvent(BaseModel):
+    type: str = "pipeline.stage_skipped"
+    parse_id: str
+    user_id: str
+    stage: str
+    occurred_at: str
+
+
 class PipelineResultEvent(BaseModel):
     type: str = "pipeline.result"
     parse_id: str
