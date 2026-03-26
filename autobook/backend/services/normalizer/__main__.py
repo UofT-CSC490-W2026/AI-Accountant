@@ -1,8 +1,9 @@
+import json
 import logging
 
 from config import get_settings
 from queues import dequeue
-from services.normalizer.service import execute
+from services.normalizer.aws import handler
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 logger = logging.getLogger("normalizer")
@@ -16,7 +17,7 @@ def main() -> None:
     while True:
         message = dequeue(queue_url)
         if message is not None:
-            process(message)
+            handler({"Records": [{"body": json.dumps(message)}]}, None)
 
 
 if __name__ == "__main__":
