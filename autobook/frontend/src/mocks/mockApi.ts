@@ -342,6 +342,7 @@ export const mockApi = {
 
     if (input.action === "approve" || input.action === "edit") {
       const journalEntryId = postJournalEntry(
+        currentItem?.clarification_id,
         currentItem?.source_text ?? "Clarified transfer posting",
         input.edited_entry?.lines ??
           currentItem?.proposed_entry.lines ??
