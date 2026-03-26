@@ -32,6 +32,11 @@ def handler(event, context):
             result = execute(message)
 
             if should_post(STAGE, result):
+                pub.stage_started(
+                    parse_id=result["parse_id"],
+                    user_id=result["user_id"],
+                    stage="post-precedent",
+                )
                 sqs.enqueue.posting(result)
             else:
                 nxt = next_stage(STAGE, result)

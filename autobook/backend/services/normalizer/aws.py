@@ -29,6 +29,13 @@ def handler(event, context):
             )
             result = execute(message)
 
+            if message.get("store", True):
+                pub.stage_started(
+                    parse_id=result["parse_id"],
+                    user_id=result["user_id"],
+                    stage="store",
+                )
+
             nxt = first_stage(result)
             if nxt:
                 sqs.enqueue.by_name(nxt, result)

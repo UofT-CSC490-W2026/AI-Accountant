@@ -32,6 +32,11 @@ def handler(event, context):
             result = execute(message)
 
             if should_post(STAGE, result):
+                pub.stage_started(
+                    parse_id=result["parse_id"],
+                    user_id=result["user_id"],
+                    stage="post-llm",
+                )
                 sqs.enqueue.posting(result)
             elif result.get("clarification", {}).get("required"):
                 set_status_sync(
