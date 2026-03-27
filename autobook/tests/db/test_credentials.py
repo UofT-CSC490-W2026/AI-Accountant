@@ -26,6 +26,20 @@ def test_get_database_url_cached(monkeypatch):
     get_database_url.cache_clear()
 
 
+def test_get_database_url_ecs_construction(monkeypatch):
+    get_database_url.cache_clear()
+    monkeypatch.delenv("DB_SECRET_ARN", raising=False)
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.setenv("DB_USER", "ecs_user")
+    monkeypatch.setenv("DB_PASSWORD", "ecs_pass")
+    monkeypatch.setenv("DB_HOST", "rds.example.com")
+    monkeypatch.setenv("DB_PORT", "5432")
+    monkeypatch.setenv("DB_NAME", "autobook")
+    result = get_database_url()
+    assert result == "postgresql://ecs_user:ecs_pass@rds.example.com:5432/autobook"
+    get_database_url.cache_clear()
+
+
 def test_get_database_url_from_secrets_manager(monkeypatch):
     get_database_url.cache_clear()
     monkeypatch.delenv("DATABASE_URL", raising=False)

@@ -102,7 +102,23 @@ def test_model_asset():
     assert hasattr(Asset, "acquisition_cost")
 
 
+def test_model_asset_org_id(db_session):
+    from uuid import uuid4
+    from db.dao.users import UserDAO
+    user = UserDAO.create(db_session, email="asset-org@example.com")
+    asset = Asset(user_id=user.id, name="Laptop", acquisition_cost=1000)
+    assert asset.org_id == user.id
+
+
 def test_model_schedule():
     assert ScheduledEntry.__tablename__ == "scheduled_entries"
     assert hasattr(ScheduledEntry, "frequency")
     assert hasattr(ScheduledEntry, "source")
+
+
+def test_model_schedule_org_id(db_session):
+    from uuid import uuid4
+    from db.dao.users import UserDAO
+    user = UserDAO.create(db_session, email="sched-org@example.com")
+    s = ScheduledEntry(user_id=user.id, amount=100, frequency="monthly")
+    assert s.org_id == user.id

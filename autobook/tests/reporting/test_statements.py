@@ -118,3 +118,22 @@ def test_trial_balance_balanced(mock_coa, mock_je):
     result = build_trial_balance(MagicMock(), "user-1", "2026-03-23")
     assert result["totals"]["total_debits"] == result["totals"]["total_credits"]
     assert result["totals"]["total_debits"] == 6000.0
+
+
+def test_trial_balance_negative_liability_balance():
+    """Liability with more debits than credits → debit column in trial balance."""
+    accounts = [
+        _make_account("2000", "Accounts Payable", "liability"),
+        _make_account("1000", "Cash", "asset"),
+    ]
+    entries = [
+        _make_entry([
+            _make_line("2000", "debit", 500),
+            _make_line("1000", "credit", 500),
+        ]),
+    ]
+    with patch("reporting.statements.JournalEntryDAO.list_by_user", return_value=entries), \
+         patch("reporting.statements.ChartOfAccountsDAO.list_by_user", return_value=accounts):
+        result = build_trial_balance(MagicMock(), "user-1", "2026-03-23")
+    assert result["totals"]["total_debits"] == 500.0
+    assert result["totals"]["total_credits"] == 500.0
