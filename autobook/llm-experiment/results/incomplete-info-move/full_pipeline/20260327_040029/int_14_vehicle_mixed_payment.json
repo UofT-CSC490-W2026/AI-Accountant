@@ -1,0 +1,604 @@
+{
+  "test_case_id": "int_14_vehicle_mixed_payment",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of delivery vehicle with 50% cash and 50% promissory note",
+    "rationale": "Commercial vehicle purchase subject to 13% HST in HST province. Vehicle cost $40,000 + HST $5,200 = $45,200 total. Asset (vehicle) debited for purchase price, HST Receivable debited for recoverable input tax. Cash credited for 50% of total ($22,600) and Notes Payable credited for remaining 50% ($22,600). This follows fix guidance to add HST and split the total cost including tax 50/50 between cash and note.",
+    "lines": [
+      {
+        "account_name": "Vehicles",
+        "type": "debit",
+        "amount": 40000.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 5200.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 22600.0
+      },
+      {
+        "account_name": "Notes Payable",
+        "type": "credit",
+        "amount": 22600.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0709074,
+  "raw_cost_usd": 0.11715300000000001,
+  "total_latency_ms": 40551,
+  "total_input_tokens": 28266,
+  "total_output_tokens": 2157,
+  "total_llm_calls": 10,
+  "iteration_count": 2,
+  "final_decision": "APPROVED",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 535,
+      "output_tokens": 35,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2659,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0027671999999999996,
+      "raw_cost_usd": 0.008502,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 510,
+      "output_tokens": 123,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1672,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037236,
+      "raw_cost_usd": 0.006861,
+      "output": {
+        "reason": "The delivery vehicle is an asset. Purchasing the vehicle increases the asset account (debit). This is ONE debit line for the vehicle acquisition, regardless of the two different payment methods (50% cash + 50% note payable). The payment split affects only the credit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The delivery vehicle is an asset. Purchasing the vehicle increases the asset account (debit). This is ONE debit line for the vehicle acquisition, regardless of the two different payment methods (50% cash + 50% note payable). The payment split affects only the credit side."
+    },
+    "credit_classifier": {
+      "input_tokens": 508,
+      "output_tokens": 148,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1649,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0040863,
+      "raw_cost_usd": 0.007167,
+      "output": {
+        "reason": "This transaction involves acquiring a delivery vehicle (asset) with two forms of payment. Credit side: (1) Cash payment of $20,000 (50% of $40,000) = asset decrease, and (2) Promissory note of $20,000 (remaining 50%) = liability increase. Therefore: 1 liability increase line + 1 asset decrease line.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "This transaction involves acquiring a delivery vehicle (asset) with two forms of payment. Credit side: (1) Cash payment of $20,000 (50% of $40,000) = asset decrease, and (2) Promissory note of $20,000 (remaining 50%) = liability increase. Therefore: 1 liability increase line + 1 asset decrease line."
+    },
+    "debit_corrector": {
+      "input_tokens": 678,
+      "output_tokens": 258,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2322,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063972,
+      "raw_cost_usd": 0.010836,
+      "output": {
+        "reason": "The transaction involves purchasing a delivery vehicle (asset) for $40,000. On the debit side, we need to record the acquisition of the vehicle, which is an asset increase. The initial debit tuple correctly shows (1,0,0,0,0,0) = one asset increase line for the vehicle.\n\nThe credit tuple shows (1,0,0,1,0,0) = one liability increase (the promissory note for 50% = $20,000) and one asset decrease (cash paid for 50% = $20,000). This is consistent with the economic substance: the company is acquiring a $40,000 asset by using $20,000 cash and taking on a $20,000 liability.\n\nThe debit and credit sides tell a consistent story under IFRS. The debit correctly records the vehicle acquisition as an asset increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing a delivery vehicle (asset) for $40,000. On the debit side, we need to record the acquisition of the vehicle, which is an asset increase. The initial debit tuple correctly shows (1,0,0,0,0,0) = one asset increase line for the vehicle.\n\nThe credit tuple shows (1,0,0,1,0,0) = one liability increase (the promissory note for 50% = $20,000) and one asset decrease (cash paid for 50% = $20,000). This is consistent with the economic substance: the company is acquiring a $40,000 asset by using $20,000 cash and taking on a $20,000 liability.\n\nThe debit and credit sides tell a consistent story under IFRS. The debit correctly records the vehicle acquisition as an asset increase. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 678,
+      "output_tokens": 292,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2330,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0069096,
+      "raw_cost_usd": 0.01137,
+      "output": {
+        "reason": "The transaction is a vehicle purchase with mixed payment (50% cash + 50% promissory note). Let me analyze:\n\nDEBIT side: (1,0,0,0,0,0) = 1 asset increase. This represents the delivery vehicle being acquired.\n\nCREDIT side should reflect:\n1. Cash payment of $20,000 (50% of $40,000) = Asset decrease\n2. Promissory note issued for $20,000 (remaining 50%) = Liability increase\n\nThe initial credit tuple (1,0,0,1,0,0) shows:\n- a=1: liability increase (the promissory note) \u2713\n- d=1: asset decrease (cash paid) \u2713\n\nThis is correct. The company is crediting cash (asset decrease) for the $20,000 payment and crediting notes payable (liability increase) for the $20,000 promissory note. The credit tuple correctly captures both aspects of the transaction. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a vehicle purchase with mixed payment (50% cash + 50% promissory note). Let me analyze:\n\nDEBIT side: (1,0,0,0,0,0) = 1 asset increase. This represents the delivery vehicle being acquired.\n\nCREDIT side should reflect:\n1. Cash payment of $20,000 (50% of $40,000) = Asset decrease\n2. Promissory note issued for $20,000 (remaining 50%) = Liability increase\n\nThe initial credit tuple (1,0,0,1,0,0) shows:\n- a=1: liability increase (the promissory note) \u2713\n- d=1: asset decrease (cash paid) \u2713\n\nThis is correct. The company is crediting cash (asset decrease) for the $20,000 payment and crediting notes payable (liability increase) for the $20,000 promissory note. The credit tuple correctly captures both aspects of the transaction. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1477,
+      "output_tokens": 723,
+      "cache_read_tokens": 5024,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6501,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.016783199999999998,
+      "raw_cost_usd": 0.030348,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of delivery vehicle with 50% cash and 50% promissory note",
+        "rationale": "Commercial vehicle purchase subject to 13% HST in HST province. Vehicle cost $40,000 + HST $5,200 = $45,200 total. Asset (vehicle) debited for purchase price, HST Receivable debited for recoverable input tax. Cash credited for 50% of total ($22,600) and Notes Payable credited for remaining 50% ($22,600). This follows fix guidance to add HST and split the total cost including tax 50/50 between cash and note.",
+        "lines": [
+          {
+            "account_name": "Vehicles",
+            "type": "debit",
+            "amount": 40000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 5200.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 22600.0
+          },
+          {
+            "account_name": "Notes Payable",
+            "type": "credit",
+            "amount": 22600.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4975,
+      "output_tokens": 425,
+      "cache_read_tokens": 2772,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7747,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.022131599999999998,
+      "raw_cost_usd": 0.029616000000000003,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records vehicle purchase with HST. Balance verified: debits $45,200 ($40,000 vehicle + $5,200 HST receivable) = credits $45,200 ($22,600 cash + $22,600 notes payable). HST at 13% correctly calculated on $40,000 base. The 50/50 split properly applies to total amount including tax ($45,200 \u00f7 2 = $22,600 each). Accounts appropriate: Vehicles for asset acquisition, HST Receivable for input tax credit, Cash for payment, Notes Payable for financing. All debits and credits on correct sides."
+      },
+      "reason": "Entry correctly records vehicle purchase with HST. Balance verified: debits $45,200 ($40,000 vehicle + $5,200 HST receivable) = credits $45,200 ($22,600 cash + $22,600 notes payable). HST at 13% correctly calculated on $40,000 base. The 50/50 split properly applies to total amount including tax ($45,200 \u00f7 2 = $22,600 each). Accounts appropriate: Vehicles for asset acquisition, HST Receivable for input tax credit, Cash for payment, Notes Payable for financing. All debits and credits on correct sides."
+    },
+    "diagnostician": {
+      "input_tokens": 1777,
+      "output_tokens": 153,
+      "cache_read_tokens": 1609,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3386,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081087,
+      "raw_cost_usd": 0.012453,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Vehicle purchase in Canada should include HST/GST on the purchase price. The entry rationale incorrectly states that vehicle purchases are \"typically not subject to HST/GST as they are capital property transactions\" - this is false. Commercial vehicle purchases are subject to HST/GST at applicable provincial rates (13% in most HST provinces, or 5% GST + provincial PST in others). The entry is missing tax lines entirely. A $40,000 vehicle purchase would typically have 13% HST = $5,200 in tax (total cost $45,200), affecting both the asset basis and amounts paid.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "The delivery vehicle is an asset. Purchasing the vehicle increases the asset account (debit). This is ONE debit line for the vehicle acquisition, regardless of the two different payment methods (50% cash + 50% note payable). The payment split affects only the credit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The delivery vehicle is an asset. Purchasing the vehicle increases the asset account (debit). This is ONE debit line for the vehicle acquisition, regardless of the two different payment methods (50% cash + 50% note payable). The payment split affects only the credit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This transaction involves acquiring a delivery vehicle (asset) with two forms of payment. Credit side: (1) Cash payment of $20,000 (50% of $40,000) = asset decrease, and (2) Promissory note of $20,000 (remaining 50%) = liability increase. Therefore: 1 liability increase line + 1 asset decrease line.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "This transaction involves acquiring a delivery vehicle (asset) with two forms of payment. Credit side: (1) Cash payment of $20,000 (50% of $40,000) = asset decrease, and (2) Promissory note of $20,000 (remaining 50%) = liability increase. Therefore: 1 liability increase line + 1 asset decrease line.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves purchasing a delivery vehicle (asset) for $40,000. On the debit side, we need to record the acquisition of the vehicle, which is an asset increase. The initial debit tuple correctly shows (1,0,0,0,0,0) = one asset increase line for the vehicle.\n\nThe credit tuple shows (1,0,0,1,0,0) = one liability increase (the promissory note for 50% = $20,000) and one asset decrease (cash paid for 50% = $20,000). This is consistent with the economic substance: the company is acquiring a $40,000 asset by using $20,000 cash and taking on a $20,000 liability.\n\nThe debit and credit sides tell a consistent story under IFRS. The debit correctly records the vehicle acquisition as an asset increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction involves purchasing a delivery vehicle (asset) for $40,000. On the debit side, we need to record the acquisition of the vehicle, which is an asset increase. The initial debit tuple correctly shows (1,0,0,0,0,0) = one asset increase line for the vehicle.\n\nThe credit tuple shows (1,0,0,1,0,0) = one liability increase (the promissory note for 50% = $20,000) and one asset decrease (cash paid for 50% = $20,000). This is consistent with the economic substance: the company is acquiring a $40,000 asset by using $20,000 cash and taking on a $20,000 liability.\n\nThe debit and credit sides tell a consistent story under IFRS. The debit correctly records the vehicle acquisition as an asset increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction is a vehicle purchase with mixed payment (50% cash + 50% promissory note). Let me analyze:\n\nDEBIT side: (1,0,0,0,0,0) = 1 asset increase. This represents the delivery vehicle being acquired.\n\nCREDIT side should reflect:\n1. Cash payment of $20,000 (50% of $40,000) = Asset decrease\n2. Promissory note issued for $20,000 (remaining 50%) = Liability increase\n\nThe initial credit tuple (1,0,0,1,0,0) shows:\n- a=1: liability increase (the promissory note) \u2713\n- d=1: asset decrease (cash paid) \u2713\n\nThis is correct. The company is crediting cash (asset decrease) for the $20,000 payment and crediting notes payable (liability increase) for the $20,000 promissory note. The credit tuple correctly captures both aspects of the transaction. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction is a vehicle purchase with mixed payment (50% cash + 50% promissory note). Let me analyze:\n\nDEBIT side: (1,0,0,0,0,0) = 1 asset increase. This represents the delivery vehicle being acquired.\n\nCREDIT side should reflect:\n1. Cash payment of $20,000 (50% of $40,000) = Asset decrease\n2. Promissory note issued for $20,000 (remaining 50%) = Liability increase\n\nThe initial credit tuple (1,0,0,1,0,0) shows:\n- a=1: liability increase (the promissory note) \u2713\n- d=1: asset decrease (cash paid) \u2713\n\nThis is correct. The company is crediting cash (asset decrease) for the $20,000 payment and crediting notes payable (liability increase) for the $20,000 promissory note. The credit tuple correctly captures both aspects of the transaction. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of delivery vehicle with mixed financing - 50% cash and 50% promissory note",
+        "rationale": "The delivery vehicle is a capital asset acquisition. Debit tuple (1,0,0,0,0,0) requires one asset increase line for the vehicle at full cost of $40,000. Credit tuple (1,0,0,1,0,0) requires one liability increase line (the promissory note for $20,000) and one asset decrease line (cash payment of $20,000). Vehicle purchases are typically not subject to HST/GST as they are capital property transactions between parties where the seller remits tax separately. Total debits ($40,000) equal total credits ($20,000 + $20,000).",
+        "lines": [
+          {
+            "account_name": "Vehicles",
+            "type": "debit",
+            "amount": 40000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 20000.0
+          },
+          {
+            "account_name": "Notes Payable",
+            "type": "credit",
+            "amount": 20000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of delivery vehicle with 50% cash and 50% promissory note",
+        "rationale": "Commercial vehicle purchase subject to 13% HST in HST province. Vehicle cost $40,000 + HST $5,200 = $45,200 total. Asset (vehicle) debited for purchase price, HST Receivable debited for recoverable input tax. Cash credited for 50% of total ($22,600) and Notes Payable credited for remaining 50% ($22,600). This follows fix guidance to add HST and split the total cost including tax 50/50 between cash and note.",
+        "lines": [
+          {
+            "account_name": "Vehicles",
+            "type": "debit",
+            "amount": 40000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 5200.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 22600.0
+          },
+          {
+            "account_name": "Notes Payable",
+            "type": "credit",
+            "amount": 22600.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Vehicle purchase in Canada should include HST/GST on the purchase price. The entry rationale incorrectly states that vehicle purchases are \"typically not subject to HST/GST as they are capital property transactions\" - this is false. Commercial vehicle purchases are subject to HST/GST at applicable provincial rates (13% in most HST provinces, or 5% GST + provincial PST in others). The entry is missing tax lines entirely. A $40,000 vehicle purchase would typically have 13% HST = $5,200 in tax (total cost $45,200), affecting both the asset basis and amounts paid."
+      },
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records vehicle purchase with HST. Balance verified: debits $45,200 ($40,000 vehicle + $5,200 HST receivable) = credits $45,200 ($22,600 cash + $22,600 notes payable). HST at 13% correctly calculated on $40,000 base. The 50/50 split properly applies to total amount including tax ($45,200 \u00f7 2 = $22,600 each). Accounts appropriate: Vehicles for asset acquisition, HST Receivable for input tax credit, Cash for payment, Notes Payable for financing. All debits and credits on correct sides."
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Commercial vehicle purchases in Canada are subject to HST/GST. A $40,000 vehicle incurs 13% HST ($5,200) in HST provinces, making total cost $45,200. Add HST Receivable debit line and increase both Cash and Notes Payable credits proportionally to reflect tax on the purchase price."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Commercial vehicle purchases in Canada are subject to HST/GST. A $40,000 vehicle incurs 13% HST ($5,200) in HST provinces, making total cost $45,200. Add HST Receivable debit line and increase both Cash and Notes Payable credits proportionally to reflect tax on the purchase price."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 535,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 510,
+        "output_tokens": 123,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 148,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 678,
+        "output_tokens": 258,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 678,
+        "output_tokens": 292,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 687,
+        "output_tokens": 356,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1943,
+        "output_tokens": 206,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1777,
+        "output_tokens": 153,
+        "input_token_details": {
+          "cache_read": 1609,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 790,
+        "output_tokens": 367,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 3032,
+        "output_tokens": 219,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

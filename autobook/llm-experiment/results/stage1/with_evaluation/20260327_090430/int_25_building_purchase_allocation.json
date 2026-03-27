@@ -1,0 +1,548 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "with_evaluation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    2,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of building and land for warehouse use, 50% paid by cheque with full sales tax, 50% payable in 6 months",
+    "rationale": "Under IFRS, the $9,000,000 purchase price must be allocated between land and building based on their relative fair values. Land FV = $8,000,000 and Building FV = $4,000,000 (total FV = $12,000,000). Allocation: Land = $9,000,000 \u00d7 (8/12) = $6,000,000; Building = $9,000,000 \u00d7 (4/12) = $3,000,000. Payment structure: 50% ($4,500,000) paid now by cheque, 50% ($4,500,000) due in 6 months (liability). Per fix context, the full 10% sales tax of $900,000 (10% \u00d7 $9,000,000) is paid upfront with the first payment, even though only half the purchase price is paid now. Total cheque payment = $4,500,000 + $900,000 = $5,400,000. HST paid on commercial property is recoverable (HST Receivable). The debit tuple (2,0,0,0,0,0) represents Land and Building as two asset increases. The credit tuple (2,0,0,1,0,0) represents Accounts Payable (liability increase) for the deferred 50%, Cash (asset decrease) for the payment, plus HST Receivable as an additional tax line.",
+    "lines": [
+      {
+        "account_name": "Land",
+        "type": "debit",
+        "amount": 6000000.0
+      },
+      {
+        "account_name": "Building",
+        "type": "debit",
+        "amount": 3000000.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 900000.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 4500000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 5400000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0815805,
+  "raw_cost_usd": 0.116775,
+  "total_latency_ms": 56827,
+  "total_input_tokens": 25585,
+  "total_output_tokens": 2668,
+  "total_llm_calls": 8,
+  "iteration_count": 2,
+  "final_decision": "APPROVED",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 1251,
+      "output_tokens": 451,
+      "cache_read_tokens": 2282,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3533,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0112026,
+      "raw_cost_usd": 0.017364,
+      "output": {
+        "reason": "The transaction involves three credit lines:\n1. Cash/Bank account decrease of $5,400,000 ($4,500,000 balance + $900,000 sales tax on entire $9,000,000) = asset decrease\n2. Accounts Payable/Note Payable increase of $4,500,000 (50% deferred payment) = liability increase  \n3. Sales Tax Payable increase of $900,000 (10% \u00d7 $9,000,000 total purchase) = liability increase\n\nCredit tuple: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash) = (2,0,0,1,0,0)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves three credit lines:\n1. Cash/Bank account decrease of $5,400,000 ($4,500,000 balance + $900,000 sales tax on entire $9,000,000) = asset decrease\n2. Accounts Payable/Note Payable increase of $4,500,000 (50% deferred payment) = liability increase  \n3. Sales Tax Payable increase of $900,000 (10% \u00d7 $9,000,000 total purchase) = liability increase\n\nCredit tuple: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash) = (2,0,0,1,0,0)"
+    },
+    "debit_classifier": {
+      "input_tokens": 570,
+      "output_tokens": 282,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1732,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0062886,
+      "raw_cost_usd": 0.009426,
+      "output": {
+        "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost under IFRS when the tax is not recoverable; the portion paid ($450,000 on the 50% paid) would also increase the asset. The accounts payable for the deferred portion and the sales tax payable on that portion are credit-side entries.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost under IFRS when the tax is not recoverable; the portion paid ($450,000 on the 50% paid) would also increase the asset. The accounts payable for the deferred portion and the sales tax payable on that portion are credit-side entries."
+    },
+    "entry_builder": {
+      "input_tokens": 1701,
+      "output_tokens": 1199,
+      "cache_read_tokens": 5210,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6911,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.024651,
+      "raw_cost_usd": 0.038718,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of building and land for warehouse use, 50% paid by cheque with full sales tax, 50% payable in 6 months",
+        "rationale": "Under IFRS, the $9,000,000 purchase price must be allocated between land and building based on their relative fair values. Land FV = $8,000,000 and Building FV = $4,000,000 (total FV = $12,000,000). Allocation: Land = $9,000,000 \u00d7 (8/12) = $6,000,000; Building = $9,000,000 \u00d7 (4/12) = $3,000,000. Payment structure: 50% ($4,500,000) paid now by cheque, 50% ($4,500,000) due in 6 months (liability). Per fix context, the full 10% sales tax of $900,000 (10% \u00d7 $9,000,000) is paid upfront with the first payment, even though only half the purchase price is paid now. Total cheque payment = $4,500,000 + $900,000 = $5,400,000. HST paid on commercial property is recoverable (HST Receivable). The debit tuple (2,0,0,0,0,0) represents Land and Building as two asset increases. The credit tuple (2,0,0,1,0,0) represents Accounts Payable (liability increase) for the deferred 50%, Cash (asset decrease) for the payment, plus HST Receivable as an additional tax line.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 900000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 5400000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 6752,
+      "output_tokens": 488,
+      "cache_read_tokens": 2772,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 9524,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.028407599999999998,
+      "raw_cost_usd": 0.035892,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records the building and land purchase with proper IFRS allocation based on relative fair values (Land: $6M, Building: $3M from $9M total allocated 8:4 ratio). The full 10% sales tax of $900,000 is correctly recorded as HST Receivable (recoverable on commercial property). Payment structure is accurate: $5,400,000 paid by cheque ($4,500,000 + $900,000 tax) and $4,500,000 deferred as Accounts Payable. Entry balances: Debits $9,900,000 = Credits $9,900,000. All accounts appropriate and amounts match transaction text."
+      },
+      "reason": "Entry correctly records the building and land purchase with proper IFRS allocation based on relative fair values (Land: $6M, Building: $3M from $9M total allocated 8:4 ratio). The full 10% sales tax of $900,000 is correctly recorded as HST Receivable (recoverable on commercial property). Payment structure is accurate: $5,400,000 paid by cheque ($4,500,000 + $900,000 tax) and $4,500,000 deferred as Accounts Payable. Entry balances: Debits $9,900,000 = Credits $9,900,000. All accounts appropriate and amounts match transaction text."
+    },
+    "diagnostician": {
+      "input_tokens": 2276,
+      "output_tokens": 248,
+      "cache_read_tokens": 1609,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3885,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.011030700000000001,
+      "raw_cost_usd": 0.015375,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    2,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    2,
+    5
+  ],
+  "rejection_reason": "Sales tax calculation error. Transaction states 10% sales tax applies to the balance (50% of purchase price = $4,500,000), so tax should be $4,500,000 \u00d7 10% = $450,000. However, the transaction states \"the balance plus 10% sales tax was paid by cheque\", meaning the 50% payment ($4,500,000) PLUS the tax on the ENTIRE purchase price ($9,000,000 \u00d7 10% = $900,000) was paid. The entry only records $450,000 HST Receivable and Cash payment of $4,950,000, but it should be $900,000 HST Receivable and $5,400,000 Cash payment. The deferred liability should remain $4,500,000 (the other 50% of the purchase price, exclusive of tax as stated).",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost under IFRS when the tax is not recoverable; the portion paid ($450,000 on the 50% paid) would also increase the asset. The accounts payable for the deferred portion and the sales tax payable on that portion are credit-side entries.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost under IFRS when the tax is not recoverable; the portion paid ($450,000 on the 50% paid) would also increase the asset. The accounts payable for the deferred portion and the sales tax payable on that portion are credit-side entries.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit side consists of:\n1. Cash/Bank account decrease for the payment made by cheque = $4,500,000 (50% of $9,000,000) + $900,000 (10% sales tax on $9,000,000) = $5,400,000 \u2192 Asset decrease (1 line)\n2. Accounts Payable or Note Payable increase for the deferred payment = $4,500,000 (remaining 50% due in 6 months) \u2192 Liability increase (1 line)\n\nTherefore: 1 liability increase line + 0 equity increase + 0 revenue increase + 1 asset decrease + 0 dividend decrease + 0 expense decrease",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction involves three credit lines:\n1. Cash/Bank account decrease of $5,400,000 ($4,500,000 balance + $900,000 sales tax on entire $9,000,000) = asset decrease\n2. Accounts Payable/Note Payable increase of $4,500,000 (50% deferred payment) = liability increase  \n3. Sales Tax Payable increase of $900,000 (10% \u00d7 $9,000,000 total purchase) = liability increase\n\nCredit tuple: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash) = (2,0,0,1,0,0)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost under IFRS when the tax is not recoverable; the portion paid ($450,000 on the 50% paid) would also increase the asset. The accounts payable for the deferred portion and the sales tax payable on that portion are credit-side entries.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost under IFRS when the tax is not recoverable; the portion paid ($450,000 on the 50% paid) would also increase the asset. The accounts payable for the deferred portion and the sales tax payable on that portion are credit-side entries.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The credit side consists of:\n1. Cash/Bank account decrease for the payment made by cheque = $4,500,000 (50% of $9,000,000) + $900,000 (10% sales tax on $9,000,000) = $5,400,000 \u2192 Asset decrease (1 line)\n2. Accounts Payable or Note Payable increase for the deferred payment = $4,500,000 (remaining 50% due in 6 months) \u2192 Liability increase (1 line)\n\nTherefore: 1 liability increase line + 0 equity increase + 0 revenue increase + 1 asset decrease + 0 dividend decrease + 0 expense decrease",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction involves three credit lines:\n1. Cash/Bank account decrease of $5,400,000 ($4,500,000 balance + $900,000 sales tax on entire $9,000,000) = asset decrease\n2. Accounts Payable/Note Payable increase of $4,500,000 (50% deferred payment) = liability increase  \n3. Sales Tax Payable increase of $900,000 (10% \u00d7 $9,000,000 total purchase) = liability increase\n\nCredit tuple: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash) = (2,0,0,1,0,0)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of building and land for warehouse use, partial payment with balance due in 6 months",
+        "rationale": "Under IFRS, when acquiring property with land and building components, the purchase price must be allocated based on relative fair values. Total fair value = $8,000,000 (land) + $4,000,000 (building) = $12,000,000. Land allocation: ($8,000,000 / $12,000,000) \u00d7 $9,000,000 = $6,000,000. Building allocation: ($4,000,000 / $12,000,000) \u00d7 $9,000,000 = $3,000,000. Payment structure: 50% ($4,500,000) is due in 6 months (recorded as liability), and 50% ($4,500,000) plus 10% sales tax on that portion ($450,000) was paid by cheque, totaling $4,950,000. The debit tuple (2,0,0,0,0,0) correctly indicates two asset increases (Land and Building). The credit tuple (1,0,0,1,0,0) correctly indicates one liability increase (for deferred payment) and one asset decrease (Cash). Sales tax paid is recoverable as HST/GST Receivable (additional debit line, not counted in tuple).",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 450000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4950000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of building and land for warehouse use, 50% paid by cheque with full sales tax, 50% payable in 6 months",
+        "rationale": "Under IFRS, the $9,000,000 purchase price must be allocated between land and building based on their relative fair values. Land FV = $8,000,000 and Building FV = $4,000,000 (total FV = $12,000,000). Allocation: Land = $9,000,000 \u00d7 (8/12) = $6,000,000; Building = $9,000,000 \u00d7 (4/12) = $3,000,000. Payment structure: 50% ($4,500,000) paid now by cheque, 50% ($4,500,000) due in 6 months (liability). Per fix context, the full 10% sales tax of $900,000 (10% \u00d7 $9,000,000) is paid upfront with the first payment, even though only half the purchase price is paid now. Total cheque payment = $4,500,000 + $900,000 = $5,400,000. HST paid on commercial property is recoverable (HST Receivable). The debit tuple (2,0,0,0,0,0) represents Land and Building as two asset increases. The credit tuple (2,0,0,1,0,0) represents Accounts Payable (liability increase) for the deferred 50%, Cash (asset decrease) for the payment, plus HST Receivable as an additional tax line.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 900000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 5400000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Sales tax calculation error. Transaction states 10% sales tax applies to the balance (50% of purchase price = $4,500,000), so tax should be $4,500,000 \u00d7 10% = $450,000. However, the transaction states \"the balance plus 10% sales tax was paid by cheque\", meaning the 50% payment ($4,500,000) PLUS the tax on the ENTIRE purchase price ($9,000,000 \u00d7 10% = $900,000) was paid. The entry only records $450,000 HST Receivable and Cash payment of $4,950,000, but it should be $900,000 HST Receivable and $5,400,000 Cash payment. The deferred liability should remain $4,500,000 (the other 50% of the purchase price, exclusive of tax as stated)."
+      },
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records the building and land purchase with proper IFRS allocation based on relative fair values (Land: $6M, Building: $3M from $9M total allocated 8:4 ratio). The full 10% sales tax of $900,000 is correctly recorded as HST Receivable (recoverable on commercial property). Payment structure is accurate: $5,400,000 paid by cheque ($4,500,000 + $900,000 tax) and $4,500,000 deferred as Accounts Payable. Entry balances: Debits $9,900,000 = Credits $9,900,000. All accounts appropriate and amounts match transaction text."
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 2,
+            "fix_context": "The transaction states 'the balance plus 10% sales tax was paid by cheque' where 'balance' refers to the 50% payment, but the 10% sales tax applies to the ENTIRE $9,000,000 purchase price, not just the 50% balance. Cash payment should be $4,500,000 + $900,000 = $5,400,000."
+          },
+          {
+            "agent": 5,
+            "fix_context": "HST Receivable should be $900,000 (10% of the full $9,000,000 purchase price), not $450,000. The entire sales tax is paid upfront with the first payment, even though only 50% of the purchase price is paid now."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [
+      "The transaction states 'the balance plus 10% sales tax was paid by cheque' where 'balance' refers to the 50% payment, but the 10% sales tax applies to the ENTIRE $9,000,000 purchase price, not just the 50% balance. Cash payment should be $4,500,000 + $900,000 = $5,400,000."
+    ],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "HST Receivable should be $900,000 (10% of the full $9,000,000 purchase price), not $450,000. The entire sales tax is paid upfront with the first payment, even though only 50% of the purchase price is paid now."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 568,
+        "output_tokens": 228,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 570,
+        "output_tokens": 282,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 806,
+        "output_tokens": 573,
+        "input_token_details": {
+          "cache_read": 2605,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2601,
+        "output_tokens": 265,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 2276,
+        "output_tokens": 248,
+        "input_token_details": {
+          "cache_read": 1609,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 683,
+        "output_tokens": 223,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 895,
+        "output_tokens": 626,
+        "input_token_details": {
+          "cache_read": 2605,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 4151,
+        "output_tokens": 223,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

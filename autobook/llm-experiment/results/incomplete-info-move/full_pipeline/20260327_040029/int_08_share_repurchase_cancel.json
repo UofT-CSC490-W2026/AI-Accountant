@@ -1,0 +1,500 @@
+{
+  "test_case_id": "int_08_share_repurchase_cancel",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Repurchase and cancellation of 10,000 common shares at $6.00 per share",
+    "rationale": "Under IFRS, share repurchase and cancellation reduces equity. The debit removes the par value from Common Shares ($5.00 \u00d7 10,000 = $50,000) and records the excess paid over par ($1.00 \u00d7 10,000 = $10,000) to Retained Earnings. The credit decreases Cash for the total purchase price ($6.00 \u00d7 10,000 = $60,000). Debit tuple (0,0,0,0,1,0) requires 1 equity decrease line, which represents the par value reduction to Common Shares. The additional debit to Retained Earnings (for the premium paid) is also an equity decrease but represents the excess over par. Credit tuple (0,0,0,1,0,0) requires 1 asset decrease line (Cash). No tax applies to share transactions.",
+    "lines": [
+      {
+        "account_name": "Common Shares",
+        "type": "debit",
+        "amount": 50000.0
+      },
+      {
+        "account_name": "Retained Earnings",
+        "type": "debit",
+        "amount": 10000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 60000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0500643,
+  "raw_cost_usd": 0.081441,
+  "total_latency_ms": 34379,
+  "total_input_tokens": 17832,
+  "total_output_tokens": 1863,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 546,
+      "output_tokens": 272,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2670,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063552,
+      "raw_cost_usd": 0.01209,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "disposition of repurchased shares",
+            "resolved": true,
+            "resolution": "Explicitly stated as 'immediately cancelled' \u2014 shares are retired, not held as treasury stock",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "share repurchase price components",
+            "resolved": true,
+            "resolution": "Par value ($5.00) and purchase price ($6.00) both explicitly stated \u2014 $1.00 excess per share is determinable",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method",
+            "resolved": true,
+            "resolution": "'in cash' explicitly stated, though payment method does not affect account classification",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "accounting treatment of excess over par",
+            "resolved": true,
+            "resolution": "Standard convention: $1.00 excess ($6.00 purchase price - $5.00 par) reduces Additional Paid-In Capital (or Retained Earnings if APIC insufficient)",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 521,
+      "output_tokens": 167,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1683,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0044166000000000006,
+      "raw_cost_usd": 0.007554,
+      "output": {
+        "reason": "Share repurchase and cancellation = equity decrease. Under IFRS, when a company repurchases and cancels its own shares, the entire payment reduces equity (typically debiting Share Capital for par value and Additional Paid-in Capital or Retained Earnings for any excess over par). This is 1 debit line reducing equity, not multiple lines. The $60,000 total payment ($6.00 \u00d7 10,000 shares) reduces shareholders' equity.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": "Share repurchase and cancellation = equity decrease. Under IFRS, when a company repurchases and cancels its own shares, the entire payment reduces equity (typically debiting Share Capital for par value and Additional Paid-in Capital or Retained Earnings for any excess over par). This is 1 debit line reducing equity, not multiple lines. The $60,000 total payment ($6.00 \u00d7 10,000 shares) reduces shareholders' equity."
+    },
+    "credit_classifier": {
+      "input_tokens": 519,
+      "output_tokens": 217,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1660,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051543000000000005,
+      "raw_cost_usd": 0.008235,
+      "output": {
+        "reason": "This is a share buyback and cancellation transaction. Credits needed: (1) Cash paid out = $60,000 (10,000 shares \u00d7 $6.00) is an asset decrease. On the equity side, we remove the common share capital at par ($50,000 = 10,000 \u00d7 $5.00) which is an equity decrease achieved by debiting Common Shares, so no credit line for this. The $10,000 excess paid above par ($60,000 - $50,000) represents a reduction in retained earnings/contributed surplus (equity decrease), also achieved by debit, so no credit line. Therefore, only one credit line exists: Cash (asset decrease).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "This is a share buyback and cancellation transaction. Credits needed: (1) Cash paid out = $60,000 (10,000 shares \u00d7 $6.00) is an asset decrease. On the equity side, we remove the common share capital at par ($50,000 = 10,000 \u00d7 $5.00) which is an equity decrease achieved by debiting Common Shares, so no credit line for this. The $10,000 excess paid above par ($60,000 - $50,000) represents a reduction in retained earnings/contributed surplus (equity decrease), also achieved by debit, so no credit line. Therefore, only one credit line exists: Cash (asset decrease)."
+    },
+    "credit_corrector": {
+      "input_tokens": 689,
+      "output_tokens": 266,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2341,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0065526000000000004,
+      "raw_cost_usd": 0.011013,
+      "output": {
+        "reason": "The transaction is a share repurchase and cancellation. The company pays $60,000 cash (10,000 shares \u00d7 $6.00) to buy back its own shares.\n\nCredits required:\n1. Cash decreases by $60,000 (asset decrease) - this is correctly captured in slot d.\n\nDebits required (for context):\nThe debit shows (0,0,0,0,1,0) = equity decrease, which makes sense because:\n- Common shares (par) decreases by $50,000 (10,000 \u00d7 $5.00 par)\n- Additional paid-in capital or retained earnings decreases by $10,000 (the $1.00 per share excess)\nBoth are equity reductions when shares are cancelled.\n\nThe initial credit tuple correctly identifies this as an asset decrease (cash paid out). The credit side is accurately classified - no correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a share repurchase and cancellation. The company pays $60,000 cash (10,000 shares \u00d7 $6.00) to buy back its own shares.\n\nCredits required:\n1. Cash decreases by $60,000 (asset decrease) - this is correctly captured in slot d.\n\nDebits required (for context):\nThe debit shows (0,0,0,0,1,0) = equity decrease, which makes sense because:\n- Common shares (par) decreases by $50,000 (10,000 \u00d7 $5.00 par)\n- Additional paid-in capital or retained earnings decreases by $10,000 (the $1.00 per share excess)\nBoth are equity reductions when shares are cancelled.\n\nThe initial credit tuple correctly identifies this as an asset decrease (cash paid out). The credit side is accurately classified - no correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 689,
+      "output_tokens": 300,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2333,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0070602,
+      "raw_cost_usd": 0.011499,
+      "output": {
+        "reason": "The initial debit tuple is correct. This is a treasury share repurchase and immediate cancellation transaction. Under IFRS, when a company repurchases and cancels its own shares:\n\nDebit side: The company must reduce equity. This involves debiting Common Share capital for the par value ($5.00 \u00d7 10,000 = $50,000) and debiting an equity account (typically Retained Earnings or another reserve) for the excess paid over par ($1.00 \u00d7 10,000 = $10,000). Both are equity decreases, so this transaction requires 1 equity decrease line (slot e).\n\nCredit side: Cash is paid out, which is an asset decrease (slot d in credit tuple).\n\nThe initial debit tuple (0,0,0,0,1,0) showing 1 equity decrease is correct. The credit tuple (0,0,0,1,0,0) showing 1 asset decrease is also consistent. The transaction is properly classified with equity reduction on debit and cash reduction on credit. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": "The initial debit tuple is correct. This is a treasury share repurchase and immediate cancellation transaction. Under IFRS, when a company repurchases and cancels its own shares:\n\nDebit side: The company must reduce equity. This involves debiting Common Share capital for the par value ($5.00 \u00d7 10,000 = $50,000) and debiting an equity account (typically Retained Earnings or another reserve) for the excess paid over par ($1.00 \u00d7 10,000 = $10,000). Both are equity decreases, so this transaction requires 1 equity decrease line (slot e).\n\nCredit side: Cash is paid out, which is an asset decrease (slot d in credit tuple).\n\nThe initial debit tuple (0,0,0,0,1,0) showing 1 equity decrease is correct. The credit tuple (0,0,0,1,0,0) showing 1 asset decrease is also consistent. The transaction is properly classified with equity reduction on debit and cash reduction on credit. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 698,
+      "output_tokens": 416,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3210,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0090876,
+      "raw_cost_usd": 0.01587,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Repurchase and cancellation of 10,000 common shares at $6.00 per share",
+        "rationale": "Under IFRS, share repurchase and cancellation reduces equity. The debit removes the par value from Common Shares ($5.00 \u00d7 10,000 = $50,000) and records the excess paid over par ($1.00 \u00d7 10,000 = $10,000) to Retained Earnings. The credit decreases Cash for the total purchase price ($6.00 \u00d7 10,000 = $60,000). Debit tuple (0,0,0,0,1,0) requires 1 equity decrease line, which represents the par value reduction to Common Shares. The additional debit to Retained Earnings (for the premium paid) is also an equity decrease but represents the excess over par. Credit tuple (0,0,0,1,0,0) requires 1 asset decrease line (Cash). No tax applies to share transactions.",
+        "lines": [
+          {
+            "account_name": "Common Shares",
+            "type": "debit",
+            "amount": 50000.0
+          },
+          {
+            "account_name": "Retained Earnings",
+            "type": "debit",
+            "amount": 10000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 60000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2549,
+      "output_tokens": 225,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3935,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0114378,
+      "raw_cost_usd": 0.01518,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records share repurchase and cancellation under IFRS. Balance verified: debits $60,000 ($50,000 + $10,000) = credits $60,000. Common Shares debited for par value ($5.00 \u00d7 10,000 = $50,000), Retained Earnings debited for excess over par ($1.00 \u00d7 10,000 = $10,000), and Cash credited for total purchase price ($6.00 \u00d7 10,000 = $60,000). All accounts appropriate, amounts match transaction text, and directionality correct (equity decreases via debits, asset decreases via credit). No tax applies to share capital transactions."
+      },
+      "reason": "Entry correctly records share repurchase and cancellation under IFRS. Balance verified: debits $60,000 ($50,000 + $10,000) = credits $60,000. Common Shares debited for par value ($5.00 \u00d7 10,000 = $50,000), Retained Earnings debited for excess over par ($1.00 \u00d7 10,000 = $10,000), and Cash credited for total purchase price ($6.00 \u00d7 10,000 = $60,000). All accounts appropriate, amounts match transaction text, and directionality correct (equity decreases via debits, asset decreases via credit). No tax applies to share capital transactions."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "disposition of repurchased shares",
+            "resolved": true,
+            "resolution": "Explicitly stated as 'immediately cancelled' \u2014 shares are retired, not held as treasury stock",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "share repurchase price components",
+            "resolved": true,
+            "resolution": "Par value ($5.00) and purchase price ($6.00) both explicitly stated \u2014 $1.00 excess per share is determinable",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method",
+            "resolved": true,
+            "resolution": "'in cash' explicitly stated, though payment method does not affect account classification",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "accounting treatment of excess over par",
+            "resolved": true,
+            "resolution": "Standard convention: $1.00 excess ($6.00 purchase price - $5.00 par) reduces Additional Paid-In Capital (or Retained Earnings if APIC insufficient)",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Share repurchase and cancellation = equity decrease. Under IFRS, when a company repurchases and cancels its own shares, the entire payment reduces equity (typically debiting Share Capital for par value and Additional Paid-in Capital or Retained Earnings for any excess over par). This is 1 debit line reducing equity, not multiple lines. The $60,000 total payment ($6.00 \u00d7 10,000 shares) reduces shareholders' equity.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This is a share buyback and cancellation transaction. Credits needed: (1) Cash paid out = $60,000 (10,000 shares \u00d7 $6.00) is an asset decrease. On the equity side, we remove the common share capital at par ($50,000 = 10,000 \u00d7 $5.00) which is an equity decrease achieved by debiting Common Shares, so no credit line for this. The $10,000 excess paid above par ($60,000 - $50,000) represents a reduction in retained earnings/contributed surplus (equity decrease), also achieved by debit, so no credit line. Therefore, only one credit line exists: Cash (asset decrease).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The initial debit tuple is correct. This is a treasury share repurchase and immediate cancellation transaction. Under IFRS, when a company repurchases and cancels its own shares:\n\nDebit side: The company must reduce equity. This involves debiting Common Share capital for the par value ($5.00 \u00d7 10,000 = $50,000) and debiting an equity account (typically Retained Earnings or another reserve) for the excess paid over par ($1.00 \u00d7 10,000 = $10,000). Both are equity decreases, so this transaction requires 1 equity decrease line (slot e).\n\nCredit side: Cash is paid out, which is an asset decrease (slot d in credit tuple).\n\nThe initial debit tuple (0,0,0,0,1,0) showing 1 equity decrease is correct. The credit tuple (0,0,0,1,0,0) showing 1 asset decrease is also consistent. The transaction is properly classified with equity reduction on debit and cash reduction on credit. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction is a share repurchase and cancellation. The company pays $60,000 cash (10,000 shares \u00d7 $6.00) to buy back its own shares.\n\nCredits required:\n1. Cash decreases by $60,000 (asset decrease) - this is correctly captured in slot d.\n\nDebits required (for context):\nThe debit shows (0,0,0,0,1,0) = equity decrease, which makes sense because:\n- Common shares (par) decreases by $50,000 (10,000 \u00d7 $5.00 par)\n- Additional paid-in capital or retained earnings decreases by $10,000 (the $1.00 per share excess)\nBoth are equity reductions when shares are cancelled.\n\nThe initial credit tuple correctly identifies this as an asset decrease (cash paid out). The credit side is accurately classified - no correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Repurchase and cancellation of 10,000 common shares at $6.00 per share",
+        "rationale": "Under IFRS, share repurchase and cancellation reduces equity. The debit removes the par value from Common Shares ($5.00 \u00d7 10,000 = $50,000) and records the excess paid over par ($1.00 \u00d7 10,000 = $10,000) to Retained Earnings. The credit decreases Cash for the total purchase price ($6.00 \u00d7 10,000 = $60,000). Debit tuple (0,0,0,0,1,0) requires 1 equity decrease line, which represents the par value reduction to Common Shares. The additional debit to Retained Earnings (for the premium paid) is also an equity decrease but represents the excess over par. Credit tuple (0,0,0,1,0,0) requires 1 asset decrease line (Cash). No tax applies to share transactions.",
+        "lines": [
+          {
+            "account_name": "Common Shares",
+            "type": "debit",
+            "amount": 50000.0
+          },
+          {
+            "account_name": "Retained Earnings",
+            "type": "debit",
+            "amount": 10000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 60000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records share repurchase and cancellation under IFRS. Balance verified: debits $60,000 ($50,000 + $10,000) = credits $60,000. Common Shares debited for par value ($5.00 \u00d7 10,000 = $50,000), Retained Earnings debited for excess over par ($1.00 \u00d7 10,000 = $10,000), and Cash credited for total purchase price ($6.00 \u00d7 10,000 = $60,000). All accounts appropriate, amounts match transaction text, and directionality correct (equity decreases via debits, asset decreases via credit). No tax applies to share capital transactions."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 546,
+        "output_tokens": 272,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 167,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 519,
+        "output_tokens": 217,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 266,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 300,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 698,
+        "output_tokens": 416,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2549,
+        "output_tokens": 225,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

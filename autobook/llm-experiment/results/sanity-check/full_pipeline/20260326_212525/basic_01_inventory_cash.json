@@ -1,0 +1,410 @@
+{
+  "test_case_id": "basic_01_inventory_cash",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase inventory for cash",
+    "rationale": "Inventory is an asset under IFRS (IAS 2). The purchase increases the Inventory account (asset increase, debit) and decreases Cash (asset decrease, credit). Under the perpetual inventory system, inventory purchases are recorded directly to the Inventory asset account. The debit tuple shows 1 asset increase (slot a=1), requiring one debit line. The credit tuple shows 1 asset decrease (slot d=1), requiring one credit line. Total debits = total credits = $100. No tax information provided, so no tax lines added.",
+    "lines": [
+      {
+        "account_name": "Inventory",
+        "type": "debit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 100.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0583365,
+  "raw_cost_usd": 0.064224,
+  "total_latency_ms": 23225,
+  "total_input_tokens": 16238,
+  "total_output_tokens": 1034,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 508,
+      "output_tokens": 35,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 1812,
+      "total_input_tokens": 2320,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.012921,
+      "raw_cost_usd": 0.007485,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 480,
+      "output_tokens": 99,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1621,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032673000000000003,
+      "raw_cost_usd": 0.006348,
+      "output": {
+        "reason": "Cash is being paid out to purchase inventory. Cash is an asset, and paying cash decreases the cash asset. This is an asset decrease (credit to Cash).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Cash is being paid out to purchase inventory. Cash is an asset, and paying cash decreases the cash asset. This is an asset decrease (credit to Cash)."
+    },
+    "debit_classifier": {
+      "input_tokens": 482,
+      "output_tokens": 99,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1644,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032795999999999997,
+      "raw_cost_usd": 0.006417,
+      "output": {
+        "reason": "Inventory is an asset account. Purchasing inventory increases the inventory asset, which is recorded as a debit to the asset account (1 asset increase line).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Inventory is an asset account. Purchasing inventory increases the inventory asset, which is recorded as a debit to the asset account (1 asset increase line)."
+    },
+    "debit_corrector": {
+      "input_tokens": 650,
+      "output_tokens": 182,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2294,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051732,
+      "raw_cost_usd": 0.009612,
+      "output": {
+        "reason": "The transaction is \"Purchase inventory for $100 cash\". Under IFRS, inventory is an asset. When inventory is purchased for cash, one asset (inventory) increases while another asset (cash) decreases. The debit tuple correctly shows (1,0,0,0,0,0) = one asset increase (inventory). The credit tuple shows (0,0,0,1,0,0) = one asset decrease (cash), which is consistent with the transaction. This is a straightforward asset-for-asset exchange. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is \"Purchase inventory for $100 cash\". Under IFRS, inventory is an asset. When inventory is purchased for cash, one asset (inventory) increases while another asset (cash) decreases. The debit tuple correctly shows (1,0,0,0,0,0) = one asset increase (inventory). The credit tuple shows (0,0,0,1,0,0) = one asset decrease (cash), which is consistent with the transaction. This is a straightforward asset-for-asset exchange. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 650,
+      "output_tokens": 186,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2302,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0052356,
+      "raw_cost_usd": 0.009696,
+      "output": {
+        "reason": "The transaction \"Purchase inventory for $100 cash\" involves two assets: inventory (increasing) and cash (decreasing). The debit side shows (1,0,0,0,0,0) = one asset increase (inventory), which is correct. The credit side should show the asset decrease (cash). The initial credit tuple (0,0,0,1,0,0) correctly represents one asset decrease (slot d). This is the proper treatment under IFRS for a cash purchase of inventory - it's an exchange of one asset for another. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Purchase inventory for $100 cash\" involves two assets: inventory (increasing) and cash (decreasing). The debit side shows (1,0,0,0,0,0) = one asset increase (inventory), which is correct. The credit side should show the asset decrease (cash). The initial credit tuple (0,0,0,1,0,0) correctly represents one asset decrease (slot d). This is the proper treatment under IFRS for a cash purchase of inventory - it's an exchange of one asset for another. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 659,
+      "output_tokens": 282,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 2512,
+      "total_input_tokens": 3171,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.021279,
+      "raw_cost_usd": 0.013743,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase inventory for cash",
+        "rationale": "Inventory is an asset under IFRS (IAS 2). The purchase increases the Inventory account (asset increase, debit) and decreases Cash (asset decrease, credit). Under the perpetual inventory system, inventory purchases are recorded directly to the Inventory asset account. The debit tuple shows 1 asset increase (slot a=1), requiring one debit line. The credit tuple shows 1 asset decrease (slot d=1), requiring one credit line. Total debits = total credits = $100. No tax information provided, so no tax lines added.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1500,
+      "output_tokens": 151,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2886,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0071808,
+      "raw_cost_usd": 0.010923,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records cash purchase of inventory. Debit to Inventory (asset increase) $100 and credit to Cash (asset decrease) $100. Entry balances. Under IFRS (IAS 2), inventory is recognized as an asset when purchased. No tax lines present, consistent with transaction description providing no tax information. All accounts, amounts, and directionality are correct."
+      },
+      "reason": "Entry correctly records cash purchase of inventory. Debit to Inventory (asset increase) $100 and credit to Cash (asset decrease) $100. Entry balances. Under IFRS (IAS 2), inventory is recognized as an asset when purchased. No tax lines present, consistent with transaction description providing no tax information. All accounts, amounts, and directionality are correct."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Inventory is an asset account. Purchasing inventory increases the inventory asset, which is recorded as a debit to the asset account (1 asset increase line).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Cash is being paid out to purchase inventory. Cash is an asset, and paying cash decreases the cash asset. This is an asset decrease (credit to Cash).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is \"Purchase inventory for $100 cash\". Under IFRS, inventory is an asset. When inventory is purchased for cash, one asset (inventory) increases while another asset (cash) decreases. The debit tuple correctly shows (1,0,0,0,0,0) = one asset increase (inventory). The credit tuple shows (0,0,0,1,0,0) = one asset decrease (cash), which is consistent with the transaction. This is a straightforward asset-for-asset exchange. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction \"Purchase inventory for $100 cash\" involves two assets: inventory (increasing) and cash (decreasing). The debit side shows (1,0,0,0,0,0) = one asset increase (inventory), which is correct. The credit side should show the asset decrease (cash). The initial credit tuple (0,0,0,1,0,0) correctly represents one asset decrease (slot d). This is the proper treatment under IFRS for a cash purchase of inventory - it's an exchange of one asset for another. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase inventory for cash",
+        "rationale": "Inventory is an asset under IFRS (IAS 2). The purchase increases the Inventory account (asset increase, debit) and decreases Cash (asset decrease, credit). Under the perpetual inventory system, inventory purchases are recorded directly to the Inventory asset account. The debit tuple shows 1 asset increase (slot a=1), requiring one debit line. The credit tuple shows 1 asset decrease (slot d=1), requiring one credit line. Total debits = total credits = $100. No tax information provided, so no tax lines added.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records cash purchase of inventory. Debit to Inventory (asset increase) $100 and credit to Cash (asset decrease) $100. Entry balances. Under IFRS (IAS 2), inventory is recognized as an asset when purchased. No tax lines present, consistent with transaction description providing no tax information. All accounts, amounts, and directionality are correct."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 0,
+          "cache_creation": 1812
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 480,
+        "output_tokens": 99,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 482,
+        "output_tokens": 99,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 650,
+        "output_tokens": 182,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 650,
+        "output_tokens": 186,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 659,
+        "output_tokens": 282,
+        "input_token_details": {
+          "cache_read": 0,
+          "cache_creation": 2512
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1500,
+        "output_tokens": 151,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

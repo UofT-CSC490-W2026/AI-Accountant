@@ -1,0 +1,467 @@
+{
+  "test_case_id": "int_10_prepayment",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Prepayment to supplier for raw materials in anticipation of price surges and supply shortages",
+    "rationale": "A prepayment for raw materials not yet received is recorded as a current asset (Prepaid Inventory or Advances to Suppliers). This represents the company's right to receive goods in the future. When the materials are eventually received, this prepaid asset will be converted to inventory. Cash decreases as payment is made. No tax lines are required as this is a prepayment transaction (tax will be recognized when materials are received and invoiced).",
+    "lines": [
+      {
+        "account_name": "Prepaid Expenses",
+        "type": "debit",
+        "amount": 1000000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 1000000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0405303,
+  "raw_cost_usd": 0.071907,
+  "total_latency_ms": 27910,
+  "total_input_tokens": 17129,
+  "total_output_tokens": 1368,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 535,
+      "output_tokens": 275,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2659,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063672,
+      "raw_cost_usd": 0.012102,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "prepayment classification and treatment",
+            "resolved": true,
+            "resolution": "The term 'prepayment' combined with 'in anticipation of' clearly indicates payment made before delivery. Standard convention: prepayments for inventory create a current asset (Prepaid Inventory / Advance to Supplier), not an expense or immediate inventory recognition. This will be converted to Inventory upon delivery.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "specific supplier identity",
+            "resolved": true,
+            "resolution": "Supplier identity does not affect the journal entry structure. The entry debits Prepaid Inventory/Advance to Supplier and credits Cash regardless of which supplier received the payment.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "reason for prepayment (price surges, supply shortages)",
+            "resolved": true,
+            "resolution": "Business rationale provides context but does not change the accounting treatment. All prepayments for raw materials follow the same convention: recognize as asset, regardless of strategic motivation.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 508,
+      "output_tokens": 110,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1649,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035163,
+      "raw_cost_usd": 0.006597,
+      "output": {
+        "reason": "Cash paid out = asset decrease. The $1,000,000 cash leaving the business is credited (asset decrease). The debit side would record the prepaid expense/asset, but we only classify credits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Cash paid out = asset decrease. The $1,000,000 cash leaving the business is credited (asset decrease). The debit side would record the prepaid expense/asset, but we only classify credits here."
+    },
+    "debit_classifier": {
+      "input_tokens": 510,
+      "output_tokens": 142,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1672,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0040086,
+      "raw_cost_usd": 0.007146,
+      "output": {
+        "reason": "Prepayment for raw materials = asset increase (Prepaid Expense or Inventory Advance). The company is exchanging one asset (cash) for another asset (prepaid/advance right to receive materials). This is not yet an expense because the materials have not been received or consumed; it's an asset that will be converted to inventory or expense in the future.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Prepayment for raw materials = asset increase (Prepaid Expense or Inventory Advance). The company is exchanging one asset (cash) for another asset (prepaid/advance right to receive materials). This is not yet an expense because the materials have not been received or consumed; it's an asset that will be converted to inventory or expense in the future."
+    },
+    "debit_corrector": {
+      "input_tokens": 678,
+      "output_tokens": 168,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2322,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0050472,
+      "raw_cost_usd": 0.009486,
+      "output": {
+        "reason": "The transaction describes a prepayment for raw materials. This is a prepaid asset (prepaid inventory/supplies), not an immediate expense. Under IFRS, when cash is paid in advance for goods not yet received, the company exchanges one asset (cash) for another asset (prepaid/advance to supplier). The initial debit tuple correctly classifies this as an asset increase (slot a=1). The credit tuple showing asset decrease (cash) is consistent with this treatment. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a prepayment for raw materials. This is a prepaid asset (prepaid inventory/supplies), not an immediate expense. Under IFRS, when cash is paid in advance for goods not yet received, the company exchanges one asset (cash) for another asset (prepaid/advance to supplier). The initial debit tuple correctly classifies this as an asset increase (slot a=1). The credit tuple showing asset decrease (cash) is consistent with this treatment. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 678,
+      "output_tokens": 221,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2330,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058446,
+      "raw_cost_usd": 0.010305,
+      "output": {
+        "reason": "The transaction describes Target paying $1,000,000 cash as a prepayment for raw materials. This is an asset exchange: Cash (asset) decreases by $1,000,000, and Prepaid Materials/Inventory (asset) increases by $1,000,000. The credit side correctly shows (0,0,0,1,0,0) = one asset decrease line (the cash payment). The debit side shows (1,0,0,0,0,0) = one asset increase line (the prepaid materials). This is consistent and correct under IFRS - a prepayment for materials creates a prepaid asset, not an expense until the materials are received and used. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes Target paying $1,000,000 cash as a prepayment for raw materials. This is an asset exchange: Cash (asset) decreases by $1,000,000, and Prepaid Materials/Inventory (asset) increases by $1,000,000. The credit side correctly shows (0,0,0,1,0,0) = one asset decrease line (the cash payment). The debit side shows (1,0,0,0,0,0) = one asset increase line (the prepaid materials). This is consistent and correct under IFRS - a prepayment for materials creates a prepaid asset, not an expense until the materials are received and used. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 687,
+      "output_tokens": 278,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3199,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0069846000000000005,
+      "raw_cost_usd": 0.013767,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Prepayment to supplier for raw materials in anticipation of price surges and supply shortages",
+        "rationale": "A prepayment for raw materials not yet received is recorded as a current asset (Prepaid Inventory or Advances to Suppliers). This represents the company's right to receive goods in the future. When the materials are eventually received, this prepaid asset will be converted to inventory. Cash decreases as payment is made. No tax lines are required as this is a prepayment transaction (tax will be recognized when materials are received and invoiced).",
+        "lines": [
+          {
+            "account_name": "Prepaid Expenses",
+            "type": "debit",
+            "amount": 1000000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 1000000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1912,
+      "output_tokens": 174,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3298,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008761799999999998,
+      "raw_cost_usd": 0.012504,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records prepayment for raw materials. Debit to Prepaid Expenses (asset increase) of $1,000,000 and credit to Cash (asset decrease) of $1,000,000 properly reflects the asset exchange. Balance verified (debits = credits = $1,000,000). No tax lines required for prepayment transactions as tax is recognized upon receipt and invoicing. All amounts match transaction text. Treatment is consistent with IFRS for advance payments."
+      },
+      "reason": "Entry correctly records prepayment for raw materials. Debit to Prepaid Expenses (asset increase) of $1,000,000 and credit to Cash (asset decrease) of $1,000,000 properly reflects the asset exchange. Balance verified (debits = credits = $1,000,000). No tax lines required for prepayment transactions as tax is recognized upon receipt and invoicing. All amounts match transaction text. Treatment is consistent with IFRS for advance payments."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "prepayment classification and treatment",
+            "resolved": true,
+            "resolution": "The term 'prepayment' combined with 'in anticipation of' clearly indicates payment made before delivery. Standard convention: prepayments for inventory create a current asset (Prepaid Inventory / Advance to Supplier), not an expense or immediate inventory recognition. This will be converted to Inventory upon delivery.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "specific supplier identity",
+            "resolved": true,
+            "resolution": "Supplier identity does not affect the journal entry structure. The entry debits Prepaid Inventory/Advance to Supplier and credits Cash regardless of which supplier received the payment.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "reason for prepayment (price surges, supply shortages)",
+            "resolved": true,
+            "resolution": "Business rationale provides context but does not change the accounting treatment. All prepayments for raw materials follow the same convention: recognize as asset, regardless of strategic motivation.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Prepayment for raw materials = asset increase (Prepaid Expense or Inventory Advance). The company is exchanging one asset (cash) for another asset (prepaid/advance right to receive materials). This is not yet an expense because the materials have not been received or consumed; it's an asset that will be converted to inventory or expense in the future.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Cash paid out = asset decrease. The $1,000,000 cash leaving the business is credited (asset decrease). The debit side would record the prepaid expense/asset, but we only classify credits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes a prepayment for raw materials. This is a prepaid asset (prepaid inventory/supplies), not an immediate expense. Under IFRS, when cash is paid in advance for goods not yet received, the company exchanges one asset (cash) for another asset (prepaid/advance to supplier). The initial debit tuple correctly classifies this as an asset increase (slot a=1). The credit tuple showing asset decrease (cash) is consistent with this treatment. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes Target paying $1,000,000 cash as a prepayment for raw materials. This is an asset exchange: Cash (asset) decreases by $1,000,000, and Prepaid Materials/Inventory (asset) increases by $1,000,000. The credit side correctly shows (0,0,0,1,0,0) = one asset decrease line (the cash payment). The debit side shows (1,0,0,0,0,0) = one asset increase line (the prepaid materials). This is consistent and correct under IFRS - a prepayment for materials creates a prepaid asset, not an expense until the materials are received and used. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Prepayment to supplier for raw materials in anticipation of price surges and supply shortages",
+        "rationale": "A prepayment for raw materials not yet received is recorded as a current asset (Prepaid Inventory or Advances to Suppliers). This represents the company's right to receive goods in the future. When the materials are eventually received, this prepaid asset will be converted to inventory. Cash decreases as payment is made. No tax lines are required as this is a prepayment transaction (tax will be recognized when materials are received and invoiced).",
+        "lines": [
+          {
+            "account_name": "Prepaid Expenses",
+            "type": "debit",
+            "amount": 1000000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 1000000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records prepayment for raw materials. Debit to Prepaid Expenses (asset increase) of $1,000,000 and credit to Cash (asset decrease) of $1,000,000 properly reflects the asset exchange. Balance verified (debits = credits = $1,000,000). No tax lines required for prepayment transactions as tax is recognized upon receipt and invoicing. All amounts match transaction text. Treatment is consistent with IFRS for advance payments."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 535,
+        "output_tokens": 275,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 110,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 510,
+        "output_tokens": 142,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 678,
+        "output_tokens": 168,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 678,
+        "output_tokens": 221,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 687,
+        "output_tokens": 278,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1912,
+        "output_tokens": 174,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

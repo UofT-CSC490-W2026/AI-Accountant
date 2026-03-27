@@ -1,0 +1,402 @@
+{
+  "test_case_id": "int_11_land_instalment_discount",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-01-01",
+    "description": "Acquisition of land with building for factory construction, financed through 6 annual instalments",
+    "rationale": "Under IFRS, when land and building are acquired together with the building to be demolished for new construction, the entire purchase price (including any demolition costs) is capitalized to land, as the building has no future service potential. The payment terms require present value calculation: 6 payments of $10M at 6% = $10M \u00d7 4.9173 (PV annuity factor) = $49,173,000. This represents the initial cost of the land asset. The difference between face value ($60M) and present value ($49.173M) will be recognized as interest expense over the payment period. The liability is recorded at present value per IFRS 9. Debit tuple (1,0,0,0,0,0) indicates one asset increase (Land). Credit tuple (1,0,0,0,0,0) indicates one liability increase (Note Payable or Long-term Debt). No tax applies to land purchases in Canada. The demolition is mentioned as immediate, but no separate demolition costs are stated in the transaction, suggesting they are either included in the purchase price, immaterial, or will be recorded separately when incurred. For this initial acquisition entry, we record only the purchase transaction at present value.",
+    "lines": [
+      {
+        "account_name": "Land",
+        "type": "debit",
+        "amount": 49173000.0
+      },
+      {
+        "account_name": "Note Payable",
+        "type": "credit",
+        "amount": 49173000.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0345657,
+  "raw_cost_usd": 0.053733,
+  "total_latency_ms": 33483,
+  "total_input_tokens": 10456,
+  "total_output_tokens": 1491,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 589,
+      "output_tokens": 679,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2722,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0125919,
+      "raw_cost_usd": 0.018351,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "allocation of purchase price between land and building",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Allocate based on relative fair values of land and building",
+              "Allocate entire amount to land since building has no future use",
+              "Use appraisal or assessment values to split the $60,000,000"
+            ],
+            "clarification_question": "What were the separate fair values of the land and the existing building at acquisition, or was the building considered to have no value given the immediate demolition plan?",
+            "why_entry_differs": "If the building has allocable value, its cost plus demolition costs capitalize to land. If building value is zero, only land is recorded at the allocated amount. The split affects the initial recognition of the land asset.",
+            "why_not_resolved": "The transaction states a combined purchase price but doesn't specify how much of the $60,000,000 relates to land versus building. While the building will be demolished, accounting standards require allocation based on fair values at acquisition, not intended use. No convention provides a default split."
+          },
+          {
+            "aspect": "treatment of demolition costs",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Demolition costs will be capitalized to land cost",
+              "Demolition costs will be expensed immediately",
+              "No demolition costs incurred (included in purchase price or borne by seller)"
+            ],
+            "clarification_question": "What are the demolition costs for the existing building, and who is responsible for paying them?",
+            "why_entry_differs": "If Ford incurs demolition costs, they are typically capitalized to land (increasing the land asset). If no costs are incurred or they're immaterial, only the allocated purchase price is recorded. The presence and amount of demolition costs changes the total land cost.",
+            "why_not_resolved": "The transaction mentions immediate demolition but doesn't state whether demolition costs exist, their amount, or who pays them. This is a factual gap that affects the final land valuation."
+          },
+          {
+            "aspect": "present value calculation for deferred payment",
+            "resolved": true,
+            "resolution": "The transaction provides all necessary information: 6 annual payments of $10,000,000 each, starting at year-end, with a 6% market interest rate. The present value of an ordinary annuity can be calculated using these stated facts.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether interest will be capitalized during construction",
+            "resolved": true,
+            "resolution": "This is an accounting treatment decision for the entry builder, not a factual ambiguity. The transaction provides the facts (construction purpose, financing terms); how to treat borrowing costs is a policy choice.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 564,
+      "output_tokens": 193,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1726,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049356,
+      "raw_cost_usd": 0.008073,
+      "output": {
+        "reason": "Under IFRS, Ford is acquiring land (a non-current asset) for the purpose of constructing a new factory. The debit side records the acquisition of the land asset at its present value. The existing building to be demolished is part of the land acquisition cost (demolition costs are capitalized to land under IFRS as they are necessary to prepare the asset for its intended use). This represents 1 asset increase (Land or Property under construction). The payment structure (instalments) and interest rate affect the credit side (liability recognition at present value), but the debit side simply records the single asset acquisition.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IFRS, Ford is acquiring land (a non-current asset) for the purpose of constructing a new factory. The debit side records the acquisition of the land asset at its present value. The existing building to be demolished is part of the land acquisition cost (demolition costs are capitalized to land under IFRS as they are necessary to prepare the asset for its intended use). This represents 1 asset increase (Land or Property under construction). The payment structure (instalments) and interest rate affect the credit side (liability recognition at present value), but the debit side simply records the single asset acquisition."
+    },
+    "credit_classifier": {
+      "input_tokens": 562,
+      "output_tokens": 149,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1703,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0042633,
+      "raw_cost_usd": 0.007344,
+      "output": {
+        "reason": "Ford acquires land for $60,000,000 to be paid in 6 annual instalments. Under IFRS, this creates a liability (payable/note payable) for the present value of the future payment obligation. The credit side records the liability increase for the amount owed to the seller. This is a single liability account being credited, representing the financing arrangement for the land acquisition.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Ford acquires land for $60,000,000 to be paid in 6 annual instalments. Under IFRS, this creates a liability (payable/note payable) for the present value of the future payment obligation. The credit side records the liability increase for the amount owed to the seller. This is a single liability account being credited, representing the financing arrangement for the land acquisition."
+    },
+    "entry_builder": {
+      "input_tokens": 1642,
+      "output_tokens": 470,
+      "cache_read_tokens": 2663,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4305,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0127749,
+      "raw_cost_usd": 0.019965,
+      "output": {
+        "date": "2026-01-01",
+        "description": "Acquisition of land with building for factory construction, financed through 6 annual instalments",
+        "rationale": "Under IFRS, when land and building are acquired together with the building to be demolished for new construction, the entire purchase price (including any demolition costs) is capitalized to land, as the building has no future service potential. The payment terms require present value calculation: 6 payments of $10M at 6% = $10M \u00d7 4.9173 (PV annuity factor) = $49,173,000. This represents the initial cost of the land asset. The difference between face value ($60M) and present value ($49.173M) will be recognized as interest expense over the payment period. The liability is recorded at present value per IFRS 9. Debit tuple (1,0,0,0,0,0) indicates one asset increase (Land). Credit tuple (1,0,0,0,0,0) indicates one liability increase (Note Payable or Long-term Debt). No tax applies to land purchases in Canada. The demolition is mentioned as immediate, but no separate demolition costs are stated in the transaction, suggesting they are either included in the purchase price, immaterial, or will be recorded separately when incurred. For this initial acquisition entry, we record only the purchase transaction at present value.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 49173000.0
+          },
+          {
+            "account_name": "Note Payable",
+            "type": "credit",
+            "amount": 49173000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of purchase price between land and building",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Allocate based on relative fair values of land and building",
+              "Allocate entire amount to land since building has no future use",
+              "Use appraisal or assessment values to split the $60,000,000"
+            ],
+            "clarification_question": "What were the separate fair values of the land and the existing building at acquisition, or was the building considered to have no value given the immediate demolition plan?",
+            "why_entry_differs": "If the building has allocable value, its cost plus demolition costs capitalize to land. If building value is zero, only land is recorded at the allocated amount. The split affects the initial recognition of the land asset.",
+            "why_not_resolved": "The transaction states a combined purchase price but doesn't specify how much of the $60,000,000 relates to land versus building. While the building will be demolished, accounting standards require allocation based on fair values at acquisition, not intended use. No convention provides a default split."
+          },
+          {
+            "aspect": "treatment of demolition costs",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Demolition costs will be capitalized to land cost",
+              "Demolition costs will be expensed immediately",
+              "No demolition costs incurred (included in purchase price or borne by seller)"
+            ],
+            "clarification_question": "What are the demolition costs for the existing building, and who is responsible for paying them?",
+            "why_entry_differs": "If Ford incurs demolition costs, they are typically capitalized to land (increasing the land asset). If no costs are incurred or they're immaterial, only the allocated purchase price is recorded. The presence and amount of demolition costs changes the total land cost.",
+            "why_not_resolved": "The transaction mentions immediate demolition but doesn't state whether demolition costs exist, their amount, or who pays them. This is a factual gap that affects the final land valuation."
+          },
+          {
+            "aspect": "present value calculation for deferred payment",
+            "resolved": true,
+            "resolution": "The transaction provides all necessary information: 6 annual payments of $10,000,000 each, starting at year-end, with a 6% market interest rate. The present value of an ordinary annuity can be calculated using these stated facts.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether interest will be capitalized during construction",
+            "resolved": true,
+            "resolution": "This is an accounting treatment decision for the entry builder, not a factual ambiguity. The transaction provides the facts (construction purpose, financing terms); how to treat borrowing costs is a policy choice.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Under IFRS, Ford is acquiring land (a non-current asset) for the purpose of constructing a new factory. The debit side records the acquisition of the land asset at its present value. The existing building to be demolished is part of the land acquisition cost (demolition costs are capitalized to land under IFRS as they are necessary to prepare the asset for its intended use). This represents 1 asset increase (Land or Property under construction). The payment structure (instalments) and interest rate affect the credit side (liability recognition at present value), but the debit side simply records the single asset acquisition.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Ford acquires land for $60,000,000 to be paid in 6 annual instalments. Under IFRS, this creates a liability (payable/note payable) for the present value of the future payment obligation. The credit side records the liability increase for the amount owed to the seller. This is a single liability account being credited, representing the financing arrangement for the land acquisition.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Under IFRS, Ford is acquiring land (a non-current asset) for the purpose of constructing a new factory. The debit side records the acquisition of the land asset at its present value. The existing building to be demolished is part of the land acquisition cost (demolition costs are capitalized to land under IFRS as they are necessary to prepare the asset for its intended use). This represents 1 asset increase (Land or Property under construction). The payment structure (instalments) and interest rate affect the credit side (liability recognition at present value), but the debit side simply records the single asset acquisition.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Ford acquires land for $60,000,000 to be paid in 6 annual instalments. Under IFRS, this creates a liability (payable/note payable) for the present value of the future payment obligation. The credit side records the liability increase for the amount owed to the seller. This is a single liability account being credited, representing the financing arrangement for the land acquisition.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-01-01",
+        "description": "Acquisition of land with building for factory construction, financed through 6 annual instalments",
+        "rationale": "Under IFRS, when land and building are acquired together with the building to be demolished for new construction, the entire purchase price (including any demolition costs) is capitalized to land, as the building has no future service potential. The payment terms require present value calculation: 6 payments of $10M at 6% = $10M \u00d7 4.9173 (PV annuity factor) = $49,173,000. This represents the initial cost of the land asset. The difference between face value ($60M) and present value ($49.173M) will be recognized as interest expense over the payment period. The liability is recorded at present value per IFRS 9. Debit tuple (1,0,0,0,0,0) indicates one asset increase (Land). Credit tuple (1,0,0,0,0,0) indicates one liability increase (Note Payable or Long-term Debt). No tax applies to land purchases in Canada. The demolition is mentioned as immediate, but no separate demolition costs are stated in the transaction, suggesting they are either included in the purchase price, immaterial, or will be recorded separately when incurred. For this initial acquisition entry, we record only the purchase transaction at present value.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 49173000.0
+          },
+          {
+            "account_name": "Note Payable",
+            "type": "credit",
+            "amount": 49173000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 589,
+        "output_tokens": 679,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 564,
+        "output_tokens": 193,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 562,
+        "output_tokens": 149,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1642,
+        "output_tokens": 470,
+        "input_token_details": {
+          "cache_read": 2663,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

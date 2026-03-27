@@ -1,0 +1,449 @@
+{
+  "test_case_id": "basic_14_casualty_loss",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Inventory destroyed by typhoon, write-off of uninsured loss",
+    "rationale": "Inventory loss from natural disaster is recognized as an expense (typically \"Loss on Inventory Destruction\" or similar casualty loss account). The credit reduces the Inventory asset account by the carrying amount of $2,000. The disambiguator correctly identified this as an uninsured loss based on the terminology used. No tax implications for asset write-offs due to casualty losses.",
+    "lines": [
+      {
+        "account_name": "Loss on Inventory Destruction",
+        "type": "debit",
+        "amount": 2000.0
+      },
+      {
+        "account_name": "Inventory",
+        "type": "credit",
+        "amount": 2000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0380235,
+  "raw_cost_usd": 0.069843,
+  "total_latency_ms": 23348,
+  "total_input_tokens": 17231,
+  "total_output_tokens": 1210,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 512,
+      "output_tokens": 142,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2645,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0043059,
+      "raw_cost_usd": 0.010065,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "insurance coverage",
+            "resolved": true,
+            "resolution": "'loss' terminology implies uninsured \u2014 insured events are described as insurance claims or recoveries, not losses",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "asset disposal details",
+            "resolved": true,
+            "resolution": "Natural disaster destruction defaults to complete write-off at book value \u2014 the $2000 represents the inventory's carrying amount",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 487,
+      "output_tokens": 96,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1649,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032496,
+      "raw_cost_usd": 0.006387,
+      "output": {
+        "reason": "Inventory destroyed by typhoon = casualty loss, which is an expense increase (loss from abnormal event). The debit records the loss expense.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Inventory destroyed by typhoon = casualty loss, which is an expense increase (loss from abnormal event). The debit records the loss expense."
+    },
+    "credit_classifier": {
+      "input_tokens": 485,
+      "output_tokens": 109,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1626,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034323,
+      "raw_cost_usd": 0.006513,
+      "output": {
+        "reason": "Inventory destroyed by typhoon represents a casualty loss. The inventory (an asset) is being written off/removed from the books. Removing inventory = asset decrease, which requires a credit to the inventory account.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Inventory destroyed by typhoon represents a casualty loss. The inventory (an asset) is being written off/removed from the books. Removing inventory = asset decrease, which requires a credit to the inventory account."
+    },
+    "debit_corrector": {
+      "input_tokens": 655,
+      "output_tokens": 224,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2299,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058182,
+      "raw_cost_usd": 0.010257,
+      "output": {
+        "reason": "The transaction describes inventory destroyed by typhoon, resulting in a $2,000 loss. Under IFRS, when inventory (an asset) is destroyed, the proper accounting treatment is to remove the inventory from the books and recognize a loss. The loss is recorded as an expense (often \"Loss on inventory\" or similar). The debit side should record an expense increase (1 line), and the credit side should record an asset decrease (inventory reduction). The initial debit tuple correctly shows (0,0,1,0,0,0) = one expense increase. The credit tuple shows (0,0,0,1,0,0) = one asset decrease, which is consistent with reducing inventory. Both sides tell a consistent story. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes inventory destroyed by typhoon, resulting in a $2,000 loss. Under IFRS, when inventory (an asset) is destroyed, the proper accounting treatment is to remove the inventory from the books and recognize a loss. The loss is recorded as an expense (often \"Loss on inventory\" or similar). The debit side should record an expense increase (1 line), and the credit side should record an asset decrease (inventory reduction). The initial debit tuple correctly shows (0,0,1,0,0,0) = one expense increase. The credit tuple shows (0,0,0,1,0,0) = one asset decrease, which is consistent with reducing inventory. Both sides tell a consistent story. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 655,
+      "output_tokens": 211,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2307,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0056256000000000006,
+      "raw_cost_usd": 0.010086,
+      "output": {
+        "reason": "The transaction describes inventory destroyed by a typhoon, representing a $2,000 loss. Under IFRS, this is recorded as:\n- Debit: Loss expense (expense increase) - captured correctly in debit tuple slot c\n- Credit: Inventory (asset decrease) - captured correctly in initial credit tuple slot d\n\nThe initial credit tuple (0,0,0,1,0,0) correctly shows one asset decrease line, which represents the inventory write-off. The debit and credit sides tell a consistent story: the business incurred an expense (loss) while simultaneously reducing inventory. This is the proper accounting treatment for casualty losses under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes inventory destroyed by a typhoon, representing a $2,000 loss. Under IFRS, this is recorded as:\n- Debit: Loss expense (expense increase) - captured correctly in debit tuple slot c\n- Credit: Inventory (asset decrease) - captured correctly in initial credit tuple slot d\n\nThe initial credit tuple (0,0,0,1,0,0) correctly shows one asset decrease line, which represents the inventory write-off. The debit and credit sides tell a consistent story: the business incurred an expense (loss) while simultaneously reducing inventory. This is the proper accounting treatment for casualty losses under IFRS. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 959,
+      "output_tokens": 258,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3626,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0075471,
+      "raw_cost_usd": 0.014748,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Inventory destroyed by typhoon, write-off of uninsured loss",
+        "rationale": "Inventory loss from natural disaster is recognized as an expense (typically \"Loss on Inventory Destruction\" or similar casualty loss account). The credit reduces the Inventory asset account by the carrying amount of $2,000. The disambiguator correctly identified this as an uninsured loss based on the terminology used. No tax implications for asset write-offs due to casualty losses.",
+        "lines": [
+          {
+            "account_name": "Loss on Inventory Destruction",
+            "type": "debit",
+            "amount": 2000.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 2000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1693,
+      "output_tokens": 170,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3079,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0080448,
+      "raw_cost_usd": 0.011787,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records inventory casualty loss. Debit to Loss on Inventory Destruction (expense increase) of $2,000 and credit to Inventory (asset decrease) of $2,000. Entry balances ($2,000 = $2,000). Amount matches transaction text. Treatment aligns with IFRS for asset write-offs due to casualty losses. No tax implications for uninsured casualty losses. All necessary lines present, no missing components."
+      },
+      "reason": "Entry correctly records inventory casualty loss. Debit to Loss on Inventory Destruction (expense increase) of $2,000 and credit to Inventory (asset decrease) of $2,000. Entry balances ($2,000 = $2,000). Amount matches transaction text. Treatment aligns with IFRS for asset write-offs due to casualty losses. No tax implications for uninsured casualty losses. All necessary lines present, no missing components."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "insurance coverage",
+            "resolved": true,
+            "resolution": "'loss' terminology implies uninsured \u2014 insured events are described as insurance claims or recoveries, not losses",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "asset disposal details",
+            "resolved": true,
+            "resolution": "Natural disaster destruction defaults to complete write-off at book value \u2014 the $2000 represents the inventory's carrying amount",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Inventory destroyed by typhoon = casualty loss, which is an expense increase (loss from abnormal event). The debit records the loss expense.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Inventory destroyed by typhoon represents a casualty loss. The inventory (an asset) is being written off/removed from the books. Removing inventory = asset decrease, which requires a credit to the inventory account.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes inventory destroyed by typhoon, resulting in a $2,000 loss. Under IFRS, when inventory (an asset) is destroyed, the proper accounting treatment is to remove the inventory from the books and recognize a loss. The loss is recorded as an expense (often \"Loss on inventory\" or similar). The debit side should record an expense increase (1 line), and the credit side should record an asset decrease (inventory reduction). The initial debit tuple correctly shows (0,0,1,0,0,0) = one expense increase. The credit tuple shows (0,0,0,1,0,0) = one asset decrease, which is consistent with reducing inventory. Both sides tell a consistent story. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes inventory destroyed by a typhoon, representing a $2,000 loss. Under IFRS, this is recorded as:\n- Debit: Loss expense (expense increase) - captured correctly in debit tuple slot c\n- Credit: Inventory (asset decrease) - captured correctly in initial credit tuple slot d\n\nThe initial credit tuple (0,0,0,1,0,0) correctly shows one asset decrease line, which represents the inventory write-off. The debit and credit sides tell a consistent story: the business incurred an expense (loss) while simultaneously reducing inventory. This is the proper accounting treatment for casualty losses under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Inventory destroyed by typhoon, write-off of uninsured loss",
+        "rationale": "Inventory loss from natural disaster is recognized as an expense (typically \"Loss on Inventory Destruction\" or similar casualty loss account). The credit reduces the Inventory asset account by the carrying amount of $2,000. The disambiguator correctly identified this as an uninsured loss based on the terminology used. No tax implications for asset write-offs due to casualty losses.",
+        "lines": [
+          {
+            "account_name": "Loss on Inventory Destruction",
+            "type": "debit",
+            "amount": 2000.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 2000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records inventory casualty loss. Debit to Loss on Inventory Destruction (expense increase) of $2,000 and credit to Inventory (asset decrease) of $2,000. Entry balances ($2,000 = $2,000). Amount matches transaction text. Treatment aligns with IFRS for asset write-offs due to casualty losses. No tax implications for uninsured casualty losses. All necessary lines present, no missing components."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 512,
+        "output_tokens": 142,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 487,
+        "output_tokens": 96,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 485,
+        "output_tokens": 109,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 655,
+        "output_tokens": 224,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 655,
+        "output_tokens": 211,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 959,
+        "output_tokens": 258,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1693,
+        "output_tokens": 170,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

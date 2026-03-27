@@ -1,0 +1,449 @@
+{
+  "test_case_id": "basic_12_pay_salaries",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Payment of employee salaries",
+    "rationale": "Salaries are an operating expense (debit to Salaries Expense). Cash paid out decreases the Cash asset account (credit to Cash). Employee salaries are not subject to HST/GST as they are compensation for employment, not a taxable supply. Total debits ($100) equal total credits ($100).",
+    "lines": [
+      {
+        "account_name": "Salaries Expense",
+        "type": "debit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 100.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0350373,
+  "raw_cost_usd": 0.066414,
+  "total_latency_ms": 26175,
+  "total_input_tokens": 16643,
+  "total_output_tokens": 1099,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 511,
+      "output_tokens": 205,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2635,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0052452,
+      "raw_cost_usd": 0.01098,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "whether net or gross salary amount",
+            "resolved": true,
+            "resolution": "In Canadian accounting, 'paid salaries' conventionally refers to net pay (take-home). Payroll deductions would have been recorded separately when wages were accrued or when remittances are made to CRA.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "timing of payroll expense recognition",
+            "resolved": true,
+            "resolution": "Transaction states 'paid', indicating cash disbursement. The expense was either recognized previously (accrued) or is recognized simultaneously with payment. Either way, the payment entry debits Salaries Payable or Salaries Expense and credits Cash.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 484,
+      "output_tokens": 96,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1625,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032343000000000003,
+      "raw_cost_usd": 0.006315,
+      "output": {
+        "reason": "Cash is leaving the business to pay employee salaries. This represents an asset (cash) decrease, which is recorded as a credit to the Cash account.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Cash is leaving the business to pay employee salaries. This represents an asset (cash) decrease, which is recorded as a credit to the Cash account."
+    },
+    "debit_classifier": {
+      "input_tokens": 486,
+      "output_tokens": 91,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1648,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031716,
+      "raw_cost_usd": 0.006309,
+      "output": {
+        "reason": "Salary payment = expense increase. When salaries are paid, the debit records the salary expense incurred by the business.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Salary payment = expense increase. When salaries are paid, the debit records the salary expense incurred by the business."
+    },
+    "debit_corrector": {
+      "input_tokens": 654,
+      "output_tokens": 131,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2298,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0044202,
+      "raw_cost_usd": 0.008859,
+      "output": {
+        "reason": "Employee salaries are a period expense under IFRS. The debit correctly records an expense increase (c=1). The credit tuple shows asset decrease (d=1), which represents the cash outflow. The two sides tell a consistent story: expense up (debit), cash down (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Employee salaries are a period expense under IFRS. The debit correctly records an expense increase (c=1). The credit tuple shows asset decrease (d=1), which represents the cash outflow. The two sides tell a consistent story: expense up (debit), cash down (credit). No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 654,
+      "output_tokens": 192,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2306,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053376000000000005,
+      "raw_cost_usd": 0.009798,
+      "output": {
+        "reason": "The transaction \"Paid employee salaries of $100 in cash\" requires two entries: (1) recognizing salary expense (debit to expense), and (2) paying cash (credit to cash, an asset decrease). The debit tuple shows (0,0,1,0,0,0), indicating an expense increase, which is correct. The initial credit tuple shows (0,0,0,1,0,0), indicating an asset decrease (cash), which is also correct. The two sides tell a consistent story: expense up (debit), cash down (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Paid employee salaries of $100 in cash\" requires two entries: (1) recognizing salary expense (debit to expense), and (2) paying cash (credit to cash, an asset decrease). The debit tuple shows (0,0,1,0,0,0), indicating an expense increase, which is correct. The initial credit tuple shows (0,0,0,1,0,0), indicating an asset decrease (cash), which is also correct. The two sides tell a consistent story: expense up (debit), cash down (credit). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 663,
+      "output_tokens": 234,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3175,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0062526000000000005,
+      "raw_cost_usd": 0.013035,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Payment of employee salaries",
+        "rationale": "Salaries are an operating expense (debit to Salaries Expense). Cash paid out decreases the Cash asset account (credit to Cash). Employee salaries are not subject to HST/GST as they are compensation for employment, not a taxable supply. Total debits ($100) equal total credits ($100).",
+        "lines": [
+          {
+            "account_name": "Salaries Expense",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1570,
+      "output_tokens": 150,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2956,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0073758,
+      "raw_cost_usd": 0.011118,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records salary payment. Debit to Salaries Expense ($100) increases operating expense. Credit to Cash ($100) decreases asset. Entry balances (debits = credits). No tax lines required as employee salaries are not subject to HST/GST. Amounts match transaction text. All necessary lines present. Directionality correct for both account types."
+      },
+      "reason": "Entry correctly records salary payment. Debit to Salaries Expense ($100) increases operating expense. Credit to Cash ($100) decreases asset. Entry balances (debits = credits). No tax lines required as employee salaries are not subject to HST/GST. Amounts match transaction text. All necessary lines present. Directionality correct for both account types."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "whether net or gross salary amount",
+            "resolved": true,
+            "resolution": "In Canadian accounting, 'paid salaries' conventionally refers to net pay (take-home). Payroll deductions would have been recorded separately when wages were accrued or when remittances are made to CRA.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "timing of payroll expense recognition",
+            "resolved": true,
+            "resolution": "Transaction states 'paid', indicating cash disbursement. The expense was either recognized previously (accrued) or is recognized simultaneously with payment. Either way, the payment entry debits Salaries Payable or Salaries Expense and credits Cash.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Salary payment = expense increase. When salaries are paid, the debit records the salary expense incurred by the business.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Cash is leaving the business to pay employee salaries. This represents an asset (cash) decrease, which is recorded as a credit to the Cash account.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Employee salaries are a period expense under IFRS. The debit correctly records an expense increase (c=1). The credit tuple shows asset decrease (d=1), which represents the cash outflow. The two sides tell a consistent story: expense up (debit), cash down (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction \"Paid employee salaries of $100 in cash\" requires two entries: (1) recognizing salary expense (debit to expense), and (2) paying cash (credit to cash, an asset decrease). The debit tuple shows (0,0,1,0,0,0), indicating an expense increase, which is correct. The initial credit tuple shows (0,0,0,1,0,0), indicating an asset decrease (cash), which is also correct. The two sides tell a consistent story: expense up (debit), cash down (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Payment of employee salaries",
+        "rationale": "Salaries are an operating expense (debit to Salaries Expense). Cash paid out decreases the Cash asset account (credit to Cash). Employee salaries are not subject to HST/GST as they are compensation for employment, not a taxable supply. Total debits ($100) equal total credits ($100).",
+        "lines": [
+          {
+            "account_name": "Salaries Expense",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records salary payment. Debit to Salaries Expense ($100) increases operating expense. Credit to Cash ($100) decreases asset. Entry balances (debits = credits). No tax lines required as employee salaries are not subject to HST/GST. Amounts match transaction text. All necessary lines present. Directionality correct for both account types."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 511,
+        "output_tokens": 205,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 484,
+        "output_tokens": 96,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 486,
+        "output_tokens": 91,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 654,
+        "output_tokens": 131,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 654,
+        "output_tokens": 192,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 663,
+        "output_tokens": 234,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1570,
+        "output_tokens": 150,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

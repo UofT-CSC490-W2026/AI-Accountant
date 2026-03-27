@@ -1,0 +1,485 @@
+{
+  "test_case_id": "int_13_donation_note",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Pledged donation to humanitarian food aid program in Somalia via 1-month promissory note",
+    "rationale": "The unconditional pledge formalized by a promissory note creates both an immediate expense recognition and a liability. Under IFRS, charitable donations are recognized as expenses when the entity has a present obligation. The issuance of a promissory note creates a formal, unconditional commitment, triggering immediate recognition. Debit Charitable Donations Expense (or Donations Expense) to record the philanthropic outflow, and credit Notes Payable to recognize the 1-month liability. This transaction is not subject to HST/GST as charitable donations are not taxable supplies. The classifier tuples (1 expense increase debit, 1 liability increase credit) correctly capture this structure.",
+    "lines": [
+      {
+        "account_name": "Charitable Donations Expense",
+        "type": "debit",
+        "amount": 1000000.0
+      },
+      {
+        "account_name": "Notes Payable",
+        "type": "credit",
+        "amount": 1000000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0459495,
+  "raw_cost_usd": 0.07776899999999999,
+  "total_latency_ms": 29507,
+  "total_input_tokens": 18108,
+  "total_output_tokens": 1563,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 536,
+      "output_tokens": 305,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2669,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0068229,
+      "raw_cost_usd": 0.012582,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "whether the donation is tax-deductible",
+            "resolved": true,
+            "resolution": "Tax treatment is an accounting classification decision, not a factual ambiguity. The entry builder will determine appropriate treatment based on CRA rules for international charitable donations.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether the promissory note creates a liability",
+            "resolved": true,
+            "resolution": "A promissory note is a formal written promise to pay, creating a clear liability (Notes Payable). This is unambiguous.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "recognition timing of the donation expense",
+            "resolved": true,
+            "resolution": "The pledge with a promissory note creates a present obligation. Standard convention is to recognize the donation expense when the unconditional commitment is made, not when paid.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether this is a conditional or unconditional pledge",
+            "resolved": true,
+            "resolution": "The issuance of a promissory note indicates an unconditional commitment. Conditional pledges would not be formalized with a note payable.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 511,
+      "output_tokens": 123,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1673,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037266,
+      "raw_cost_usd": 0.006864,
+      "output": {
+        "reason": "Target pledged a donation and issued a promissory note. The donation represents an expense increase (charitable contribution/donation expense). The promissory note is a liability that will be credited, not debited. Therefore, on the debit side we have 1 expense increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Target pledged a donation and issued a promissory note. The donation represents an expense increase (charitable contribution/donation expense). The promissory note is a liability that will be credited, not debited. Therefore, on the debit side we have 1 expense increase."
+    },
+    "credit_classifier": {
+      "input_tokens": 509,
+      "output_tokens": 173,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1650,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0044643,
+      "raw_cost_usd": 0.007545,
+      "output": {
+        "reason": "Target pledged a donation and issued a promissory note. The credit side records: (1) a liability increase for the promissory note payable of $1,000,000, and (2) an expense decrease is NOT recorded because donations are expenses when incurred, not when paid. However, since the donation is pledged and a liability is created, the donation expense is recognized on the debit side. The credit side only shows the promissory note payable = liability increase (1 line).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Target pledged a donation and issued a promissory note. The credit side records: (1) a liability increase for the promissory note payable of $1,000,000, and (2) an expense decrease is NOT recorded because donations are expenses when incurred, not when paid. However, since the donation is pledged and a liability is created, the donation expense is recognized on the debit side. The credit side only shows the promissory note payable = liability increase (1 line)."
+    },
+    "debit_corrector": {
+      "input_tokens": 679,
+      "output_tokens": 199,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2323,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0055152,
+      "raw_cost_usd": 0.009954,
+      "output": {
+        "reason": "The transaction involves Target pledging a donation and issuing a promissory note. Under IFRS, when a donation is pledged and a liability is created (the promissory note), the entity recognizes:\n- Debit: Donation expense (expense increase)\n- Credit: Notes payable/promissory note liability (liability increase)\n\nThe initial debit tuple correctly classifies this as an expense increase (c=1). The credit tuple showing liability increase (a=1) is consistent with this treatment. The donation commitment is recognized as an expense when the pledge is made and the liability is established. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves Target pledging a donation and issuing a promissory note. Under IFRS, when a donation is pledged and a liability is created (the promissory note), the entity recognizes:\n- Debit: Donation expense (expense increase)\n- Credit: Notes payable/promissory note liability (liability increase)\n\nThe initial debit tuple correctly classifies this as an expense increase (c=1). The credit tuple showing liability increase (a=1) is consistent with this treatment. The donation commitment is recognized as an expense when the pledge is made and the liability is established. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 679,
+      "output_tokens": 246,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2331,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0062226,
+      "raw_cost_usd": 0.010683,
+      "output": {
+        "reason": "The transaction involves Target pledging a donation and issuing a promissory note. Under IFRS, when a donation is pledged and a promissory note is issued, this creates:\n- Debit: Donation expense (expense increase) - correctly shown in debit tuple as (0,0,1,0,0,0)\n- Credit: Notes payable (liability increase) - the promissory note represents a liability\n\nThe initial credit tuple (1,0,0,0,0,0) correctly classifies this as a liability increase. The promissory note is a financial obligation that Target must settle in 1 month, which is a liability. The debit and credit sides tell a consistent story: expense is recognized for the donation pledge, and a liability is recorded for the promissory note obligation. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves Target pledging a donation and issuing a promissory note. Under IFRS, when a donation is pledged and a promissory note is issued, this creates:\n- Debit: Donation expense (expense increase) - correctly shown in debit tuple as (0,0,1,0,0,0)\n- Credit: Notes payable (liability increase) - the promissory note represents a liability\n\nThe initial credit tuple (1,0,0,0,0,0) correctly classifies this as a liability increase. The promissory note is a financial obligation that Target must settle in 1 month, which is a liability. The debit and credit sides tell a consistent story: expense is recognized for the donation pledge, and a liability is recorded for the promissory note obligation. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1212,
+      "output_tokens": 337,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3879,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0094911,
+      "raw_cost_usd": 0.016692,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Pledged donation to humanitarian food aid program in Somalia via 1-month promissory note",
+        "rationale": "The unconditional pledge formalized by a promissory note creates both an immediate expense recognition and a liability. Under IFRS, charitable donations are recognized as expenses when the entity has a present obligation. The issuance of a promissory note creates a formal, unconditional commitment, triggering immediate recognition. Debit Charitable Donations Expense (or Donations Expense) to record the philanthropic outflow, and credit Notes Payable to recognize the 1-month liability. This transaction is not subject to HST/GST as charitable donations are not taxable supplies. The classifier tuples (1 expense increase debit, 1 liability increase credit) correctly capture this structure.",
+        "lines": [
+          {
+            "account_name": "Charitable Donations Expense",
+            "type": "debit",
+            "amount": 1000000.0
+          },
+          {
+            "account_name": "Notes Payable",
+            "type": "credit",
+            "amount": 1000000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2197,
+      "output_tokens": 180,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3583,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0097068,
+      "raw_cost_usd": 0.013449,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records the pledged donation with promissory note. Balance verified: $1,000,000 debit = $1,000,000 credit. Under IFRS, the unconditional pledge formalized by a promissory note creates a present obligation requiring immediate expense recognition. Debit to Charitable Donations Expense (expense increase) and credit to Notes Payable (liability increase) are both directionally correct. Amount matches transaction text. No tax applicable to charitable donations. All necessary lines present."
+      },
+      "reason": "Entry correctly records the pledged donation with promissory note. Balance verified: $1,000,000 debit = $1,000,000 credit. Under IFRS, the unconditional pledge formalized by a promissory note creates a present obligation requiring immediate expense recognition. Debit to Charitable Donations Expense (expense increase) and credit to Notes Payable (liability increase) are both directionally correct. Amount matches transaction text. No tax applicable to charitable donations. All necessary lines present."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "whether the donation is tax-deductible",
+            "resolved": true,
+            "resolution": "Tax treatment is an accounting classification decision, not a factual ambiguity. The entry builder will determine appropriate treatment based on CRA rules for international charitable donations.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether the promissory note creates a liability",
+            "resolved": true,
+            "resolution": "A promissory note is a formal written promise to pay, creating a clear liability (Notes Payable). This is unambiguous.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "recognition timing of the donation expense",
+            "resolved": true,
+            "resolution": "The pledge with a promissory note creates a present obligation. Standard convention is to recognize the donation expense when the unconditional commitment is made, not when paid.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether this is a conditional or unconditional pledge",
+            "resolved": true,
+            "resolution": "The issuance of a promissory note indicates an unconditional commitment. Conditional pledges would not be formalized with a note payable.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Target pledged a donation and issued a promissory note. The donation represents an expense increase (charitable contribution/donation expense). The promissory note is a liability that will be credited, not debited. Therefore, on the debit side we have 1 expense increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Target pledged a donation and issued a promissory note. The credit side records: (1) a liability increase for the promissory note payable of $1,000,000, and (2) an expense decrease is NOT recorded because donations are expenses when incurred, not when paid. However, since the donation is pledged and a liability is created, the donation expense is recognized on the debit side. The credit side only shows the promissory note payable = liability increase (1 line).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves Target pledging a donation and issuing a promissory note. Under IFRS, when a donation is pledged and a liability is created (the promissory note), the entity recognizes:\n- Debit: Donation expense (expense increase)\n- Credit: Notes payable/promissory note liability (liability increase)\n\nThe initial debit tuple correctly classifies this as an expense increase (c=1). The credit tuple showing liability increase (a=1) is consistent with this treatment. The donation commitment is recognized as an expense when the pledge is made and the liability is established. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves Target pledging a donation and issuing a promissory note. Under IFRS, when a donation is pledged and a promissory note is issued, this creates:\n- Debit: Donation expense (expense increase) - correctly shown in debit tuple as (0,0,1,0,0,0)\n- Credit: Notes payable (liability increase) - the promissory note represents a liability\n\nThe initial credit tuple (1,0,0,0,0,0) correctly classifies this as a liability increase. The promissory note is a financial obligation that Target must settle in 1 month, which is a liability. The debit and credit sides tell a consistent story: expense is recognized for the donation pledge, and a liability is recorded for the promissory note obligation. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Pledged donation to humanitarian food aid program in Somalia via 1-month promissory note",
+        "rationale": "The unconditional pledge formalized by a promissory note creates both an immediate expense recognition and a liability. Under IFRS, charitable donations are recognized as expenses when the entity has a present obligation. The issuance of a promissory note creates a formal, unconditional commitment, triggering immediate recognition. Debit Charitable Donations Expense (or Donations Expense) to record the philanthropic outflow, and credit Notes Payable to recognize the 1-month liability. This transaction is not subject to HST/GST as charitable donations are not taxable supplies. The classifier tuples (1 expense increase debit, 1 liability increase credit) correctly capture this structure.",
+        "lines": [
+          {
+            "account_name": "Charitable Donations Expense",
+            "type": "debit",
+            "amount": 1000000.0
+          },
+          {
+            "account_name": "Notes Payable",
+            "type": "credit",
+            "amount": 1000000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records the pledged donation with promissory note. Balance verified: $1,000,000 debit = $1,000,000 credit. Under IFRS, the unconditional pledge formalized by a promissory note creates a present obligation requiring immediate expense recognition. Debit to Charitable Donations Expense (expense increase) and credit to Notes Payable (liability increase) are both directionally correct. Amount matches transaction text. No tax applicable to charitable donations. All necessary lines present."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 536,
+        "output_tokens": 305,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 511,
+        "output_tokens": 123,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 509,
+        "output_tokens": 173,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 679,
+        "output_tokens": 199,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 679,
+        "output_tokens": 246,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1212,
+        "output_tokens": 337,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2197,
+        "output_tokens": 180,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

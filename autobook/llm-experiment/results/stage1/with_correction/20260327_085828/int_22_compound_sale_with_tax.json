@@ -1,0 +1,409 @@
+{
+  "test_case_id": "int_22_compound_sale_with_tax",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Sale of 300 cases of snack products at $230 per case, partial payment received",
+    "rationale": "This is a revenue transaction with inventory sold. Debits: Cash increases by $45,900 (bank transfer received), Accounts Receivable increases by $30,000 (balance on credit), and Cost of Goods Sold increases by $55,500 (300 cases \u00d7 $185). Credits: Sales Revenue increases by $69,000 (300 cases \u00d7 $230), Sales Tax Payable increases by $6,900 (10% of $69,000), and Inventory decreases by $55,500 (cost of goods sold). The tuple guidance suggests 2 asset increases (Cash and A/R), 1 expense increase (COGS), 1 liability increase (Sales Tax Payable), 1 revenue increase (Sales Revenue), and 1 asset decrease (Inventory). Total debits: $45,900 + $30,000 + $55,500 = $131,400. Total credits: $69,000 + $6,900 + $55,500 = $131,400. Entry balances.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 45900.0
+      },
+      {
+        "account_name": "Accounts Receivable",
+        "type": "debit",
+        "amount": 30000.0
+      },
+      {
+        "account_name": "Cost of Goods Sold",
+        "type": "debit",
+        "amount": 55500.0
+      },
+      {
+        "account_name": "Sales Revenue",
+        "type": "credit",
+        "amount": 69000.0
+      },
+      {
+        "account_name": "Sales Tax Payable",
+        "type": "credit",
+        "amount": 6900.0
+      },
+      {
+        "account_name": "Inventory",
+        "type": "credit",
+        "amount": 55500.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0404652,
+  "raw_cost_usd": 0.062616,
+  "total_latency_ms": 52491,
+  "total_input_tokens": 11627,
+  "total_output_tokens": 1849,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 558,
+      "output_tokens": 202,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1720,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0050526,
+      "raw_cost_usd": 0.00819,
+      "output": {
+        "reason": "This is a sale transaction with three debit-side journal lines:\n1. Cash/Bank asset increase: $45,900 received via bank transfer (asset increase)\n2. Accounts Receivable asset increase: $30,000 remainder on credit ($75,900 - $45,900) (asset increase)\n3. Cost of Goods Sold expense increase: $55,500 (300 cases \u00d7 $185 per case) to record the cost of inventory sold (expense increase)\n\nTotal: 2 asset increases + 1 expense increase = (2,0,1,0,0,0)",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This is a sale transaction with three debit-side journal lines:\n1. Cash/Bank asset increase: $45,900 received via bank transfer (asset increase)\n2. Accounts Receivable asset increase: $30,000 remainder on credit ($75,900 - $45,900) (asset increase)\n3. Cost of Goods Sold expense increase: $55,500 (300 cases \u00d7 $185 per case) to record the cost of inventory sold (expense increase)\n\nTotal: 2 asset increases + 1 expense increase = (2,0,1,0,0,0)"
+    },
+    "credit_classifier": {
+      "input_tokens": 556,
+      "output_tokens": 323,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1697,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0068553,
+      "raw_cost_usd": 0.009936,
+      "output": {
+        "reason": "This transaction has multiple credit-side effects:\n1. Revenue increase: $69,000 in sales revenue from selling snack products (revenue increase)\n2. Liability increase: $6,900 in sales tax collected (10% \u00d7 $69,000), which is owed to the government (liability increase)\n3. Liability increase: $30,000 accounts receivable credit represents the amount still owed by the customer ($75,900 - $45,900), but wait - accounts receivable is an asset, so when we receive partial payment and leave the remainder on credit, we're actually DEBITING accounts receivable for the credit portion, not crediting it.\n\nLet me reconsider: On the credit side we have:\n- Sales Revenue: $69,000 (revenue increase) \n- Sales Tax Payable: $6,900 (liability increase)\n- Cost of Goods Sold is reduced by crediting Inventory for $55,500 (300 \u00d7 $185), which is an asset decrease\n\nSo the credit side has: 1 liability increase (sales tax), 1 revenue increase (sales), and 1 asset decrease (inventory)",
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "This transaction has multiple credit-side effects:\n1. Revenue increase: $69,000 in sales revenue from selling snack products (revenue increase)\n2. Liability increase: $6,900 in sales tax collected (10% \u00d7 $69,000), which is owed to the government (liability increase)\n3. Liability increase: $30,000 accounts receivable credit represents the amount still owed by the customer ($75,900 - $45,900), but wait - accounts receivable is an asset, so when we receive partial payment and leave the remainder on credit, we're actually DEBITING accounts receivable for the credit portion, not crediting it.\n\nLet me reconsider: On the credit side we have:\n- Sales Revenue: $69,000 (revenue increase) \n- Sales Tax Payable: $6,900 (liability increase)\n- Cost of Goods Sold is reduced by crediting Inventory for $55,500 (300 \u00d7 $185), which is an asset decrease\n\nSo the credit side has: 1 liability increase (sales tax), 1 revenue increase (sales), and 1 asset decrease (inventory)"
+    },
+    "credit_corrector": {
+      "input_tokens": 726,
+      "output_tokens": 372,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2378,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0082536,
+      "raw_cost_usd": 0.012714,
+      "output": {
+        "reason": "The initial credit tuple is correct. Let me break down the transaction:\n\n1. **Revenue recognition**: Sale of 300 cases at $230 = $69,000 revenue \u2192 Revenue increase (slot c = 1) \u2713\n\n2. **Sales tax collected**: 10% sales tax = $6,900 \u2192 This creates a liability (sales tax payable) \u2192 Liability increase (slot a = 1) \u2713\n\n3. **Inventory reduction**: Cost of goods sold is 300 cases at $185 = $55,500 \u2192 Inventory decreases \u2192 Asset decrease (slot d = 1) \u2713\n\nThe credit side should show:\n- Liability increase (sales tax payable): 1 line\n- Revenue increase (sales revenue): 1 line  \n- Asset decrease (inventory): 1 line\n\nTotal: (1, 0, 1, 1, 0, 0)\n\nThe debit tuple shows (2, 0, 1, 0, 0, 0) which represents:\n- 2 asset increases: Cash/Bank $45,900 and Accounts Receivable $30,000\n- 1 expense increase: COGS $55,500\n\nThis is consistent with the credit side. The transaction is a sale with COGS, partial payment received, and sales tax collected. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. Let me break down the transaction:\n\n1. **Revenue recognition**: Sale of 300 cases at $230 = $69,000 revenue \u2192 Revenue increase (slot c = 1) \u2713\n\n2. **Sales tax collected**: 10% sales tax = $6,900 \u2192 This creates a liability (sales tax payable) \u2192 Liability increase (slot a = 1) \u2713\n\n3. **Inventory reduction**: Cost of goods sold is 300 cases at $185 = $55,500 \u2192 Inventory decreases \u2192 Asset decrease (slot d = 1) \u2713\n\nThe credit side should show:\n- Liability increase (sales tax payable): 1 line\n- Revenue increase (sales revenue): 1 line  \n- Asset decrease (inventory): 1 line\n\nTotal: (1, 0, 1, 1, 0, 0)\n\nThe debit tuple shows (2, 0, 1, 0, 0, 0) which represents:\n- 2 asset increases: Cash/Bank $45,900 and Accounts Receivable $30,000\n- 1 expense increase: COGS $55,500\n\nThis is consistent with the credit side. The transaction is a sale with COGS, partial payment received, and sales tax collected. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 726,
+      "output_tokens": 367,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2370,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081762,
+      "raw_cost_usd": 0.012615,
+      "output": {
+        "reason": "The initial debit tuple is correct. This is a sale of inventory transaction with the following accounting entries:\n\nDEBITS (what increases or what liability/equity/revenue decreases):\n1. Cash/Bank asset increase: $45,900 received via bank transfer (asset increase)\n2. Accounts Receivable asset increase: $30,000 ($75,900 - $45,900) on credit (asset increase)\n3. Cost of Goods Sold expense increase: $55,500 (300 cases \u00d7 $185) (expense increase)\n\nThis gives us (2,0,1,0,0,0): 2 asset increases + 1 expense increase.\n\nCREDITS (for validation):\n1. Sales Tax Payable liability increase: $6,900 (10% of $69,000) (liability increase)\n2. Revenue increase: $69,000 from the sale (revenue increase)\n3. Inventory asset decrease: $55,500 cost of goods sold (asset decrease)\n\nThe credit tuple shows (1,0,1,1,0,0): 1 liability increase + 1 revenue increase + 1 asset decrease, which is consistent with the expected accounting treatment.\n\nBoth tuples tell a coherent story of a sale transaction with partial payment, sales tax collection, and COGS recognition. No correction needed.",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial debit tuple is correct. This is a sale of inventory transaction with the following accounting entries:\n\nDEBITS (what increases or what liability/equity/revenue decreases):\n1. Cash/Bank asset increase: $45,900 received via bank transfer (asset increase)\n2. Accounts Receivable asset increase: $30,000 ($75,900 - $45,900) on credit (asset increase)\n3. Cost of Goods Sold expense increase: $55,500 (300 cases \u00d7 $185) (expense increase)\n\nThis gives us (2,0,1,0,0,0): 2 asset increases + 1 expense increase.\n\nCREDITS (for validation):\n1. Sales Tax Payable liability increase: $6,900 (10% of $69,000) (liability increase)\n2. Revenue increase: $69,000 from the sale (revenue increase)\n3. Inventory asset decrease: $55,500 cost of goods sold (asset decrease)\n\nThe credit tuple shows (1,0,1,1,0,0): 1 liability increase + 1 revenue increase + 1 asset decrease, which is consistent with the expected accounting treatment.\n\nBoth tuples tell a coherent story of a sale transaction with partial payment, sales tax collection, and COGS recognition. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 857,
+      "output_tokens": 585,
+      "cache_read_tokens": 2605,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3462,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0121275,
+      "raw_cost_usd": 0.019161,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Sale of 300 cases of snack products at $230 per case, partial payment received",
+        "rationale": "This is a revenue transaction with inventory sold. Debits: Cash increases by $45,900 (bank transfer received), Accounts Receivable increases by $30,000 (balance on credit), and Cost of Goods Sold increases by $55,500 (300 cases \u00d7 $185). Credits: Sales Revenue increases by $69,000 (300 cases \u00d7 $230), Sales Tax Payable increases by $6,900 (10% of $69,000), and Inventory decreases by $55,500 (cost of goods sold). The tuple guidance suggests 2 asset increases (Cash and A/R), 1 expense increase (COGS), 1 liability increase (Sales Tax Payable), 1 revenue increase (Sales Revenue), and 1 asset decrease (Inventory). Total debits: $45,900 + $30,000 + $55,500 = $131,400. Total credits: $69,000 + $6,900 + $55,500 = $131,400. Entry balances.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 45900.0
+          },
+          {
+            "account_name": "Accounts Receivable",
+            "type": "debit",
+            "amount": 30000.0
+          },
+          {
+            "account_name": "Cost of Goods Sold",
+            "type": "debit",
+            "amount": 55500.0
+          },
+          {
+            "account_name": "Sales Revenue",
+            "type": "credit",
+            "amount": 69000.0
+          },
+          {
+            "account_name": "Sales Tax Payable",
+            "type": "credit",
+            "amount": 6900.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 55500.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "This is a sale transaction with three debit-side journal lines:\n1. Cash/Bank asset increase: $45,900 received via bank transfer (asset increase)\n2. Accounts Receivable asset increase: $30,000 remainder on credit ($75,900 - $45,900) (asset increase)\n3. Cost of Goods Sold expense increase: $55,500 (300 cases \u00d7 $185 per case) to record the cost of inventory sold (expense increase)\n\nTotal: 2 asset increases + 1 expense increase = (2,0,1,0,0,0)",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This transaction has multiple credit-side effects:\n1. Revenue increase: $69,000 in sales revenue from selling snack products (revenue increase)\n2. Liability increase: $6,900 in sales tax collected (10% \u00d7 $69,000), which is owed to the government (liability increase)\n3. Liability increase: $30,000 accounts receivable credit represents the amount still owed by the customer ($75,900 - $45,900), but wait - accounts receivable is an asset, so when we receive partial payment and leave the remainder on credit, we're actually DEBITING accounts receivable for the credit portion, not crediting it.\n\nLet me reconsider: On the credit side we have:\n- Sales Revenue: $69,000 (revenue increase) \n- Sales Tax Payable: $6,900 (liability increase)\n- Cost of Goods Sold is reduced by crediting Inventory for $55,500 (300 \u00d7 $185), which is an asset decrease\n\nSo the credit side has: 1 liability increase (sales tax), 1 revenue increase (sales), and 1 asset decrease (inventory)",
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The initial debit tuple is correct. This is a sale of inventory transaction with the following accounting entries:\n\nDEBITS (what increases or what liability/equity/revenue decreases):\n1. Cash/Bank asset increase: $45,900 received via bank transfer (asset increase)\n2. Accounts Receivable asset increase: $30,000 ($75,900 - $45,900) on credit (asset increase)\n3. Cost of Goods Sold expense increase: $55,500 (300 cases \u00d7 $185) (expense increase)\n\nThis gives us (2,0,1,0,0,0): 2 asset increases + 1 expense increase.\n\nCREDITS (for validation):\n1. Sales Tax Payable liability increase: $6,900 (10% of $69,000) (liability increase)\n2. Revenue increase: $69,000 from the sale (revenue increase)\n3. Inventory asset decrease: $55,500 cost of goods sold (asset decrease)\n\nThe credit tuple shows (1,0,1,1,0,0): 1 liability increase + 1 revenue increase + 1 asset decrease, which is consistent with the expected accounting treatment.\n\nBoth tuples tell a coherent story of a sale transaction with partial payment, sales tax collection, and COGS recognition. No correction needed.",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. Let me break down the transaction:\n\n1. **Revenue recognition**: Sale of 300 cases at $230 = $69,000 revenue \u2192 Revenue increase (slot c = 1) \u2713\n\n2. **Sales tax collected**: 10% sales tax = $6,900 \u2192 This creates a liability (sales tax payable) \u2192 Liability increase (slot a = 1) \u2713\n\n3. **Inventory reduction**: Cost of goods sold is 300 cases at $185 = $55,500 \u2192 Inventory decreases \u2192 Asset decrease (slot d = 1) \u2713\n\nThe credit side should show:\n- Liability increase (sales tax payable): 1 line\n- Revenue increase (sales revenue): 1 line  \n- Asset decrease (inventory): 1 line\n\nTotal: (1, 0, 1, 1, 0, 0)\n\nThe debit tuple shows (2, 0, 1, 0, 0, 0) which represents:\n- 2 asset increases: Cash/Bank $45,900 and Accounts Receivable $30,000\n- 1 expense increase: COGS $55,500\n\nThis is consistent with the credit side. The transaction is a sale with COGS, partial payment received, and sales tax collected. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Sale of 300 cases of snack products at $230 per case, partial payment received",
+        "rationale": "This is a revenue transaction with inventory sold. Debits: Cash increases by $45,900 (bank transfer received), Accounts Receivable increases by $30,000 (balance on credit), and Cost of Goods Sold increases by $55,500 (300 cases \u00d7 $185). Credits: Sales Revenue increases by $69,000 (300 cases \u00d7 $230), Sales Tax Payable increases by $6,900 (10% of $69,000), and Inventory decreases by $55,500 (cost of goods sold). The tuple guidance suggests 2 asset increases (Cash and A/R), 1 expense increase (COGS), 1 liability increase (Sales Tax Payable), 1 revenue increase (Sales Revenue), and 1 asset decrease (Inventory). Total debits: $45,900 + $30,000 + $55,500 = $131,400. Total credits: $69,000 + $6,900 + $55,500 = $131,400. Entry balances.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 45900.0
+          },
+          {
+            "account_name": "Accounts Receivable",
+            "type": "debit",
+            "amount": 30000.0
+          },
+          {
+            "account_name": "Cost of Goods Sold",
+            "type": "debit",
+            "amount": 55500.0
+          },
+          {
+            "account_name": "Sales Revenue",
+            "type": "credit",
+            "amount": 69000.0
+          },
+          {
+            "account_name": "Sales Tax Payable",
+            "type": "credit",
+            "amount": 6900.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 55500.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 558,
+        "output_tokens": 202,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 556,
+        "output_tokens": 323,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 726,
+        "output_tokens": 372,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 726,
+        "output_tokens": 367,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 857,
+        "output_tokens": 585,
+        "input_token_details": {
+          "cache_read": 2605,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

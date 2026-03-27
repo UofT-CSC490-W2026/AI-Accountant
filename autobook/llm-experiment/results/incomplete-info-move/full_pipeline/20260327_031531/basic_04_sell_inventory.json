@@ -1,0 +1,441 @@
+{
+  "test_case_id": "basic_04_sell_inventory",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Sale of inventory for cash",
+    "rationale": "This is a two-part entry for an inventory sale under IFRS. The debit tuple (1,0,1,0,0,0) indicates 1 asset increase (Cash) and 1 expense increase (Cost of Goods Sold). The credit tuple (0,0,1,1,0,0) indicates 1 revenue increase (Sales Revenue) and 1 asset decrease (Inventory). When inventory is sold: (1) recognize the revenue of $500 by crediting Sales Revenue and debiting Cash for the sale proceeds, and (2) recognize the cost by debiting Cost of Goods Sold (expense) and crediting Inventory (asset decrease) for $300. Total debits = $800 ($500 Cash + $300 COGS), total credits = $800 ($500 Sales Revenue + $300 Inventory). No tax information was provided, so no separate tax lines are added.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 500.0
+      },
+      {
+        "account_name": "Cost of Goods Sold",
+        "type": "debit",
+        "amount": 300.0
+      },
+      {
+        "account_name": "Sales Revenue",
+        "type": "credit",
+        "amount": 500.0
+      },
+      {
+        "account_name": "Inventory",
+        "type": "credit",
+        "amount": 300.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0390783,
+  "raw_cost_usd": 0.070455,
+  "total_latency_ms": 29252,
+  "total_input_tokens": 16990,
+  "total_output_tokens": 1299,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 513,
+      "output_tokens": 35,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2637,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0027012,
+      "raw_cost_usd": 0.008436,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 486,
+      "output_tokens": 93,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1627,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031953000000000003,
+      "raw_cost_usd": 0.006276,
+      "output": {
+        "reason": "Two credit lines: (1) Inventory leaving the business = asset decrease, (2) Sale of inventory generates revenue = revenue increase",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Inventory leaving the business = asset decrease, (2) Sale of inventory generates revenue = revenue increase"
+    },
+    "debit_classifier": {
+      "input_tokens": 488,
+      "output_tokens": 115,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1650,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035376,
+      "raw_cost_usd": 0.006675,
+      "output": {
+        "reason": "This sale transaction requires two debit entries: (1) Cash $500 = asset increase, and (2) Cost of Goods Sold $300 = expense increase. The inventory asset decrease and revenue increase are on the credit side.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This sale transaction requires two debit entries: (1) Cash $500 = asset increase, and (2) Cost of Goods Sold $300 = expense increase. The inventory asset decrease and revenue increase are on the credit side."
+    },
+    "debit_corrector": {
+      "input_tokens": 656,
+      "output_tokens": 182,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2300,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051912,
+      "raw_cost_usd": 0.00963,
+      "output": {
+        "reason": "The transaction involves selling inventory for cash, which has two accounting effects: (1) Cash increases by $500 (asset increase), and (2) Cost of Goods Sold (COGS) is recognized for $300 (expense increase). The initial debit tuple correctly shows 1 asset increase (cash) and 1 expense increase (COGS). The credit tuple showing 1 revenue increase (for the $500 sale) and 1 asset decrease (inventory reduction of $300) is consistent with this. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves selling inventory for cash, which has two accounting effects: (1) Cash increases by $500 (asset increase), and (2) Cost of Goods Sold (COGS) is recognized for $300 (expense increase). The initial debit tuple correctly shows 1 asset increase (cash) and 1 expense increase (COGS). The credit tuple showing 1 revenue increase (for the $500 sale) and 1 asset decrease (inventory reduction of $300) is consistent with this. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 656,
+      "output_tokens": 266,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2308,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0064536,
+      "raw_cost_usd": 0.010914,
+      "output": {
+        "reason": "The initial credit tuple is correct. This transaction involves selling inventory for cash, which requires two accounting entries:\n\n1. Revenue recognition: The $500 sale creates revenue, which is a revenue increase (credit to Revenue) - slot c = 1\n2. Cost of goods sold: The $300 cost of inventory must be removed from Inventory (an asset), which is an asset decrease (credit to Inventory) - slot d = 1\n\nThe credit tuple (0,0,1,1,0,0) correctly captures both: one revenue increase and one asset decrease.\n\nCross-validation with debit tuple (1,0,1,0,0,0): The debit side shows one asset increase (Cash +$500) and one expense increase (COGS expense +$300), which is consistent with the standard double-entry for a sale of inventory. The two sides tell a consistent story under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. This transaction involves selling inventory for cash, which requires two accounting entries:\n\n1. Revenue recognition: The $500 sale creates revenue, which is a revenue increase (credit to Revenue) - slot c = 1\n2. Cost of goods sold: The $300 cost of inventory must be removed from Inventory (an asset), which is an asset decrease (credit to Inventory) - slot d = 1\n\nThe credit tuple (0,0,1,1,0,0) correctly captures both: one revenue increase and one asset decrease.\n\nCross-validation with debit tuple (1,0,1,0,0,0): The debit side shows one asset increase (Cash +$500) and one expense increase (COGS expense +$300), which is consistent with the standard double-entry for a sale of inventory. The two sides tell a consistent story under IFRS. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 665,
+      "output_tokens": 439,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3177,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.009333600000000001,
+      "raw_cost_usd": 0.016116,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Sale of inventory for cash",
+        "rationale": "This is a two-part entry for an inventory sale under IFRS. The debit tuple (1,0,1,0,0,0) indicates 1 asset increase (Cash) and 1 expense increase (Cost of Goods Sold). The credit tuple (0,0,1,1,0,0) indicates 1 revenue increase (Sales Revenue) and 1 asset decrease (Inventory). When inventory is sold: (1) recognize the revenue of $500 by crediting Sales Revenue and debiting Cash for the sale proceeds, and (2) recognize the cost by debiting Cost of Goods Sold (expense) and crediting Inventory (asset decrease) for $300. Total debits = $800 ($500 Cash + $300 COGS), total credits = $800 ($500 Sales Revenue + $300 Inventory). No tax information was provided, so no separate tax lines are added.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 500.0
+          },
+          {
+            "account_name": "Cost of Goods Sold",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "Sales Revenue",
+            "type": "credit",
+            "amount": 500.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 300.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1905,
+      "output_tokens": 169,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3291,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0086658,
+      "raw_cost_usd": 0.012408,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records inventory sale with proper two-part treatment. Revenue of $500 recognized (credit Sales Revenue, debit Cash). COGS of $300 recognized (debit Cost of Goods Sold, credit Inventory). All accounts appropriate, amounts match transaction text exactly. Balance verified: total debits $800 = total credits $800. Directionality correct for all account types. No tax information provided in transaction, so absence of tax lines is appropriate."
+      },
+      "reason": "Entry correctly records inventory sale with proper two-part treatment. Revenue of $500 recognized (credit Sales Revenue, debit Cash). COGS of $300 recognized (debit Cost of Goods Sold, credit Inventory). All accounts appropriate, amounts match transaction text exactly. Balance verified: total debits $800 = total credits $800. Directionality correct for all account types. No tax information provided in transaction, so absence of tax lines is appropriate."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "This sale transaction requires two debit entries: (1) Cash $500 = asset increase, and (2) Cost of Goods Sold $300 = expense increase. The inventory asset decrease and revenue increase are on the credit side.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Inventory leaving the business = asset decrease, (2) Sale of inventory generates revenue = revenue increase",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves selling inventory for cash, which has two accounting effects: (1) Cash increases by $500 (asset increase), and (2) Cost of Goods Sold (COGS) is recognized for $300 (expense increase). The initial debit tuple correctly shows 1 asset increase (cash) and 1 expense increase (COGS). The credit tuple showing 1 revenue increase (for the $500 sale) and 1 asset decrease (inventory reduction of $300) is consistent with this. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. This transaction involves selling inventory for cash, which requires two accounting entries:\n\n1. Revenue recognition: The $500 sale creates revenue, which is a revenue increase (credit to Revenue) - slot c = 1\n2. Cost of goods sold: The $300 cost of inventory must be removed from Inventory (an asset), which is an asset decrease (credit to Inventory) - slot d = 1\n\nThe credit tuple (0,0,1,1,0,0) correctly captures both: one revenue increase and one asset decrease.\n\nCross-validation with debit tuple (1,0,1,0,0,0): The debit side shows one asset increase (Cash +$500) and one expense increase (COGS expense +$300), which is consistent with the standard double-entry for a sale of inventory. The two sides tell a consistent story under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Sale of inventory for cash",
+        "rationale": "This is a two-part entry for an inventory sale under IFRS. The debit tuple (1,0,1,0,0,0) indicates 1 asset increase (Cash) and 1 expense increase (Cost of Goods Sold). The credit tuple (0,0,1,1,0,0) indicates 1 revenue increase (Sales Revenue) and 1 asset decrease (Inventory). When inventory is sold: (1) recognize the revenue of $500 by crediting Sales Revenue and debiting Cash for the sale proceeds, and (2) recognize the cost by debiting Cost of Goods Sold (expense) and crediting Inventory (asset decrease) for $300. Total debits = $800 ($500 Cash + $300 COGS), total credits = $800 ($500 Sales Revenue + $300 Inventory). No tax information was provided, so no separate tax lines are added.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 500.0
+          },
+          {
+            "account_name": "Cost of Goods Sold",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "Sales Revenue",
+            "type": "credit",
+            "amount": 500.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 300.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records inventory sale with proper two-part treatment. Revenue of $500 recognized (credit Sales Revenue, debit Cash). COGS of $300 recognized (debit Cost of Goods Sold, credit Inventory). All accounts appropriate, amounts match transaction text exactly. Balance verified: total debits $800 = total credits $800. Directionality correct for all account types. No tax information provided in transaction, so absence of tax lines is appropriate."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 513,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 486,
+        "output_tokens": 93,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 488,
+        "output_tokens": 115,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 656,
+        "output_tokens": 182,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 656,
+        "output_tokens": 266,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 665,
+        "output_tokens": 439,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1905,
+        "output_tokens": 169,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

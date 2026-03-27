@@ -1,0 +1,327 @@
+{
+  "test_case_id": "int_hard_01a_note_derecognition",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Discounting of 90-day non-interest-bearing note receivable at bank (15% annual discount rate, 40 days remaining)",
+    "rationale": "Ford discounted a $100,000 note receivable with 40 days remaining at 15% annual rate. Discount charge = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $100,000 - $1,643.84 = $98,356.16. Since management determined this qualifies as derecognition under IFRS 9 (transfer of risks and rewards), the note receivable is removed from the books. The discount charge represents the financing cost/loss on the transaction. Debit Cash for proceeds received ($98,356.16), debit Loss on Note Discounting for the discount charge ($1,643.84), and credit Notes Receivable to derecognize the asset ($100,000). The tuple structure (1 asset increase, 1 expense increase, 1 asset decrease) correctly reflects this transaction.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 98356.16
+      },
+      {
+        "account_name": "Loss on Note Discounting",
+        "type": "debit",
+        "amount": 1643.84
+      },
+      {
+        "account_name": "Notes Receivable",
+        "type": "credit",
+        "amount": 100000.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0244107,
+  "raw_cost_usd": 0.043578000000000006,
+  "total_latency_ms": 19794,
+  "total_input_tokens": 9746,
+  "total_output_tokens": 956,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 601,
+      "output_tokens": 35,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2734,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0029679,
+      "raw_cost_usd": 0.008727,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 576,
+      "output_tokens": 190,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1738,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004926600000000001,
+      "raw_cost_usd": 0.008064,
+      "output": {
+        "reason": "Ford discounts the note at the bank and receives cash (asset increase = 1 line). The difference between the cash received and the carrying value of the note represents a loss on discounting/factoring (expense increase = 1 line). The note receivable will be credited (asset decrease on credit side). Under IFRS 9, since this qualifies as derecognition, the note is removed from Ford's books and any difference between proceeds and carrying value is recognized as a loss. Debit: Cash (asset increase) and Loss on Note Discounting (expense increase).",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Ford discounts the note at the bank and receives cash (asset increase = 1 line). The difference between the cash received and the carrying value of the note represents a loss on discounting/factoring (expense increase = 1 line). The note receivable will be credited (asset decrease on credit side). Under IFRS 9, since this qualifies as derecognition, the note is removed from Ford's books and any difference between proceeds and carrying value is recognized as a loss. Debit: Cash (asset increase) and Loss on Note Discounting (expense increase)."
+    },
+    "credit_classifier": {
+      "input_tokens": 574,
+      "output_tokens": 281,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1715,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0062793,
+      "raw_cost_usd": 0.00936,
+      "output": {
+        "reason": "This transaction involves discounting (selling) a note receivable to the bank with derecognition. On the credit side:\n1. Notes Receivable is removed from the books = asset decrease (the $100,000 note is no longer Ford's asset)\n2. A loss on discounting is recognized = expense increase, which when credited means expense decrease does NOT apply here\n\nSince the note is discounted at 15% for the remaining 40 days (90 - 50 = 40 days), there will be a discount charge that creates a loss. However, we only classify what is CREDITED. The credit side shows:\n- Credit to Notes Receivable (removing the asset) = asset decrease\n\nThe loss/expense would be DEBITED (increasing expense), not credited, so it doesn't appear on the credit side. The cash received is also DEBITED (increasing asset), not credited.\n\nTherefore, the credit side has only one line: the removal of the Notes Receivable asset.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "This transaction involves discounting (selling) a note receivable to the bank with derecognition. On the credit side:\n1. Notes Receivable is removed from the books = asset decrease (the $100,000 note is no longer Ford's asset)\n2. A loss on discounting is recognized = expense increase, which when credited means expense decrease does NOT apply here\n\nSince the note is discounted at 15% for the remaining 40 days (90 - 50 = 40 days), there will be a discount charge that creates a loss. However, we only classify what is CREDITED. The credit side shows:\n- Credit to Notes Receivable (removing the asset) = asset decrease\n\nThe loss/expense would be DEBITED (increasing expense), not credited, so it doesn't appear on the credit side. The cash received is also DEBITED (increasing asset), not credited.\n\nTherefore, the credit side has only one line: the removal of the Notes Receivable asset."
+    },
+    "entry_builder": {
+      "input_tokens": 896,
+      "output_tokens": 450,
+      "cache_read_tokens": 2663,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3559,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0102369,
+      "raw_cost_usd": 0.017427,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Discounting of 90-day non-interest-bearing note receivable at bank (15% annual discount rate, 40 days remaining)",
+        "rationale": "Ford discounted a $100,000 note receivable with 40 days remaining at 15% annual rate. Discount charge = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $100,000 - $1,643.84 = $98,356.16. Since management determined this qualifies as derecognition under IFRS 9 (transfer of risks and rewards), the note receivable is removed from the books. The discount charge represents the financing cost/loss on the transaction. Debit Cash for proceeds received ($98,356.16), debit Loss on Note Discounting for the discount charge ($1,643.84), and credit Notes Receivable to derecognize the asset ($100,000). The tuple structure (1 asset increase, 1 expense increase, 1 asset decrease) correctly reflects this transaction.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98356.16
+          },
+          {
+            "account_name": "Loss on Note Discounting",
+            "type": "debit",
+            "amount": 1643.84
+          },
+          {
+            "account_name": "Notes Receivable",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Ford discounts the note at the bank and receives cash (asset increase = 1 line). The difference between the cash received and the carrying value of the note represents a loss on discounting/factoring (expense increase = 1 line). The note receivable will be credited (asset decrease on credit side). Under IFRS 9, since this qualifies as derecognition, the note is removed from Ford's books and any difference between proceeds and carrying value is recognized as a loss. Debit: Cash (asset increase) and Loss on Note Discounting (expense increase).",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This transaction involves discounting (selling) a note receivable to the bank with derecognition. On the credit side:\n1. Notes Receivable is removed from the books = asset decrease (the $100,000 note is no longer Ford's asset)\n2. A loss on discounting is recognized = expense increase, which when credited means expense decrease does NOT apply here\n\nSince the note is discounted at 15% for the remaining 40 days (90 - 50 = 40 days), there will be a discount charge that creates a loss. However, we only classify what is CREDITED. The credit side shows:\n- Credit to Notes Receivable (removing the asset) = asset decrease\n\nThe loss/expense would be DEBITED (increasing expense), not credited, so it doesn't appear on the credit side. The cash received is also DEBITED (increasing asset), not credited.\n\nTherefore, the credit side has only one line: the removal of the Notes Receivable asset.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Ford discounts the note at the bank and receives cash (asset increase = 1 line). The difference between the cash received and the carrying value of the note represents a loss on discounting/factoring (expense increase = 1 line). The note receivable will be credited (asset decrease on credit side). Under IFRS 9, since this qualifies as derecognition, the note is removed from Ford's books and any difference between proceeds and carrying value is recognized as a loss. Debit: Cash (asset increase) and Loss on Note Discounting (expense increase).",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "This transaction involves discounting (selling) a note receivable to the bank with derecognition. On the credit side:\n1. Notes Receivable is removed from the books = asset decrease (the $100,000 note is no longer Ford's asset)\n2. A loss on discounting is recognized = expense increase, which when credited means expense decrease does NOT apply here\n\nSince the note is discounted at 15% for the remaining 40 days (90 - 50 = 40 days), there will be a discount charge that creates a loss. However, we only classify what is CREDITED. The credit side shows:\n- Credit to Notes Receivable (removing the asset) = asset decrease\n\nThe loss/expense would be DEBITED (increasing expense), not credited, so it doesn't appear on the credit side. The cash received is also DEBITED (increasing asset), not credited.\n\nTherefore, the credit side has only one line: the removal of the Notes Receivable asset.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Discounting of 90-day non-interest-bearing note receivable at bank (15% annual discount rate, 40 days remaining)",
+        "rationale": "Ford discounted a $100,000 note receivable with 40 days remaining at 15% annual rate. Discount charge = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $100,000 - $1,643.84 = $98,356.16. Since management determined this qualifies as derecognition under IFRS 9 (transfer of risks and rewards), the note receivable is removed from the books. The discount charge represents the financing cost/loss on the transaction. Debit Cash for proceeds received ($98,356.16), debit Loss on Note Discounting for the discount charge ($1,643.84), and credit Notes Receivable to derecognize the asset ($100,000). The tuple structure (1 asset increase, 1 expense increase, 1 asset decrease) correctly reflects this transaction.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98356.16
+          },
+          {
+            "account_name": "Loss on Note Discounting",
+            "type": "debit",
+            "amount": 1643.84
+          },
+          {
+            "account_name": "Notes Receivable",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 601,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 576,
+        "output_tokens": 190,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 574,
+        "output_tokens": 281,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 896,
+        "output_tokens": 450,
+        "input_token_details": {
+          "cache_read": 2663,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

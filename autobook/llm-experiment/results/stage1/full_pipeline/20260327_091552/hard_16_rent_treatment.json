@@ -1,0 +1,439 @@
+{
+  "test_case_id": "hard_16_rent_treatment",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Prepaid rent for 12 months of office space",
+    "rationale": "Under IFRS, a payment for 12 months of rent in advance represents a prepaid expense that provides future economic benefit. The $24,000 payment creates an asset (Prepaid Rent) that will be systematically expensed over the 12-month period as the benefit is consumed. The classifier tuples correctly identify this as an asset increase (debit) and asset decrease (credit) for the cash payment. No tax applies to residential or commercial rent in Canada (exempt supply under GST/HST rules).",
+    "lines": [
+      {
+        "account_name": "Prepaid Rent",
+        "type": "debit",
+        "amount": 24000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 24000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0429723,
+  "raw_cost_usd": 0.074781,
+  "total_latency_ms": 43720,
+  "total_input_tokens": 17632,
+  "total_output_tokens": 1459,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 525,
+      "output_tokens": 288,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2658,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0065349,
+      "raw_cost_usd": 0.012294,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "timing of rent expense recognition",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Recognize entire $24,000 as prepaid rent (asset) and amortize monthly over 12 months",
+              "Recognize entire $24,000 as rent expense immediately"
+            ],
+            "clarification_question": "Should the 12-month rent payment be recorded as a prepaid asset and expensed monthly, or expensed in full immediately?",
+            "why_entry_differs": "Prepaid treatment debits Prepaid Rent (asset) and amortizes monthly; immediate expense treatment debits Rent Expense in full. This affects both balance sheet and income statement presentation.",
+            "why_not_resolved": "While GAAP generally requires prepaid expenses to be capitalized as assets when they provide future benefit, the materiality threshold and accounting policy election (especially for smaller corporations) may permit immediate expensing. The transaction text states facts but doesn't indicate the entity's accounting policy choice, and no convention definitively resolves this for a general corporation."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 500,
+      "output_tokens": 134,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1662,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038586,
+      "raw_cost_usd": 0.006996,
+      "output": {
+        "reason": "Prepaid rent for 12 months = asset increase. Under IFRS, when rent is paid in advance for a future period, it is recorded as a prepaid expense (asset) rather than an immediate expense. The $24,000 represents future economic benefits that will be consumed over the 12-month lease period.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Prepaid rent for 12 months = asset increase. Under IFRS, when rent is paid in advance for a future period, it is recorded as a prepaid expense (asset) rather than an immediate expense. The $24,000 represents future economic benefits that will be consumed over the 12-month lease period."
+    },
+    "credit_classifier": {
+      "input_tokens": 498,
+      "output_tokens": 105,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1639,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034113000000000004,
+      "raw_cost_usd": 0.006492,
+      "output": {
+        "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent. The credit side reflects cash leaving the business, which is an asset decrease (1 line).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent. The credit side reflects cash leaving the business, which is an asset decrease (1 line)."
+    },
+    "debit_corrector": {
+      "input_tokens": 668,
+      "output_tokens": 190,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2312,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053472,
+      "raw_cost_usd": 0.009786,
+      "output": {
+        "reason": "The transaction involves prepaying 12 months of rent ($24,000). Under IFRS, when rent is paid in advance for a future period, it creates a prepaid expense asset (prepaid rent), not an immediate expense. The debit should increase an asset account (prepaid rent). The initial debit tuple (1,0,0,0,0,0) correctly classifies this as an asset increase. The credit tuple (0,0,0,1,0,0) showing asset decrease (cash paid by cheque) is consistent with the transaction. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves prepaying 12 months of rent ($24,000). Under IFRS, when rent is paid in advance for a future period, it creates a prepaid expense asset (prepaid rent), not an immediate expense. The debit should increase an asset account (prepaid rent). The initial debit tuple (1,0,0,0,0,0) correctly classifies this as an asset increase. The credit tuple (0,0,0,1,0,0) showing asset decrease (cash paid by cheque) is consistent with the transaction. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 668,
+      "output_tokens": 303,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2320,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.007044600000000001,
+      "raw_cost_usd": 0.011505,
+      "output": {
+        "reason": "The transaction describes Atlas Van Lines paying $24,000 by cheque for 12 months of rent in advance. This is a prepaid rent transaction.\n\nWhen rent is paid in advance:\n- Cash (asset) decreases by $24,000 \u2192 credit to cash\n- Prepaid rent (asset) increases by $24,000 \u2192 debit to prepaid rent\n\nThe debit tuple shows (1,0,0,0,0,0) = asset increase, which correctly represents the debit to prepaid rent (an asset).\n\nThe initial credit tuple shows (0,0,0,1,0,0) = asset decrease, which correctly represents the credit to cash/bank (an asset decrease when paid by cheque).\n\nBoth sides tell a consistent story: one asset (prepaid rent) increases while another asset (cash) decreases. This is the proper IFRS treatment for prepaid expenses. The rent will be expensed over the 12-month period through subsequent adjusting entries, but at the point of payment, it is recorded as an asset.\n\nNo correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes Atlas Van Lines paying $24,000 by cheque for 12 months of rent in advance. This is a prepaid rent transaction.\n\nWhen rent is paid in advance:\n- Cash (asset) decreases by $24,000 \u2192 credit to cash\n- Prepaid rent (asset) increases by $24,000 \u2192 debit to prepaid rent\n\nThe debit tuple shows (1,0,0,0,0,0) = asset increase, which correctly represents the debit to prepaid rent (an asset).\n\nThe initial credit tuple shows (0,0,0,1,0,0) = asset decrease, which correctly represents the credit to cash/bank (an asset decrease when paid by cheque).\n\nBoth sides tell a consistent story: one asset (prepaid rent) increases while another asset (cash) decreases. This is the proper IFRS treatment for prepaid expenses. The rent will be expensed over the 12-month period through subsequent adjusting entries, but at the point of payment, it is recorded as an asset.\n\nNo correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1041,
+      "output_tokens": 287,
+      "cache_read_tokens": 2663,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3704,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008226899999999999,
+      "raw_cost_usd": 0.015417,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Prepaid rent for 12 months of office space",
+        "rationale": "Under IFRS, a payment for 12 months of rent in advance represents a prepaid expense that provides future economic benefit. The $24,000 payment creates an asset (Prepaid Rent) that will be systematically expensed over the 12-month period as the benefit is consumed. The classifier tuples correctly identify this as an asset increase (debit) and asset decrease (credit) for the cash payment. No tax applies to residential or commercial rent in Canada (exempt supply under GST/HST rules).",
+        "lines": [
+          {
+            "account_name": "Prepaid Rent",
+            "type": "debit",
+            "amount": 24000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 24000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1951,
+      "output_tokens": 152,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3337,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008548799999999999,
+      "raw_cost_usd": 0.012291,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records prepaid rent under IFRS. Balance verified: $24,000 debit = $24,000 credit. Prepaid Rent (asset) debited for future economic benefit, Cash credited for payment by cheque. Amount matches transaction text. No tax lines required as rent is exempt from GST/HST in Canada. All accounts appropriate and directionally correct."
+      },
+      "reason": "Entry correctly records prepaid rent under IFRS. Balance verified: $24,000 debit = $24,000 credit. Prepaid Rent (asset) debited for future economic benefit, Cash credited for payment by cheque. Amount matches transaction text. No tax lines required as rent is exempt from GST/HST in Canada. All accounts appropriate and directionally correct."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "Should the 12-month rent payment be recorded as a prepaid asset and expensed monthly, or expensed in full immediately?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "timing of rent expense recognition",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Recognize entire $24,000 as prepaid rent (asset) and amortize monthly over 12 months",
+              "Recognize entire $24,000 as rent expense immediately"
+            ],
+            "clarification_question": "Should the 12-month rent payment be recorded as a prepaid asset and expensed monthly, or expensed in full immediately?",
+            "why_entry_differs": "Prepaid treatment debits Prepaid Rent (asset) and amortizes monthly; immediate expense treatment debits Rent Expense in full. This affects both balance sheet and income statement presentation.",
+            "why_not_resolved": "While GAAP generally requires prepaid expenses to be capitalized as assets when they provide future benefit, the materiality threshold and accounting policy election (especially for smaller corporations) may permit immediate expensing. The transaction text states facts but doesn't indicate the entity's accounting policy choice, and no convention definitively resolves this for a general corporation."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Prepaid rent for 12 months = asset increase. Under IFRS, when rent is paid in advance for a future period, it is recorded as a prepaid expense (asset) rather than an immediate expense. The $24,000 represents future economic benefits that will be consumed over the 12-month lease period.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent. The credit side reflects cash leaving the business, which is an asset decrease (1 line).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves prepaying 12 months of rent ($24,000). Under IFRS, when rent is paid in advance for a future period, it creates a prepaid expense asset (prepaid rent), not an immediate expense. The debit should increase an asset account (prepaid rent). The initial debit tuple (1,0,0,0,0,0) correctly classifies this as an asset increase. The credit tuple (0,0,0,1,0,0) showing asset decrease (cash paid by cheque) is consistent with the transaction. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes Atlas Van Lines paying $24,000 by cheque for 12 months of rent in advance. This is a prepaid rent transaction.\n\nWhen rent is paid in advance:\n- Cash (asset) decreases by $24,000 \u2192 credit to cash\n- Prepaid rent (asset) increases by $24,000 \u2192 debit to prepaid rent\n\nThe debit tuple shows (1,0,0,0,0,0) = asset increase, which correctly represents the debit to prepaid rent (an asset).\n\nThe initial credit tuple shows (0,0,0,1,0,0) = asset decrease, which correctly represents the credit to cash/bank (an asset decrease when paid by cheque).\n\nBoth sides tell a consistent story: one asset (prepaid rent) increases while another asset (cash) decreases. This is the proper IFRS treatment for prepaid expenses. The rent will be expensed over the 12-month period through subsequent adjusting entries, but at the point of payment, it is recorded as an asset.\n\nNo correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Prepaid rent for 12 months of office space",
+        "rationale": "Under IFRS, a payment for 12 months of rent in advance represents a prepaid expense that provides future economic benefit. The $24,000 payment creates an asset (Prepaid Rent) that will be systematically expensed over the 12-month period as the benefit is consumed. The classifier tuples correctly identify this as an asset increase (debit) and asset decrease (credit) for the cash payment. No tax applies to residential or commercial rent in Canada (exempt supply under GST/HST rules).",
+        "lines": [
+          {
+            "account_name": "Prepaid Rent",
+            "type": "debit",
+            "amount": 24000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 24000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records prepaid rent under IFRS. Balance verified: $24,000 debit = $24,000 credit. Prepaid Rent (asset) debited for future economic benefit, Cash credited for payment by cheque. Amount matches transaction text. No tax lines required as rent is exempt from GST/HST in Canada. All accounts appropriate and directionally correct."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 525,
+        "output_tokens": 288,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 500,
+        "output_tokens": 134,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 498,
+        "output_tokens": 105,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 668,
+        "output_tokens": 190,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 668,
+        "output_tokens": 303,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1041,
+        "output_tokens": 287,
+        "input_token_details": {
+          "cache_read": 2663,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1951,
+        "output_tokens": 152,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

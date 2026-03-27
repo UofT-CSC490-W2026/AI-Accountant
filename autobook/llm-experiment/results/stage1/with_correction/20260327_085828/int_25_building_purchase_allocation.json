@@ -1,0 +1,394 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of building and land for warehouse use, partial payment with balance deferred",
+    "rationale": "Under IFRS, when multiple assets are acquired in a basket purchase, the total cost must be allocated based on relative fair values. Total fair value = $8,000,000 (land) + $4,000,000 (building) = $12,000,000. Land allocation: ($8,000,000 / $12,000,000) \u00d7 $9,000,000 = $6,000,000. Building allocation: ($4,000,000 / $12,000,000) \u00d7 $9,000,000 = $3,000,000. Payment structure: 50% due in 6 months ($4,500,000) recorded as liability; 50% paid now ($4,500,000) plus 10% sales tax on the paid portion ($450,000) = $4,950,000 paid by cheque. The debit tuple (2,0,1,0,0,0) suggests 2 asset increases and 1 expense increase, but this is incorrect - the sales tax on asset purchases should be capitalized or recorded as HST Receivable (if recoverable), not expensed. I'm overriding to record 3 asset lines (Land, Building, HST Receivable) as the tax is recoverable input tax. Credit tuple (1,0,0,1,0,0) correctly identifies 1 liability increase (deferred payment) and 1 asset decrease (cash/bank).",
+    "lines": [
+      {
+        "account_name": "Land",
+        "type": "debit",
+        "amount": 6000000.0
+      },
+      {
+        "account_name": "Building",
+        "type": "debit",
+        "amount": 3000000.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 450000.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 4500000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 4950000.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0389052,
+  "raw_cost_usd": 0.061056,
+  "total_latency_ms": 34098,
+  "total_input_tokens": 11687,
+  "total_output_tokens": 1733,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 570,
+      "output_tokens": 252,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1732,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058386,
+      "raw_cost_usd": 0.008976,
+      "output": {
+        "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost or recorded separately depending on recoverability, but the core transaction shows 2 distinct asset acquisitions (land and building).",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost or recorded separately depending on recoverability, but the core transaction shows 2 distinct asset acquisitions (land and building)."
+    },
+    "credit_classifier": {
+      "input_tokens": 568,
+      "output_tokens": 228,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1709,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0054663,
+      "raw_cost_usd": 0.008547,
+      "output": {
+        "reason": "The credit side consists of:\n1. Cash/Bank account decrease for the payment made by cheque = $4,500,000 (50% of $9,000,000) + $900,000 (10% sales tax on $9,000,000) = $5,400,000 \u2192 Asset decrease (1 line)\n2. Accounts Payable or Note Payable increase for the deferred payment = $4,500,000 (remaining 50% due in 6 months) \u2192 Liability increase (1 line)\n\nTherefore: 1 liability increase line + 0 equity increase + 0 revenue increase + 1 asset decrease + 0 dividend decrease + 0 expense decrease",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The credit side consists of:\n1. Cash/Bank account decrease for the payment made by cheque = $4,500,000 (50% of $9,000,000) + $900,000 (10% sales tax on $9,000,000) = $5,400,000 \u2192 Asset decrease (1 line)\n2. Accounts Payable or Note Payable increase for the deferred payment = $4,500,000 (remaining 50% due in 6 months) \u2192 Liability increase (1 line)\n\nTherefore: 1 liability increase line + 0 equity increase + 0 revenue increase + 1 asset decrease + 0 dividend decrease + 0 expense decrease"
+    },
+    "debit_corrector": {
+      "input_tokens": 738,
+      "output_tokens": 233,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2382,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0062022,
+      "raw_cost_usd": 0.010641,
+      "output": {
+        "reason": "The transaction involves three debit components: (1) Land asset increase - allocated portion of $8M/$12M \u00d7 $9M = $6M, (2) Building asset increase - allocated portion of $4M/$12M \u00d7 $9M = $3M, and (3) Sales tax expense increase - 10% \u00d7 $4.5M paid now = $450K. The sales tax is an expense under IFRS as it is not recoverable input tax in this context. The initial tuple (2,0,0,0,0,0) correctly identified 2 asset increases (land and building) but missed the sales tax expense component. Corrected to (2,0,1,0,0,0) to include the expense increase for sales tax paid.",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves three debit components: (1) Land asset increase - allocated portion of $8M/$12M \u00d7 $9M = $6M, (2) Building asset increase - allocated portion of $4M/$12M \u00d7 $9M = $3M, and (3) Sales tax expense increase - 10% \u00d7 $4.5M paid now = $450K. The sales tax is an expense under IFRS as it is not recoverable input tax in this context. The initial tuple (2,0,0,0,0,0) correctly identified 2 asset increases (land and building) but missed the sales tax expense component. Corrected to (2,0,1,0,0,0) to include the expense increase for sales tax paid."
+    },
+    "credit_corrector": {
+      "input_tokens": 738,
+      "output_tokens": 388,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2390,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0085296,
+      "raw_cost_usd": 0.01299,
+      "output": {
+        "reason": "The initial credit tuple is correct. Let me analyze the transaction:\n\nMondelez purchased a building for $9,000,000. The payment structure is:\n- 50% ($4,500,000) is due in 6 months \u2192 creates a liability (accounts payable)\n- 50% ($4,500,000) plus 10% sales tax ($900,000) = $5,400,000 paid immediately by cheque \u2192 decreases cash (asset decrease)\n\nOn the credit side:\n- Slot a (liability increase) = 1: Correct. The $4,500,000 deferred payment creates a liability increase (accounts payable or note payable).\n- Slot d (asset decrease) = 1: Correct. The $5,400,000 cheque payment decreases cash, which is an asset decrease.\n\nThe debit tuple shows (2,0,0,0,0,0) = 2 asset increases, which makes sense because:\n1. Land component increases (asset)\n2. Building component increases (asset)\n\nThe fair value allocation ($8M land, $4M building totaling $12M) is used to allocate the $9M purchase price proportionally between land and building for accounting purposes, but doesn't change the credit side classification.\n\nThe credit and debit sides tell a consistent story: acquiring two asset components (land and building) by paying partly in cash and partly on credit. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. Let me analyze the transaction:\n\nMondelez purchased a building for $9,000,000. The payment structure is:\n- 50% ($4,500,000) is due in 6 months \u2192 creates a liability (accounts payable)\n- 50% ($4,500,000) plus 10% sales tax ($900,000) = $5,400,000 paid immediately by cheque \u2192 decreases cash (asset decrease)\n\nOn the credit side:\n- Slot a (liability increase) = 1: Correct. The $4,500,000 deferred payment creates a liability increase (accounts payable or note payable).\n- Slot d (asset decrease) = 1: Correct. The $5,400,000 cheque payment decreases cash, which is an asset decrease.\n\nThe debit tuple shows (2,0,0,0,0,0) = 2 asset increases, which makes sense because:\n1. Land component increases (asset)\n2. Building component increases (asset)\n\nThe fair value allocation ($8M land, $4M building totaling $12M) is used to allocate the $9M purchase price proportionally between land and building for accounting purposes, but doesn't change the credit side classification.\n\nThe credit and debit sides tell a consistent story: acquiring two asset components (land and building) by paying partly in cash and partly on credit. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 869,
+      "output_tokens": 632,
+      "cache_read_tokens": 2605,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3474,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0128685,
+      "raw_cost_usd": 0.019902,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of building and land for warehouse use, partial payment with balance deferred",
+        "rationale": "Under IFRS, when multiple assets are acquired in a basket purchase, the total cost must be allocated based on relative fair values. Total fair value = $8,000,000 (land) + $4,000,000 (building) = $12,000,000. Land allocation: ($8,000,000 / $12,000,000) \u00d7 $9,000,000 = $6,000,000. Building allocation: ($4,000,000 / $12,000,000) \u00d7 $9,000,000 = $3,000,000. Payment structure: 50% due in 6 months ($4,500,000) recorded as liability; 50% paid now ($4,500,000) plus 10% sales tax on the paid portion ($450,000) = $4,950,000 paid by cheque. The debit tuple (2,0,1,0,0,0) suggests 2 asset increases and 1 expense increase, but this is incorrect - the sales tax on asset purchases should be capitalized or recorded as HST Receivable (if recoverable), not expensed. I'm overriding to record 3 asset lines (Land, Building, HST Receivable) as the tax is recoverable input tax. Credit tuple (1,0,0,1,0,0) correctly identifies 1 liability increase (deferred payment) and 1 asset decrease (cash/bank).",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 450000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4950000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost or recorded separately depending on recoverability, but the core transaction shows 2 distinct asset acquisitions (land and building).",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit side consists of:\n1. Cash/Bank account decrease for the payment made by cheque = $4,500,000 (50% of $9,000,000) + $900,000 (10% sales tax on $9,000,000) = $5,400,000 \u2192 Asset decrease (1 line)\n2. Accounts Payable or Note Payable increase for the deferred payment = $4,500,000 (remaining 50% due in 6 months) \u2192 Liability increase (1 line)\n\nTherefore: 1 liability increase line + 0 equity increase + 0 revenue increase + 1 asset decrease + 0 dividend decrease + 0 expense decrease",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves three debit components: (1) Land asset increase - allocated portion of $8M/$12M \u00d7 $9M = $6M, (2) Building asset increase - allocated portion of $4M/$12M \u00d7 $9M = $3M, and (3) Sales tax expense increase - 10% \u00d7 $4.5M paid now = $450K. The sales tax is an expense under IFRS as it is not recoverable input tax in this context. The initial tuple (2,0,0,0,0,0) correctly identified 2 asset increases (land and building) but missed the sales tax expense component. Corrected to (2,0,1,0,0,0) to include the expense increase for sales tax paid.",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. Let me analyze the transaction:\n\nMondelez purchased a building for $9,000,000. The payment structure is:\n- 50% ($4,500,000) is due in 6 months \u2192 creates a liability (accounts payable)\n- 50% ($4,500,000) plus 10% sales tax ($900,000) = $5,400,000 paid immediately by cheque \u2192 decreases cash (asset decrease)\n\nOn the credit side:\n- Slot a (liability increase) = 1: Correct. The $4,500,000 deferred payment creates a liability increase (accounts payable or note payable).\n- Slot d (asset decrease) = 1: Correct. The $5,400,000 cheque payment decreases cash, which is an asset decrease.\n\nThe debit tuple shows (2,0,0,0,0,0) = 2 asset increases, which makes sense because:\n1. Land component increases (asset)\n2. Building component increases (asset)\n\nThe fair value allocation ($8M land, $4M building totaling $12M) is used to allocate the $9M purchase price proportionally between land and building for accounting purposes, but doesn't change the credit side classification.\n\nThe credit and debit sides tell a consistent story: acquiring two asset components (land and building) by paying partly in cash and partly on credit. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of building and land for warehouse use, partial payment with balance deferred",
+        "rationale": "Under IFRS, when multiple assets are acquired in a basket purchase, the total cost must be allocated based on relative fair values. Total fair value = $8,000,000 (land) + $4,000,000 (building) = $12,000,000. Land allocation: ($8,000,000 / $12,000,000) \u00d7 $9,000,000 = $6,000,000. Building allocation: ($4,000,000 / $12,000,000) \u00d7 $9,000,000 = $3,000,000. Payment structure: 50% due in 6 months ($4,500,000) recorded as liability; 50% paid now ($4,500,000) plus 10% sales tax on the paid portion ($450,000) = $4,950,000 paid by cheque. The debit tuple (2,0,1,0,0,0) suggests 2 asset increases and 1 expense increase, but this is incorrect - the sales tax on asset purchases should be capitalized or recorded as HST Receivable (if recoverable), not expensed. I'm overriding to record 3 asset lines (Land, Building, HST Receivable) as the tax is recoverable input tax. Credit tuple (1,0,0,1,0,0) correctly identifies 1 liability increase (deferred payment) and 1 asset decrease (cash/bank).",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 450000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4950000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 570,
+        "output_tokens": 252,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 568,
+        "output_tokens": 228,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 738,
+        "output_tokens": 233,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 738,
+        "output_tokens": 388,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 869,
+        "output_tokens": 632,
+        "input_token_details": {
+          "cache_read": 2605,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

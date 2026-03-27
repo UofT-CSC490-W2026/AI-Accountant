@@ -1,0 +1,690 @@
+{
+  "test_case_id": "basic_09_repurchase_stock",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Repurchase of 100 shares from shareholders",
+    "rationale": "Under IFRS (IAS 32), share repurchases reduce equity directly. The fix context specifies to use 'Share Capital' as the debit account (not Treasury Stock, which is US GAAP). The transaction reduces equity (e=1) and reduces cash asset (d=1). No tax applies to equity transactions.",
+    "lines": [
+      {
+        "account_name": "Share Capital",
+        "type": "debit",
+        "amount": 200.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 200.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0819045,
+  "raw_cost_usd": 0.141048,
+  "total_latency_ms": 51956,
+  "total_input_tokens": 34921,
+  "total_output_tokens": 2419,
+  "total_llm_calls": 13,
+  "iteration_count": 2,
+  "final_decision": "APPROVED",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 514,
+      "output_tokens": 189,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2647,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0050168999999999995,
+      "raw_cost_usd": 0.010776,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "disposition of repurchased shares",
+            "resolved": true,
+            "resolution": "'Bought back' without mention of cancellation or retirement defaults to treasury stock under standard convention",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "which shareholders sold the shares",
+            "resolved": true,
+            "resolution": "Shareholder identity does not change the entry structure - all share repurchases follow the same accounting treatment regardless of which specific shareholder sold",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method",
+            "resolved": true,
+            "resolution": "Explicitly stated as 'cash' in the transaction description",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 487,
+      "output_tokens": 91,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1628,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031683,
+      "raw_cost_usd": 0.006249,
+      "output": {
+        "reason": "Buying back shares from shareholders for cash results in: (1) Cash leaving the business = asset decrease (one credit line)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Buying back shares from shareholders for cash results in: (1) Cash leaving the business = asset decrease (one credit line)"
+    },
+    "debit_classifier": {
+      "input_tokens": 1067,
+      "output_tokens": 277,
+      "cache_read_tokens": 2324,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3391,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0080532,
+      "raw_cost_usd": 0.014328,
+      "output": {
+        "reason": "Under IFRS (IAS 32), share buybacks reduce equity directly. The transaction has two debit lines: (1) Equity decrease (Share Capital or Contributed Surplus reduction) for $200, and (2) Asset decrease (Cash) for $200. Wait - asset decrease is a CREDIT, not a debit. On the DEBIT side only: we have 1 line for equity decrease when the shares are retired/cancelled.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": "Under IFRS (IAS 32), share buybacks reduce equity directly. The transaction has two debit lines: (1) Equity decrease (Share Capital or Contributed Surplus reduction) for $200, and (2) Asset decrease (Cash) for $200. Wait - asset decrease is a CREDIT, not a debit. On the DEBIT side only: we have 1 line for equity decrease when the shares are retired/cancelled."
+    },
+    "debit_corrector": {
+      "input_tokens": 1314,
+      "output_tokens": 344,
+      "cache_read_tokens": 3288,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4602,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0100884,
+      "raw_cost_usd": 0.018966,
+      "output": {
+        "reason": "The transaction is a share buyback (treasury stock transaction). Under IFRS, when a company repurchases its own shares from shareholders, it reduces equity. The debit side correctly shows equity decrease (slot e=1), representing the reduction in shareholders' equity. The credit side shows asset decrease (cash going out, slot d=1), which is consistent. This is the proper accounting treatment for a share buyback. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": "The transaction is a share buyback (treasury stock transaction). Under IFRS, when a company repurchases its own shares from shareholders, it reduces equity. The debit side correctly shows equity decrease (slot e=1), representing the reduction in shareholders' equity. The credit side shows asset decrease (cash going out, slot d=1), which is consistent. This is the proper accounting treatment for a share buyback. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 1314,
+      "output_tokens": 449,
+      "cache_read_tokens": 3304,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4618,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0116682,
+      "raw_cost_usd": 0.020589,
+      "output": {
+        "reason": "The transaction is a share buyback (treasury share transaction). The company pays $200 cash to repurchase its own shares. \n\nOn the credit side: Cash (an asset) decreases by $200, correctly classified as slot d (asset decrease).\n\nOn the debit side: The debit tuple shows slot e (equity decrease), which is correct - buying back shares reduces equity under IFRS (typically debiting treasury shares or share capital and any related premium accounts).\n\nThe two tuples tell a consistent story:\n- Debit: Equity decrease (buyback reduces equity)\n- Credit: Asset decrease (cash paid out)\n\nThis is the proper accounting treatment for a share buyback under IFRS. The initial credit tuple is correct and requires no changes.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a share buyback (treasury share transaction). The company pays $200 cash to repurchase its own shares. \n\nOn the credit side: Cash (an asset) decreases by $200, correctly classified as slot d (asset decrease).\n\nOn the debit side: The debit tuple shows slot e (equity decrease), which is correct - buying back shares reduces equity under IFRS (typically debiting treasury shares or share capital and any related premium accounts).\n\nThe two tuples tell a consistent story:\n- Debit: Equity decrease (buyback reduces equity)\n- Credit: Asset decrease (cash paid out)\n\nThis is the proper accounting treatment for a share buyback under IFRS. The initial credit tuple is correct and requires no changes."
+    },
+    "entry_builder": {
+      "input_tokens": 2162,
+      "output_tokens": 516,
+      "cache_read_tokens": 5334,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7496,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0158262,
+      "raw_cost_usd": 0.030227999999999998,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Repurchase of 100 shares from shareholders",
+        "rationale": "Under IFRS (IAS 32), share repurchases reduce equity directly. The fix context specifies to use 'Share Capital' as the debit account (not Treasury Stock, which is US GAAP). The transaction reduces equity (e=1) and reduces cash asset (d=1). No tax applies to equity transactions.",
+        "lines": [
+          {
+            "account_name": "Share Capital",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4513,
+      "output_tokens": 334,
+      "cache_read_tokens": 2772,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7285,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.019380599999999998,
+      "raw_cost_usd": 0.026865,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records share repurchase under IFRS. Balance verified: $200 debit = $200 credit. Under IAS 32, repurchased shares reduce equity directly (Share Capital debited for $200) with corresponding Cash credit for $200. Amounts match transaction text (100 shares \u00d7 $200 = $200 total). No tax applies to equity transactions. All necessary lines present. Directionality correct: equity decrease debited, asset decrease credited."
+      },
+      "reason": "Entry correctly records share repurchase under IFRS. Balance verified: $200 debit = $200 credit. Under IAS 32, repurchased shares reduce equity directly (Share Capital debited for $200) with corresponding Cash credit for $200. Amounts match transaction text (100 shares \u00d7 $200 = $200 total). No tax applies to equity transactions. All necessary lines present. Directionality correct: equity decrease debited, asset decrease credited."
+    },
+    "diagnostician": {
+      "input_tokens": 1645,
+      "output_tokens": 219,
+      "cache_read_tokens": 1609,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3254,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0087027,
+      "raw_cost_usd": 0.013047,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    1,
+    5
+  ],
+  "rejection_reason": "Under IFRS (IAS 32), share buybacks should be recorded as a direct deduction from equity, not through a Treasury Stock account. The correct treatment is to debit Share Capital (or Contributed Surplus if reacquiring at amounts different from original issue) and credit Cash. Treasury Stock is a US GAAP concept not used under IFRS. The entry uses an incorrect account name for the IFRS framework.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "disposition of repurchased shares",
+            "resolved": true,
+            "resolution": "'Bought back' without mention of cancellation or retirement defaults to treasury stock under standard convention",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "which shareholders sold the shares",
+            "resolved": true,
+            "resolution": "Shareholder identity does not change the entry structure - all share repurchases follow the same accounting treatment regardless of which specific shareholder sold",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method",
+            "resolved": true,
+            "resolution": "Explicitly stated as 'cash' in the transaction description",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      {
+        "ambiguities": [
+          {
+            "aspect": "disposition of repurchased shares",
+            "resolved": true,
+            "resolution": "'Bought back' without mention of cancellation or retirement defaults to treasury stock under standard convention",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "which shareholders sold the shares",
+            "resolved": true,
+            "resolution": "Shareholder identity does not change the entry structure - all share repurchases follow the same accounting treatment regardless of which specific shareholder sold",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method",
+            "resolved": true,
+            "resolution": "Explicitly stated as 'cash' in the transaction description",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Share buyback (treasury stock) = equity decrease. When a company repurchases its own shares from shareholders, it reduces equity. Under IFRS, treasury shares are recorded as a reduction in equity, debited to an equity contra account.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "reason": "Under IFRS (IAS 32), share buybacks reduce equity directly. The transaction has two debit lines: (1) Equity decrease (Share Capital or Contributed Surplus reduction) for $200, and (2) Asset decrease (Cash) for $200. Wait - asset decrease is a CREDIT, not a debit. On the DEBIT side only: we have 1 line for equity decrease when the shares are retired/cancelled.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Buying back shares from shareholders for cash results in: (1) Cash leaving the business = asset decrease (one credit line)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Buying back shares from shareholders for cash results in: (1) Cash leaving the business = asset decrease (one credit line)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Transaction is a share buyback: the company repurchases its own shares from shareholders for cash. Under IFRS, treasury share transactions reduce equity (the company is buying back its own equity). The debit side should show equity decrease (slot e), and the credit side should show asset decrease/cash outflow (slot d). The initial debit tuple (0,0,0,0,1,0) correctly records equity decrease. The credit tuple (0,0,0,1,0,0) correctly records asset decrease. Both sides tell a consistent story. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction is a share buyback (treasury stock transaction). Under IFRS, when a company repurchases its own shares from shareholders, it reduces equity. The debit side correctly shows equity decrease (slot e=1), representing the reduction in shareholders' equity. The credit side shows asset decrease (cash going out, slot d=1), which is consistent. This is the proper accounting treatment for a share buyback. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction is a share buyback (treasury stock transaction). The company pays $200 cash to repurchase its own shares. Under IFRS, this is recorded as:\n- Debit: Equity decrease (reducing share capital or creating treasury stock contra-equity account) - shown correctly in debit tuple as (0,0,0,0,1,0)\n- Credit: Asset decrease (cash going out) - shown correctly in initial credit tuple as (0,0,0,1,0,0)\n\nThe initial credit tuple correctly identifies this as an asset decrease (cash reduction). The debit and credit sides are consistent and tell the same story: equity is reduced and cash is paid out. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction is a share buyback (treasury share transaction). The company pays $200 cash to repurchase its own shares. \n\nOn the credit side: Cash (an asset) decreases by $200, correctly classified as slot d (asset decrease).\n\nOn the debit side: The debit tuple shows slot e (equity decrease), which is correct - buying back shares reduces equity under IFRS (typically debiting treasury shares or share capital and any related premium accounts).\n\nThe two tuples tell a consistent story:\n- Debit: Equity decrease (buyback reduces equity)\n- Credit: Asset decrease (cash paid out)\n\nThis is the proper accounting treatment for a share buyback under IFRS. The initial credit tuple is correct and requires no changes.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Repurchase of 100 common shares from shareholders for treasury",
+        "rationale": "Share buyback reduces equity by recording treasury stock (contra-equity account). Debit Treasury Stock for $200 (equity decrease, slot e=1) and credit Cash for $200 (asset decrease, slot d=1). Under IFRS, repurchased shares are typically held as treasury stock until retired or reissued. This is a capital transaction between the company and its shareholders, not subject to HST/GST. Total debits ($200) = total credits ($200).",
+        "lines": [
+          {
+            "account_name": "Treasury Stock",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Repurchase of 100 shares from shareholders",
+        "rationale": "Under IFRS (IAS 32), share repurchases reduce equity directly. The fix context specifies to use 'Share Capital' as the debit account (not Treasury Stock, which is US GAAP). The transaction reduces equity (e=1) and reduces cash asset (d=1). No tax applies to equity transactions.",
+        "lines": [
+          {
+            "account_name": "Share Capital",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Under IFRS (IAS 32), share buybacks should be recorded as a direct deduction from equity, not through a Treasury Stock account. The correct treatment is to debit Share Capital (or Contributed Surplus if reacquiring at amounts different from original issue) and credit Cash. Treasury Stock is a US GAAP concept not used under IFRS. The entry uses an incorrect account name for the IFRS framework."
+      },
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records share repurchase under IFRS. Balance verified: $200 debit = $200 credit. Under IAS 32, repurchased shares reduce equity directly (Share Capital debited for $200) with corresponding Cash credit for $200. Amounts match transaction text (100 shares \u00d7 $200 = $200 total). No tax applies to equity transactions. All necessary lines present. Directionality correct: equity decrease debited, asset decrease credited."
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 1,
+            "fix_context": "Under IFRS (IAS 32), share buybacks are recorded as direct reductions to Share Capital or Contributed Surplus, not Treasury Stock (which is US GAAP). Classify as equity decrease (slot e) but recognize the account must be Share Capital, not Treasury Stock."
+          },
+          {
+            "agent": 5,
+            "fix_context": "Under IFRS (IAS 32), use 'Share Capital' as the debit account name, not 'Treasury Stock'. Treasury Stock is a US GAAP concept; IFRS requires direct deduction from equity accounts like Share Capital or Contributed Surplus."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [
+      "Under IFRS (IAS 32), share buybacks are recorded as direct reductions to Share Capital or Contributed Surplus, not Treasury Stock (which is US GAAP). Classify as equity decrease (slot e) but recognize the account must be Share Capital, not Treasury Stock."
+    ],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Under IFRS (IAS 32), use 'Share Capital' as the debit account name, not 'Treasury Stock'. Treasury Stock is a US GAAP concept; IFRS requires direct deduction from equity accounts like Share Capital or Contributed Surplus."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 514,
+        "output_tokens": 189,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 487,
+        "output_tokens": 91,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 489,
+        "output_tokens": 115,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 657,
+        "output_tokens": 188,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 657,
+        "output_tokens": 220,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1038,
+        "output_tokens": 276,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1775,
+        "output_tokens": 162,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1645,
+        "output_tokens": 219,
+        "input_token_details": {
+          "cache_read": 1609,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 578,
+        "output_tokens": 162,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 657,
+        "output_tokens": 156,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 657,
+        "output_tokens": 229,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1124,
+        "output_tokens": 240,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2738,
+        "output_tokens": 172,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

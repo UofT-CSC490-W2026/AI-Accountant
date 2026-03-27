@@ -1,0 +1,377 @@
+{
+  "test_case_id": "int_31_vehicle_nonrecoverable_tax",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of sedan from Ford for executive use, financed through 3-month dealer payment plan",
+    "rationale": "The vehicle is recorded as a capital asset (PPE) owned by the corporation. The $48,000 base cost is capitalized to Vehicle/Automobile asset account. The $4,800 sales tax (10% as stated) is non-recoverable and must be capitalized as part of the asset cost under IFRS, bringing total asset value to $52,800. The entire amount is financed through a dealer payment plan, creating a liability. The debit tuple (2,0,0,0,0,0) correctly indicates two asset increases: the vehicle itself and the capitalized sales tax component. The credit tuple (1,0,0,0,0,0) correctly indicates one liability increase for the financing. While the transaction mentions both commuting and business use, the fact that the corporation is purchasing and financing the vehicle indicates corporate ownership as a business asset. Any personal use component would be handled through separate taxable benefit calculations in payroll, not at the point of acquisition. The 10% tax rate is used as stated in the transaction, though this is unusual for Ontario (typically 13% HST).",
+    "lines": [
+      {
+        "account_name": "Vehicles",
+        "type": "debit",
+        "amount": 48000.0
+      },
+      {
+        "account_name": "Vehicles",
+        "type": "debit",
+        "amount": 4800.0
+      },
+      {
+        "account_name": "Loan Payable",
+        "type": "credit",
+        "amount": 52800.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.030503699999999998,
+  "raw_cost_usd": 0.049671,
+  "total_latency_ms": 34561,
+  "total_input_tokens": 10117,
+  "total_output_tokens": 1288,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 561,
+      "output_tokens": 528,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2694,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0102429,
+      "raw_cost_usd": 0.016002,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "asset classification of vehicle",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Capital asset (vehicle used for business purposes)",
+              "Taxable benefit / compensation to executive (personal use vehicle)"
+            ],
+            "clarification_question": "Is this vehicle owned by the corporation as a business asset, or is it being provided to the executive as compensation/benefit?",
+            "why_entry_differs": "If business asset: debit Vehicle/PPE and Sales Tax (asset), credit Loan Payable. If compensation: debit Compensation Expense or Shareholder Loan, credit Loan Payable, with ongoing taxable benefit implications",
+            "why_not_resolved": "The description states 'executive's commuting and business use' which is ambiguous. Commuting is typically personal use, while business use suggests corporate asset. The transaction doesn't clarify whether the corporation owns the vehicle as an asset or if this is a benefit being provided to the executive. Standard convention doesn't resolve this because both interpretations are common in practice."
+          },
+          {
+            "aspect": "sales tax rate",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "10% is correct rate for this transaction type",
+              "10% is an error (ON HST is 13%)"
+            ],
+            "clarification_question": "Can you confirm the 10% sales tax rate is correct? Ontario's HST rate is 13% for most purchases.",
+            "why_entry_differs": "If 10% is correct: record $4,800 as sales tax. If it's an error and should be 13%: the total should be $54,240 with $6,240 sales tax, affecting both the asset value and loan payable amounts",
+            "why_not_resolved": "Ontario's standard HST rate is 13%, not 10%. The stated 10% rate is inconsistent with provincial tax law. While the transaction explicitly states 10%, this appears to be a factual error that would affect the accuracy of the journal entry. No exemption or special rate for vehicle purchases would result in 10% in Ontario."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 534,
+      "output_tokens": 114,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1675,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036543,
+      "raw_cost_usd": 0.006735,
+      "output": {
+        "reason": "The credit side has one line: the dealer payment plan creates a liability (accounts payable or notes payable) of $52,800. This is a liability increase. The vehicle asset and sales tax asset are debited, not credited.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The credit side has one line: the dealer payment plan creates a liability (accounts payable or notes payable) of $52,800. This is a liability increase. The vehicle asset and sales tax asset are debited, not credited."
+    },
+    "debit_classifier": {
+      "input_tokens": 536,
+      "output_tokens": 171,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1698,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004521600000000001,
+      "raw_cost_usd": 0.007659,
+      "output": {
+        "reason": "Two asset increases on the debit side: (1) Vehicle/Equipment asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, but since it's explicitly stated as a separate component in the transaction, it represents a second debit line. Both are asset acquisitions debited to the books.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two asset increases on the debit side: (1) Vehicle/Equipment asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, but since it's explicitly stated as a separate component in the transaction, it represents a second debit line. Both are asset acquisitions debited to the books."
+    },
+    "entry_builder": {
+      "input_tokens": 1387,
+      "output_tokens": 475,
+      "cache_read_tokens": 2663,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4050,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.012084899999999999,
+      "raw_cost_usd": 0.019275,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of sedan from Ford for executive use, financed through 3-month dealer payment plan",
+        "rationale": "The vehicle is recorded as a capital asset (PPE) owned by the corporation. The $48,000 base cost is capitalized to Vehicle/Automobile asset account. The $4,800 sales tax (10% as stated) is non-recoverable and must be capitalized as part of the asset cost under IFRS, bringing total asset value to $52,800. The entire amount is financed through a dealer payment plan, creating a liability. The debit tuple (2,0,0,0,0,0) correctly indicates two asset increases: the vehicle itself and the capitalized sales tax component. The credit tuple (1,0,0,0,0,0) correctly indicates one liability increase for the financing. While the transaction mentions both commuting and business use, the fact that the corporation is purchasing and financing the vehicle indicates corporate ownership as a business asset. Any personal use component would be handled through separate taxable benefit calculations in payroll, not at the point of acquisition. The 10% tax rate is used as stated in the transaction, though this is unusual for Ontario (typically 13% HST).",
+        "lines": [
+          {
+            "account_name": "Vehicles",
+            "type": "debit",
+            "amount": 48000.0
+          },
+          {
+            "account_name": "Vehicles",
+            "type": "debit",
+            "amount": 4800.0
+          },
+          {
+            "account_name": "Loan Payable",
+            "type": "credit",
+            "amount": 52800.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "asset classification of vehicle",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Capital asset (vehicle used for business purposes)",
+              "Taxable benefit / compensation to executive (personal use vehicle)"
+            ],
+            "clarification_question": "Is this vehicle owned by the corporation as a business asset, or is it being provided to the executive as compensation/benefit?",
+            "why_entry_differs": "If business asset: debit Vehicle/PPE and Sales Tax (asset), credit Loan Payable. If compensation: debit Compensation Expense or Shareholder Loan, credit Loan Payable, with ongoing taxable benefit implications",
+            "why_not_resolved": "The description states 'executive's commuting and business use' which is ambiguous. Commuting is typically personal use, while business use suggests corporate asset. The transaction doesn't clarify whether the corporation owns the vehicle as an asset or if this is a benefit being provided to the executive. Standard convention doesn't resolve this because both interpretations are common in practice."
+          },
+          {
+            "aspect": "sales tax rate",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "10% is correct rate for this transaction type",
+              "10% is an error (ON HST is 13%)"
+            ],
+            "clarification_question": "Can you confirm the 10% sales tax rate is correct? Ontario's HST rate is 13% for most purchases.",
+            "why_entry_differs": "If 10% is correct: record $4,800 as sales tax. If it's an error and should be 13%: the total should be $54,240 with $6,240 sales tax, affecting both the asset value and loan payable amounts",
+            "why_not_resolved": "Ontario's standard HST rate is 13%, not 10%. The stated 10% rate is inconsistent with provincial tax law. While the transaction explicitly states 10%, this appears to be a factual error that would affect the accuracy of the journal entry. No exemption or special rate for vehicle purchases would result in 10% in Ontario."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Two asset increases on the debit side: (1) Vehicle/Equipment asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, but since it's explicitly stated as a separate component in the transaction, it represents a second debit line. Both are asset acquisitions debited to the books.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit side has one line: the dealer payment plan creates a liability (accounts payable or notes payable) of $52,800. This is a liability increase. The vehicle asset and sales tax asset are debited, not credited.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Two asset increases on the debit side: (1) Vehicle/Equipment asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, but since it's explicitly stated as a separate component in the transaction, it represents a second debit line. Both are asset acquisitions debited to the books.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The credit side has one line: the dealer payment plan creates a liability (accounts payable or notes payable) of $52,800. This is a liability increase. The vehicle asset and sales tax asset are debited, not credited.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of sedan from Ford for executive use, financed through 3-month dealer payment plan",
+        "rationale": "The vehicle is recorded as a capital asset (PPE) owned by the corporation. The $48,000 base cost is capitalized to Vehicle/Automobile asset account. The $4,800 sales tax (10% as stated) is non-recoverable and must be capitalized as part of the asset cost under IFRS, bringing total asset value to $52,800. The entire amount is financed through a dealer payment plan, creating a liability. The debit tuple (2,0,0,0,0,0) correctly indicates two asset increases: the vehicle itself and the capitalized sales tax component. The credit tuple (1,0,0,0,0,0) correctly indicates one liability increase for the financing. While the transaction mentions both commuting and business use, the fact that the corporation is purchasing and financing the vehicle indicates corporate ownership as a business asset. Any personal use component would be handled through separate taxable benefit calculations in payroll, not at the point of acquisition. The 10% tax rate is used as stated in the transaction, though this is unusual for Ontario (typically 13% HST).",
+        "lines": [
+          {
+            "account_name": "Vehicles",
+            "type": "debit",
+            "amount": 48000.0
+          },
+          {
+            "account_name": "Vehicles",
+            "type": "debit",
+            "amount": 4800.0
+          },
+          {
+            "account_name": "Loan Payable",
+            "type": "credit",
+            "amount": 52800.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 561,
+        "output_tokens": 528,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 534,
+        "output_tokens": 114,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 536,
+        "output_tokens": 171,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1387,
+        "output_tokens": 475,
+        "input_token_details": {
+          "cache_read": 2663,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}
