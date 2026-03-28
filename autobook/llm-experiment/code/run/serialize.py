@@ -69,22 +69,12 @@ def result_to_dict(m: TestCaseMetrics, model: str) -> dict:
 
 def save_results(results: list[TestCaseMetrics], variant_name: str, model: str,
                   experiment: str = "default") -> Path:
-    """Save results to results/<experiment>/<variant>/<timestamp>/ with meta.json."""
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-    run_dir = Path("results") / experiment / variant_name / timestamp
+    """Save results to results/<experiment>/<variant>/ (flat, no timestamp subdir)."""
+    run_dir = Path("results") / experiment / variant_name
     run_dir.mkdir(parents=True, exist_ok=True)
 
     for m in results:
         d = result_to_dict(m, model)
         (run_dir / f"{m.test_case_id}.json").write_text(json.dumps(d, indent=2, default=str))
-
-    meta = {
-        "variant": variant_name,
-        "model": model,
-        "timestamp": timestamp,
-        "test_cases": [m.test_case_id for m in results],
-    }
-    (run_dir / "meta.json").write_text(json.dumps(meta, indent=2))
 
     return run_dir

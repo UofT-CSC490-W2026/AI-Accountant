@@ -18,13 +18,13 @@ def gen_accuracy_non_ambiguous(data: dict) -> str:
             f"  {esc(name)} & {_cnt(int(m.get('decision_accuracy_non_ambig', 0) * nn), nn, m.get('decision_accuracy_non_ambig'))} "
             f"& {_cnt(m.get('exact_matches', 0), nn, m.get('tuple_match_rate'))} "
             f"& {_cnt(m.get('entry_matches', 0), nn, m.get('entry_match_rate'))} "
-            f"& {fmt_pct(m.get('mean_slot_accuracy'))} \\\\"
+            f"& {_cnt(m.get('entry_tax_relaxed_matches', 0), nn, m.get('entry_tax_relaxed_rate'))} \\\\"
         )
     return (
         "\\begin{table}[htbp]\n\\centering\n"
         "\\caption{Non-Ambiguous Accuracy}\n\\label{tab:acc-non-ambig}\n"
         "\\begin{tabular}{l rrrr}\n\\toprule\n"
-        "Variant & Decision & Tuple & Entry & Slot \\\\\n"
+        "Variant & Decision & Tuple & Entry & Entry (tax-relaxed) \\\\\n"
         "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n"
         "\\end{tabular}\n\\end{table}\n"
     )
@@ -58,19 +58,24 @@ def gen_cost_accuracy_tradeoff(data: dict) -> str:
         n = m["num_test_cases"]
         dec_ok = int(m["decision_accuracy"] * n)
         cpc = fmt_cost(m.get("cost_per_correct_entry"))
+        total_tok = m["total_input_tokens"] + m["total_output_tokens"]
         rows.append(
             f"  {esc(name)} & {_cnt(dec_ok, n, m['decision_accuracy'])} "
             f"& {fmt_pct(m.get('entry_match_rate'))} "
-            f"& {fmt_cost(m['total_cost_usd'])} & {cpc} "
-            f"& {fmt_ms(m['p50_latency_ms'])}ms & {fmt_ms(m['p95_latency_ms'])}ms \\\\"
+            f"& {fmt_tokens(total_tok)} & {fmt_tokens(m.get('total_cache_read', 0))} "
+            f"& {fmt_cost(m['total_cost_usd'])} & {fmt_cost(m.get('actual_cost_usd', 0))} "
+            f"& {cpc} "
+            f"& {fmt_ms(m['p50_latency_ms'])}ms \\\\"
         )
     return (
         "\\begin{table}[htbp]\n\\centering\n"
         "\\caption{Cost--Accuracy Tradeoff}\n\\label{tab:cost-accuracy}\n"
-        "\\begin{tabular}{l r r rr rr}\n\\toprule\n"
-        "Variant & Decision & Entry & Cost & \\$/Corr & p50 & p95 \\\\\n"
+        "\\resizebox{\\textwidth}{!}{%\n"
+        "\\begin{tabular}{l r r rr rr r r}\n\\toprule\n"
+        "Variant & Decision & Entry & Tokens & Cache R "
+        "& Raw \\$ & Cached \\$ & \\$/Corr & p50 \\\\\n"
         "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n"
-        "\\end{tabular}\n\\end{table}\n"
+        "\\end{tabular}}\\end{table}\n"
     )
 
 

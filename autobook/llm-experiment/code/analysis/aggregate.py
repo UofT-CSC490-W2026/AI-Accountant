@@ -45,6 +45,7 @@ def aggregate_variant(variant_name: str, test_cases: list[dict]) -> dict:
     exact = sum(1 for tc in non_ambig
                 if tc.get("debit_tuple_exact_match") and tc.get("credit_tuple_exact_match"))
     entry_matches = sum(1 for tc in non_ambig if tc.get("entry_match"))
+    entry_tax_relaxed = sum(1 for tc in non_ambig if tc.get("entry_tax_relaxed_match"))
     valid = sum(1 for tc in test_cases if tc.get("entry_valid"))
     errors = sum(1 for tc in test_cases if tc.get("error"))
     fixes_a = sum(1 for tc in test_cases if tc.get("fix_attempted"))
@@ -57,6 +58,7 @@ def aggregate_variant(variant_name: str, test_cases: list[dict]) -> dict:
     n_ambig = len(ambig)
 
     total_cost = sum(_get_cost(tc) for tc in test_cases)
+    actual_cost = sum(tc.get("actual_cost_usd", 0) for tc in test_cases)
     latencies = sorted(tc.get("total_latency_ms", 0) for tc in test_cases)
 
     d_acc = sum(tc.get("debit_tuple_slot_accuracy", 0) for tc in non_ambig) / n_non_ambig if n_non_ambig else 0
@@ -71,8 +73,10 @@ def aggregate_variant(variant_name: str, test_cases: list[dict]) -> dict:
         "variant_name": variant_name, "num_test_cases": n,
         "num_non_ambiguous": n_non_ambig, "num_ambiguous": n_ambig,
         "exact_matches": exact, "entry_matches": entry_matches,
+        "entry_tax_relaxed_matches": entry_tax_relaxed,
         "tuple_match_rate": _safe_div(exact, n_non_ambig),
         "entry_match_rate": _safe_div(entry_matches, n_non_ambig),
+        "entry_tax_relaxed_rate": _safe_div(entry_tax_relaxed, n_non_ambig),
         "mean_slot_accuracy": (d_acc + c_acc) / 2,
         "entry_valid_rate": valid / n,
         "decision_accuracy": dec_ok / n,
@@ -81,6 +85,7 @@ def aggregate_variant(variant_name: str, test_cases: list[dict]) -> dict:
         "clarification_correct": clar_ok,
         "clarification_accuracy": _safe_div(clar_ok, n_ambig),
         "total_cost_usd": total_cost,
+        "actual_cost_usd": actual_cost,
         "cost_per_correct_entry": _safe_inf(_safe_div(total_cost, exact, float("inf"))),
         "mean_latency_ms": sum(latencies) / n,
         "p50_latency_ms": latencies[n // 2], "p95_latency_ms": latencies[int(n * 0.95)],

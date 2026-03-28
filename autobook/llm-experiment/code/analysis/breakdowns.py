@@ -22,12 +22,15 @@ def compute_tier_breakdown(all_results: dict[str, list[dict]]) -> dict:
             exact = sum(1 for tc in non_ambig
                         if tc.get("debit_tuple_exact_match") and tc.get("credit_tuple_exact_match"))
             entry_ok = sum(1 for tc in non_ambig if tc.get("entry_match"))
+            entry_tax_ok = sum(1 for tc in non_ambig if tc.get("entry_tax_relaxed_match"))
             dec_ok = sum(1 for tc in cases if tc.get("decision_correct"))
             clar_ok = sum(1 for tc in ambig if tc.get("clarification_correct"))
             vt[tier] = {
                 "n": n, "n_non_ambiguous": len(non_ambig), "n_ambiguous": len(ambig),
                 "tuple_matches": exact, "tuple_match_rate": exact / len(non_ambig) if non_ambig else 0,
                 "entry_matches": entry_ok, "entry_match_rate": entry_ok / len(non_ambig) if non_ambig else 0,
+                "entry_tax_relaxed_matches": entry_tax_ok,
+                "entry_tax_relaxed_rate": entry_tax_ok / len(non_ambig) if non_ambig else 0,
                 "decision_correct": dec_ok, "decision_accuracy": dec_ok / n,
                 "clarification_correct": clar_ok, "clarification_accuracy": clar_ok / len(ambig) if ambig else 0,
                 "total_cost_usd": sum(_get_cost(tc) for tc in cases),

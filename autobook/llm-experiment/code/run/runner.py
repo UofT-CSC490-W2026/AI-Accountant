@@ -233,6 +233,8 @@ async def _run_one(app, tc, config_dict: dict, variant_name: str,
             elapsed_ms = int((time.perf_counter() - start) * 1000)
             statuses[tc.id] = "❌ failed"
             metrics = TestCaseMetrics(test_case_id=tc.id, variant_name=variant_name, error=str(e))
+            metrics.ambiguous = tc.ambiguous
+            metrics.tier = tc.tier
             metrics.common.total_latency_ms = elapsed_ms
             metrics.common.raw_cost_usd = sum(compute_raw_cost(call, pricing) for call in callback.llm_calls)
             metrics.common.actual_cost_usd = sum(compute_actual_cost(call, pricing) for call in callback.llm_calls)

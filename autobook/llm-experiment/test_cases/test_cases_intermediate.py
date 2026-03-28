@@ -92,17 +92,17 @@ INTERMEDIATE_TEST_CASES: list[TestCase] = [
     # ── IAS 16: Land + building allocation ───────────────────────────────
     TestCase(
         id="int_25_building_purchase_allocation",
-        transaction_text="Mondelez purchased a building from a vendor for $9,000,000 (exclusive of sales tax) to be used as a product storage warehouse. Fifty percent of the purchase price is due in 6 months, and the balance plus 10% sales tax was paid by cheque. At the date of acquisition, the fair values of the land and building components were $8,000,000 and $4,000,000, respectively.",
+        transaction_text="Mondelez purchased land and a building from a vendor for $9,000,000 (exclusive of sales tax) to be used as a product storage warehouse. Fifty percent of the purchase price is due in 6 months, and the balance plus 10% sales tax on the building was paid by cheque. At the date of acquisition, the fair values of the land and building components were $8,000,000 and $4,000,000, respectively.",
         user_context=_DEFAULT_CTX,
-        # 3 asset increases: land, building, VAT receivable
+        # 3 asset increases: land, building, VAT receivable (on building only)
         expected_debit_tuple=(3, 0, 0, 0, 0, 0),
         # 1 asset decrease (cash) + 1 liability increase (payable)
         expected_credit_tuple=(1, 0, 0, 1, 0, 0),
         expected_entry={"lines": [
             {"account_name": "Land", "type": "debit", "amount": 6000000},
             {"account_name": "Building", "type": "debit", "amount": 3000000},
-            {"account_name": "VAT receivable", "type": "debit", "amount": 900000},
-            {"account_name": "Cash — chequing", "type": "credit", "amount": 5400000},
+            {"account_name": "VAT receivable", "type": "debit", "amount": 300000},
+            {"account_name": "Cash — chequing", "type": "credit", "amount": 4800000},
             {"account_name": "Other payables", "type": "credit", "amount": 4500000},
         ]},
     ),
