@@ -1,0 +1,619 @@
+{
+  "test_case_id": "int_hard_27b_meal_meeting",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2024-01-15",
+    "description": "Working meeting meal expense paid by corporate credit card",
+    "rationale": "The $125 charged to the corporate credit card is tax-inclusive. Since this is a meal for a working meeting among employees in Canada, it is subject to HST but only 50% of the meal expense is deductible for tax purposes (CRA rules). However, the full HST can be claimed as ITC (Input Tax Credit). Back-calculating from the $125 total: base amount = $125/1.13 = $110.62, HST = $14.38. The meal expense is recorded at the full base amount of $110.62 (the 50% limitation applies at tax filing, not in bookkeeping). Debit tuple (0,0,1,0,0,0) requires 1 expense increase line. Credit tuple (1,0,0,0,0,0) requires 1 liability increase line. HST Receivable is debited as an additional tax line (asset increase). The credit card payable is credited for exactly $125.00.",
+    "lines": [
+      {
+        "account_name": "Meals and Entertainment Expense",
+        "type": "debit",
+        "amount": 110.62
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 14.38
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 125.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0707754,
+  "raw_cost_usd": 0.117021,
+  "total_latency_ms": 68504,
+  "total_input_tokens": 28032,
+  "total_output_tokens": 2195,
+  "total_llm_calls": 10,
+  "iteration_count": 2,
+  "final_decision": "APPROVED",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 526,
+      "output_tokens": 112,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2650,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038951999999999997,
+      "raw_cost_usd": 0.00963,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "classification of employee working meeting meal",
+            "resolved": true,
+            "resolution": "Transaction explicitly states 'working meeting among employees' \u2014 this is a business expense (meals and entertainment for internal business purposes), not a client entertainment expense. The explicit purpose stated in the description resolves the classification.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 501,
+      "output_tokens": 99,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1663,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033366,
+      "raw_cost_usd": 0.006474,
+      "output": {
+        "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (Meals & Entertainment), so it represents 1 expense increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (Meals & Entertainment), so it represents 1 expense increase."
+    },
+    "credit_classifier": {
+      "input_tokens": 499,
+      "output_tokens": 94,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1640,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032493,
+      "raw_cost_usd": 0.00633,
+      "output": {
+        "reason": "Corporate credit card used = liability increase. When paying with a credit card, the credit card payable (liability) increases on the credit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Corporate credit card used = liability increase. When paying with a credit card, the credit card payable (liability) increases on the credit side."
+    },
+    "credit_corrector": {
+      "input_tokens": 669,
+      "output_tokens": 178,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2321,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051726,
+      "raw_cost_usd": 0.009633,
+      "output": {
+        "reason": "The initial credit tuple is correct. This transaction involves purchasing a meal with a corporate credit card, which creates a liability (credit card payable). The credit side correctly shows (1,0,0,0,0,0) = liability increase. The debit side shows (0,0,1,0,0,0) = expense increase, which represents the meal/entertainment expense being recognized. The two sides tell a consistent story: debit expense (meal cost) and credit liability (amount owed on credit card). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. This transaction involves purchasing a meal with a corporate credit card, which creates a liability (credit card payable). The credit side correctly shows (1,0,0,0,0,0) = liability increase. The debit side shows (0,0,1,0,0,0) = expense increase, which represents the meal/entertainment expense being recognized. The two sides tell a consistent story: debit expense (meal cost) and credit liability (amount owed on credit card). No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 669,
+      "output_tokens": 178,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2313,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051702,
+      "raw_cost_usd": 0.009609,
+      "output": {
+        "reason": "The transaction describes a business meal expense paid using a corporate credit card. Under IFRS, this is a meal and entertainment expense (expense increase). The debit side correctly shows (0,0,1,0,0,0) = one expense increase line. The credit side shows (1,0,0,0,0,0) = one liability increase line, which represents the increase in the credit card payable. The two sides tell a consistent story: debit expense, credit liability (credit card payable). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a business meal expense paid using a corporate credit card. Under IFRS, this is a meal and entertainment expense (expense increase). The debit side correctly shows (0,0,1,0,0,0) = one expense increase line. The credit side shows (1,0,0,0,0,0) = one liability increase line, which represents the increase in the credit card payable. The two sides tell a consistent story: debit expense, credit liability (credit card payable). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1467,
+      "output_tokens": 900,
+      "cache_read_tokens": 5024,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6491,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0194082,
+      "raw_cost_usd": 0.032973,
+      "output": {
+        "date": "2024-01-15",
+        "description": "Working meeting meal expense paid by corporate credit card",
+        "rationale": "The $125 charged to the corporate credit card is tax-inclusive. Since this is a meal for a working meeting among employees in Canada, it is subject to HST but only 50% of the meal expense is deductible for tax purposes (CRA rules). However, the full HST can be claimed as ITC (Input Tax Credit). Back-calculating from the $125 total: base amount = $125/1.13 = $110.62, HST = $14.38. The meal expense is recorded at the full base amount of $110.62 (the 50% limitation applies at tax filing, not in bookkeeping). Debit tuple (0,0,1,0,0,0) requires 1 expense increase line. Credit tuple (1,0,0,0,0,0) requires 1 liability increase line. HST Receivable is debited as an additional tax line (asset increase). The credit card payable is credited for exactly $125.00.",
+        "lines": [
+          {
+            "account_name": "Meals and Entertainment Expense",
+            "type": "debit",
+            "amount": 110.62
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 14.38
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4859,
+      "output_tokens": 466,
+      "cache_read_tokens": 2772,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7631,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.022398599999999998,
+      "raw_cost_usd": 0.029883,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records the $125 meal expense paid by corporate credit card. Balance verified: debits ($110.62 + $14.38 = $125.00) equal credits ($125.00). The entry properly back-calculates HST from the tax-inclusive amount ($125/1.13 = $110.62 base, $14.38 HST). Accounts are appropriate: Meals and Entertainment Expense for the business meal, HST Receivable for the input tax credit, and Credit Card Payable for the liability. The treatment correctly records the full meal amount (the 50% CRA deductibility limitation is a tax filing adjustment, not a bookkeeping entry requirement). All debits and credits are on the correct sides for their account types."
+      },
+      "reason": "Entry correctly records the $125 meal expense paid by corporate credit card. Balance verified: debits ($110.62 + $14.38 = $125.00) equal credits ($125.00). The entry properly back-calculates HST from the tax-inclusive amount ($125/1.13 = $110.62 base, $14.38 HST). Accounts are appropriate: Meals and Entertainment Expense for the business meal, HST Receivable for the input tax credit, and Credit Card Payable for the liability. The treatment correctly records the full meal amount (the 50% CRA deductibility limitation is a tax filing adjustment, not a bookkeeping entry requirement). All debits and credits are on the correct sides for their account types."
+    },
+    "diagnostician": {
+      "input_tokens": 1714,
+      "output_tokens": 168,
+      "cache_read_tokens": 1609,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3323,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081447,
+      "raw_cost_usd": 0.012489,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Transaction states $125 paid using corporate credit card, but entry records $141.25 to Credit Card Payable. The generator assumed $125 was pre-tax and added 13% HST ($16.25), but the transaction description says \"$125 paid\" - this typically means the total amount charged to the card was $125, not a base amount before tax. The HST calculation (13% yielding $16.25) is also incorrect: 13% of $125 = $16.25, but if $125 includes HST, the base would be $110.62 and HST would be $14.38. Entry should record exactly $125 to Credit Card Payable to match the stated payment amount.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "classification of employee working meeting meal",
+            "resolved": true,
+            "resolution": "Transaction explicitly states 'working meeting among employees' \u2014 this is a business expense (meals and entertainment for internal business purposes), not a client entertainment expense. The explicit purpose stated in the description resolves the classification.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      {
+        "ambiguities": [
+          {
+            "aspect": "classification of employee working meeting meal",
+            "resolved": true,
+            "resolution": "Transaction explicitly states 'working meeting among employees' \u2014 this is a business expense (meals and entertainment for internal business purposes), not a client entertainment expense. The explicit purpose stated in the description resolves the classification.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (Meals & Entertainment), so it represents 1 expense increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (Meals & Entertainment), so it represents 1 expense increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Corporate credit card used = liability increase. When paying with a credit card, the credit card payable (liability) increases on the credit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Corporate credit card used = liability increase. When paying with a credit card, the credit card payable (liability) increases on the credit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes a business meal expense paid using a corporate credit card. Under IFRS, this is a meal and entertainment expense (expense increase). The debit side correctly shows (0,0,1,0,0,0) = one expense increase line. The credit side shows (1,0,0,0,0,0) = one liability increase line, which represents the increase in the credit card payable. The two sides tell a consistent story: debit expense, credit liability (credit card payable). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction describes a business meal expense paid using a corporate credit card. Under IFRS, this is a meal and entertainment expense (expense increase). The debit side correctly shows (0,0,1,0,0,0) = one expense increase line. The credit side shows (1,0,0,0,0,0) = one liability increase line, which represents the increase in the credit card payable. The two sides tell a consistent story: debit expense, credit liability (credit card payable). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. This transaction involves purchasing a meal with a corporate credit card, which creates a liability (credit card payable). The credit side correctly shows (1,0,0,0,0,0) = liability increase. The debit side shows (0,0,1,0,0,0) = expense increase, which represents the meal/entertainment expense being recognized. The two sides tell a consistent story: debit expense (meal cost) and credit liability (amount owed on credit card). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The initial credit tuple is correct. This transaction involves purchasing a meal with a corporate credit card, which creates a liability (credit card payable). The credit side correctly shows (1,0,0,0,0,0) = liability increase. The debit side shows (0,0,1,0,0,0) = expense increase, which represents the meal/entertainment expense being recognized. The two sides tell a consistent story: debit expense (meal cost) and credit liability (amount owed on credit card). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2024-01-01",
+        "description": "Meal expense for employee working meeting paid by corporate credit card",
+        "rationale": "The meal was for a working meeting among employees, which qualifies as a business meal expense under IFRS. In Canada, meals consumed by employees during working meetings are generally subject to 50% deductibility for income tax purposes (though this is recorded at the full amount and adjusted on tax returns). The meal is taxable and subject to applicable sales tax. Since no jurisdiction was specified and no chart of accounts provided, I'm using standard Canadian account names. The corporate credit card creates a liability (Credit Card Payable). The expense amount of $125 appears to be the pre-tax amount based on typical transaction descriptions. However, meals in most Canadian jurisdictions would include HST/GST. Assuming this is in Ontario (HST 13%), the $125 would include tax, making the base amount approximately $110.62 and HST $14.38. However, if $125 is stated as the meal cost, it's more likely the base amount with tax additional. Given ambiguity and standard practice, I'll treat $125 as the base meal cost subject to 13% HST (Ontario assumed as most common jurisdiction), making total $141.25 charged to the credit card.",
+        "lines": [
+          {
+            "account_name": "Meals and Entertainment Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 16.25
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 141.25
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2024-01-15",
+        "description": "Working meeting meal expense paid by corporate credit card",
+        "rationale": "The $125 charged to the corporate credit card is tax-inclusive. Since this is a meal for a working meeting among employees in Canada, it is subject to HST but only 50% of the meal expense is deductible for tax purposes (CRA rules). However, the full HST can be claimed as ITC (Input Tax Credit). Back-calculating from the $125 total: base amount = $125/1.13 = $110.62, HST = $14.38. The meal expense is recorded at the full base amount of $110.62 (the 50% limitation applies at tax filing, not in bookkeeping). Debit tuple (0,0,1,0,0,0) requires 1 expense increase line. Credit tuple (1,0,0,0,0,0) requires 1 liability increase line. HST Receivable is debited as an additional tax line (asset increase). The credit card payable is credited for exactly $125.00.",
+        "lines": [
+          {
+            "account_name": "Meals and Entertainment Expense",
+            "type": "debit",
+            "amount": 110.62
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 14.38
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Transaction states $125 paid using corporate credit card, but entry records $141.25 to Credit Card Payable. The generator assumed $125 was pre-tax and added 13% HST ($16.25), but the transaction description says \"$125 paid\" - this typically means the total amount charged to the card was $125, not a base amount before tax. The HST calculation (13% yielding $16.25) is also incorrect: 13% of $125 = $16.25, but if $125 includes HST, the base would be $110.62 and HST would be $14.38. Entry should record exactly $125 to Credit Card Payable to match the stated payment amount."
+      },
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records the $125 meal expense paid by corporate credit card. Balance verified: debits ($110.62 + $14.38 = $125.00) equal credits ($125.00). The entry properly back-calculates HST from the tax-inclusive amount ($125/1.13 = $110.62 base, $14.38 HST). Accounts are appropriate: Meals and Entertainment Expense for the business meal, HST Receivable for the input tax credit, and Credit Card Payable for the liability. The treatment correctly records the full meal amount (the 50% CRA deductibility limitation is a tax filing adjustment, not a bookkeeping entry requirement). All debits and credits are on the correct sides for their account types."
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Transaction states '$125 paid using corporate credit card' - this means the total amount charged to the card was $125 (tax-inclusive), not a pre-tax base amount. Record exactly $125 to Credit Card Payable. If HST is embedded, back-calculate: base = $125/1.13 = $110.62, HST = $14.38."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Transaction states '$125 paid using corporate credit card' - this means the total amount charged to the card was $125 (tax-inclusive), not a pre-tax base amount. Record exactly $125 to Credit Card Payable. If HST is embedded, back-calculate: base = $125/1.13 = $110.62, HST = $14.38."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 526,
+        "output_tokens": 112,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 501,
+        "output_tokens": 99,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 499,
+        "output_tokens": 94,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 669,
+        "output_tokens": 178,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 669,
+        "output_tokens": 178,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 678,
+        "output_tokens": 469,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1969,
+        "output_tokens": 229,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1714,
+        "output_tokens": 168,
+        "input_token_details": {
+          "cache_read": 1609,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 789,
+        "output_tokens": 431,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2890,
+        "output_tokens": 237,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

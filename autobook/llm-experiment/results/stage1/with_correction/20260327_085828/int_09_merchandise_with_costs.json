@@ -1,0 +1,469 @@
+{
+  "test_case_id": "int_09_merchandise_with_costs",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    3,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    4,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of merchandise inventory with associated freight, insurance, and storage costs",
+    "rationale": "Under IFRS (IAS 2), inventory cost includes purchase price plus costs necessary to bring inventory to its present location and condition. Freight to warehouse ($120,000) and shipping insurance ($30,000) are capitalizable as they are necessary to bring inventory to the warehouse. Post-acquisition warehouse storage ($20,000) is expensed as it occurs after inventory is ready for sale. Outbound delivery freight ($50,000) is expensed as it relates to selling activity, not acquisition. The merchandise purchase ($1,000,000) creates Accounts Payable; all other costs are paid in cash. Total inventory capitalized: $1,000,000 + $120,000 + $30,000 = $1,150,000.",
+    "lines": [
+      {
+        "account_name": "Inventory",
+        "type": "debit",
+        "amount": 1000000.0
+      },
+      {
+        "account_name": "Inventory",
+        "type": "debit",
+        "amount": 120000.0
+      },
+      {
+        "account_name": "Inventory",
+        "type": "debit",
+        "amount": 30000.0
+      },
+      {
+        "account_name": "Warehouse Storage Expense",
+        "type": "debit",
+        "amount": 20000.0
+      },
+      {
+        "account_name": "Freight Out Expense",
+        "type": "debit",
+        "amount": 50000.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 1000000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 120000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 30000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 20000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 50000.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.044905200000000006,
+  "raw_cost_usd": 0.067056,
+  "total_latency_ms": 33795,
+  "total_input_tokens": 11532,
+  "total_output_tokens": 2164,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 537,
+      "output_tokens": 214,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1678,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051633,
+      "raw_cost_usd": 0.008244,
+      "output": {
+        "reason": "This transaction has 5 credit lines:\n1. Accounts Payable increase $1,000,000 (liability increase) - merchandise purchased on account\n2. Cash decrease $120,000 (asset decrease) - freight to warehouse paid in cash\n3. Cash decrease $30,000 (asset decrease) - shipping insurance paid in cash\n4. Cash decrease $20,000 (asset decrease) - post-acquisition warehouse storage paid in cash\n5. Cash decrease $50,000 (asset decrease) - outbound delivery freight paid in cash\n\nTotal: 1 liability increase + 4 asset decreases = (1,0,0,4,0,0)",
+        "tuple": [
+          1,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      },
+      "reason": "This transaction has 5 credit lines:\n1. Accounts Payable increase $1,000,000 (liability increase) - merchandise purchased on account\n2. Cash decrease $120,000 (asset decrease) - freight to warehouse paid in cash\n3. Cash decrease $30,000 (asset decrease) - shipping insurance paid in cash\n4. Cash decrease $20,000 (asset decrease) - post-acquisition warehouse storage paid in cash\n5. Cash decrease $50,000 (asset decrease) - outbound delivery freight paid in cash\n\nTotal: 1 liability increase + 4 asset decreases = (1,0,0,4,0,0)"
+    },
+    "debit_classifier": {
+      "input_tokens": 539,
+      "output_tokens": 463,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1701,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008910600000000001,
+      "raw_cost_usd": 0.012048,
+      "output": {
+        "reason": "Under IFRS, the debit side has:\n1. Merchandise inventory $1,000,000 = asset increase (inventory acquired)\n2. Merchandise inventory for freight-in $120,000 + shipping insurance $30,000 = asset increase (costs necessary to bring inventory to its present location and condition are capitalized per IAS 2)\n3. Warehouse storage expense $20,000 = expense increase (post-acquisition storage is not necessary to bring inventory to saleable condition, so expensed per IAS 2)\n4. Delivery/freight-out expense $50,000 = expense increase (outbound delivery to customers is a selling expense, not capitalizable)\n\nTotal: 2 asset increases (merchandise + freight-in/insurance as one line, though could be recorded separately they relate to inventory capitalization) + 1 expense increase (storage) + 1 expense increase (delivery) = [2,0,2,0,0,0]. \n\nActually, reviewing more carefully: the merchandise purchase itself is 1 asset increase. The freight-in and insurance are also capitalized to inventory (1 more asset increase, or combined with merchandise). The storage and delivery are 2 separate expense increases.\n\nMost precise classification: Merchandise inventory (1 asset), Freight-in + insurance capitalized to inventory (1 asset), Storage expense (1 expense), Delivery expense (1 expense) = [2,0,2,0,0,0].\n\nWait - let me reconsider if freight and insurance are separate lines or combined with the merchandise. Typically they would be separate debit lines even though they increase the same inventory asset account. So: 2 asset increase lines + 2 expense increase lines = [2,0,2,0,0,0].",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IFRS, the debit side has:\n1. Merchandise inventory $1,000,000 = asset increase (inventory acquired)\n2. Merchandise inventory for freight-in $120,000 + shipping insurance $30,000 = asset increase (costs necessary to bring inventory to its present location and condition are capitalized per IAS 2)\n3. Warehouse storage expense $20,000 = expense increase (post-acquisition storage is not necessary to bring inventory to saleable condition, so expensed per IAS 2)\n4. Delivery/freight-out expense $50,000 = expense increase (outbound delivery to customers is a selling expense, not capitalizable)\n\nTotal: 2 asset increases (merchandise + freight-in/insurance as one line, though could be recorded separately they relate to inventory capitalization) + 1 expense increase (storage) + 1 expense increase (delivery) = [2,0,2,0,0,0]. \n\nActually, reviewing more carefully: the merchandise purchase itself is 1 asset increase. The freight-in and insurance are also capitalized to inventory (1 more asset increase, or combined with merchandise). The storage and delivery are 2 separate expense increases.\n\nMost precise classification: Merchandise inventory (1 asset), Freight-in + insurance capitalized to inventory (1 asset), Storage expense (1 expense), Delivery expense (1 expense) = [2,0,2,0,0,0].\n\nWait - let me reconsider if freight and insurance are separate lines or combined with the merchandise. Typically they would be separate debit lines even though they increase the same inventory asset account. So: 2 asset increase lines + 2 expense increase lines = [2,0,2,0,0,0]."
+    },
+    "credit_corrector": {
+      "input_tokens": 707,
+      "output_tokens": 451,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2359,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0093816,
+      "raw_cost_usd": 0.013842,
+      "output": {
+        "reason": "The initial credit tuple is correct. Let me break down the transaction:\n\n1. Purchased merchandise $1,000,000 on account \u2192 Credit: Accounts Payable (liability increase) = 1 line\n2. Paid cash for freight to warehouse $120,000 \u2192 Credit: Cash (asset decrease) = 1 line\n3. Paid cash for shipping insurance $30,000 \u2192 Credit: Cash (asset decrease) = 1 line\n4. Paid cash for post-acquisition warehouse storage $20,000 \u2192 Credit: Cash (asset decrease) = 1 line\n5. Paid cash for outbound delivery freight $50,000 \u2192 Credit: Cash (asset decrease) = 1 line\n\nUnder IFRS (IAS 2), costs that are included in inventory cost are: purchase price, freight-in, and insurance to bring inventory to its present location and condition. Post-acquisition storage and outbound delivery are period expenses, not inventory costs.\n\nThe credit side correctly shows:\n- 1 liability increase (accounts payable for the merchandise purchase)\n- 4 asset decreases (cash payments for the four separate cash transactions)\n\nThis aligns with the debit side showing 2 asset increases (inventory for $1,000,000 + freight $120,000 + insurance $30,000 = $1,150,000 total; and possibly a separate line for capitalizable costs) and 1 expense increase (the $20,000 storage + $50,000 delivery = $70,000 in period expenses, though the debit tuple structure suggests these might be recorded differently).\n\nThe credit tuple (1,0,0,4,0,0) accurately reflects the accounting treatment. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. Let me break down the transaction:\n\n1. Purchased merchandise $1,000,000 on account \u2192 Credit: Accounts Payable (liability increase) = 1 line\n2. Paid cash for freight to warehouse $120,000 \u2192 Credit: Cash (asset decrease) = 1 line\n3. Paid cash for shipping insurance $30,000 \u2192 Credit: Cash (asset decrease) = 1 line\n4. Paid cash for post-acquisition warehouse storage $20,000 \u2192 Credit: Cash (asset decrease) = 1 line\n5. Paid cash for outbound delivery freight $50,000 \u2192 Credit: Cash (asset decrease) = 1 line\n\nUnder IFRS (IAS 2), costs that are included in inventory cost are: purchase price, freight-in, and insurance to bring inventory to its present location and condition. Post-acquisition storage and outbound delivery are period expenses, not inventory costs.\n\nThe credit side correctly shows:\n- 1 liability increase (accounts payable for the merchandise purchase)\n- 4 asset decreases (cash payments for the four separate cash transactions)\n\nThis aligns with the debit side showing 2 asset increases (inventory for $1,000,000 + freight $120,000 + insurance $30,000 = $1,150,000 total; and possibly a separate line for capitalizable costs) and 1 expense increase (the $20,000 storage + $50,000 delivery = $70,000 in period expenses, though the debit tuple structure suggests these might be recorded differently).\n\nThe credit tuple (1,0,0,4,0,0) accurately reflects the accounting treatment. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 707,
+      "output_tokens": 390,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2351,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008464200000000002,
+      "raw_cost_usd": 0.012903,
+      "output": {
+        "reason": "The transaction involves multiple components that need proper IFRS classification:\n\n1. Merchandise purchased on account ($1,000,000): Asset increase (Inventory) - correctly identified\n2. Freight to warehouse ($120,000 cash): Under IFRS, costs necessary to bring inventory to its present location and condition are capitalized as part of inventory cost. This is an asset increase (Inventory), not an expense.\n3. Shipping insurance ($30,000 cash): Similar to freight, insurance costs incurred to bring inventory to the warehouse are capitalizable costs. This is an asset increase (Inventory), not an expense.\n4. Post-acquisition warehouse storage ($20,000 cash): Storage costs AFTER acquisition are period expenses, not capitalizable. This is correctly an expense increase.\n5. Outbound delivery freight ($50,000 cash): Costs to deliver goods to customers are selling/distribution expenses, not inventory costs. This is correctly an expense increase.\n\nThe initial tuple (2,0,1,0,0,0) only showed 2 asset increases and 1 expense increase, but there should be 3 asset increases (merchandise + freight + insurance) and 2 expense increases (storage + outbound delivery). The credit tuple showing 1 liability increase (accounts payable for merchandise) and 4 asset decreases (cash payments for the four separate items) is consistent with this analysis.\n\nCorrected to (3,0,2,0,0,0).",
+        "tuple": [
+          3,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves multiple components that need proper IFRS classification:\n\n1. Merchandise purchased on account ($1,000,000): Asset increase (Inventory) - correctly identified\n2. Freight to warehouse ($120,000 cash): Under IFRS, costs necessary to bring inventory to its present location and condition are capitalized as part of inventory cost. This is an asset increase (Inventory), not an expense.\n3. Shipping insurance ($30,000 cash): Similar to freight, insurance costs incurred to bring inventory to the warehouse are capitalizable costs. This is an asset increase (Inventory), not an expense.\n4. Post-acquisition warehouse storage ($20,000 cash): Storage costs AFTER acquisition are period expenses, not capitalizable. This is correctly an expense increase.\n5. Outbound delivery freight ($50,000 cash): Costs to deliver goods to customers are selling/distribution expenses, not inventory costs. This is correctly an expense increase.\n\nThe initial tuple (2,0,1,0,0,0) only showed 2 asset increases and 1 expense increase, but there should be 3 asset increases (merchandise + freight + insurance) and 2 expense increases (storage + outbound delivery). The credit tuple showing 1 liability increase (accounts payable for merchandise) and 4 asset decreases (cash payments for the four separate items) is consistent with this analysis.\n\nCorrected to (3,0,2,0,0,0)."
+    },
+    "entry_builder": {
+      "input_tokens": 838,
+      "output_tokens": 646,
+      "cache_read_tokens": 2605,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3443,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0129855,
+      "raw_cost_usd": 0.020019,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of merchandise inventory with associated freight, insurance, and storage costs",
+        "rationale": "Under IFRS (IAS 2), inventory cost includes purchase price plus costs necessary to bring inventory to its present location and condition. Freight to warehouse ($120,000) and shipping insurance ($30,000) are capitalizable as they are necessary to bring inventory to the warehouse. Post-acquisition warehouse storage ($20,000) is expensed as it occurs after inventory is ready for sale. Outbound delivery freight ($50,000) is expensed as it relates to selling activity, not acquisition. The merchandise purchase ($1,000,000) creates Accounts Payable; all other costs are paid in cash. Total inventory capitalized: $1,000,000 + $120,000 + $30,000 = $1,150,000.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 1000000.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 120000.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 30000.0
+          },
+          {
+            "account_name": "Warehouse Storage Expense",
+            "type": "debit",
+            "amount": 20000.0
+          },
+          {
+            "account_name": "Freight Out Expense",
+            "type": "debit",
+            "amount": 50000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 1000000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 120000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 30000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 20000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 50000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Under IFRS, the debit side has:\n1. Merchandise inventory $1,000,000 = asset increase (inventory acquired)\n2. Merchandise inventory for freight-in $120,000 + shipping insurance $30,000 = asset increase (costs necessary to bring inventory to its present location and condition are capitalized per IAS 2)\n3. Warehouse storage expense $20,000 = expense increase (post-acquisition storage is not necessary to bring inventory to saleable condition, so expensed per IAS 2)\n4. Delivery/freight-out expense $50,000 = expense increase (outbound delivery to customers is a selling expense, not capitalizable)\n\nTotal: 2 asset increases (merchandise + freight-in/insurance as one line, though could be recorded separately they relate to inventory capitalization) + 1 expense increase (storage) + 1 expense increase (delivery) = [2,0,2,0,0,0]. \n\nActually, reviewing more carefully: the merchandise purchase itself is 1 asset increase. The freight-in and insurance are also capitalized to inventory (1 more asset increase, or combined with merchandise). The storage and delivery are 2 separate expense increases.\n\nMost precise classification: Merchandise inventory (1 asset), Freight-in + insurance capitalized to inventory (1 asset), Storage expense (1 expense), Delivery expense (1 expense) = [2,0,2,0,0,0].\n\nWait - let me reconsider if freight and insurance are separate lines or combined with the merchandise. Typically they would be separate debit lines even though they increase the same inventory asset account. So: 2 asset increase lines + 2 expense increase lines = [2,0,2,0,0,0].",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This transaction has 5 credit lines:\n1. Accounts Payable increase $1,000,000 (liability increase) - merchandise purchased on account\n2. Cash decrease $120,000 (asset decrease) - freight to warehouse paid in cash\n3. Cash decrease $30,000 (asset decrease) - shipping insurance paid in cash\n4. Cash decrease $20,000 (asset decrease) - post-acquisition warehouse storage paid in cash\n5. Cash decrease $50,000 (asset decrease) - outbound delivery freight paid in cash\n\nTotal: 1 liability increase + 4 asset decreases = (1,0,0,4,0,0)",
+        "tuple": [
+          1,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves multiple components that need proper IFRS classification:\n\n1. Merchandise purchased on account ($1,000,000): Asset increase (Inventory) - correctly identified\n2. Freight to warehouse ($120,000 cash): Under IFRS, costs necessary to bring inventory to its present location and condition are capitalized as part of inventory cost. This is an asset increase (Inventory), not an expense.\n3. Shipping insurance ($30,000 cash): Similar to freight, insurance costs incurred to bring inventory to the warehouse are capitalizable costs. This is an asset increase (Inventory), not an expense.\n4. Post-acquisition warehouse storage ($20,000 cash): Storage costs AFTER acquisition are period expenses, not capitalizable. This is correctly an expense increase.\n5. Outbound delivery freight ($50,000 cash): Costs to deliver goods to customers are selling/distribution expenses, not inventory costs. This is correctly an expense increase.\n\nThe initial tuple (2,0,1,0,0,0) only showed 2 asset increases and 1 expense increase, but there should be 3 asset increases (merchandise + freight + insurance) and 2 expense increases (storage + outbound delivery). The credit tuple showing 1 liability increase (accounts payable for merchandise) and 4 asset decreases (cash payments for the four separate items) is consistent with this analysis.\n\nCorrected to (3,0,2,0,0,0).",
+        "tuple": [
+          3,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. Let me break down the transaction:\n\n1. Purchased merchandise $1,000,000 on account \u2192 Credit: Accounts Payable (liability increase) = 1 line\n2. Paid cash for freight to warehouse $120,000 \u2192 Credit: Cash (asset decrease) = 1 line\n3. Paid cash for shipping insurance $30,000 \u2192 Credit: Cash (asset decrease) = 1 line\n4. Paid cash for post-acquisition warehouse storage $20,000 \u2192 Credit: Cash (asset decrease) = 1 line\n5. Paid cash for outbound delivery freight $50,000 \u2192 Credit: Cash (asset decrease) = 1 line\n\nUnder IFRS (IAS 2), costs that are included in inventory cost are: purchase price, freight-in, and insurance to bring inventory to its present location and condition. Post-acquisition storage and outbound delivery are period expenses, not inventory costs.\n\nThe credit side correctly shows:\n- 1 liability increase (accounts payable for the merchandise purchase)\n- 4 asset decreases (cash payments for the four separate cash transactions)\n\nThis aligns with the debit side showing 2 asset increases (inventory for $1,000,000 + freight $120,000 + insurance $30,000 = $1,150,000 total; and possibly a separate line for capitalizable costs) and 1 expense increase (the $20,000 storage + $50,000 delivery = $70,000 in period expenses, though the debit tuple structure suggests these might be recorded differently).\n\nThe credit tuple (1,0,0,4,0,0) accurately reflects the accounting treatment. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of merchandise inventory with associated freight, insurance, and storage costs",
+        "rationale": "Under IFRS (IAS 2), inventory cost includes purchase price plus costs necessary to bring inventory to its present location and condition. Freight to warehouse ($120,000) and shipping insurance ($30,000) are capitalizable as they are necessary to bring inventory to the warehouse. Post-acquisition warehouse storage ($20,000) is expensed as it occurs after inventory is ready for sale. Outbound delivery freight ($50,000) is expensed as it relates to selling activity, not acquisition. The merchandise purchase ($1,000,000) creates Accounts Payable; all other costs are paid in cash. Total inventory capitalized: $1,000,000 + $120,000 + $30,000 = $1,150,000.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 1000000.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 120000.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 30000.0
+          },
+          {
+            "account_name": "Warehouse Storage Expense",
+            "type": "debit",
+            "amount": 20000.0
+          },
+          {
+            "account_name": "Freight Out Expense",
+            "type": "debit",
+            "amount": 50000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 1000000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 120000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 30000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 20000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 50000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 537,
+        "output_tokens": 214,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 539,
+        "output_tokens": 463,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 707,
+        "output_tokens": 451,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 707,
+        "output_tokens": 390,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 838,
+        "output_tokens": 646,
+        "input_token_details": {
+          "cache_read": 2605,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

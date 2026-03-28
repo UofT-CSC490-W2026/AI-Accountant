@@ -1,0 +1,464 @@
+{
+  "test_case_id": "int_hard_02c_investment_equity_method",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    2,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Acquisition of 10% equity interest in Ford common shares under equity method, including transaction costs",
+    "rationale": "Under IAS 28, an investment in an associate (where significant influence exists) is initially recognized at cost, including directly attributable transaction costs. The $3,000,000 purchase price plus $100,000 transaction fee totaling $3,100,000 is capitalized to Investment in Associate. Both amounts were paid by cheque (cash), reducing the Cash/Bank asset account by $3,100,000. This follows the equity method accounting requirements for associates. The debit tuple (1,0,1,0,0,0) suggested one asset increase and one expense increase, but the disambiguator correctly identified that under IAS 28, transaction costs are capitalized, not expensed. Therefore, we override the expense slot and record both amounts as a single asset increase (Investment in Associate), with two credit lines reducing cash.",
+    "lines": [
+      {
+        "account_name": "Investment in Associate - Ford",
+        "type": "debit",
+        "amount": 3100000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 3000000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 100000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0499125,
+  "raw_cost_usd": 0.081732,
+  "total_latency_ms": 36988,
+  "total_input_tokens": 18279,
+  "total_output_tokens": 1793,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 558,
+      "output_tokens": 202,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2691,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053438999999999995,
+      "raw_cost_usd": 0.011103,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "treatment of transaction fee",
+            "resolved": true,
+            "resolution": "Under IAS 28, transaction costs directly attributable to acquiring an equity method investment are included in the cost of the investment. The $100,000 fee is capitalized to the investment account, not expensed.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method for share acquisition",
+            "resolved": true,
+            "resolution": "The $3,000,000 share purchase payment method is not explicitly stated, but the $100,000 fee was paid by cheque. Standard convention assumes the main purchase was also paid (cash transaction) unless stated otherwise as 'on account' or similar credit terms.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 533,
+      "output_tokens": 157,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1695,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0043026,
+      "raw_cost_usd": 0.00744,
+      "output": {
+        "reason": "Under IAS 28, when acquiring an investment accounted for using the equity method, the initial cost includes the purchase price plus directly attributable transaction costs. This creates one investment in associate asset account. Therefore: (1) Investment in Associate (Ford) = asset increase for $3,100,000 ($3,000,000 purchase + $100,000 transaction fee). This is 1 debit line increasing an asset.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IAS 28, when acquiring an investment accounted for using the equity method, the initial cost includes the purchase price plus directly attributable transaction costs. This creates one investment in associate asset account. Therefore: (1) Investment in Associate (Ford) = asset increase for $3,100,000 ($3,000,000 purchase + $100,000 transaction fee). This is 1 debit line increasing an asset."
+    },
+    "credit_classifier": {
+      "input_tokens": 531,
+      "output_tokens": 132,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1672,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0039153,
+      "raw_cost_usd": 0.006996,
+      "output": {
+        "reason": "BlackRock pays $3,000,000 for shares plus $100,000 transaction fee, totaling $3,100,000. Under IAS 28, transaction costs are capitalized as part of the investment cost. The credit side reflects cash/bank account leaving = asset decrease (1 line).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "BlackRock pays $3,000,000 for shares plus $100,000 transaction fee, totaling $3,100,000. Under IAS 28, transaction costs are capitalized as part of the investment cost. The credit side reflects cash/bank account leaving = asset decrease (1 line)."
+    },
+    "credit_corrector": {
+      "input_tokens": 701,
+      "output_tokens": 264,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2353,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0065586,
+      "raw_cost_usd": 0.011019,
+      "output": {
+        "reason": "The transaction involves BlackRock paying $3,000,000 for the investment plus $100,000 in transaction fees, both by cheque. Under IAS 28, transaction costs directly attributable to acquiring an investment accounted for using the equity method are included in the cost of the investment. This means both amounts reduce cash (asset decreases). The initial credit tuple showed only 1 asset decrease, but there are actually 2 separate cash outflows: one for the investment purchase and one for the transaction fee. The debit side shows only 1 asset increase (the investment in associate), which is correct because the $3,100,000 total cost is capitalized as a single investment asset. The credit side must reflect 2 asset decreases (2 cash payments). Corrected from (0,0,0,1,0,0) to (0,0,0,2,0,0).",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves BlackRock paying $3,000,000 for the investment plus $100,000 in transaction fees, both by cheque. Under IAS 28, transaction costs directly attributable to acquiring an investment accounted for using the equity method are included in the cost of the investment. This means both amounts reduce cash (asset decreases). The initial credit tuple showed only 1 asset decrease, but there are actually 2 separate cash outflows: one for the investment purchase and one for the transaction fee. The debit side shows only 1 asset increase (the investment in associate), which is correct because the $3,100,000 total cost is capitalized as a single investment asset. The credit side must reflect 2 asset decreases (2 cash payments). Corrected from (0,0,0,1,0,0) to (0,0,0,2,0,0)."
+    },
+    "debit_corrector": {
+      "input_tokens": 701,
+      "output_tokens": 436,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2345,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0091362,
+      "raw_cost_usd": 0.013575,
+      "output": {
+        "reason": "The transaction involves two distinct economic events: (1) acquiring an investment in associate for $3,000,000, and (2) paying a transaction fee of $100,000. Under IAS 28, when acquiring an investment in an associate accounted for using the equity method, the investment is initially recognized at cost, which includes the purchase price PLUS directly attributable transaction costs. Therefore, the $100,000 transaction fee should be capitalized as part of the investment asset, not expensed. However, the initial debit tuple (1,0,0,0,0,0) only shows one asset increase line, which would represent the combined $3,100,000 investment. But examining the credit side showing only one asset decrease (cash) suggests the system may be treating these as separate line items. Given the transaction explicitly mentions two payments (shares for $3M and fee of $100K), and considering the fee is directly attributable to the acquisition, the correct treatment is: one asset increase for the investment in associate ($3,100,000 total, combining both amounts). The initial tuple is actually correct - it shows one asset increase representing the total investment including transaction costs. Wait - re-reading more carefully: if the system is line-item based and the transaction describes two separate payments, we need to consider whether the fee creates a separate debit line. Under IFRS, transaction costs directly attributable to acquiring an investment in associate are capitalized. This means both the $3M and $100K increase the same asset account (Investment in Associate). This should be ONE debit line totaling $3,100,000. The initial tuple (1,0,0,0,0,0) correctly shows one asset increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves two distinct economic events: (1) acquiring an investment in associate for $3,000,000, and (2) paying a transaction fee of $100,000. Under IAS 28, when acquiring an investment in an associate accounted for using the equity method, the investment is initially recognized at cost, which includes the purchase price PLUS directly attributable transaction costs. Therefore, the $100,000 transaction fee should be capitalized as part of the investment asset, not expensed. However, the initial debit tuple (1,0,0,0,0,0) only shows one asset increase line, which would represent the combined $3,100,000 investment. But examining the credit side showing only one asset decrease (cash) suggests the system may be treating these as separate line items. Given the transaction explicitly mentions two payments (shares for $3M and fee of $100K), and considering the fee is directly attributable to the acquisition, the correct treatment is: one asset increase for the investment in associate ($3,100,000 total, combining both amounts). The initial tuple is actually correct - it shows one asset increase representing the total investment including transaction costs. Wait - re-reading more carefully: if the system is line-item based and the transaction describes two separate payments, we need to consider whether the fee creates a separate debit line. Under IFRS, transaction costs directly attributable to acquiring an investment in associate are capitalized. This means both the $3M and $100K increase the same asset account (Investment in Associate). This should be ONE debit line totaling $3,100,000. The initial tuple (1,0,0,0,0,0) correctly shows one asset increase. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1057,
+      "output_tokens": 396,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3724,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0099111,
+      "raw_cost_usd": 0.017112,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity interest in Ford common shares under equity method, including transaction costs",
+        "rationale": "Under IAS 28, an investment in an associate (where significant influence exists) is initially recognized at cost, including directly attributable transaction costs. The $3,000,000 purchase price plus $100,000 transaction fee totaling $3,100,000 is capitalized to Investment in Associate. Both amounts were paid by cheque (cash), reducing the Cash/Bank asset account by $3,100,000. This follows the equity method accounting requirements for associates. The debit tuple (1,0,1,0,0,0) suggested one asset increase and one expense increase, but the disambiguator correctly identified that under IAS 28, transaction costs are capitalized, not expensed. Therefore, we override the expense slot and record both amounts as a single asset increase (Investment in Associate), with two credit lines reducing cash.",
+        "lines": [
+          {
+            "account_name": "Investment in Associate - Ford",
+            "type": "debit",
+            "amount": 3100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2413,
+      "output_tokens": 206,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3799,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.010744799999999999,
+      "raw_cost_usd": 0.014487,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly applies IAS 28 equity method accounting. Investment in Associate is debited for $3,100,000 (purchase price $3,000,000 + transaction costs $100,000), which is correct as transaction costs directly attributable to acquiring an associate must be capitalized. Cash is credited twice totaling $3,100,000 ($3,000,000 + $100,000), reflecting the two separate payments by cheque. Entry balances (debits $3,100,000 = credits $3,100,000). All accounts are appropriate, amounts match transaction text, and directionality is correct."
+      },
+      "reason": "Entry correctly applies IAS 28 equity method accounting. Investment in Associate is debited for $3,100,000 (purchase price $3,000,000 + transaction costs $100,000), which is correct as transaction costs directly attributable to acquiring an associate must be capitalized. Cash is credited twice totaling $3,100,000 ($3,000,000 + $100,000), reflecting the two separate payments by cheque. Entry balances (debits $3,100,000 = credits $3,100,000). All accounts are appropriate, amounts match transaction text, and directionality is correct."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "treatment of transaction fee",
+            "resolved": true,
+            "resolution": "Under IAS 28, transaction costs directly attributable to acquiring an equity method investment are included in the cost of the investment. The $100,000 fee is capitalized to the investment account, not expensed.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method for share acquisition",
+            "resolved": true,
+            "resolution": "The $3,000,000 share purchase payment method is not explicitly stated, but the $100,000 fee was paid by cheque. Standard convention assumes the main purchase was also paid (cash transaction) unless stated otherwise as 'on account' or similar credit terms.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Under IAS 28, when acquiring an investment accounted for using the equity method, the initial cost includes the purchase price plus directly attributable transaction costs. This creates one investment in associate asset account. Therefore: (1) Investment in Associate (Ford) = asset increase for $3,100,000 ($3,000,000 purchase + $100,000 transaction fee). This is 1 debit line increasing an asset.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "BlackRock pays $3,000,000 for shares plus $100,000 transaction fee, totaling $3,100,000. Under IAS 28, transaction costs are capitalized as part of the investment cost. The credit side reflects cash/bank account leaving = asset decrease (1 line).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves two distinct economic events: (1) acquiring an investment in associate for $3,000,000, and (2) paying a transaction fee of $100,000. Under IAS 28, when acquiring an investment in an associate accounted for using the equity method, the investment is initially recognized at cost, which includes the purchase price PLUS directly attributable transaction costs. Therefore, the $100,000 transaction fee should be capitalized as part of the investment asset, not expensed. However, the initial debit tuple (1,0,0,0,0,0) only shows one asset increase line, which would represent the combined $3,100,000 investment. But examining the credit side showing only one asset decrease (cash) suggests the system may be treating these as separate line items. Given the transaction explicitly mentions two payments (shares for $3M and fee of $100K), and considering the fee is directly attributable to the acquisition, the correct treatment is: one asset increase for the investment in associate ($3,100,000 total, combining both amounts). The initial tuple is actually correct - it shows one asset increase representing the total investment including transaction costs. Wait - re-reading more carefully: if the system is line-item based and the transaction describes two separate payments, we need to consider whether the fee creates a separate debit line. Under IFRS, transaction costs directly attributable to acquiring an investment in associate are capitalized. This means both the $3M and $100K increase the same asset account (Investment in Associate). This should be ONE debit line totaling $3,100,000. The initial tuple (1,0,0,0,0,0) correctly shows one asset increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves BlackRock paying $3,000,000 for the investment plus $100,000 in transaction fees, both by cheque. Under IAS 28, transaction costs directly attributable to acquiring an investment accounted for using the equity method are included in the cost of the investment. This means both amounts reduce cash (asset decreases). The initial credit tuple showed only 1 asset decrease, but there are actually 2 separate cash outflows: one for the investment purchase and one for the transaction fee. The debit side shows only 1 asset increase (the investment in associate), which is correct because the $3,100,000 total cost is capitalized as a single investment asset. The credit side must reflect 2 asset decreases (2 cash payments). Corrected from (0,0,0,1,0,0) to (0,0,0,2,0,0).",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity interest in Ford common shares under equity method, including transaction costs",
+        "rationale": "Under IAS 28, an investment in an associate (where significant influence exists) is initially recognized at cost, including directly attributable transaction costs. The $3,000,000 purchase price plus $100,000 transaction fee totaling $3,100,000 is capitalized to Investment in Associate. Both amounts were paid by cheque (cash), reducing the Cash/Bank asset account by $3,100,000. This follows the equity method accounting requirements for associates. The debit tuple (1,0,1,0,0,0) suggested one asset increase and one expense increase, but the disambiguator correctly identified that under IAS 28, transaction costs are capitalized, not expensed. Therefore, we override the expense slot and record both amounts as a single asset increase (Investment in Associate), with two credit lines reducing cash.",
+        "lines": [
+          {
+            "account_name": "Investment in Associate - Ford",
+            "type": "debit",
+            "amount": 3100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly applies IAS 28 equity method accounting. Investment in Associate is debited for $3,100,000 (purchase price $3,000,000 + transaction costs $100,000), which is correct as transaction costs directly attributable to acquiring an associate must be capitalized. Cash is credited twice totaling $3,100,000 ($3,000,000 + $100,000), reflecting the two separate payments by cheque. Entry balances (debits $3,100,000 = credits $3,100,000). All accounts are appropriate, amounts match transaction text, and directionality is correct."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 558,
+        "output_tokens": 202,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 533,
+        "output_tokens": 157,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 531,
+        "output_tokens": 132,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 701,
+        "output_tokens": 264,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 701,
+        "output_tokens": 436,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1057,
+        "output_tokens": 396,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2413,
+        "output_tokens": 206,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "evaluator": "claude",
+  "evaluated_at": "2026-03-27T12:00:00",
+  "prompt_version": "v1",
+  "results": {
+    "hard_01_note_discounting": {
+      "actual_decision": "APPROVED",
+      "actual_questions": [],
+      "expected_cases": ["Derecognition (sale)", "Collateralized borrowing"],
+      "relevant": false,
+      "reason": "Pipeline did not output INCOMPLETE_INFORMATION; it guessed APPROVED. The disambiguator found zero ambiguities (ambiguities: []) and proceeded to build a journal entry assuming derecognition. No question was asked to distinguish between derecognition vs. collateralized borrowing."
+    },
+    "hard_02_investment_classification": {
+      "actual_decision": "APPROVED",
+      "actual_questions": [
+        "Does BlackRock intend to exercise significant influence over Ford, or is this a passive investment?"
+      ],
+      "expected_cases": ["Short-term trading (FVTPL)", "Long-term strategic (FVOCI)", "Significant influence (Equity method)"],
+      "relevant": false,
+      "reason": "The disambiguator identified the ambiguity and produced a clarification question asking about investment intent (passive vs. significant influence). This question is relevant to the expected cases -- it would distinguish equity method from the other classifications. However, the pipeline did NOT output INCOMPLETE_INFORMATION as its final_decision; it guessed APPROVED and proceeded to build an entry (capitalizing transaction costs). The disambiguator flagged the ambiguity but the downstream pipeline overrode it and produced a journal entry anyway. Since the final_decision is APPROVED, criterion 1 fails."
+    },
+    "hard_27_meal_purpose": {
+      "actual_decision": "INCOMPLETE_INFORMATION",
+      "actual_questions": [
+        "What was the business purpose of this meal expense? (e.g., client entertainment, employee meal during business travel, team meeting, employee benefit/perk)"
+      ],
+      "expected_cases": ["Overtime meal (employee benefit)", "Working meeting", "Client entertainment", "Factory staff meal (production overhead)"],
+      "relevant": true,
+      "reason": "Pipeline correctly identified INCOMPLETE_INFORMATION via the disambiguator, which flagged 'business purpose of the meal' as unresolved with four specific options (client entertainment, travel meal, team meeting, employee benefit/perk). The entry_builder produced a clarification question asking about business purpose. This is a business-fact question whose answer determines the correct expense account. The options map directly to the expected cases."
+    },
+    "hard_32_grocery_purpose": {
+      "actual_decision": "INCOMPLETE_INFORMATION",
+      "actual_questions": [
+        "What was the business purpose of purchasing these tea, beverages, and refreshments? (e.g., office supplies for employees, client meeting refreshments, inventory for resale, event/marketing supplies)"
+      ],
+      "expected_cases": ["Client entertainment", "Employee break room supplies"],
+      "relevant": true,
+      "reason": "Pipeline correctly identified INCOMPLETE_INFORMATION via the disambiguator, which flagged 'business purpose of tea, beverages, and refreshments purchase' as unresolved with four specific options. The clarification question asks about business purpose with options that map to structurally different accounts. This is a business-fact question that distinguishes between the expected cases (client entertainment vs. employee break room supplies)."
+    },
+    "hard_16_rent_treatment": {
+      "actual_decision": "APPROVED",
+      "actual_questions": [
+        "Should this 12-month rent payment be recorded as a prepaid asset and expensed monthly, or expensed in full immediately?"
+      ],
+      "expected_cases": ["Prepaid (asset recognition)", "Expense (short-term lease exemption)"],
+      "relevant": false,
+      "reason": "The disambiguator identified the ambiguity and produced a clarification question about prepaid vs. immediate expense. However, this question asks about accounting treatment ('Should this be recorded as a prepaid asset and expensed monthly, or expensed in full immediately?') rather than about a business fact. The expected business-fact question would ask about the lease term or whether it qualifies for short-term lease exemption under IFRS 16. Additionally, the pipeline did NOT output INCOMPLETE_INFORMATION as its final_decision; it guessed APPROVED and proceeded with the prepaid treatment. Criterion 1 (final_decision = INCOMPLETE_INFORMATION) and criterion 4 (question about business facts, not treatment) both fail."
+    }
+  }
+}

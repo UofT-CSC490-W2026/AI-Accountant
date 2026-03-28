@@ -1,0 +1,449 @@
+{
+  "test_case_id": "basic_11_convert_preferred_to_common",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Conversion of 50 preferred shares to 25 common shares",
+    "rationale": "Under IFRS, share conversions are equity-to-equity transactions recorded at the carrying value of the shares surrendered. The $100 carrying value of the preferred shares is transferred to common shares. Debit Preferred Shares (equity decrease) $100, credit Common Shares (equity increase) $100. This is a pure equity reclassification with no gain/loss recognized. The classifier tuples correctly identify this as e=1 (equity decrease) on debit side and b=1 (equity increase) on credit side.",
+    "lines": [
+      {
+        "account_name": "Preferred Shares",
+        "type": "debit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "Common Shares",
+        "type": "credit",
+        "amount": 100.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0418245,
+  "raw_cost_usd": 0.073644,
+  "total_latency_ms": 31719,
+  "total_input_tokens": 17533,
+  "total_output_tokens": 1403,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 519,
+      "output_tokens": 190,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2652,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0050469,
+      "raw_cost_usd": 0.010806,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "conversion terms",
+            "resolved": true,
+            "resolution": "Transaction explicitly states carrying value of $100 for preferred shares and conversion ratio (50 preferred to 25 common). Convention: book value method applies \u2014 common shares recorded at carrying value of preferred shares converted.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether conversion is per share or total",
+            "resolved": true,
+            "resolution": "Transaction states '50 preferred shares (carrying value $100)' \u2014 the $100 is the total carrying value of all 50 shares being converted, not per-share value. This is the standard way to express conversion transactions.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 494,
+      "output_tokens": 134,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1656,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038406,
+      "raw_cost_usd": 0.006978,
+      "output": {
+        "reason": "Converting preferred shares to common shares involves decreasing one equity account (preferred shares) and increasing another equity account (common shares). On the debit side, we debit preferred shares equity to decrease it (equity decrease = 1 line in position e). The credit side would increase common shares equity, but we only classify debits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": "Converting preferred shares to common shares involves decreasing one equity account (preferred shares) and increasing another equity account (common shares). On the debit side, we debit preferred shares equity to decrease it (equity decrease = 1 line in position e). The credit side would increase common shares equity, but we only classify debits here."
+    },
+    "credit_classifier": {
+      "input_tokens": 492,
+      "output_tokens": 144,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1633,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.003978300000000001,
+      "raw_cost_usd": 0.007059,
+      "output": {
+        "reason": "This is a share conversion transaction. On the credit side, we decrease Preferred Share Capital (equity decrease) by crediting it. Under IFRS, crediting an equity account decreases its balance. The preferred shares are being removed/converted, so we credit Preferred Share Capital = equity decrease. Note: The debit side (not classified here) would increase Common Share Capital.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This is a share conversion transaction. On the credit side, we decrease Preferred Share Capital (equity decrease) by crediting it. Under IFRS, crediting an equity account decreases its balance. The preferred shares are being removed/converted, so we credit Preferred Share Capital = equity decrease. Note: The debit side (not classified here) would increase Common Share Capital."
+    },
+    "credit_corrector": {
+      "input_tokens": 662,
+      "output_tokens": 222,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2314,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058116,
+      "raw_cost_usd": 0.010272,
+      "output": {
+        "reason": "This is a share conversion transaction within equity. Converting preferred shares to common shares involves:\n- Debit: Preferred shares (equity decrease) - correctly shown in debit tuple as (0,0,0,0,1,0)\n- Credit: Common shares (equity increase) - should be slot b\n\nThe initial credit tuple (0,0,0,0,0,0) shows no entries at all, which is incorrect. This is an equity-to-equity conversion where the carrying value of preferred shares ($100) is transferred to common shares. No assets, liabilities, or revenues are involved - this is purely a reclassification within equity accounts. The credit side must record the increase in common shares as an equity increase.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This is a share conversion transaction within equity. Converting preferred shares to common shares involves:\n- Debit: Preferred shares (equity decrease) - correctly shown in debit tuple as (0,0,0,0,1,0)\n- Credit: Common shares (equity increase) - should be slot b\n\nThe initial credit tuple (0,0,0,0,0,0) shows no entries at all, which is incorrect. This is an equity-to-equity conversion where the carrying value of preferred shares ($100) is transferred to common shares. No assets, liabilities, or revenues are involved - this is purely a reclassification within equity accounts. The credit side must record the increase in common shares as an equity increase."
+    },
+    "debit_corrector": {
+      "input_tokens": 662,
+      "output_tokens": 232,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2306,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059592,
+      "raw_cost_usd": 0.010398,
+      "output": {
+        "reason": "This is a share conversion transaction where preferred shares are converted to common shares. Under IFRS, this is an equity reclassification within shareholders' equity - no assets, liabilities, revenues, or expenses are affected. The debit should decrease preferred share equity (e=1) and the credit should increase common share equity (b=1). The initial debit tuple correctly shows equity decrease (e=1). However, the credit tuple showing (0,0,0,0,0,0) appears to be incorrect - it should show equity increase (b=1) for the common shares issued. Since we only review the debit side and the credit may contain its own errors, the debit classification of equity decrease is correct for reducing preferred share capital. No correction needed to the debit tuple.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": "This is a share conversion transaction where preferred shares are converted to common shares. Under IFRS, this is an equity reclassification within shareholders' equity - no assets, liabilities, revenues, or expenses are affected. The debit should decrease preferred share equity (e=1) and the credit should increase common share equity (b=1). The initial debit tuple correctly shows equity decrease (e=1). However, the credit tuple showing (0,0,0,0,0,0) appears to be incorrect - it should show equity increase (b=1) for the common shares issued. Since we only review the debit side and the credit may contain its own errors, the debit classification of equity decrease is correct for reducing preferred share capital. No correction needed to the debit tuple."
+    },
+    "entry_builder": {
+      "input_tokens": 1014,
+      "output_tokens": 291,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3681,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0082071,
+      "raw_cost_usd": 0.015408,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Conversion of 50 preferred shares to 25 common shares",
+        "rationale": "Under IFRS, share conversions are equity-to-equity transactions recorded at the carrying value of the shares surrendered. The $100 carrying value of the preferred shares is transferred to common shares. Debit Preferred Shares (equity decrease) $100, credit Common Shares (equity increase) $100. This is a pure equity reclassification with no gain/loss recognized. The classifier tuples correctly identify this as e=1 (equity decrease) on debit side and b=1 (equity increase) on credit side.",
+        "lines": [
+          {
+            "account_name": "Preferred Shares",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1905,
+      "output_tokens": 190,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3291,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008980799999999999,
+      "raw_cost_usd": 0.012723,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records share conversion as equity reclassification. Debit to Preferred Shares (equity decrease) $100 and credit to Common Shares (equity increase) $100 properly reflects the carrying value transfer. Entry balances ($100 = $100), accounts are appropriate for the transaction, amount matches the stated carrying value, and directionality is correct (debit decreases equity account being surrendered, credit increases equity account being issued). Under IFRS, share conversions are recorded at carrying value with no gain/loss, which is properly applied here."
+      },
+      "reason": "Entry correctly records share conversion as equity reclassification. Debit to Preferred Shares (equity decrease) $100 and credit to Common Shares (equity increase) $100 properly reflects the carrying value transfer. Entry balances ($100 = $100), accounts are appropriate for the transaction, amount matches the stated carrying value, and directionality is correct (debit decreases equity account being surrendered, credit increases equity account being issued). Under IFRS, share conversions are recorded at carrying value with no gain/loss, which is properly applied here."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "conversion terms",
+            "resolved": true,
+            "resolution": "Transaction explicitly states carrying value of $100 for preferred shares and conversion ratio (50 preferred to 25 common). Convention: book value method applies \u2014 common shares recorded at carrying value of preferred shares converted.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether conversion is per share or total",
+            "resolved": true,
+            "resolution": "Transaction states '50 preferred shares (carrying value $100)' \u2014 the $100 is the total carrying value of all 50 shares being converted, not per-share value. This is the standard way to express conversion transactions.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Converting preferred shares to common shares involves decreasing one equity account (preferred shares) and increasing another equity account (common shares). On the debit side, we debit preferred shares equity to decrease it (equity decrease = 1 line in position e). The credit side would increase common shares equity, but we only classify debits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This is a share conversion transaction. On the credit side, we decrease Preferred Share Capital (equity decrease) by crediting it. Under IFRS, crediting an equity account decreases its balance. The preferred shares are being removed/converted, so we credit Preferred Share Capital = equity decrease. Note: The debit side (not classified here) would increase Common Share Capital.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "This is a share conversion transaction where preferred shares are converted to common shares. Under IFRS, this is an equity reclassification within shareholders' equity - no assets, liabilities, revenues, or expenses are affected. The debit should decrease preferred share equity (e=1) and the credit should increase common share equity (b=1). The initial debit tuple correctly shows equity decrease (e=1). However, the credit tuple showing (0,0,0,0,0,0) appears to be incorrect - it should show equity increase (b=1) for the common shares issued. Since we only review the debit side and the credit may contain its own errors, the debit classification of equity decrease is correct for reducing preferred share capital. No correction needed to the debit tuple.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "This is a share conversion transaction within equity. Converting preferred shares to common shares involves:\n- Debit: Preferred shares (equity decrease) - correctly shown in debit tuple as (0,0,0,0,1,0)\n- Credit: Common shares (equity increase) - should be slot b\n\nThe initial credit tuple (0,0,0,0,0,0) shows no entries at all, which is incorrect. This is an equity-to-equity conversion where the carrying value of preferred shares ($100) is transferred to common shares. No assets, liabilities, or revenues are involved - this is purely a reclassification within equity accounts. The credit side must record the increase in common shares as an equity increase.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Conversion of 50 preferred shares to 25 common shares",
+        "rationale": "Under IFRS, share conversions are equity-to-equity transactions recorded at the carrying value of the shares surrendered. The $100 carrying value of the preferred shares is transferred to common shares. Debit Preferred Shares (equity decrease) $100, credit Common Shares (equity increase) $100. This is a pure equity reclassification with no gain/loss recognized. The classifier tuples correctly identify this as e=1 (equity decrease) on debit side and b=1 (equity increase) on credit side.",
+        "lines": [
+          {
+            "account_name": "Preferred Shares",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records share conversion as equity reclassification. Debit to Preferred Shares (equity decrease) $100 and credit to Common Shares (equity increase) $100 properly reflects the carrying value transfer. Entry balances ($100 = $100), accounts are appropriate for the transaction, amount matches the stated carrying value, and directionality is correct (debit decreases equity account being surrendered, credit increases equity account being issued). Under IFRS, share conversions are recorded at carrying value with no gain/loss, which is properly applied here."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 519,
+        "output_tokens": 190,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 494,
+        "output_tokens": 134,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 492,
+        "output_tokens": 144,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 662,
+        "output_tokens": 222,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 662,
+        "output_tokens": 232,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1014,
+        "output_tokens": 291,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1905,
+        "output_tokens": 190,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

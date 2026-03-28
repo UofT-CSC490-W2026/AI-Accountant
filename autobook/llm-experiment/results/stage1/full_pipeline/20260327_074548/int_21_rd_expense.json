@@ -1,0 +1,437 @@
+{
+  "test_case_id": "int_21_rd_expense",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Raw materials purchased for R&D of new snack product",
+    "rationale": "Under IAS 38, research costs must be expensed as incurred. The transaction explicitly states materials are \"for research and development\" of a new product. In the research phase, materials consumed are expensed immediately as R&D expense. The classifier tuples (debit: expense increase, credit: asset decrease) align with this treatment. Payment by cheque reduces the Cash/Bank asset.",
+    "lines": [
+      {
+        "account_name": "Research and Development Expense",
+        "type": "debit",
+        "amount": 50000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 50000.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.042472499999999996,
+  "raw_cost_usd": 0.074292,
+  "total_latency_ms": 34395,
+  "total_input_tokens": 17569,
+  "total_output_tokens": 1439,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 530,
+      "output_tokens": 327,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2663,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0071349,
+      "raw_cost_usd": 0.012894,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "accounting treatment of R&D raw materials",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Capitalize as inventory (raw materials asset) if materials are for production trials that will yield saleable products",
+              "Expense immediately as R&D expense if materials are consumed in pure research with no inventory output"
+            ],
+            "clarification_question": "Will these raw materials be used to produce inventory items (even trial/prototype products), or are they being consumed purely in research activities with no saleable output?",
+            "why_entry_differs": "If materials become inventory: debit Inventory/Raw Materials, credit Cash. If consumed in pure R&D: debit R&D Expense, credit Cash. Different account types (asset vs expense) and different financial statement impact.",
+            "why_not_resolved": "The transaction states materials are 'for research and development' but doesn't clarify whether they will be converted into inventory (even prototypes) or consumed entirely in research. IAS 38 requires R&D costs to be expensed unless they meet specific capitalization criteria, but raw materials purchased for product development trials that yield inventory are treated as inventory purchases, not R&D expense. The text doesn't provide enough detail to determine which treatment applies."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 505,
+      "output_tokens": 169,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1667,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004398600000000001,
+      "raw_cost_usd": 0.007536,
+      "output": {
+        "reason": "Under IFRS, research and development costs must be expensed as incurred (research phase) or capitalized only if strict criteria are met (development phase). Since this is for R&D of a new product and raw materials are being consumed in the research process, this represents an expense increase. The debit is to R&D Expense (or similar expense account), not to inventory or another asset, because the materials are specifically for experimental/research purposes rather than for production of goods for sale.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IFRS, research and development costs must be expensed as incurred (research phase) or capitalized only if strict criteria are met (development phase). Since this is for R&D of a new product and raw materials are being consumed in the research process, this represents an expense increase. The debit is to R&D Expense (or similar expense account), not to inventory or another asset, because the materials are specifically for experimental/research purposes rather than for production of goods for sale."
+    },
+    "credit_classifier": {
+      "input_tokens": 503,
+      "output_tokens": 96,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1644,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032913,
+      "raw_cost_usd": 0.006372,
+      "output": {
+        "reason": "Payment by cheque means cash (bank account) is leaving the business, which represents an asset decrease. The credit side records the outflow of cash.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Payment by cheque means cash (bank account) is leaving the business, which represents an asset decrease. The credit side records the outflow of cash."
+    },
+    "debit_corrector": {
+      "input_tokens": 673,
+      "output_tokens": 153,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2317,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0048072,
+      "raw_cost_usd": 0.009246,
+      "output": {
+        "reason": "Under IFRS (IAS 38), research costs must be expensed as incurred and cannot be capitalized. The raw materials purchased for R&D of a new snack product are research expenses, not inventory or other assets. The initial debit tuple correctly classifies this as an expense increase (c=1). The credit tuple showing asset decrease (cash paid by cheque) is consistent. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IFRS (IAS 38), research costs must be expensed as incurred and cannot be capitalized. The raw materials purchased for R&D of a new snack product are research expenses, not inventory or other assets. The initial debit tuple correctly classifies this as an expense increase (c=1). The credit tuple showing asset decrease (cash paid by cheque) is consistent. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 673,
+      "output_tokens": 201,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2325,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0055296,
+      "raw_cost_usd": 0.00999,
+      "output": {
+        "reason": "The transaction involves paying $50,000 by cheque for raw materials for R&D. Under IFRS, R&D costs are typically expensed as incurred (IAS 38), so the debit correctly shows expense increase (slot c=1). The credit side shows asset decrease (slot d=1), which correctly represents the reduction in cash/bank account from the cheque payment. The initial credit tuple is correct - when you pay by cheque, you are decreasing an asset (cash). The debit and credit sides tell a consistent story: expense increases (debit) and cash decreases (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves paying $50,000 by cheque for raw materials for R&D. Under IFRS, R&D costs are typically expensed as incurred (IAS 38), so the debit correctly shows expense increase (slot c=1). The credit side shows asset decrease (slot d=1), which correctly represents the reduction in cash/bank account from the cheque payment. The initial credit tuple is correct - when you pay by cheque, you are decreasing an asset (cash). The debit and credit sides tell a consistent story: expense increases (debit) and cash decreases (credit). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1085,
+      "output_tokens": 276,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3752,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081951,
+      "raw_cost_usd": 0.015396,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Raw materials purchased for R&D of new snack product",
+        "rationale": "Under IAS 38, research costs must be expensed as incurred. The transaction explicitly states materials are \"for research and development\" of a new product. In the research phase, materials consumed are expensed immediately as R&D expense. The classifier tuples (debit: expense increase, credit: asset decrease) align with this treatment. Payment by cheque reduces the Cash/Bank asset.",
+        "lines": [
+          {
+            "account_name": "Research and Development Expense",
+            "type": "debit",
+            "amount": 50000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 50000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1815,
+      "output_tokens": 217,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3201,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.009115799999999999,
+      "raw_cost_usd": 0.012858,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "SOMEWHAT_CONFIDENT",
+        "reason": "Entry balances ($50,000 debit = $50,000 credit). Under IAS 38, research costs must be expensed as incurred. The transaction states materials are \"for research and development of a new snack product\" - treating this as R&D expense is appropriate given the explicit R&D context. Debit to R&D Expense (expense increase) and credit to Cash (asset decrease) are directionally correct. Amount matches transaction text. While there is some ambiguity about whether these materials could be treated as inventory if they produce prototypes, the explicit \"for research and development\" language supports immediate expensing under IAS 38's research phase requirements."
+      },
+      "reason": "Entry balances ($50,000 debit = $50,000 credit). Under IAS 38, research costs must be expensed as incurred. The transaction states materials are \"for research and development of a new snack product\" - treating this as R&D expense is appropriate given the explicit R&D context. Debit to R&D Expense (expense increase) and credit to Cash (asset decrease) are directionally correct. Amount matches transaction text. While there is some ambiguity about whether these materials could be treated as inventory if they produce prototypes, the explicit \"for research and development\" language supports immediate expensing under IAS 38's research phase requirements."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "accounting treatment of R&D raw materials",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Capitalize as inventory (raw materials asset) if materials are for production trials that will yield saleable products",
+              "Expense immediately as R&D expense if materials are consumed in pure research with no inventory output"
+            ],
+            "clarification_question": "Will these raw materials be used to produce inventory items (even trial/prototype products), or are they being consumed purely in research activities with no saleable output?",
+            "why_entry_differs": "If materials become inventory: debit Inventory/Raw Materials, credit Cash. If consumed in pure R&D: debit R&D Expense, credit Cash. Different account types (asset vs expense) and different financial statement impact.",
+            "why_not_resolved": "The transaction states materials are 'for research and development' but doesn't clarify whether they will be converted into inventory (even prototypes) or consumed entirely in research. IAS 38 requires R&D costs to be expensed unless they meet specific capitalization criteria, but raw materials purchased for product development trials that yield inventory are treated as inventory purchases, not R&D expense. The text doesn't provide enough detail to determine which treatment applies."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Under IFRS, research and development costs must be expensed as incurred (research phase) or capitalized only if strict criteria are met (development phase). Since this is for R&D of a new product and raw materials are being consumed in the research process, this represents an expense increase. The debit is to R&D Expense (or similar expense account), not to inventory or another asset, because the materials are specifically for experimental/research purposes rather than for production of goods for sale.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Payment by cheque means cash (bank account) is leaving the business, which represents an asset decrease. The credit side records the outflow of cash.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Under IFRS (IAS 38), research costs must be expensed as incurred and cannot be capitalized. The raw materials purchased for R&D of a new snack product are research expenses, not inventory or other assets. The initial debit tuple correctly classifies this as an expense increase (c=1). The credit tuple showing asset decrease (cash paid by cheque) is consistent. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves paying $50,000 by cheque for raw materials for R&D. Under IFRS, R&D costs are typically expensed as incurred (IAS 38), so the debit correctly shows expense increase (slot c=1). The credit side shows asset decrease (slot d=1), which correctly represents the reduction in cash/bank account from the cheque payment. The initial credit tuple is correct - when you pay by cheque, you are decreasing an asset (cash). The debit and credit sides tell a consistent story: expense increases (debit) and cash decreases (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Raw materials purchased for R&D of new snack product",
+        "rationale": "Under IAS 38, research costs must be expensed as incurred. The transaction explicitly states materials are \"for research and development\" of a new product. In the research phase, materials consumed are expensed immediately as R&D expense. The classifier tuples (debit: expense increase, credit: asset decrease) align with this treatment. Payment by cheque reduces the Cash/Bank asset.",
+        "lines": [
+          {
+            "account_name": "Research and Development Expense",
+            "type": "debit",
+            "amount": 50000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 50000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "SOMEWHAT_CONFIDENT",
+        "reason": "Entry balances ($50,000 debit = $50,000 credit). Under IAS 38, research costs must be expensed as incurred. The transaction states materials are \"for research and development of a new snack product\" - treating this as R&D expense is appropriate given the explicit R&D context. Debit to R&D Expense (expense increase) and credit to Cash (asset decrease) are directionally correct. Amount matches transaction text. While there is some ambiguity about whether these materials could be treated as inventory if they produce prototypes, the explicit \"for research and development\" language supports immediate expensing under IAS 38's research phase requirements."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 530,
+        "output_tokens": 327,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 505,
+        "output_tokens": 169,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 503,
+        "output_tokens": 96,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 673,
+        "output_tokens": 153,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 673,
+        "output_tokens": 201,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1085,
+        "output_tokens": 276,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1815,
+        "output_tokens": 217,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

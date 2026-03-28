@@ -1,0 +1,411 @@
+{
+  "test_case_id": "basic_06_refinance_loan",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Refinance bank loan - replace old note with new note",
+    "rationale": "Loan refinancing involves extinguishing the old liability and recording the new liability. The old loan payable (liability) is decreased by debiting it, and the new loan payable (liability) is increased by crediting it. Since the amounts are equal ($100), this is a pure refinancing with no cash exchanged, no gain/loss, and no tax implications. The debit tuple (0,0,0,1,0,0) indicates 1 liability decrease line, and the credit tuple (1,0,0,0,0,0) indicates 1 liability increase line.",
+    "lines": [
+      {
+        "account_name": "Loan Payable - Old",
+        "type": "debit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "Loan Payable - New",
+        "type": "credit",
+        "amount": 100.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.035702700000000004,
+  "raw_cost_usd": 0.066237,
+  "total_latency_ms": 18906,
+  "total_input_tokens": 16444,
+  "total_output_tokens": 1127,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 519,
+      "output_tokens": 35,
+      "cache_read_tokens": 1812,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2331,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0026256,
+      "raw_cost_usd": 0.007518,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 115,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1655,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035526,
+      "raw_cost_usd": 0.00669,
+      "output": {
+        "reason": "Refinancing replaces one loan with another. The old $100 loan is extinguished (liability decrease, debited), and a new $100 loan is created (liability increase, credited). Debit side: 1 line for liability decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Refinancing replaces one loan with another. The old $100 loan is extinguished (liability decrease, debited), and a new $100 loan is created (liability increase, credited). Debit side: 1 line for liability decrease."
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 124,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1632,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036753000000000003,
+      "raw_cost_usd": 0.006756,
+      "output": {
+        "reason": "Refinancing replaces one loan with another. The old loan liability of $100 is removed (liability decrease = debit), and the new loan liability of $100 is established (liability increase = credit). The credit side shows only the new loan = 1 liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Refinancing replaces one loan with another. The old loan liability of $100 is removed (liability decrease = debit), and the new loan liability of $100 is established (liability increase = credit). The credit side shows only the new loan = 1 liability increase."
+    },
+    "credit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 197,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2313,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0054336,
+      "raw_cost_usd": 0.009894,
+      "output": {
+        "reason": "The transaction is a loan refinance where an old $100 note is replaced by a new $100 note. This means: (1) the old liability is extinguished (liability decrease - debit side slot d), and (2) a new liability is created (liability increase - credit side slot a). The debit tuple shows (0,0,0,1,0,0) = liability decrease, and the initial credit tuple shows (1,0,0,0,0,0) = liability increase. These are consistent with each other and correctly reflect the accounting treatment of a refinancing transaction. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a loan refinance where an old $100 note is replaced by a new $100 note. This means: (1) the old liability is extinguished (liability decrease - debit side slot d), and (2) a new liability is created (liability increase - credit side slot a). The debit tuple shows (0,0,0,1,0,0) = liability decrease, and the initial credit tuple shows (1,0,0,0,0,0) = liability increase. These are consistent with each other and correctly reflect the accounting treatment of a refinancing transaction. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 201,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2305,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0054912,
+      "raw_cost_usd": 0.00993,
+      "output": {
+        "reason": "The transaction is a refinancing where an old $100 loan is replaced by a new $100 loan. This involves: (1) paying off/extinguishing the old liability (debit = liability decrease), and (2) taking on the new liability (credit = liability increase). The initial debit tuple (0,0,0,1,0,0) correctly shows a liability decrease, which represents the elimination of the old loan obligation. The credit tuple (1,0,0,0,0,0) correctly shows a liability increase for the new loan. Both sides are consistent and correct for a refinancing transaction. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a refinancing where an old $100 loan is replaced by a new $100 loan. This involves: (1) paying off/extinguishing the old liability (debit = liability decrease), and (2) taking on the new liability (credit = liability increase). The initial debit tuple (0,0,0,1,0,0) correctly shows a liability decrease, which represents the elimination of the old loan obligation. The credit tuple (1,0,0,0,0,0) correctly shows a liability increase for the new loan. Both sides are consistent and correct for a refinancing transaction. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 670,
+      "output_tokens": 308,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3182,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.007383600000000001,
+      "raw_cost_usd": 0.014166,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Refinance bank loan - replace old note with new note",
+        "rationale": "Loan refinancing involves extinguishing the old liability and recording the new liability. The old loan payable (liability) is decreased by debiting it, and the new loan payable (liability) is increased by crediting it. Since the amounts are equal ($100), this is a pure refinancing with no cash exchanged, no gain/loss, and no tax implications. The debit tuple (0,0,0,1,0,0) indicates 1 liability decrease line, and the credit tuple (1,0,0,0,0,0) indicates 1 liability increase line.",
+        "lines": [
+          {
+            "account_name": "Loan Payable - Old",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Loan Payable - New",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1640,
+      "output_tokens": 147,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3026,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0075408,
+      "raw_cost_usd": 0.011283,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records loan refinancing. Balance verified: $100 debit = $100 credit. Old loan liability decreased (debited) and new loan liability increased (credited) for equal amounts. No cash exchanged, no gain/loss, no tax implications for a pure refinancing. Accounts, amounts, and directionality are all correct under IFRS."
+      },
+      "reason": "Entry correctly records loan refinancing. Balance verified: $100 debit = $100 credit. Old loan liability decreased (debited) and new loan liability increased (credited) for equal amounts. No cash exchanged, no gain/loss, no tax implications for a pure refinancing. Accounts, amounts, and directionality are all correct under IFRS."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Refinancing replaces one loan with another. The old $100 loan is extinguished (liability decrease, debited), and a new $100 loan is created (liability increase, credited). Debit side: 1 line for liability decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Refinancing replaces one loan with another. The old loan liability of $100 is removed (liability decrease = debit), and the new loan liability of $100 is established (liability increase = credit). The credit side shows only the new loan = 1 liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is a refinancing where an old $100 loan is replaced by a new $100 loan. This involves: (1) paying off/extinguishing the old liability (debit = liability decrease), and (2) taking on the new liability (credit = liability increase). The initial debit tuple (0,0,0,1,0,0) correctly shows a liability decrease, which represents the elimination of the old loan obligation. The credit tuple (1,0,0,0,0,0) correctly shows a liability increase for the new loan. Both sides are consistent and correct for a refinancing transaction. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction is a loan refinance where an old $100 note is replaced by a new $100 note. This means: (1) the old liability is extinguished (liability decrease - debit side slot d), and (2) a new liability is created (liability increase - credit side slot a). The debit tuple shows (0,0,0,1,0,0) = liability decrease, and the initial credit tuple shows (1,0,0,0,0,0) = liability increase. These are consistent with each other and correctly reflect the accounting treatment of a refinancing transaction. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Refinance bank loan - replace old note with new note",
+        "rationale": "Loan refinancing involves extinguishing the old liability and recording the new liability. The old loan payable (liability) is decreased by debiting it, and the new loan payable (liability) is increased by crediting it. Since the amounts are equal ($100), this is a pure refinancing with no cash exchanged, no gain/loss, and no tax implications. The debit tuple (0,0,0,1,0,0) indicates 1 liability decrease line, and the credit tuple (1,0,0,0,0,0) indicates 1 liability increase line.",
+        "lines": [
+          {
+            "account_name": "Loan Payable - Old",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Loan Payable - New",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records loan refinancing. Balance verified: $100 debit = $100 credit. Old loan liability decreased (debited) and new loan liability increased (credited) for equal amounts. No cash exchanged, no gain/loss, no tax implications for a pure refinancing. Accounts, amounts, and directionality are all correct under IFRS."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 519,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 1812,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 115,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 124,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 197,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 201,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 670,
+        "output_tokens": 308,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1640,
+        "output_tokens": 147,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

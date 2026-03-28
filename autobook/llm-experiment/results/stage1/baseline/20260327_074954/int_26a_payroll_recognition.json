@@ -1,0 +1,358 @@
+{
+  "test_case_id": "int_26a_payroll_recognition",
+  "variant_name": "baseline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    4,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-01-31",
+    "description": "January payroll: production wages and administrative salaries with statutory deductions",
+    "rationale": "Production worker wages ($25,000) are debited to Manufacturing Wages Expense (or Direct Labor) as they are part of cost of goods manufactured. Administrative salaries ($20,000) are debited to Salaries Expense as operating expense. Total gross pay is $45,000. Employee-borne deductions create liabilities: Pension Payable $2,000, Health Insurance Payable $3,250, EI Payable $1,050, and Income Tax Payable $1,450, totaling $7,750 in withholdings. Net pay of $37,250 ($45,000 - $7,750) was paid from the chequing account. The tuple structure (2 expense debits, 4 liability credits, 1 asset decrease) aligns with this interpretation. No sales tax applies to payroll transactions.",
+    "lines": [
+      {
+        "account_name": "Manufacturing Wages Expense",
+        "type": "debit",
+        "amount": 25000.0
+      },
+      {
+        "account_name": "Salaries Expense",
+        "type": "debit",
+        "amount": 20000.0
+      },
+      {
+        "account_name": "Pension Payable",
+        "type": "credit",
+        "amount": 2000.0
+      },
+      {
+        "account_name": "Health Insurance Payable",
+        "type": "credit",
+        "amount": 3250.0
+      },
+      {
+        "account_name": "EI Payable",
+        "type": "credit",
+        "amount": 1050.0
+      },
+      {
+        "account_name": "Income Tax Payable",
+        "type": "credit",
+        "amount": 1450.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 37250.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.022679400000000002,
+  "raw_cost_usd": 0.035931,
+  "total_latency_ms": 14742,
+  "total_input_tokens": 6942,
+  "total_output_tokens": 1007,
+  "total_llm_calls": 3,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 579,
+      "output_tokens": 169,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1741,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004620600000000001,
+      "raw_cost_usd": 0.007758,
+      "output": {
+        "reason": "The debit side has two expense increases: (1) Production worker wages $25,000 = manufacturing/production expense increase (or work-in-progress cost), and (2) Administrative salaries $20,000 = administrative expense increase. The withholdings are employee-borne deductions that reduce the liability owed to employees but do not affect the expense recognition. The net payment from chequing account is the credit side (asset decrease). Total: 2 expense increase lines.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The debit side has two expense increases: (1) Production worker wages $25,000 = manufacturing/production expense increase (or work-in-progress cost), and (2) Administrative salaries $20,000 = administrative expense increase. The withholdings are employee-borne deductions that reduce the liability owed to employees but do not affect the expense recognition. The net payment from chequing account is the credit side (asset decrease). Total: 2 expense increase lines."
+    },
+    "credit_classifier": {
+      "input_tokens": 577,
+      "output_tokens": 263,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1718,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0060183,
+      "raw_cost_usd": 0.009099,
+      "output": {
+        "reason": "The credit side consists of:\n1. Pension contributions payable = $2,000 (liability increase)\n2. Health insurance premiums payable = $3,250 (liability increase)\n3. Employment insurance premiums payable = $1,050 (liability increase)\n4. Income tax withholdings payable = $1,450 (liability increase)\n5. Cash/chequing account = net pay transferred (asset decrease)\n\nTotal gross wages = $45,000. Total deductions = $7,750. Net pay = $37,250.\n\nThe credit side has 5 lines: 4 liability increases (for the various payables to government/benefit providers) and 1 asset decrease (cash paid out). Therefore: a=4 (liability increases), b=0, c=0, d=1 (asset decrease), e=0, f=0.",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The credit side consists of:\n1. Pension contributions payable = $2,000 (liability increase)\n2. Health insurance premiums payable = $3,250 (liability increase)\n3. Employment insurance premiums payable = $1,050 (liability increase)\n4. Income tax withholdings payable = $1,450 (liability increase)\n5. Cash/chequing account = net pay transferred (asset decrease)\n\nTotal gross wages = $45,000. Total deductions = $7,750. Net pay = $37,250.\n\nThe credit side has 5 lines: 4 liability increases (for the various payables to government/benefit providers) and 1 asset decrease (cash paid out). Therefore: a=4 (liability increases), b=0, c=0, d=1 (asset decrease), e=0, f=0."
+    },
+    "entry_builder": {
+      "input_tokens": 878,
+      "output_tokens": 575,
+      "cache_read_tokens": 2605,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3483,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0120405,
+      "raw_cost_usd": 0.019074,
+      "output": {
+        "date": "2026-01-31",
+        "description": "January payroll: production wages and administrative salaries with statutory deductions",
+        "rationale": "Production worker wages ($25,000) are debited to Manufacturing Wages Expense (or Direct Labor) as they are part of cost of goods manufactured. Administrative salaries ($20,000) are debited to Salaries Expense as operating expense. Total gross pay is $45,000. Employee-borne deductions create liabilities: Pension Payable $2,000, Health Insurance Payable $3,250, EI Payable $1,050, and Income Tax Payable $1,450, totaling $7,750 in withholdings. Net pay of $37,250 ($45,000 - $7,750) was paid from the chequing account. The tuple structure (2 expense debits, 4 liability credits, 1 asset decrease) aligns with this interpretation. No sales tax applies to payroll transactions.",
+        "lines": [
+          {
+            "account_name": "Manufacturing Wages Expense",
+            "type": "debit",
+            "amount": 25000.0
+          },
+          {
+            "account_name": "Salaries Expense",
+            "type": "debit",
+            "amount": 20000.0
+          },
+          {
+            "account_name": "Pension Payable",
+            "type": "credit",
+            "amount": 2000.0
+          },
+          {
+            "account_name": "Health Insurance Payable",
+            "type": "credit",
+            "amount": 3250.0
+          },
+          {
+            "account_name": "EI Payable",
+            "type": "credit",
+            "amount": 1050.0
+          },
+          {
+            "account_name": "Income Tax Payable",
+            "type": "credit",
+            "amount": 1450.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 37250.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "The debit side has two expense increases: (1) Production worker wages $25,000 = manufacturing/production expense increase (or work-in-progress cost), and (2) Administrative salaries $20,000 = administrative expense increase. The withholdings are employee-borne deductions that reduce the liability owed to employees but do not affect the expense recognition. The net payment from chequing account is the credit side (asset decrease). Total: 2 expense increase lines.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit side consists of:\n1. Pension contributions payable = $2,000 (liability increase)\n2. Health insurance premiums payable = $3,250 (liability increase)\n3. Employment insurance premiums payable = $1,050 (liability increase)\n4. Income tax withholdings payable = $1,450 (liability increase)\n5. Cash/chequing account = net pay transferred (asset decrease)\n\nTotal gross wages = $45,000. Total deductions = $7,750. Net pay = $37,250.\n\nThe credit side has 5 lines: 4 liability increases (for the various payables to government/benefit providers) and 1 asset decrease (cash paid out). Therefore: a=4 (liability increases), b=0, c=0, d=1 (asset decrease), e=0, f=0.",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The debit side has two expense increases: (1) Production worker wages $25,000 = manufacturing/production expense increase (or work-in-progress cost), and (2) Administrative salaries $20,000 = administrative expense increase. The withholdings are employee-borne deductions that reduce the liability owed to employees but do not affect the expense recognition. The net payment from chequing account is the credit side (asset decrease). Total: 2 expense increase lines.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The credit side consists of:\n1. Pension contributions payable = $2,000 (liability increase)\n2. Health insurance premiums payable = $3,250 (liability increase)\n3. Employment insurance premiums payable = $1,050 (liability increase)\n4. Income tax withholdings payable = $1,450 (liability increase)\n5. Cash/chequing account = net pay transferred (asset decrease)\n\nTotal gross wages = $45,000. Total deductions = $7,750. Net pay = $37,250.\n\nThe credit side has 5 lines: 4 liability increases (for the various payables to government/benefit providers) and 1 asset decrease (cash paid out). Therefore: a=4 (liability increases), b=0, c=0, d=1 (asset decrease), e=0, f=0.",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-01-31",
+        "description": "January payroll: production wages and administrative salaries with statutory deductions",
+        "rationale": "Production worker wages ($25,000) are debited to Manufacturing Wages Expense (or Direct Labor) as they are part of cost of goods manufactured. Administrative salaries ($20,000) are debited to Salaries Expense as operating expense. Total gross pay is $45,000. Employee-borne deductions create liabilities: Pension Payable $2,000, Health Insurance Payable $3,250, EI Payable $1,050, and Income Tax Payable $1,450, totaling $7,750 in withholdings. Net pay of $37,250 ($45,000 - $7,750) was paid from the chequing account. The tuple structure (2 expense debits, 4 liability credits, 1 asset decrease) aligns with this interpretation. No sales tax applies to payroll transactions.",
+        "lines": [
+          {
+            "account_name": "Manufacturing Wages Expense",
+            "type": "debit",
+            "amount": 25000.0
+          },
+          {
+            "account_name": "Salaries Expense",
+            "type": "debit",
+            "amount": 20000.0
+          },
+          {
+            "account_name": "Pension Payable",
+            "type": "credit",
+            "amount": 2000.0
+          },
+          {
+            "account_name": "Health Insurance Payable",
+            "type": "credit",
+            "amount": 3250.0
+          },
+          {
+            "account_name": "EI Payable",
+            "type": "credit",
+            "amount": 1050.0
+          },
+          {
+            "account_name": "Income Tax Payable",
+            "type": "credit",
+            "amount": 1450.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 37250.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 579,
+        "output_tokens": 169,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 577,
+        "output_tokens": 263,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 878,
+        "output_tokens": 575,
+        "input_token_details": {
+          "cache_read": 2605,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

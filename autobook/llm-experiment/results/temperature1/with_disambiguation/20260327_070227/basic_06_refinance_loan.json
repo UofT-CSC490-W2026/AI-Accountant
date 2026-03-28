@@ -1,0 +1,394 @@
+{
+  "test_case_id": "basic_06_refinance_loan",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Refinance bank loan \u2014 old note extinguished and replaced with new note",
+    "rationale": "In a refinancing transaction, the old liability is removed (debit Loan Payable) and the new liability is established (credit Loan Payable). Since both notes are $100 with no mention of fees or costs, this is a clean refinancing where the old obligation is extinguished by creating a new obligation of equal principal. The transaction states equal amounts ($100 to $100), and there is no indication of any fees, penalties, or transaction costs. If such costs existed and were material, they would typically be explicitly mentioned in the transaction description. Following the principle of recording what is stated and not speculating about unstated elements, I am treating this as a straightforward refinancing with no additional costs. The debit tuple (d=1) correctly indicates liability decrease (extinguishing old note), and credit tuple (a=1) correctly indicates liability increase (establishing new note).",
+    "lines": [
+      {
+        "account_name": "Loan Payable",
+        "type": "debit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "Loan Payable",
+        "type": "credit",
+        "amount": 100.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.026733899999999998,
+  "raw_cost_usd": 0.045912,
+  "total_latency_ms": 24508,
+  "total_input_tokens": 9969,
+  "total_output_tokens": 1067,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 518,
+      "output_tokens": 433,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2651,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0086889,
+      "raw_cost_usd": 0.014448,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "interest rate difference between old and new note",
+            "resolved": true,
+            "resolution": "Interest rate difference does not affect the journal entry at refinancing date \u2014 only principal amounts are recorded. Interest differences affect future periods.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether old loan was fully extinguished",
+            "resolved": true,
+            "resolution": "'Refinance' and 'replaced by' are conventional terms indicating the old obligation is extinguished and a new one created at the stated amounts",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method for refinancing",
+            "resolved": true,
+            "resolution": "In a refinancing transaction, the old note is extinguished by issuing the new note \u2014 no cash changes hands at the refinancing moment, making payment method irrelevant",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "transaction costs or fees",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "No fees incurred (clean refinance)",
+              "Fees paid separately (would require additional expense/cash entry)",
+              "Fees capitalized into new note principal (would increase note payable amount)"
+            ],
+            "clarification_question": "Were there any fees, penalties, or transaction costs associated with refinancing this loan?",
+            "why_entry_differs": "If fees exist, they either increase the new note payable amount (if capitalized) or require a separate debit to an expense or asset account with corresponding credit to cash/payables",
+            "why_not_resolved": "The transaction states equal principal amounts ($100 to $100), but does not mention whether any refinancing costs were incurred. Standard convention does not assume zero costs for refinancing."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 126,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1632,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037053000000000003,
+      "raw_cost_usd": 0.006786,
+      "output": {
+        "reason": "Refinancing replaces one loan with another. On the credit side: the old loan liability is decreased (debit old loan payable) and a new loan liability is increased (credit new loan payable). Since both loans are $100, we have one liability increase line for the new loan.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Refinancing replaces one loan with another. On the credit side: the old loan liability is decreased (debit old loan payable) and a new loan liability is increased (credit new loan payable). Since both loans are $100, we have one liability increase line for the new loan."
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 122,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1655,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036576,
+      "raw_cost_usd": 0.006795,
+      "output": {
+        "reason": "Refinancing means paying off the old loan and creating a new loan. The debit side records the decrease of the old liability (loan payable of $100). This is a liability decrease. The credit side (handled separately) would record the new loan as a liability increase.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Refinancing means paying off the old loan and creating a new loan. The debit side records the decrease of the old liability (loan payable of $100). This is a liability decrease. The credit side (handled separately) would record the new loan as a liability increase."
+    },
+    "entry_builder": {
+      "input_tokens": 1364,
+      "output_tokens": 386,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4031,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0106821,
+      "raw_cost_usd": 0.017883,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Refinance bank loan \u2014 old note extinguished and replaced with new note",
+        "rationale": "In a refinancing transaction, the old liability is removed (debit Loan Payable) and the new liability is established (credit Loan Payable). Since both notes are $100 with no mention of fees or costs, this is a clean refinancing where the old obligation is extinguished by creating a new obligation of equal principal. The transaction states equal amounts ($100 to $100), and there is no indication of any fees, penalties, or transaction costs. If such costs existed and were material, they would typically be explicitly mentioned in the transaction description. Following the principle of recording what is stated and not speculating about unstated elements, I am treating this as a straightforward refinancing with no additional costs. The debit tuple (d=1) correctly indicates liability decrease (extinguishing old note), and credit tuple (a=1) correctly indicates liability increase (establishing new note).",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Loan Payable",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "interest rate difference between old and new note",
+            "resolved": true,
+            "resolution": "Interest rate difference does not affect the journal entry at refinancing date \u2014 only principal amounts are recorded. Interest differences affect future periods.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether old loan was fully extinguished",
+            "resolved": true,
+            "resolution": "'Refinance' and 'replaced by' are conventional terms indicating the old obligation is extinguished and a new one created at the stated amounts",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method for refinancing",
+            "resolved": true,
+            "resolution": "In a refinancing transaction, the old note is extinguished by issuing the new note \u2014 no cash changes hands at the refinancing moment, making payment method irrelevant",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "transaction costs or fees",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "No fees incurred (clean refinance)",
+              "Fees paid separately (would require additional expense/cash entry)",
+              "Fees capitalized into new note principal (would increase note payable amount)"
+            ],
+            "clarification_question": "Were there any fees, penalties, or transaction costs associated with refinancing this loan?",
+            "why_entry_differs": "If fees exist, they either increase the new note payable amount (if capitalized) or require a separate debit to an expense or asset account with corresponding credit to cash/payables",
+            "why_not_resolved": "The transaction states equal principal amounts ($100 to $100), but does not mention whether any refinancing costs were incurred. Standard convention does not assume zero costs for refinancing."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Refinancing means paying off the old loan and creating a new loan. The debit side records the decrease of the old liability (loan payable of $100). This is a liability decrease. The credit side (handled separately) would record the new loan as a liability increase.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Refinancing replaces one loan with another. On the credit side: the old loan liability is decreased (debit old loan payable) and a new loan liability is increased (credit new loan payable). Since both loans are $100, we have one liability increase line for the new loan.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Refinancing means paying off the old loan and creating a new loan. The debit side records the decrease of the old liability (loan payable of $100). This is a liability decrease. The credit side (handled separately) would record the new loan as a liability increase.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Refinancing replaces one loan with another. On the credit side: the old loan liability is decreased (debit old loan payable) and a new loan liability is increased (credit new loan payable). Since both loans are $100, we have one liability increase line for the new loan.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Refinance bank loan \u2014 old note extinguished and replaced with new note",
+        "rationale": "In a refinancing transaction, the old liability is removed (debit Loan Payable) and the new liability is established (credit Loan Payable). Since both notes are $100 with no mention of fees or costs, this is a clean refinancing where the old obligation is extinguished by creating a new obligation of equal principal. The transaction states equal amounts ($100 to $100), and there is no indication of any fees, penalties, or transaction costs. If such costs existed and were material, they would typically be explicitly mentioned in the transaction description. Following the principle of recording what is stated and not speculating about unstated elements, I am treating this as a straightforward refinancing with no additional costs. The debit tuple (d=1) correctly indicates liability decrease (extinguishing old note), and credit tuple (a=1) correctly indicates liability increase (establishing new note).",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Loan Payable",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 433,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 126,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 122,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1364,
+        "output_tokens": 386,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,377 @@
+{
+  "test_case_id": "basic_12_pay_salaries",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Employee salary payment",
+    "rationale": "Cannot determine correct entry structure without knowing if $100 is gross or net salary. If gross: debit Salary Expense $100, credit Cash and various payable accounts for statutory deductions. If net: debit Salary Expense for higher gross amount, credit Cash $100 and payables for withholdings. The journal entry structure fundamentally differs based on this fact.",
+    "lines": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "Is the $100 the gross salary amount before deductions, or the net amount paid to employees after withholding CPP, EI, and income tax?"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0302247,
+  "raw_cost_usd": 0.058302,
+  "total_latency_ms": 19239,
+  "total_input_tokens": 14219,
+  "total_output_tokens": 1043,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 511,
+      "output_tokens": 288,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2644,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.006492899999999999,
+      "raw_cost_usd": 0.012252,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "gross vs net salary payment",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "The $100 is gross salary (requires payroll deductions for CPP, EI, income tax)",
+              "The $100 is net salary (deductions already withheld from a higher gross amount)"
+            ],
+            "clarification_question": "Is the $100 the gross salary amount before deductions, or the net amount paid to employees after withholding taxes and contributions?",
+            "why_entry_differs": "If gross: debit Salary Expense $100, credit Cash and various payable accounts (CPP, EI, tax withholdings). If net: debit Salary Expense for a higher gross amount, credit Cash $100 and payables for the difference.",
+            "why_not_resolved": "The transaction states 'paid employee salaries of $100' which could refer to either the gross amount being expensed or the net amount being disbursed. Convention does not establish a default \u2014 both interpretations are common in practice depending on context."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 484,
+      "output_tokens": 76,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1625,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0029343000000000004,
+      "raw_cost_usd": 0.006015,
+      "output": {
+        "reason": "Cash paid out = asset decrease (1 line)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Cash paid out = asset decrease (1 line)"
+    },
+    "debit_classifier": {
+      "input_tokens": 486,
+      "output_tokens": 89,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1648,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031416,
+      "raw_cost_usd": 0.006279,
+      "output": {
+        "reason": "Salaries paid to employees = expense increase. The debit side records the salary expense incurred by the business.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Salaries paid to employees = expense increase. The debit side records the salary expense incurred by the business."
+    },
+    "debit_corrector": {
+      "input_tokens": 654,
+      "output_tokens": 149,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2298,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004690199999999999,
+      "raw_cost_usd": 0.009129,
+      "output": {
+        "reason": "The transaction \"Paid employee salaries of $100 in cash\" represents a salary expense payment. Under IFRS, employee salaries are an operating expense. The debit side should record an expense increase (slot c). The credit tuple shows asset decrease (cash going out), which is consistent with paying salaries. The initial debit tuple correctly classifies this as an expense increase. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Paid employee salaries of $100 in cash\" represents a salary expense payment. Under IFRS, employee salaries are an operating expense. The debit side should record an expense increase (slot c). The credit tuple shows asset decrease (cash going out), which is consistent with paying salaries. The initial debit tuple correctly classifies this as an expense increase. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 654,
+      "output_tokens": 195,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2306,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053826,
+      "raw_cost_usd": 0.009843,
+      "output": {
+        "reason": "The transaction \"Paid employee salaries of $100 in cash\" involves two accounting effects: (1) Salaries Expense increases (debit), and (2) Cash (an asset) decreases (credit). The debit tuple shows (0,0,1,0,0,0) = one expense increase, which is correct. The initial credit tuple shows (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash payment. Both sides tell a consistent story: expense is recognized and cash is paid out. The credit classification is correct and requires no change.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Paid employee salaries of $100 in cash\" involves two accounting effects: (1) Salaries Expense increases (debit), and (2) Cash (an asset) decreases (credit). The debit tuple shows (0,0,1,0,0,0) = one expense increase, which is correct. The initial credit tuple shows (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash payment. Both sides tell a consistent story: expense is recognized and cash is paid out. The credit classification is correct and requires no change."
+    },
+    "entry_builder": {
+      "input_tokens": 1031,
+      "output_tokens": 246,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3698,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.007583100000000001,
+      "raw_cost_usd": 0.014784,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Employee salary payment",
+        "rationale": "Cannot determine correct entry structure without knowing if $100 is gross or net salary. If gross: debit Salary Expense $100, credit Cash and various payable accounts for statutory deductions. If net: debit Salary Expense for higher gross amount, credit Cash $100 and payables for withholdings. The journal entry structure fundamentally differs based on this fact.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Is the $100 the gross salary amount before deductions, or the net amount paid to employees after withholding CPP, EI, and income tax?"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "gross vs net salary payment",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "The $100 is gross salary (requires payroll deductions for CPP, EI, income tax)",
+              "The $100 is net salary (deductions already withheld from a higher gross amount)"
+            ],
+            "clarification_question": "Is the $100 the gross salary amount before deductions, or the net amount paid to employees after withholding taxes and contributions?",
+            "why_entry_differs": "If gross: debit Salary Expense $100, credit Cash and various payable accounts (CPP, EI, tax withholdings). If net: debit Salary Expense for a higher gross amount, credit Cash $100 and payables for the difference.",
+            "why_not_resolved": "The transaction states 'paid employee salaries of $100' which could refer to either the gross amount being expensed or the net amount being disbursed. Convention does not establish a default \u2014 both interpretations are common in practice depending on context."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Salaries paid to employees = expense increase. The debit side records the salary expense incurred by the business.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Cash paid out = asset decrease (1 line)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction \"Paid employee salaries of $100 in cash\" represents a salary expense payment. Under IFRS, employee salaries are an operating expense. The debit side should record an expense increase (slot c). The credit tuple shows asset decrease (cash going out), which is consistent with paying salaries. The initial debit tuple correctly classifies this as an expense increase. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction \"Paid employee salaries of $100 in cash\" involves two accounting effects: (1) Salaries Expense increases (debit), and (2) Cash (an asset) decreases (credit). The debit tuple shows (0,0,1,0,0,0) = one expense increase, which is correct. The initial credit tuple shows (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash payment. Both sides tell a consistent story: expense is recognized and cash is paid out. The credit classification is correct and requires no change.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Employee salary payment",
+        "rationale": "Cannot determine correct entry structure without knowing if $100 is gross or net salary. If gross: debit Salary Expense $100, credit Cash and various payable accounts for statutory deductions. If net: debit Salary Expense for higher gross amount, credit Cash $100 and payables for withholdings. The journal entry structure fundamentally differs based on this fact.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Is the $100 the gross salary amount before deductions, or the net amount paid to employees after withholding CPP, EI, and income tax?"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 511,
+        "output_tokens": 288,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 484,
+        "output_tokens": 76,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 486,
+        "output_tokens": 89,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 654,
+        "output_tokens": 149,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 654,
+        "output_tokens": 195,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1031,
+        "output_tokens": 246,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,364 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\graphicspath{{../figures/}}
+
+\begin{document}
+
+%% ============================================================
+\section{Part 3: Context Window Extension}
+%% ============================================================
+
+\subsection{Overview and Findings}
+
+Context window extension trains a language model at a short sequence length, then resumes training at a longer sequence length. The hypothesis is that most language knowledge is learned during the short-context phase, and extension mainly teaches the model to attend over longer positions---making it a cheaper alternative to training at full context from the start.
+
+This is well-established in the literature. GrowLength~\cite{growlength} demonstrates progressive context growth (e.g.\ 128$\to$256$\to$512$\to$1024) during pretraining, finding that short-context phases contribute the bulk of capability and that extension mainly adapts attention patterns to longer positions~\cite{skyladder,prolong}.
+
+We train ``picochat''---a smaller nanochat configuration---at sequence length 512, extend to 2048, and compare against training at 2048 from scratch. Our key findings:
+
+\begin{itemize}
+  \item Context extension mechanically works: the extended model handles long positions better than the short-only model (mean CE 4.19 vs 4.34 beyond position 512).
+  \item The degradation beyond the training boundary is gradual ($+0.35$~nats), not catastrophic---RoPE extrapolation at 4$\times$ is within tolerance at this model scale.
+  \item The cheap path (extension) nearly matches the expensive path (full training) on BPB (1.0540 vs 1.0499) and CORE (0.0766 vs 0.0789), but leaves a 28\% gap on PG19 perplexity (73.55 vs 57.40) due to unmitigated forgetting.
+\end{itemize}
+
+%% ============================================================
+\subsection{Method and Justification}
+%% ============================================================
+
+\subsubsection{Model Configuration}
+
+Picochat uses nanochat's depth-6 configuration:
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Parameter & Value \\
+\midrule
+Depth & 6 \\
+Model dim & 384 \\
+Attention heads & 3 \\
+Head dim & 128 \\
+Window pattern & SSSL \\
+Total parameters & ${\sim}136$M \\
+Scaling parameters & ${\sim}35.8$M \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Depth~6 is the smallest nanochat configuration with 3 attention heads (depth~4 has only 2). Nanochat's own \texttt{runcpu.sh} uses depth~6 for demos.
+
+\subsubsection{Sequence Length}
+
+The target of 2048 is nanochat's default \texttt{max\_seq\_len} and the assignment requirement. No RoPE interpolation is needed---we are returning to the native context length. The question is what short length to start from.
+
+We chose 512, grounding the decision in two sources:
+
+\begin{enumerate}
+  \item \textbf{BabyLM}~\cite{babyslen} tests 125M-parameter models across \{64, 128, 256, 512, 1024, 2048, 4096, 8192\} and recommends 512 as ``a safe and efficient baseline across both architectures.''
+  \item \textbf{GrowLength}~\cite{growlength} validates 2$\times$ per-stage jumps as the established baseline for progressive context growth.
+\end{enumerate}
+
+This places our 4$\times$ jump (512$\to$2048) as a deliberate sweet spot. A 2$\times$ jump (1024$\to$2048) is already validated by GrowLength as their baseline---repeating it adds no new insight---and offers only modest compute savings since attention is a small fraction of total FLOPs at this model scale. An 8$\times$ jump (256$\to$2048) pushes further into territory that GrowLength warns against: they find that ``substantial difference between consecutive training window sizes can lead to dramatic loss rising,'' though their experiments are on multi-stage schedules, not single-stage jumps. Our 4$\times$ is a moderate extrapolation beyond the validated 2$\times$---large enough for meaningful savings, small enough to stay closer to the safe range.
+
+\subsubsection{Data Portion}
+
+The token budget of ${\sim}376$M is 0.38\% of the FineWeb-edu 100B-token corpus. This is the compute-optimal amount for a 35.8M scaling-parameter model under nanochat's 10.5$\times$ data ratio, which follows Chinchilla-style scaling laws~\cite{chinchilla}. We use nanochat's default ratio because the codebase's hyperparameters (LR, batch size, weight decay) are co-tuned for it.
+
+This gives a three-stage experiment:
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{@{}lllrl@{}}
+\toprule
+Stage & Strategy & seq\_len & Steps & Purpose \\
+\midrule
+1 & Train from scratch & 512 & 1433 & Short-context pretraining \\
+2 & Resume from Stage~1 & 2048 & 500 (1433$\to$1933) & Context extension (cheap path) \\
+3 & Train from scratch & 2048 & 1433 & Full-context baseline (expensive path) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Stages~1 and~3 use nanochat's auto-computed iteration count (\texttt{target\_tokens / total\_batch\_size} $= 375{,}732{,}000 / 262{,}144 \approx 1433$). The literature provides no quantitative recovery data for single-stage context jumps, so Stage~2 uses a generous 500 extension steps with \texttt{save\_every=50} to observe the actual trajectory at high resolution (10 intermediate checkpoints). In hindsight, recovery largely plateaus by step~${\sim}1600$ (${\sim}170$ steps in), so fewer steps would have sufficed---but this was unknown beforehand. On resume, nanochat recalculates the LR schedule for \texttt{num\_iterations=1933}, producing a deliberate rewarm from ${\approx}0$ to ${\approx}0.52$ of peak LR at step~1433---analogous to ProLong's approach~\cite{prolong}.
+
+\subsubsection{Custom Evaluation}
+
+We designed a per-position cross-entropy evaluation to directly measure whether the model handles positions beyond its training length:
+
+\begin{itemize}
+  \item \textbf{Dataset}: PG19 test split---avoids contamination (nanochat trains on FineWeb-edu) and is standard in context extension literature~\cite{pi,yarn,longrope}.
+  \item \textbf{Bucketing}: 128-token windows (16 buckets for 2048 tokens). Each bucket reports mean cross-entropy across all documents.
+  \item \textbf{Sample}: All 100 documents in PG19 test split, each truncated to 2048 tokens.
+\end{itemize}
+
+We also run nanochat's built-in evaluations:
+\begin{itemize}
+  \item \textbf{BPB} (bits per byte): Overall language modeling quality on FineWeb-edu validation.
+  \item \textbf{CORE} (22 tasks): General task capability. At ${\sim}136$M params, most tasks are near random---HellaSwag, PIQA, ARC-Easy, and BoolQ are the most informative. The appendix lists all 22 per-task scores.
+\end{itemize}
+
+\subsubsection{Checkpoints}
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{@{}llrl@{}}
+\toprule
+Checkpoint & Model Tag & Step & Description \\
+\midrule
+Short & pico-short & 1433 & End of Stage~1 (seq\_len=512 only) \\
+Extended & pico-short & 1933 & End of Stage~2 (512$\to$2048 extension) \\
+Full & pico-full & 1433 & End of Stage~3 (2048 from scratch) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Additionally, 10 intermediate checkpoints during extension (steps 1450--1900, every 50 steps) were evaluated with both custom eval and CORE to track recovery dynamics.
+
+CORE was not run on the short checkpoint (pico-short@1433) because nanochat's RoPE positional encoding at seq\_len=512 cannot process the 2048-token CORE prompts.
+
+\subsubsection{Compute Specification}
+
+All training and evaluation ran on A100-80GB GPUs via Modal. We chose this GPU for two reasons. First, the full batch at \texttt{seq\_len=2048} (${\sim}262{,}144$ tokens) fits in 80\,GB, allowing one forward pass per optimizer step with no gradient accumulation. Second, nanochat's built-in CORE evaluation at 2048-token prompts exceeded 40\,GB VRAM, ruling out the A100-40GB. All stages use nanochat's default learning rate schedule (warmup ratio 0, warmdown ratio 0.5).
+
+
+
+%% ============================================================
+\subsection{Results}
+%% ============================================================
+
+\subsubsection{Per-Position Cross-Entropy}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{per_position_ce.png}
+\caption{Per-position cross-entropy on PG19 for three checkpoints. Dashed vertical line marks the 512-token training boundary.}
+\label{fig:perpos}
+\end{figure}
+
+The short checkpoint (red) shows a gradual upward drift in cross-entropy beyond position~512, rising from ${\sim}4.15$ at positions 384--512 to ${\sim}4.50$ at positions 1920--2048---a $+0.35$~nats degradation. This is not catastrophic but is consistent: positions the model never trained on are handled worse.
+
+The extended checkpoint (green) improves over short beyond position~512 (mean CE 4.19 vs 4.34, a 0.15~nats improvement), confirming that context extension mechanically worked.
+
+The full checkpoint (blue) achieves the lowest CE at all positions, with a consistent advantage that narrows from ${\sim}0.30$--$0.40$~nats at early positions to ${\sim}0.15$~nats toward the end of the context---including positions 0--512 where both models had training data.
+
+\subsubsection{Recovery Evolution}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{recovery_evolution.png}
+\caption{Per-position cross-entropy at each extension checkpoint (steps 1433--1933). Dashed black line is the full-from-scratch baseline.}
+\label{fig:recovery}
+\end{figure}
+
+The model improves most rapidly in the first ${\sim}150$ extension steps (1433$\to$1600). Beyond step~1600, PG19 CE plateaus and oscillates mildly, with the final value (4.298) close to the step-1600 minimum (4.288). The largest gains are at positions 512--1024, where the model transitions from untrained to trained positions.
+
+\subsubsection{Training Curves}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{training_curves.png}
+\caption{Training loss (left) and validation BPB (right) from W\&B. Dotted vertical line marks step~1433 where extension begins.}
+\label{fig:traincurves}
+\end{figure}
+
+Short and full training curves overlap closely---both reach similar loss levels despite different sequence lengths. The extension phase (green, steps 1433--1933) shows a mild increase in training loss at resume (from the 4$\times$ context jump and LR rewarm), followed by steady recovery. Validation BPB during extension decreases monotonically toward the full baseline.
+
+\subsubsection{BPB and CORE Recovery}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{bpb_core_recovery.png}
+\caption{Validation BPB (left) and CORE score (right) during extension. Dashed blue line is the full-from-scratch baseline.}
+\label{fig:bpbcore}
+\end{figure}
+
+BPB recovery is smooth and monotonic, approaching the full baseline (1.0540 vs 1.0499 at convergence). CORE recovery is noisier---expected at this model scale where individual task scores fluctuate---but trends upward, reaching 0.0766 vs the full baseline's 0.0789.
+
+\subsubsection{Summary}
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Metric & Short (1433) & Extended (1933) & Full (1433) \\
+\midrule
+Val BPB & 1.0586 & 1.0540 & 1.0499 \\
+Train Loss & 3.3921 & 3.4769 & 3.5236 \\
+PG19 Aggregate CE & 4.4029 & 4.2980 & 4.0500 \\
+PG19 Aggregate PPL & 81.69 & 73.55 & 57.40 \\
+CE (pos 0--512) & 4.5811 & 4.6267 & 4.1785 \\
+CE (pos 512--2048) & 4.3435 & 4.1884 & 4.0071 \\
+CORE & N/A & 0.0766 & 0.0789 \\
+\bottomrule
+\end{tabular}
+\caption{Summary of all metrics. Short CORE is N/A because RoPE at seq\_len=512 cannot process 2048-token CORE prompts.}
+\label{tab:summary}
+\end{table}
+
+\subsubsection{Cost Report}
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{@{}lrl@{}}
+\toprule
+Run & GPU-Hours & Description \\
+\midrule
+Pipeline (baseline) & ${\sim}1.51$ & 3 stages + 3 evals \\
+Pipeline (CORE recovery) & ${\sim}1.34$ & 10 CORE evals at intermediate steps \\
+Debug / failed attempts & ${\sim}1.83$ & 13 smaller runs \\
+\midrule
+\textbf{Total} & \textbf{4.67} & \textbf{15 Modal app runs} \\
+\bottomrule
+\end{tabular}
+\caption{GPU-hours breakdown. Estimated cost: \$29.77 at A100-80GB rates (\$6.37/hr).}
+\label{tab:cost}
+\end{table}
+
+The two successful pipeline runs used ${\sim}2.85$ GPU-hours total. Debug runs account for 39\% of total cost---expected for a first-time pipeline with multiple failure modes (OOM on A100-40GB, RoPE overflow for short-context CORE, nanochat import paths, BFloat16 autocast).
+
+
+
+%% ============================================================
+\subsection{Discussion}
+%% ============================================================
+
+Context extension mechanically works: the model recovers from the 4$\times$ context jump within ${\sim}150$ steps, with BPB and CORE approaching the full-from-scratch baseline. However, a persistent PG19 perplexity gap (28\%) at all positions---including those seen during short training---indicates forgetting that nanochat's pipeline cannot mitigate. Extension is a viable cheap path for general capability but not for long-context quality.
+
+\subsubsection{Recovery Dynamics}
+
+On resume at step~1433, the model experiences two simultaneous shocks: a 4$\times$ context length jump (512$\to$2048) and a learning rate rewarm (from ${\approx}0$ to ${\approx}0.52$ of peak). The training loss spikes mildly (Figure~\ref{fig:traincurves}), then recovers steadily.
+
+The recovery is front-loaded. Per-position cross-entropy improves most rapidly in the first ${\sim}150$ steps (1433$\to$1600), with the largest gains at positions 512--1024 where the model encounters truly novel positions for the first time (Figure~\ref{fig:recovery}). BPB recovery is smooth and monotonic throughout (Figure~\ref{fig:bpbcore}, left). CORE recovery is noisier but trends upward (Figure~\ref{fig:bpbcore}, right)---the noise is expected at this model scale, where individual task scores fluctuate between checkpoints.
+
+\subsubsection{Does the Cheap Path Work?}
+
+The cheap path (512$\to$2048 extension) nearly matches the expensive path (2048 from scratch) on general-purpose metrics:
+
+\begin{itemize}
+  \item \textbf{BPB}: 1.0540 vs 1.0499---a 0.0042 gap. Close enough for practical purposes.
+  \item \textbf{CORE}: 0.0766 vs 0.0789---within noise at this model scale.
+\end{itemize}
+
+However, on the positional perplexity evaluation designed specifically for context extension, the gap is substantial: PG19 perplexity of 73.55 vs 57.40 (28\%). This gap persists at \emph{all} positions, including 0--512 where both models had training data (CE 4.63 vs 4.18). Indeed, the extended model is slightly worse than the short-only model at positions 0--512 (CE 4.63 vs 4.58), confirming that extension actively degrades performance at originally trained positions. ProLong~\cite{prolong} identifies this as forgetting: without short-context data mixing during extension, the model partially unlearns what it knew. Nanochat does not support data mixing, so this forgetting is unmitigated.
+
+\subsubsection{Compute Efficiency}
+
+Stage~2 ran 500 steps at seq\_len=2048 vs Stage~3's 1433 steps---roughly 65\% fewer long-context training steps. However, including the short-context phase, the progressive path uses more total compute (127.9T vs 94.8T FLOPs). The savings materialize only when extending a pre-existing short-context model, not when both paths start from scratch. Whether the trade-off is worthwhile depends on the use case: for BPB and CORE (general capability), the cheap path is viable; for tasks requiring strong long-context performance, training from scratch is preferable.
+
+\medskip
+\textbf{Limitations.}
+We tested a single model scale (${\sim}136$M parameters), a single jump ratio (4$\times$), and evaluated on a single long-document dataset (PG19). ProLong's 40\% short-context data mixing---which would likely close the PG19 gap---is unavailable in nanochat. Results may differ at larger scales, with progressive multi-stage schedules (as in GrowLength), or on other evaluation domains.
+
+%% ============================================================
+
+
+\subsection*{Appendix}
+
+\subsubsection*{W\&B Runs}
+
+\begin{itemize}
+  \item \textbf{p3-baseline-short}: \url{https://wandb.ai/seonghyun-ban-uoft/490-autobook-a3/runs/mpaiemt0}
+  \item \textbf{p3-baseline-extended}: \url{https://wandb.ai/seonghyun-ban-uoft/490-autobook-a3/runs/woxwtud7}
+  \item \textbf{p3-baseline-full}: \url{https://wandb.ai/seonghyun-ban-uoft/490-autobook-a3/runs/wy8sw0zf}
+\end{itemize}
+
+\subsubsection*{CORE Per-Task Breakdown for Extended Picochat and Full Picochat}
+%% ============================================================
+
+\begin{table}[H]
+\centering\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Task & Extended (1933) & Full (1433) \\
+\midrule
+\textbf{CORE (aggregate)} & \textbf{0.0766} & \textbf{0.0789} \\
+\midrule
+hellaswag & 0.2731 & 0.2745 \\
+hellaswag\_zeroshot & 0.2810 & 0.2767 \\
+arc\_easy & 0.4289 & 0.4314 \\
+copa & 0.6100 & 0.5500 \\
+piqa & 0.5871 & 0.5996 \\
+boolq & 0.4529 & 0.5899 \\
+winograd & 0.5311 & 0.5018 \\
+winogrande & 0.5170 & 0.5043 \\
+commonsense\_qa & 0.2703 & 0.2817 \\
+openbook\_qa & 0.2740 & 0.2540 \\
+lambada\_openai & 0.1820 & 0.1814 \\
+bigbench\_qa\_wikidata & 0.1469 & 0.1284 \\
+bigbench\_cs\_algorithms & 0.3977 & 0.3886 \\
+bigbench\_dyck\_languages & 0.1210 & 0.0530 \\
+agi\_eval\_lsat\_ar & 0.2826 & 0.2435 \\
+arc\_challenge & 0.2304 & 0.2457 \\
+bigbench\_language\_id & 0.2574 & 0.2526 \\
+bigbench\_operators & 0.0667 & 0.0667 \\
+squad & 0.0035 & 0.0033 \\
+coqa & 0.0256 & 0.0370 \\
+jeopardy & 0.0005 & 0.0019 \\
+bigbench\_repeat\_copy & 0.0000 & 0.0000 \\
+\bottomrule
+\end{tabular}
+\caption{CORE per-task accuracy. Most scores are within noise. The largest differences (boolq, copa) go in opposite directions, consistent with variance rather than systematic capability gaps.}
+\label{tab:core}
+\end{table}
+
+\subsection*{References}
+\begin{thebibliography}{8}
+
+\bibitem{growlength}
+H.~Jin, X.~Han, J.~Yang, Z.~Jiang, C.-Y.~Chang, and X.~Hu.
+\newblock GrowLength: Accelerating LLMs Pretraining by Progressively Growing Training Length.
+\newblock \textit{arXiv:2310.00576}, 2023.
+
+\bibitem{skyladder}
+T.~Zhu, Q.~Liu, H.~Wang, S.~Chen, X.~Gu, T.~Pang, and M.-Y.~Kan.
+\newblock SkyLadder: Better and Faster Pretraining via Context Window Scheduling.
+\newblock \textit{NeurIPS}, 2025. arXiv:2503.15450.
+
+\bibitem{prolong}
+T.~Gao, A.~Wettig, H.~Yen, and D.~Chen.
+\newblock How to Train Long-Context Language Models (Effectively).
+\newblock \textit{ACL}, 2025. arXiv:2410.02660.
+
+\bibitem{babyslen}
+S.~Salhan, R.~Diehl~Martinez, Z.~Goriely, and P.~Buttery.
+\newblock What is the Best Sequence Length for BabyLM?
+\newblock \textit{BabyLM Workshop @ EMNLP}, 2025. arXiv:2510.19493.
+
+\bibitem{chinchilla}
+J.~Hoffmann, S.~Borgeaud, A.~Mensch, et~al.
+\newblock Training Compute-Optimal Large Language Models.
+\newblock \textit{NeurIPS}, 2022. arXiv:2203.15556.
+
+\bibitem{pi}
+S.~Chen, S.~Wong, L.~Chen, and Y.~Tian.
+\newblock Extending Context Window of Large Language Models via Positional Interpolation.
+\newblock \textit{arXiv:2306.15595}, 2023.
+
+\bibitem{yarn}
+B.~Peng, J.~Quesnelle, H.~Fan, and E.~Shippole.
+\newblock YaRN: Efficient Context Window Extension of Large Language Models.
+\newblock \textit{ICLR}, 2024. arXiv:2309.00071.
+
+\bibitem{longrope}
+Y.~Ding, L.~Zhang, C.~Jia, et~al.
+\newblock LongRoPE: Extending LLM Context Window Beyond 2 Million Tokens.
+\newblock \textit{arXiv:2402.13753}, 2024.
+
+\end{thebibliography}
+
+\end{document}

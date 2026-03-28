@@ -1,0 +1,411 @@
+{
+  "test_case_id": "basic_08_deliver_service_against_deposit",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Revenue recognition for service delivered against customer deposit",
+    "rationale": "The customer previously paid a $100 deposit, which was recorded as a liability (Unearned Revenue or Customer Deposits). Now that the service has been delivered, we recognize the revenue by decreasing the liability (debit) and increasing revenue (credit). No cash changes hands in this transaction since payment was received earlier. This follows IFRS 15 revenue recognition principles - revenue is recognized when performance obligations are satisfied.",
+    "lines": [
+      {
+        "account_name": "Unearned Revenue",
+        "type": "debit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "Service Revenue",
+        "type": "credit",
+        "amount": 100.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0355593,
+  "raw_cost_usd": 0.066936,
+  "total_latency_ms": 23982,
+  "total_input_tokens": 16647,
+  "total_output_tokens": 1133,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 509,
+      "output_tokens": 35,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2633,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0026891999999999997,
+      "raw_cost_usd": 0.008424,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 484,
+      "output_tokens": 110,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1646,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034506,
+      "raw_cost_usd": 0.006588,
+      "output": {
+        "reason": "When service is delivered against a customer deposit, the liability (unearned revenue/customer deposit) is decreased. This requires a debit to the liability account. The debit side shows: 1 liability decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "When service is delivered against a customer deposit, the liability (unearned revenue/customer deposit) is decreased. This requires a debit to the liability account. The debit side shows: 1 liability decrease."
+    },
+    "credit_classifier": {
+      "input_tokens": 482,
+      "output_tokens": 145,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1623,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0039633,
+      "raw_cost_usd": 0.007044,
+      "output": {
+        "reason": "When a service is delivered against a customer deposit, two things happen on the credit side: (1) The liability (unearned revenue/customer deposit) decreases, which requires a debit to the liability account, not a credit. (2) The earned revenue is now recognized, which is a revenue increase = credit. So on the credit side we have one line: revenue increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "When a service is delivered against a customer deposit, two things happen on the credit side: (1) The liability (unearned revenue/customer deposit) decreases, which requires a debit to the liability account, not a credit. (2) The earned revenue is now recognized, which is a revenue increase = credit. So on the credit side we have one line: revenue increase."
+    },
+    "debit_corrector": {
+      "input_tokens": 652,
+      "output_tokens": 180,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2296,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051492,
+      "raw_cost_usd": 0.009588,
+      "output": {
+        "reason": "The transaction is delivering service against a customer deposit. When a deposit was initially received, it created a liability (unearned revenue). Now that the service is delivered, we must: (1) decrease the liability (debit), and (2) recognize revenue (credit). The initial debit tuple shows d=1 (liability decrease), which correctly represents removing the deposit liability. The credit tuple shows c=1 (revenue increase), which is also correct for recognizing earned revenue. Both sides tell a consistent story under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is delivering service against a customer deposit. When a deposit was initially received, it created a liability (unearned revenue). Now that the service is delivered, we must: (1) decrease the liability (debit), and (2) recognize revenue (credit). The initial debit tuple shows d=1 (liability decrease), which correctly represents removing the deposit liability. The credit tuple shows c=1 (revenue increase), which is also correct for recognizing earned revenue. Both sides tell a consistent story under IFRS. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 652,
+      "output_tokens": 254,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2304,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0062616,
+      "raw_cost_usd": 0.010722,
+      "output": {
+        "reason": "The transaction is \"Deliver service against $100 customer deposit.\" This involves two accounting events: (1) recognizing revenue now that the service has been delivered, and (2) eliminating the unearned revenue liability that was created when the deposit was originally received.\n\nThe debit tuple shows (0,0,0,1,0,0) = liability decrease, which correctly represents the elimination of the unearned revenue liability (the deposit obligation is now fulfilled).\n\nThe initial credit tuple shows (0,0,1,0,0,0) = revenue increase, which correctly represents the recognition of service revenue now that the performance obligation has been satisfied.\n\nThese two sides tell a consistent IFRS story: \n- Debit: Unearned Revenue (liability decrease)\n- Credit: Service Revenue (revenue increase)\n\nThe initial credit tuple is correct and requires no correction.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is \"Deliver service against $100 customer deposit.\" This involves two accounting events: (1) recognizing revenue now that the service has been delivered, and (2) eliminating the unearned revenue liability that was created when the deposit was originally received.\n\nThe debit tuple shows (0,0,0,1,0,0) = liability decrease, which correctly represents the elimination of the unearned revenue liability (the deposit obligation is now fulfilled).\n\nThe initial credit tuple shows (0,0,1,0,0,0) = revenue increase, which correctly represents the recognition of service revenue now that the performance obligation has been satisfied.\n\nThese two sides tell a consistent IFRS story: \n- Debit: Unearned Revenue (liability decrease)\n- Credit: Service Revenue (revenue increase)\n\nThe initial credit tuple is correct and requires no correction."
+    },
+    "entry_builder": {
+      "input_tokens": 661,
+      "output_tokens": 257,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3173,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0065916,
+      "raw_cost_usd": 0.013374,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Revenue recognition for service delivered against customer deposit",
+        "rationale": "The customer previously paid a $100 deposit, which was recorded as a liability (Unearned Revenue or Customer Deposits). Now that the service has been delivered, we recognize the revenue by decreasing the liability (debit) and increasing revenue (credit). No cash changes hands in this transaction since payment was received earlier. This follows IFRS 15 revenue recognition principles - revenue is recognized when performance obligations are satisfied.",
+        "lines": [
+          {
+            "account_name": "Unearned Revenue",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Service Revenue",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1586,
+      "output_tokens": 152,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2972,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0074538,
+      "raw_cost_usd": 0.011196,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly recognizes revenue upon service delivery against customer deposit. Debit to Unearned Revenue (liability decrease) of $100 and credit to Service Revenue (revenue increase) of $100 properly reflects satisfaction of performance obligation under IFRS 15. Entry balances, amounts match transaction, accounts are appropriate, and no tax lines needed as this is revenue recognition of previously received payment."
+      },
+      "reason": "Entry correctly recognizes revenue upon service delivery against customer deposit. Debit to Unearned Revenue (liability decrease) of $100 and credit to Service Revenue (revenue increase) of $100 properly reflects satisfaction of performance obligation under IFRS 15. Entry balances, amounts match transaction, accounts are appropriate, and no tax lines needed as this is revenue recognition of previously received payment."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "When service is delivered against a customer deposit, the liability (unearned revenue/customer deposit) is decreased. This requires a debit to the liability account. The debit side shows: 1 liability decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "When a service is delivered against a customer deposit, two things happen on the credit side: (1) The liability (unearned revenue/customer deposit) decreases, which requires a debit to the liability account, not a credit. (2) The earned revenue is now recognized, which is a revenue increase = credit. So on the credit side we have one line: revenue increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is delivering service against a customer deposit. When a deposit was initially received, it created a liability (unearned revenue). Now that the service is delivered, we must: (1) decrease the liability (debit), and (2) recognize revenue (credit). The initial debit tuple shows d=1 (liability decrease), which correctly represents removing the deposit liability. The credit tuple shows c=1 (revenue increase), which is also correct for recognizing earned revenue. Both sides tell a consistent story under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction is \"Deliver service against $100 customer deposit.\" This involves two accounting events: (1) recognizing revenue now that the service has been delivered, and (2) eliminating the unearned revenue liability that was created when the deposit was originally received.\n\nThe debit tuple shows (0,0,0,1,0,0) = liability decrease, which correctly represents the elimination of the unearned revenue liability (the deposit obligation is now fulfilled).\n\nThe initial credit tuple shows (0,0,1,0,0,0) = revenue increase, which correctly represents the recognition of service revenue now that the performance obligation has been satisfied.\n\nThese two sides tell a consistent IFRS story: \n- Debit: Unearned Revenue (liability decrease)\n- Credit: Service Revenue (revenue increase)\n\nThe initial credit tuple is correct and requires no correction.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Revenue recognition for service delivered against customer deposit",
+        "rationale": "The customer previously paid a $100 deposit, which was recorded as a liability (Unearned Revenue or Customer Deposits). Now that the service has been delivered, we recognize the revenue by decreasing the liability (debit) and increasing revenue (credit). No cash changes hands in this transaction since payment was received earlier. This follows IFRS 15 revenue recognition principles - revenue is recognized when performance obligations are satisfied.",
+        "lines": [
+          {
+            "account_name": "Unearned Revenue",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Service Revenue",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly recognizes revenue upon service delivery against customer deposit. Debit to Unearned Revenue (liability decrease) of $100 and credit to Service Revenue (revenue increase) of $100 properly reflects satisfaction of performance obligation under IFRS 15. Entry balances, amounts match transaction, accounts are appropriate, and no tax lines needed as this is revenue recognition of previously received payment."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 509,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 484,
+        "output_tokens": 110,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 482,
+        "output_tokens": 145,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 652,
+        "output_tokens": 180,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 652,
+        "output_tokens": 254,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 257,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1586,
+        "output_tokens": 152,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

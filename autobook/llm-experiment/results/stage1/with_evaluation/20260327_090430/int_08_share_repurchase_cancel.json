@@ -1,0 +1,331 @@
+{
+  "test_case_id": "int_08_share_repurchase_cancel",
+  "variant_name": "with_evaluation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    2,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Repurchase and cancellation of 10,000 common shares at $6.00 per share",
+    "rationale": "Under IFRS, when a company repurchases and cancels its own shares, the transaction reduces equity. The par value ($5.00 \u00d7 10,000 = $50,000) is removed from Common Shares (equity decrease). The excess paid over par ($1.00 \u00d7 10,000 = $10,000) is charged to Retained Earnings (equity decrease). Cash is reduced by the total purchase price ($6.00 \u00d7 10,000 = $60,000). The classifier correctly identified 2 equity decreases (debits) and 1 asset decrease (credit). This is a capital transaction, not subject to sales tax.",
+    "lines": [
+      {
+        "account_name": "Common Shares",
+        "type": "debit",
+        "amount": 50000.0
+      },
+      {
+        "account_name": "Retained Earnings",
+        "type": "debit",
+        "amount": 10000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 60000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0353682,
+  "raw_cost_usd": 0.052362,
+  "total_latency_ms": 31272,
+  "total_input_tokens": 10754,
+  "total_output_tokens": 1340,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 521,
+      "output_tokens": 189,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1683,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0047466,
+      "raw_cost_usd": 0.007884,
+      "output": {
+        "reason": "Under IFRS, when a company repurchases and cancels its own shares, the debit side records: (1) Common Stock (equity decrease) for the par value portion = 10,000 shares \u00d7 $5.00 = $50,000, and (2) Additional Paid-in Capital or Retained Earnings (equity decrease) for the excess paid over par = 10,000 shares \u00d7 ($6.00 - $5.00) = $10,000. Both debits represent equity decreases. Total: 2 equity decrease lines.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ]
+      },
+      "reason": "Under IFRS, when a company repurchases and cancels its own shares, the debit side records: (1) Common Stock (equity decrease) for the par value portion = 10,000 shares \u00d7 $5.00 = $50,000, and (2) Additional Paid-in Capital or Retained Earnings (equity decrease) for the excess paid over par = 10,000 shares \u00d7 ($6.00 - $5.00) = $10,000. Both debits represent equity decreases. Total: 2 equity decrease lines."
+    },
+    "credit_classifier": {
+      "input_tokens": 519,
+      "output_tokens": 573,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1660,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0104943,
+      "raw_cost_usd": 0.013575,
+      "output": {
+        "reason": "The transaction involves repurchasing and cancelling own shares for $60,000 cash. On the credit side: (1) Cash paid out = asset decrease (1 line); (2) Common shares cancelled at par value ($50,000) = equity decrease, which is achieved by crediting (decreasing) the share capital account (1 line); (3) The $10,000 excess paid over par represents additional equity reduction, typically recorded as a decrease to retained earnings or additional paid-in capital, also achieved by crediting (1 line). Total: 1 asset decrease + 2 equity decreases = (0,0,0,1,0,0) for asset decrease and... wait, equity DECREASE is achieved by CREDITING equity under IFRS. Let me reconsider: When equity decreases, we CREDIT equity accounts (per the domain knowledge). So we have: Cash leaving (asset decrease, 1 credit line) + Share capital reduction (equity decrease via credit, 1 line) + Retained earnings/APIC reduction (equity decrease via credit, 1 line) = 1 asset decrease + 2 equity decreases. But equity decrease is slot 'b' reversed... Actually, reviewing the tuple definition: slot 'b' is \"Equity increase\". An equity DECREASE would not be an equity increase. Looking at the debit/credit rules: \"Equity: decreases its balance\" when credited means crediting equity REDUCES it. But the tuple slot 'b' counts \"Equity increase\" credits. Since we're REDUCING equity by crediting it, this doesn't fit slot b. The transaction credits: (1) Cash (asset decrease, slot d), (2) Common shares (equity account credited to reduce it - but this is equity decrease, not covered in the 6 slots as stated). Wait - I need to reconsider the framework. The credit tuple slots represent what HAPPENS when you credit. Slot b = \"Equity increase\" means crediting causes equity to go UP. But crediting equity normally increases it. However, share capital and APIC are equity accounts. When we cancel shares, we DEBIT these accounts to reduce them. The CREDIT side is cash leaving. So credit side = Cash out only = (0,0,0,1,0,0).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves repurchasing and cancelling own shares for $60,000 cash. On the credit side: (1) Cash paid out = asset decrease (1 line); (2) Common shares cancelled at par value ($50,000) = equity decrease, which is achieved by crediting (decreasing) the share capital account (1 line); (3) The $10,000 excess paid over par represents additional equity reduction, typically recorded as a decrease to retained earnings or additional paid-in capital, also achieved by crediting (1 line). Total: 1 asset decrease + 2 equity decreases = (0,0,0,1,0,0) for asset decrease and... wait, equity DECREASE is achieved by CREDITING equity under IFRS. Let me reconsider: When equity decreases, we CREDIT equity accounts (per the domain knowledge). So we have: Cash leaving (asset decrease, 1 credit line) + Share capital reduction (equity decrease via credit, 1 line) + Retained earnings/APIC reduction (equity decrease via credit, 1 line) = 1 asset decrease + 2 equity decreases. But equity decrease is slot 'b' reversed... Actually, reviewing the tuple definition: slot 'b' is \"Equity increase\". An equity DECREASE would not be an equity increase. Looking at the debit/credit rules: \"Equity: decreases its balance\" when credited means crediting equity REDUCES it. But the tuple slot 'b' counts \"Equity increase\" credits. Since we're REDUCING equity by crediting it, this doesn't fit slot b. The transaction credits: (1) Cash (asset decrease, slot d), (2) Common shares (equity account credited to reduce it - but this is equity decrease, not covered in the 6 slots as stated). Wait - I need to reconsider the framework. The credit tuple slots represent what HAPPENS when you credit. Slot b = \"Equity increase\" means crediting causes equity to go UP. But crediting equity normally increases it. However, share capital and APIC are equity accounts. When we cancel shares, we DEBIT these accounts to reduce them. The CREDIT side is cash leaving. So credit side = Cash out only = (0,0,0,1,0,0)."
+    },
+    "entry_builder": {
+      "input_tokens": 757,
+      "output_tokens": 367,
+      "cache_read_tokens": 2605,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3362,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0085575,
+      "raw_cost_usd": 0.015591,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Repurchase and cancellation of 10,000 common shares at $6.00 per share",
+        "rationale": "Under IFRS, when a company repurchases and cancels its own shares, the transaction reduces equity. The par value ($5.00 \u00d7 10,000 = $50,000) is removed from Common Shares (equity decrease). The excess paid over par ($1.00 \u00d7 10,000 = $10,000) is charged to Retained Earnings (equity decrease). Cash is reduced by the total purchase price ($6.00 \u00d7 10,000 = $60,000). The classifier correctly identified 2 equity decreases (debits) and 1 asset decrease (credit). This is a capital transaction, not subject to sales tax.",
+        "lines": [
+          {
+            "account_name": "Common Shares",
+            "type": "debit",
+            "amount": 50000.0
+          },
+          {
+            "account_name": "Retained Earnings",
+            "type": "debit",
+            "amount": 10000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 60000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2663,
+      "output_tokens": 211,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4049,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0115698,
+      "raw_cost_usd": 0.015312,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records share repurchase and cancellation under IFRS. Balance verified: debits ($50,000 + $10,000 = $60,000) equal credits ($60,000). Common Shares debited for par value (10,000 \u00d7 $5.00 = $50,000), Retained Earnings debited for excess over par (10,000 \u00d7 $1.00 = $10,000), and Cash credited for total payment ($60,000). All accounts appropriate, amounts match transaction text, and directionality correct (equity decreases via debits, asset decrease via credit). No tax applicable to capital transactions."
+      },
+      "reason": "Entry correctly records share repurchase and cancellation under IFRS. Balance verified: debits ($50,000 + $10,000 = $60,000) equal credits ($60,000). Common Shares debited for par value (10,000 \u00d7 $5.00 = $50,000), Retained Earnings debited for excess over par (10,000 \u00d7 $1.00 = $10,000), and Cash credited for total payment ($60,000). All accounts appropriate, amounts match transaction text, and directionality correct (equity decreases via debits, asset decrease via credit). No tax applicable to capital transactions."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Under IFRS, when a company repurchases and cancels its own shares, the debit side records: (1) Common Stock (equity decrease) for the par value portion = 10,000 shares \u00d7 $5.00 = $50,000, and (2) Additional Paid-in Capital or Retained Earnings (equity decrease) for the excess paid over par = 10,000 shares \u00d7 ($6.00 - $5.00) = $10,000. Both debits represent equity decreases. Total: 2 equity decrease lines.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction involves repurchasing and cancelling own shares for $60,000 cash. On the credit side: (1) Cash paid out = asset decrease (1 line); (2) Common shares cancelled at par value ($50,000) = equity decrease, which is achieved by crediting (decreasing) the share capital account (1 line); (3) The $10,000 excess paid over par represents additional equity reduction, typically recorded as a decrease to retained earnings or additional paid-in capital, also achieved by crediting (1 line). Total: 1 asset decrease + 2 equity decreases = (0,0,0,1,0,0) for asset decrease and... wait, equity DECREASE is achieved by CREDITING equity under IFRS. Let me reconsider: When equity decreases, we CREDIT equity accounts (per the domain knowledge). So we have: Cash leaving (asset decrease, 1 credit line) + Share capital reduction (equity decrease via credit, 1 line) + Retained earnings/APIC reduction (equity decrease via credit, 1 line) = 1 asset decrease + 2 equity decreases. But equity decrease is slot 'b' reversed... Actually, reviewing the tuple definition: slot 'b' is \"Equity increase\". An equity DECREASE would not be an equity increase. Looking at the debit/credit rules: \"Equity: decreases its balance\" when credited means crediting equity REDUCES it. But the tuple slot 'b' counts \"Equity increase\" credits. Since we're REDUCING equity by crediting it, this doesn't fit slot b. The transaction credits: (1) Cash (asset decrease, slot d), (2) Common shares (equity account credited to reduce it - but this is equity decrease, not covered in the 6 slots as stated). Wait - I need to reconsider the framework. The credit tuple slots represent what HAPPENS when you credit. Slot b = \"Equity increase\" means crediting causes equity to go UP. But crediting equity normally increases it. However, share capital and APIC are equity accounts. When we cancel shares, we DEBIT these accounts to reduce them. The CREDIT side is cash leaving. So credit side = Cash out only = (0,0,0,1,0,0).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Under IFRS, when a company repurchases and cancels its own shares, the debit side records: (1) Common Stock (equity decrease) for the par value portion = 10,000 shares \u00d7 $5.00 = $50,000, and (2) Additional Paid-in Capital or Retained Earnings (equity decrease) for the excess paid over par = 10,000 shares \u00d7 ($6.00 - $5.00) = $10,000. Both debits represent equity decreases. Total: 2 equity decrease lines.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves repurchasing and cancelling own shares for $60,000 cash. On the credit side: (1) Cash paid out = asset decrease (1 line); (2) Common shares cancelled at par value ($50,000) = equity decrease, which is achieved by crediting (decreasing) the share capital account (1 line); (3) The $10,000 excess paid over par represents additional equity reduction, typically recorded as a decrease to retained earnings or additional paid-in capital, also achieved by crediting (1 line). Total: 1 asset decrease + 2 equity decreases = (0,0,0,1,0,0) for asset decrease and... wait, equity DECREASE is achieved by CREDITING equity under IFRS. Let me reconsider: When equity decreases, we CREDIT equity accounts (per the domain knowledge). So we have: Cash leaving (asset decrease, 1 credit line) + Share capital reduction (equity decrease via credit, 1 line) + Retained earnings/APIC reduction (equity decrease via credit, 1 line) = 1 asset decrease + 2 equity decreases. But equity decrease is slot 'b' reversed... Actually, reviewing the tuple definition: slot 'b' is \"Equity increase\". An equity DECREASE would not be an equity increase. Looking at the debit/credit rules: \"Equity: decreases its balance\" when credited means crediting equity REDUCES it. But the tuple slot 'b' counts \"Equity increase\" credits. Since we're REDUCING equity by crediting it, this doesn't fit slot b. The transaction credits: (1) Cash (asset decrease, slot d), (2) Common shares (equity account credited to reduce it - but this is equity decrease, not covered in the 6 slots as stated). Wait - I need to reconsider the framework. The credit tuple slots represent what HAPPENS when you credit. Slot b = \"Equity increase\" means crediting causes equity to go UP. But crediting equity normally increases it. However, share capital and APIC are equity accounts. When we cancel shares, we DEBIT these accounts to reduce them. The CREDIT side is cash leaving. So credit side = Cash out only = (0,0,0,1,0,0).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Repurchase and cancellation of 10,000 common shares at $6.00 per share",
+        "rationale": "Under IFRS, when a company repurchases and cancels its own shares, the transaction reduces equity. The par value ($5.00 \u00d7 10,000 = $50,000) is removed from Common Shares (equity decrease). The excess paid over par ($1.00 \u00d7 10,000 = $10,000) is charged to Retained Earnings (equity decrease). Cash is reduced by the total purchase price ($6.00 \u00d7 10,000 = $60,000). The classifier correctly identified 2 equity decreases (debits) and 1 asset decrease (credit). This is a capital transaction, not subject to sales tax.",
+        "lines": [
+          {
+            "account_name": "Common Shares",
+            "type": "debit",
+            "amount": 50000.0
+          },
+          {
+            "account_name": "Retained Earnings",
+            "type": "debit",
+            "amount": 10000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 60000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records share repurchase and cancellation under IFRS. Balance verified: debits ($50,000 + $10,000 = $60,000) equal credits ($60,000). Common Shares debited for par value (10,000 \u00d7 $5.00 = $50,000), Retained Earnings debited for excess over par (10,000 \u00d7 $1.00 = $10,000), and Cash credited for total payment ($60,000). All accounts appropriate, amounts match transaction text, and directionality correct (equity decreases via debits, asset decrease via credit). No tax applicable to capital transactions."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 189,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 519,
+        "output_tokens": 573,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 757,
+        "output_tokens": 367,
+        "input_token_details": {
+          "cache_read": 2605,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2663,
+        "output_tokens": 211,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

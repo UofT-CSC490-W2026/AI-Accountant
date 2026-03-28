@@ -1,30 +1,176 @@
-services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - ENV=local
-      - DATABASE_URL=postgresql://autobook:autobook@db:5432/autobook
-      - S3_BUCKET=local
-      - AWS_PROFILE=${AWS_PROFILE:-default}
-      - AWS_DEFAULT_REGION=ca-central-1
-    volumes:
-      - ./src:/app/src
-      - ~/.aws:/root/.aws:ro    # Bedrock auth — mount AWS credentials
-    depends_on:
-      - db
+x-common-env: &common-env
+  DATABASE_URL: postgresql://autobook:autobook@db:5432/autobook
+  REDIS_URL: redis://redis:6379/0
+  SQS_ENDPOINT_URL: http://elasticmq:9324
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  AWS_DEFAULT_REGION: ca-central-1
+  S3_ENDPOINT_URL: http://minio:9000
+  S3_BUCKET: autobook-local
+  QDRANT_URL: http://qdrant:6333
+  QDRANT_API_KEY: ""
+  SAGEMAKER_ENDPOINT_URL: http://localstack:4566
+  COGNITO_ENDPOINT_URL: http://localstack:4566
+  SECRETS_MANAGER_ENDPOINT_URL: http://localstack:4566
+  ENV: local
+  AUTH_ENABLED: "false"
 
+x-common: &common
+  depends_on:
+    - db
+    - redis
+    - elasticmq
+    - minio
+    - qdrant
+    - localstack
+  volumes: []
+
+services:
+  # ── Infrastructure ──────────────────────────────────────────
   db:
     image: postgres:16
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
-      - POSTGRES_USER=autobook
-      - POSTGRES_PASSWORD=autobook
-      - POSTGRES_DB=autobook
+      POSTGRES_USER: autobook
+      POSTGRES_PASSWORD: autobook
+      POSTGRES_DB: autobook
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@autobook.ca
+      PGADMIN_DEFAULT_PASSWORD: admin
+
+  elasticmq:
+    image: softwaremill/elasticmq
+    ports:
+      - "9324:9324"
+      - "9325:9325"
+    volumes:
+      - ./elasticmq.conf:/opt/elasticmq.conf
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  qdrant-init:
+    build: { context: ., target: autobook-flywheel }
+    entrypoint: ["python", "-m", "vectordb.init"]
+    depends_on:
+      - qdrant
+    environment:
+      <<: *common-env
+    restart: "no"
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sagemaker,cognito-idp,secretsmanager
+      DEFAULT_REGION: ca-central-1
+
+  # ── Application Services ────────────────────────────────────
+  api:
+    build: { context: ., target: autobook-api }
+    <<: *common
+    ports:
+      - "8000:8000"
+    environment:
+      <<: *common-env
+
+  normalizer:
+    build: { context: ., target: autobook-normalizer }
+    <<: *common
+    entrypoint: ["python", "-m", "services.normalizer"]
+    environment:
+      <<: *common-env
+
+  precedent:
+    build: { context: ., target: autobook-precedent }
+    <<: *common
+    entrypoint: ["python", "-m", "services.precedent"]
+    environment:
+      <<: *common-env
+
+  ml-inference:
+    build: { context: ., target: autobook-ml-inference }
+    <<: *common
+    entrypoint: ["python", "-m", "services.ml_inference"]
+    environment:
+      <<: *common-env
+
+  agent:
+    build: { context: ., target: autobook-agent }
+    <<: *common
+    depends_on:
+      - db
+      - redis
+      - elasticmq
+      - minio
+      - qdrant
+      - localstack
+      - qdrant-init
+    entrypoint: ["python", "-m", "services.agent"]
+    environment:
+      <<: *common-env
+
+  resolution:
+    build: { context: ., target: autobook-resolution }
+    <<: *common
+    entrypoint: ["python", "-m", "services.resolution"]
+    environment:
+      <<: *common-env
+
+  posting:
+    build: { context: ., target: autobook-posting }
+    <<: *common
+    entrypoint: ["python", "-m", "services.posting"]
+    environment:
+      <<: *common-env
+
+  flywheel:
+    build: { context: ., target: autobook-flywheel }
+    <<: *common
+    depends_on:
+      - db
+      - redis
+      - elasticmq
+      - minio
+      - qdrant
+      - localstack
+      - qdrant-init
+    entrypoint: ["python", "-m", "services.flywheel"]
+    environment:
+      <<: *common-env
+
 volumes:
   pgdata:
+  minio-data:
+  qdrant-data:

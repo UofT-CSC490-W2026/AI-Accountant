@@ -1,0 +1,392 @@
+{
+  "test_case_id": "int_29_security_deposit_received",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Receipt of security deposit upon lease signing",
+    "rationale": "Security deposit of $25,000 received in cash creates a liability (refundable deposit held in trust). The transaction describes only the lease signing and deposit receipt - no indication that the rental period has begun or that first month's rent was collected. Security deposits are not subject to HST as they are refundable amounts, not consideration for taxable supply. No rent revenue is recognized at this time as the deposit is a liability, not earned revenue. The debit tuple (1,0,0,0,0,0) indicates one asset increase (Cash), and credit tuple (1,0,0,0,0,0) indicates one liability increase (Security Deposit Payable), which aligns with standard accounting treatment for security deposits.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 25000.0
+      },
+      {
+        "account_name": "Security Deposit Payable",
+        "type": "credit",
+        "amount": 25000.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0268797,
+  "raw_cost_usd": 0.046047,
+  "total_latency_ms": 25432,
+  "total_input_tokens": 10134,
+  "total_output_tokens": 1043,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 559,
+      "output_tokens": 438,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2692,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0088869,
+      "raw_cost_usd": 0.014646,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "HST collection requirement on rent",
+            "resolved": true,
+            "resolution": "Ontario commercial property rent is subject to HST at 13%. 'Exclusive of sales tax' confirms HST must be collected separately",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "treatment of security deposit",
+            "resolved": true,
+            "resolution": "Security deposits are refundable amounts held in trust \u2014 standard convention is to record as liability (Security Deposit Payable), not revenue",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "timing of rent recognition",
+            "resolved": true,
+            "resolution": "Transaction describes lease signing and deposit receipt only \u2014 no indication rent period has begun or rent is due, so no rent revenue recognized at signing",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether first month's rent was also collected",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Only security deposit of $25,000 received",
+              "Security deposit plus first month's rent received"
+            ],
+            "clarification_question": "Was the first month's rent ($10,000 + HST) collected at lease signing in addition to the $25,000 security deposit?",
+            "why_entry_differs": "If first month's rent was collected, there would be an additional debit to Cash and credit to Unearned Rent Revenue (or Rent Revenue if the period has begun). If only the deposit was received, the entry records only the security deposit liability",
+            "why_not_resolved": "The transaction states 'received a security deposit of $25,000' but does not explicitly state whether first month's rent was also collected. Commercial lease practice commonly requires both, but the text only confirms the deposit amount"
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 534,
+      "output_tokens": 119,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1696,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037356,
+      "raw_cost_usd": 0.006873,
+      "output": {
+        "reason": "Cash received of $25,000 = 1 asset increase (Cash). The security deposit creates a liability (refundable to tenant), but that is the credit side. On the debit side, we only record the cash receipt as an asset increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Cash received of $25,000 = 1 asset increase (Cash). The security deposit creates a liability (refundable to tenant), but that is the credit side. On the debit side, we only record the cash receipt as an asset increase."
+    },
+    "credit_classifier": {
+      "input_tokens": 532,
+      "output_tokens": 142,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1673,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0040683,
+      "raw_cost_usd": 0.007149,
+      "output": {
+        "reason": "The transaction involves receiving $25,000 cash as a security deposit. On the credit side: (1) Security deposit received creates a liability (refundable deposit payable to tenant) = liability increase. No revenue is recognized yet because this is a refundable deposit, not earned rent. The cash received is the debit side (asset increase), not classified here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves receiving $25,000 cash as a security deposit. On the credit side: (1) Security deposit received creates a liability (refundable deposit payable to tenant) = liability increase. No revenue is recognized yet because this is a refundable deposit, not earned rent. The cash received is the debit side (asset increase), not classified here."
+    },
+    "entry_builder": {
+      "input_tokens": 1410,
+      "output_tokens": 344,
+      "cache_read_tokens": 2663,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4073,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.010188899999999999,
+      "raw_cost_usd": 0.017379,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Receipt of security deposit upon lease signing",
+        "rationale": "Security deposit of $25,000 received in cash creates a liability (refundable deposit held in trust). The transaction describes only the lease signing and deposit receipt - no indication that the rental period has begun or that first month's rent was collected. Security deposits are not subject to HST as they are refundable amounts, not consideration for taxable supply. No rent revenue is recognized at this time as the deposit is a liability, not earned revenue. The debit tuple (1,0,0,0,0,0) indicates one asset increase (Cash), and credit tuple (1,0,0,0,0,0) indicates one liability increase (Security Deposit Payable), which aligns with standard accounting treatment for security deposits.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 25000.0
+          },
+          {
+            "account_name": "Security Deposit Payable",
+            "type": "credit",
+            "amount": 25000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "HST collection requirement on rent",
+            "resolved": true,
+            "resolution": "Ontario commercial property rent is subject to HST at 13%. 'Exclusive of sales tax' confirms HST must be collected separately",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "treatment of security deposit",
+            "resolved": true,
+            "resolution": "Security deposits are refundable amounts held in trust \u2014 standard convention is to record as liability (Security Deposit Payable), not revenue",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "timing of rent recognition",
+            "resolved": true,
+            "resolution": "Transaction describes lease signing and deposit receipt only \u2014 no indication rent period has begun or rent is due, so no rent revenue recognized at signing",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether first month's rent was also collected",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Only security deposit of $25,000 received",
+              "Security deposit plus first month's rent received"
+            ],
+            "clarification_question": "Was the first month's rent ($10,000 + HST) collected at lease signing in addition to the $25,000 security deposit?",
+            "why_entry_differs": "If first month's rent was collected, there would be an additional debit to Cash and credit to Unearned Rent Revenue (or Rent Revenue if the period has begun). If only the deposit was received, the entry records only the security deposit liability",
+            "why_not_resolved": "The transaction states 'received a security deposit of $25,000' but does not explicitly state whether first month's rent was also collected. Commercial lease practice commonly requires both, but the text only confirms the deposit amount"
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Cash received of $25,000 = 1 asset increase (Cash). The security deposit creates a liability (refundable to tenant), but that is the credit side. On the debit side, we only record the cash receipt as an asset increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction involves receiving $25,000 cash as a security deposit. On the credit side: (1) Security deposit received creates a liability (refundable deposit payable to tenant) = liability increase. No revenue is recognized yet because this is a refundable deposit, not earned rent. The cash received is the debit side (asset increase), not classified here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Cash received of $25,000 = 1 asset increase (Cash). The security deposit creates a liability (refundable to tenant), but that is the credit side. On the debit side, we only record the cash receipt as an asset increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves receiving $25,000 cash as a security deposit. On the credit side: (1) Security deposit received creates a liability (refundable deposit payable to tenant) = liability increase. No revenue is recognized yet because this is a refundable deposit, not earned rent. The cash received is the debit side (asset increase), not classified here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Receipt of security deposit upon lease signing",
+        "rationale": "Security deposit of $25,000 received in cash creates a liability (refundable deposit held in trust). The transaction describes only the lease signing and deposit receipt - no indication that the rental period has begun or that first month's rent was collected. Security deposits are not subject to HST as they are refundable amounts, not consideration for taxable supply. No rent revenue is recognized at this time as the deposit is a liability, not earned revenue. The debit tuple (1,0,0,0,0,0) indicates one asset increase (Cash), and credit tuple (1,0,0,0,0,0) indicates one liability increase (Security Deposit Payable), which aligns with standard accounting treatment for security deposits.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 25000.0
+          },
+          {
+            "account_name": "Security Deposit Payable",
+            "type": "credit",
+            "amount": 25000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 559,
+        "output_tokens": 438,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 534,
+        "output_tokens": 119,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 532,
+        "output_tokens": 142,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1410,
+        "output_tokens": 344,
+        "input_token_details": {
+          "cache_read": 2663,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

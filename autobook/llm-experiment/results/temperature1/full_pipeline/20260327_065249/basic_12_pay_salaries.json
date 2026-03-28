@@ -1,0 +1,377 @@
+{
+  "test_case_id": "basic_12_pay_salaries",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Employee salary payment",
+    "rationale": "The transaction states \"paid employee salaries of $100 in cash.\" In Canadian payroll, employers are legally required to withhold CPP, EI, and income tax from employee gross salaries before paying the net amount. The $100 could represent either: (1) gross salary with withholdings to be recorded, or (2) net salary already reflecting prior withholdings. These two scenarios produce structurally different entries with different accounts and amounts. Since the transaction text does not specify whether $100 is gross or net, and this is a business fact only the transaction initiator would know, clarification is required.",
+    "lines": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "Is the $100 the gross salary amount before statutory deductions (CPP, EI, income tax), or is it the net amount paid to employees after withholdings have been deducted?"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0319647,
+  "raw_cost_usd": 0.060042,
+  "total_latency_ms": 24893,
+  "total_input_tokens": 14249,
+  "total_output_tokens": 1153,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 511,
+      "output_tokens": 320,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2644,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0069729,
+      "raw_cost_usd": 0.012732,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "gross vs net salary payment",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "$100 is gross salary (statutory deductions need to be withheld and remitted separately)",
+              "$100 is net salary (statutory deductions already withheld from a higher gross amount)"
+            ],
+            "clarification_question": "Is the $100 payment the gross salary amount, or is it the net amount paid to employees after withholding taxes and other statutory deductions?",
+            "why_entry_differs": "If gross: debit Salaries Expense $100, credit Cash $X and Payroll Liabilities $Y (where X+Y=100). If net: debit Salaries Expense (higher amount), credit Cash $100 and Payroll Liabilities (for withheld amounts)",
+            "why_not_resolved": "The description 'paid employee salaries of $100' could refer to either the gross compensation or the net cash disbursed. Canadian employment law requires statutory withholdings (CPP, EI, income tax), but the text doesn't specify whether these were already deducted. Convention doesn't provide a clear default\u2014both interpretations are common in practice"
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 484,
+      "output_tokens": 76,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1625,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0029343000000000004,
+      "raw_cost_usd": 0.006015,
+      "output": {
+        "reason": "Cash paid out = asset decrease (1 line)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Cash paid out = asset decrease (1 line)"
+    },
+    "debit_classifier": {
+      "input_tokens": 486,
+      "output_tokens": 101,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1648,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033216,
+      "raw_cost_usd": 0.006459,
+      "output": {
+        "reason": "Employee salaries are an operating expense. When paid, the debit side records an expense increase (Salaries Expense or Wages Expense account is debited).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Employee salaries are an operating expense. When paid, the debit side records an expense increase (Salaries Expense or Wages Expense account is debited)."
+    },
+    "debit_corrector": {
+      "input_tokens": 654,
+      "output_tokens": 155,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2298,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0047802,
+      "raw_cost_usd": 0.009219,
+      "output": {
+        "reason": "The transaction is \"Paid employee salaries of $100 in cash\". Employee salaries are a period expense. The debit side correctly records this as an expense increase (slot c = 1). The credit side shows an asset decrease (slot d = 1), which represents the cash payment. The two sides tell a consistent story: debit expense (salary expense increases) and credit cash (asset decreases). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is \"Paid employee salaries of $100 in cash\". Employee salaries are a period expense. The debit side correctly records this as an expense increase (slot c = 1). The credit side shows an asset decrease (slot d = 1), which represents the cash payment. The two sides tell a consistent story: debit expense (salary expense increases) and credit cash (asset decreases). No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 654,
+      "output_tokens": 196,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2306,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005397600000000001,
+      "raw_cost_usd": 0.009858,
+      "output": {
+        "reason": "The transaction is \"Paid employee salaries of $100 in cash.\" This requires: (1) recognizing salary expense (debit to expense), and (2) decreasing cash (credit to asset). The debit tuple shows (0,0,1,0,0,0) = one expense increase, which is correct for salary expense. The initial credit tuple shows (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash payment. The two sides tell a consistent story: expense increases (debit) and cash/asset decreases (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is \"Paid employee salaries of $100 in cash.\" This requires: (1) recognizing salary expense (debit to expense), and (2) decreasing cash (credit to asset). The debit tuple shows (0,0,1,0,0,0) = one expense increase, which is correct for salary expense. The initial credit tuple shows (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash payment. The two sides tell a consistent story: expense increases (debit) and cash/asset decreases (credit). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1061,
+      "output_tokens": 305,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3728,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0085581,
+      "raw_cost_usd": 0.015759,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Employee salary payment",
+        "rationale": "The transaction states \"paid employee salaries of $100 in cash.\" In Canadian payroll, employers are legally required to withhold CPP, EI, and income tax from employee gross salaries before paying the net amount. The $100 could represent either: (1) gross salary with withholdings to be recorded, or (2) net salary already reflecting prior withholdings. These two scenarios produce structurally different entries with different accounts and amounts. Since the transaction text does not specify whether $100 is gross or net, and this is a business fact only the transaction initiator would know, clarification is required.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Is the $100 the gross salary amount before statutory deductions (CPP, EI, income tax), or is it the net amount paid to employees after withholdings have been deducted?"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "gross vs net salary payment",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "$100 is gross salary (statutory deductions need to be withheld and remitted separately)",
+              "$100 is net salary (statutory deductions already withheld from a higher gross amount)"
+            ],
+            "clarification_question": "Is the $100 payment the gross salary amount, or is it the net amount paid to employees after withholding taxes and other statutory deductions?",
+            "why_entry_differs": "If gross: debit Salaries Expense $100, credit Cash $X and Payroll Liabilities $Y (where X+Y=100). If net: debit Salaries Expense (higher amount), credit Cash $100 and Payroll Liabilities (for withheld amounts)",
+            "why_not_resolved": "The description 'paid employee salaries of $100' could refer to either the gross compensation or the net cash disbursed. Canadian employment law requires statutory withholdings (CPP, EI, income tax), but the text doesn't specify whether these were already deducted. Convention doesn't provide a clear default\u2014both interpretations are common in practice"
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Employee salaries are an operating expense. When paid, the debit side records an expense increase (Salaries Expense or Wages Expense account is debited).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Cash paid out = asset decrease (1 line)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is \"Paid employee salaries of $100 in cash\". Employee salaries are a period expense. The debit side correctly records this as an expense increase (slot c = 1). The credit side shows an asset decrease (slot d = 1), which represents the cash payment. The two sides tell a consistent story: debit expense (salary expense increases) and credit cash (asset decreases). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction is \"Paid employee salaries of $100 in cash.\" This requires: (1) recognizing salary expense (debit to expense), and (2) decreasing cash (credit to asset). The debit tuple shows (0,0,1,0,0,0) = one expense increase, which is correct for salary expense. The initial credit tuple shows (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash payment. The two sides tell a consistent story: expense increases (debit) and cash/asset decreases (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Employee salary payment",
+        "rationale": "The transaction states \"paid employee salaries of $100 in cash.\" In Canadian payroll, employers are legally required to withhold CPP, EI, and income tax from employee gross salaries before paying the net amount. The $100 could represent either: (1) gross salary with withholdings to be recorded, or (2) net salary already reflecting prior withholdings. These two scenarios produce structurally different entries with different accounts and amounts. Since the transaction text does not specify whether $100 is gross or net, and this is a business fact only the transaction initiator would know, clarification is required.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Is the $100 the gross salary amount before statutory deductions (CPP, EI, income tax), or is it the net amount paid to employees after withholdings have been deducted?"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 511,
+        "output_tokens": 320,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 484,
+        "output_tokens": 76,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 486,
+        "output_tokens": 101,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 654,
+        "output_tokens": 155,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 654,
+        "output_tokens": 196,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1061,
+        "output_tokens": 305,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

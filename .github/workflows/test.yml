@@ -1,0 +1,83 @@
+name: Test & Coverage
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '.github/badges/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: "sqlite:///:memory:"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        working-directory: autobook
+        run: uv sync --frozen --dev
+
+      - name: Run tests with coverage
+        working-directory: autobook
+        run: |
+          uv run pytest --tb=short -q \
+            --junitxml=pytest.xml \
+            --cov-report=term-missing:skip-covered
+          uv run coverage report --format=total > coverage-total.txt
+
+      - name: Post coverage on PR
+        if: always()
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-xml-coverage-path: autobook/coverage.xml
+          junitxml-path: autobook/pytest.xml
+          title: Test Coverage Report
+          badge-title: coverage
+          coverage-path-prefix: backend/
+
+      - name: Upload coverage HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: autobook/htmlcov/
+
+      - name: Update coverage badge
+        if: always()
+        working-directory: autobook
+        run: |
+          PCT=$(cat coverage-total.txt | tr -d '[:space:]')
+          if [ "$PCT" -ge 90 ] 2>/dev/null; then COLOR="brightgreen"
+          elif [ "$PCT" -ge 70 ] 2>/dev/null; then COLOR="yellow"
+          else COLOR="red"; fi
+
+          mkdir -p ../.github/badges
+          cat > ../.github/badges/coverage.json << BADGE
+          {
+            "schemaVersion": 1,
+            "label": "coverage",
+            "message": "${PCT}%",
+            "color": "${COLOR}"
+          }
+          BADGE
+
+          cd ..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/badges/coverage.json
+          git diff --staged --quiet || (git commit -m "ci: update coverage badge to ${PCT}%" && git push)

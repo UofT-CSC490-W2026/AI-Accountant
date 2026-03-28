@@ -1,0 +1,349 @@
+{
+  "test_case_id": "basic_07_loan_to_equity",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Converted $200 bank loan to equity, issuing 400 common shares",
+    "rationale": "Debt-to-equity conversion reduces liability (Loan Payable) and increases equity (Common Shares). The debit tuple (0,0,0,1,0,0) correctly indicates liability decrease (d=1), and credit tuple (0,1,0,0,0,0) correctly indicates equity increase (b=1). The $200 loan is extinguished and 400 common shares are issued. Under IFRS, the consideration for the shares is the carrying amount of the debt extinguished ($200). No tax implications for corporate restructuring. Total debits = total credits = $200.",
+    "lines": [
+      {
+        "account_name": "Loan Payable",
+        "type": "debit",
+        "amount": 200.0
+      },
+      {
+        "account_name": "Common Shares",
+        "type": "credit",
+        "amount": 200.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0263202,
+  "raw_cost_usd": 0.048471,
+  "total_latency_ms": 17302,
+  "total_input_tokens": 11302,
+  "total_output_tokens": 971,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 109,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1655,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034625999999999997,
+      "raw_cost_usd": 0.0066,
+      "output": {
+        "reason": "Debt-to-equity conversion: The $200 bank loan (liability) is being eliminated, which requires a debit to decrease the liability balance. This is a single debit line representing a liability decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Debt-to-equity conversion: The $200 bank loan (liability) is being eliminated, which requires a debit to decrease the liability balance. This is a single debit line representing a liability decrease."
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 170,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1632,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0043653,
+      "raw_cost_usd": 0.007446,
+      "output": {
+        "reason": "The transaction converts a bank loan (liability) into equity by issuing common shares. On the credit side: (1) The bank loan (liability) is being eliminated, which is a liability decrease \u2013 but crediting a liability increases it, so this is NOT a credit. Actually, eliminating the loan means we debit the liability to decrease it. (2) Issuing common shares increases equity, which is an equity increase = credit to equity. Therefore, the credit side has one line: equity increase.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction converts a bank loan (liability) into equity by issuing common shares. On the credit side: (1) The bank loan (liability) is being eliminated, which is a liability decrease \u2013 but crediting a liability increases it, so this is NOT a credit. Actually, eliminating the loan means we debit the liability to decrease it. (2) Issuing common shares increases equity, which is an equity increase = credit to equity. Therefore, the credit side has one line: equity increase."
+    },
+    "debit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 147,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2305,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0046812,
+      "raw_cost_usd": 0.00912,
+      "output": {
+        "reason": "Transaction is a debt-to-equity conversion: the $200 bank loan (liability) is eliminated and equity is increased by issuing 400 common shares. Debit side should show liability decrease (slot d=1), which matches the initial tuple. Credit side correctly shows equity increase (slot b=1). The two sides tell a consistent story under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Transaction is a debt-to-equity conversion: the $200 bank loan (liability) is eliminated and equity is increased by issuing 400 common shares. Debit side should show liability decrease (slot d=1), which matches the initial tuple. Credit side correctly shows equity increase (slot b=1). The two sides tell a consistent story under IFRS. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 214,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2313,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0056886,
+      "raw_cost_usd": 0.010149,
+      "output": {
+        "reason": "The transaction describes a debt-to-equity conversion: a $200 bank loan (liability) is converted into 400 common shares (equity). \n\nThe debit side shows (0,0,0,1,0,0) = liability decrease, which correctly represents the elimination of the loan obligation.\n\nThe credit side should show the corresponding equity increase from issuing shares in exchange for extinguishing the debt. The initial credit tuple (0,1,0,0,0,0) = equity increase is correct.\n\nThis is a compound entry with one debit line (liability decrease) and one credit line (equity increase), which properly reflects the conversion transaction under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a debt-to-equity conversion: a $200 bank loan (liability) is converted into 400 common shares (equity). \n\nThe debit side shows (0,0,0,1,0,0) = liability decrease, which correctly represents the elimination of the loan obligation.\n\nThe credit side should show the corresponding equity increase from issuing shares in exchange for extinguishing the debt. The initial credit tuple (0,1,0,0,0,0) = equity increase is correct.\n\nThis is a compound entry with one debit line (liability decrease) and one credit line (equity increase), which properly reflects the conversion transaction under IFRS. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 792,
+      "output_tokens": 331,
+      "cache_read_tokens": 2605,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3397,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081225,
+      "raw_cost_usd": 0.015156,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Converted $200 bank loan to equity, issuing 400 common shares",
+        "rationale": "Debt-to-equity conversion reduces liability (Loan Payable) and increases equity (Common Shares). The debit tuple (0,0,0,1,0,0) correctly indicates liability decrease (d=1), and credit tuple (0,1,0,0,0,0) correctly indicates equity increase (b=1). The $200 loan is extinguished and 400 common shares are issued. Under IFRS, the consideration for the shares is the carrying amount of the debt extinguished ($200). No tax implications for corporate restructuring. Total debits = total credits = $200.",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Debt-to-equity conversion: The $200 bank loan (liability) is being eliminated, which requires a debit to decrease the liability balance. This is a single debit line representing a liability decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction converts a bank loan (liability) into equity by issuing common shares. On the credit side: (1) The bank loan (liability) is being eliminated, which is a liability decrease \u2013 but crediting a liability increases it, so this is NOT a credit. Actually, eliminating the loan means we debit the liability to decrease it. (2) Issuing common shares increases equity, which is an equity increase = credit to equity. Therefore, the credit side has one line: equity increase.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Transaction is a debt-to-equity conversion: the $200 bank loan (liability) is eliminated and equity is increased by issuing 400 common shares. Debit side should show liability decrease (slot d=1), which matches the initial tuple. Credit side correctly shows equity increase (slot b=1). The two sides tell a consistent story under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes a debt-to-equity conversion: a $200 bank loan (liability) is converted into 400 common shares (equity). \n\nThe debit side shows (0,0,0,1,0,0) = liability decrease, which correctly represents the elimination of the loan obligation.\n\nThe credit side should show the corresponding equity increase from issuing shares in exchange for extinguishing the debt. The initial credit tuple (0,1,0,0,0,0) = equity increase is correct.\n\nThis is a compound entry with one debit line (liability decrease) and one credit line (equity increase), which properly reflects the conversion transaction under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Converted $200 bank loan to equity, issuing 400 common shares",
+        "rationale": "Debt-to-equity conversion reduces liability (Loan Payable) and increases equity (Common Shares). The debit tuple (0,0,0,1,0,0) correctly indicates liability decrease (d=1), and credit tuple (0,1,0,0,0,0) correctly indicates equity increase (b=1). The $200 loan is extinguished and 400 common shares are issued. Under IFRS, the consideration for the shares is the carrying amount of the debt extinguished ($200). No tax implications for corporate restructuring. Total debits = total credits = $200.",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 109,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 170,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 147,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 214,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 792,
+        "output_tokens": 331,
+        "input_token_details": {
+          "cache_read": 2605,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

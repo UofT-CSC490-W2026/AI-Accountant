@@ -1,0 +1,406 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    2,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "INCOMPLETE - Building and land purchase from vendor",
+    "rationale": "Cannot determine correct entry due to two critical ambiguities: (1) The tax calculation basis is unclear - 'the balance plus 10% sales tax' could mean tax on the $4.5M paid now ($450K) or tax on the full $9M ($900K), resulting in different cash payments ($4,950,000 vs $5,400,000) and different liability structures. (2) The allocation method between land and building is ambiguous - the transaction mentions fair values totaling $12M for assets purchased at $9M, but doesn't specify the allocation method. Standard IFRS would use relative fair value allocation (6:3 ratio), but the explicit mention of specific fair values without stating this creates uncertainty. These are genuine business facts that affect the structural composition of the entry, not accounting treatment choices.",
+    "lines": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "Was the 10% sales tax calculated on the $4,500,000 paid now (resulting in $450,000 tax), or on the entire $9,000,000 purchase price (resulting in $900,000 tax)?",
+      "Should the $9,000,000 purchase price be allocated between land and building based on their relative fair values (Land: $6,000,000 and Building: $3,000,000), or is there a different allocation method intended?"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.050084699999999996,
+  "raw_cost_usd": 0.078162,
+  "total_latency_ms": 38754,
+  "total_input_tokens": 15099,
+  "total_output_tokens": 2191,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 595,
+      "output_tokens": 661,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2728,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0123399,
+      "raw_cost_usd": 0.018099,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "which portion of the purchase price was paid by cheque",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "50% of purchase price ($4,500,000) plus 10% sales tax on that portion ($450,000) = $4,950,000",
+              "50% of purchase price ($4,500,000) plus 10% sales tax on the entire purchase ($900,000) = $5,400,000"
+            ],
+            "clarification_question": "Was the 10% sales tax calculated on the $4,500,000 paid now, or on the entire $9,000,000 purchase price?",
+            "why_entry_differs": "The cash payment amount and sales tax payable/liability amounts differ: $4,950,000 vs $5,400,000 paid, with remaining tax liability of $450,000 vs $0",
+            "why_not_resolved": "The phrase 'the balance plus 10% sales tax' is grammatically ambiguous - 'balance' could mean the remaining 50% of purchase price, with tax on that portion only, or it could mean the remaining payment obligation with tax on the full amount. Ontario HST at 13% would typically apply to the full transaction value, but the stated 10% rate suggests a different jurisdiction or special circumstance, preventing use of standard tax conventions to resolve."
+          },
+          {
+            "aspect": "allocation of purchase price between land and building",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Allocate $9,000,000 based on fair value ratio: Land $6,000,000 (8/12), Building $3,000,000 (4/12)",
+              "Record land at $8,000,000 and building at $1,000,000 (residual)",
+              "Record building at $4,000,000 and land at $5,000,000 (residual)"
+            ],
+            "clarification_question": "Should the $9,000,000 purchase price be allocated between land and building based on their relative fair values ($8M and $4M), or is there another intended allocation method?",
+            "why_entry_differs": "Land and Building accounts will have different values depending on allocation method, affecting future depreciation (building only) and asset classification on the balance sheet",
+            "why_not_resolved": "The transaction states fair values that total $12,000,000 but the purchase price is only $9,000,000. Standard accounting would use relative fair value allocation, but the explicit mention of specific fair values without stating the allocation method creates ambiguity about whether management intends a different approach or has additional information about the allocation."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 568,
+      "output_tokens": 218,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1709,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053163,
+      "raw_cost_usd": 0.008397,
+      "output": {
+        "reason": "The credit side consists of:\n1. Cash/Bank account decrease for the payment made by cheque = $4,500,000 (50% of $9,000,000) + $900,000 (10% sales tax on $9,000,000) = $5,400,000 \u2192 Asset decrease (1 line)\n2. Accounts Payable or Note Payable increase for the deferred payment = $4,500,000 (remaining 50% due in 6 months) \u2192 Liability increase (1 line)\n\nTherefore: 1 liability increase line + 1 asset decrease line = (1,0,0,1,0,0)",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The credit side consists of:\n1. Cash/Bank account decrease for the payment made by cheque = $4,500,000 (50% of $9,000,000) + $900,000 (10% sales tax on $9,000,000) = $5,400,000 \u2192 Asset decrease (1 line)\n2. Accounts Payable or Note Payable increase for the deferred payment = $4,500,000 (remaining 50% due in 6 months) \u2192 Liability increase (1 line)\n\nTherefore: 1 liability increase line + 1 asset decrease line = (1,0,0,1,0,0)"
+    },
+    "debit_classifier": {
+      "input_tokens": 570,
+      "output_tokens": 252,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1732,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058386,
+      "raw_cost_usd": 0.008976,
+      "output": {
+        "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost or recorded separately depending on recoverability, but the core transaction shows 2 distinct asset acquisitions (land and building).",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost or recorded separately depending on recoverability, but the core transaction shows 2 distinct asset acquisitions (land and building)."
+    },
+    "debit_corrector": {
+      "input_tokens": 738,
+      "output_tokens": 233,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2382,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0062022,
+      "raw_cost_usd": 0.010641,
+      "output": {
+        "reason": "The transaction involves three debit components: (1) Land asset increase - allocated portion of $8M/$12M \u00d7 $9M = $6M, (2) Building asset increase - allocated portion of $4M/$12M \u00d7 $9M = $3M, and (3) Sales tax expense increase - 10% \u00d7 $4.5M paid now = $450K. The sales tax is an expense under IFRS as it is not recoverable input tax in this context. The initial tuple (2,0,0,0,0,0) correctly identified 2 asset increases (land and building) but missed the sales tax expense component. Corrected to (2,0,1,0,0,0) to include the expense increase for sales tax paid.",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves three debit components: (1) Land asset increase - allocated portion of $8M/$12M \u00d7 $9M = $6M, (2) Building asset increase - allocated portion of $4M/$12M \u00d7 $9M = $3M, and (3) Sales tax expense increase - 10% \u00d7 $4.5M paid now = $450K. The sales tax is an expense under IFRS as it is not recoverable input tax in this context. The initial tuple (2,0,0,0,0,0) correctly identified 2 asset increases (land and building) but missed the sales tax expense component. Corrected to (2,0,1,0,0,0) to include the expense increase for sales tax paid."
+    },
+    "credit_corrector": {
+      "input_tokens": 738,
+      "output_tokens": 388,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2390,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0085296,
+      "raw_cost_usd": 0.01299,
+      "output": {
+        "reason": "The initial credit tuple is correct. Let me analyze the transaction:\n\nMondelez purchased a building for $9,000,000. The payment structure is:\n- 50% ($4,500,000) is due in 6 months \u2192 creates a liability (accounts payable)\n- 50% ($4,500,000) plus 10% sales tax ($900,000) = $5,400,000 paid immediately by cheque \u2192 decreases cash (asset decrease)\n\nOn the credit side:\n- Slot a (liability increase) = 1: Correct. The $4,500,000 deferred payment creates a liability increase (accounts payable or note payable).\n- Slot d (asset decrease) = 1: Correct. The $5,400,000 cheque payment decreases cash, which is an asset decrease.\n\nThe debit tuple shows (2,0,0,0,0,0) = 2 asset increases, which makes sense because:\n1. Land component increases (asset)\n2. Building component increases (asset)\n\nThe fair value allocation ($8M land, $4M building totaling $12M) is used to allocate the $9M purchase price proportionally between land and building for accounting purposes, but doesn't change the credit side classification.\n\nThe credit and debit sides tell a consistent story: acquiring two asset components (land and building) by paying partly in cash and partly on credit. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. Let me analyze the transaction:\n\nMondelez purchased a building for $9,000,000. The payment structure is:\n- 50% ($4,500,000) is due in 6 months \u2192 creates a liability (accounts payable)\n- 50% ($4,500,000) plus 10% sales tax ($900,000) = $5,400,000 paid immediately by cheque \u2192 decreases cash (asset decrease)\n\nOn the credit side:\n- Slot a (liability increase) = 1: Correct. The $4,500,000 deferred payment creates a liability increase (accounts payable or note payable).\n- Slot d (asset decrease) = 1: Correct. The $5,400,000 cheque payment decreases cash, which is an asset decrease.\n\nThe debit tuple shows (2,0,0,0,0,0) = 2 asset increases, which makes sense because:\n1. Land component increases (asset)\n2. Building component increases (asset)\n\nThe fair value allocation ($8M land, $4M building totaling $12M) is used to allocate the $9M purchase price proportionally between land and building for accounting purposes, but doesn't change the credit side classification.\n\nThe credit and debit sides tell a consistent story: acquiring two asset components (land and building) by paying partly in cash and partly on credit. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1491,
+      "output_tokens": 439,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4158,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0118581,
+      "raw_cost_usd": 0.019059,
+      "output": {
+        "date": "2026-03-22",
+        "description": "INCOMPLETE - Building and land purchase from vendor",
+        "rationale": "Cannot determine correct entry due to two critical ambiguities: (1) The tax calculation basis is unclear - 'the balance plus 10% sales tax' could mean tax on the $4.5M paid now ($450K) or tax on the full $9M ($900K), resulting in different cash payments ($4,950,000 vs $5,400,000) and different liability structures. (2) The allocation method between land and building is ambiguous - the transaction mentions fair values totaling $12M for assets purchased at $9M, but doesn't specify the allocation method. Standard IFRS would use relative fair value allocation (6:3 ratio), but the explicit mention of specific fair values without stating this creates uncertainty. These are genuine business facts that affect the structural composition of the entry, not accounting treatment choices.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Was the 10% sales tax calculated on the $4,500,000 paid now (resulting in $450,000 tax), or on the entire $9,000,000 purchase price (resulting in $900,000 tax)?",
+          "Should the $9,000,000 purchase price be allocated between land and building based on their relative fair values (Land: $6,000,000 and Building: $3,000,000), or is there a different allocation method intended?"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "which portion of the purchase price was paid by cheque",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "50% of purchase price ($4,500,000) plus 10% sales tax on that portion ($450,000) = $4,950,000",
+              "50% of purchase price ($4,500,000) plus 10% sales tax on the entire purchase ($900,000) = $5,400,000"
+            ],
+            "clarification_question": "Was the 10% sales tax calculated on the $4,500,000 paid now, or on the entire $9,000,000 purchase price?",
+            "why_entry_differs": "The cash payment amount and sales tax payable/liability amounts differ: $4,950,000 vs $5,400,000 paid, with remaining tax liability of $450,000 vs $0",
+            "why_not_resolved": "The phrase 'the balance plus 10% sales tax' is grammatically ambiguous - 'balance' could mean the remaining 50% of purchase price, with tax on that portion only, or it could mean the remaining payment obligation with tax on the full amount. Ontario HST at 13% would typically apply to the full transaction value, but the stated 10% rate suggests a different jurisdiction or special circumstance, preventing use of standard tax conventions to resolve."
+          },
+          {
+            "aspect": "allocation of purchase price between land and building",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Allocate $9,000,000 based on fair value ratio: Land $6,000,000 (8/12), Building $3,000,000 (4/12)",
+              "Record land at $8,000,000 and building at $1,000,000 (residual)",
+              "Record building at $4,000,000 and land at $5,000,000 (residual)"
+            ],
+            "clarification_question": "Should the $9,000,000 purchase price be allocated between land and building based on their relative fair values ($8M and $4M), or is there another intended allocation method?",
+            "why_entry_differs": "Land and Building accounts will have different values depending on allocation method, affecting future depreciation (building only) and asset classification on the balance sheet",
+            "why_not_resolved": "The transaction states fair values that total $12,000,000 but the purchase price is only $9,000,000. Standard accounting would use relative fair value allocation, but the explicit mention of specific fair values without stating the allocation method creates ambiguity about whether management intends a different approach or has additional information about the allocation."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "The transaction involves purchasing a building (which includes land and building components) for use as a warehouse. Under IFRS, when acquiring property with identifiable land and building components, they must be recorded separately as distinct assets. The debit side records: (1) Land asset increase of $6,000,000 (allocated based on fair value proportion: 8,000,000/12,000,000 \u00d7 $9,000,000), and (2) Building asset increase of $3,000,000 (allocated based on fair value proportion: 4,000,000/12,000,000 \u00d7 $9,000,000). This results in 2 asset increase lines. Note: Sales tax paid is capitalized to the asset cost or recorded separately depending on recoverability, but the core transaction shows 2 distinct asset acquisitions (land and building).",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit side consists of:\n1. Cash/Bank account decrease for the payment made by cheque = $4,500,000 (50% of $9,000,000) + $900,000 (10% sales tax on $9,000,000) = $5,400,000 \u2192 Asset decrease (1 line)\n2. Accounts Payable or Note Payable increase for the deferred payment = $4,500,000 (remaining 50% due in 6 months) \u2192 Liability increase (1 line)\n\nTherefore: 1 liability increase line + 1 asset decrease line = (1,0,0,1,0,0)",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves three debit components: (1) Land asset increase - allocated portion of $8M/$12M \u00d7 $9M = $6M, (2) Building asset increase - allocated portion of $4M/$12M \u00d7 $9M = $3M, and (3) Sales tax expense increase - 10% \u00d7 $4.5M paid now = $450K. The sales tax is an expense under IFRS as it is not recoverable input tax in this context. The initial tuple (2,0,0,0,0,0) correctly identified 2 asset increases (land and building) but missed the sales tax expense component. Corrected to (2,0,1,0,0,0) to include the expense increase for sales tax paid.",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. Let me analyze the transaction:\n\nMondelez purchased a building for $9,000,000. The payment structure is:\n- 50% ($4,500,000) is due in 6 months \u2192 creates a liability (accounts payable)\n- 50% ($4,500,000) plus 10% sales tax ($900,000) = $5,400,000 paid immediately by cheque \u2192 decreases cash (asset decrease)\n\nOn the credit side:\n- Slot a (liability increase) = 1: Correct. The $4,500,000 deferred payment creates a liability increase (accounts payable or note payable).\n- Slot d (asset decrease) = 1: Correct. The $5,400,000 cheque payment decreases cash, which is an asset decrease.\n\nThe debit tuple shows (2,0,0,0,0,0) = 2 asset increases, which makes sense because:\n1. Land component increases (asset)\n2. Building component increases (asset)\n\nThe fair value allocation ($8M land, $4M building totaling $12M) is used to allocate the $9M purchase price proportionally between land and building for accounting purposes, but doesn't change the credit side classification.\n\nThe credit and debit sides tell a consistent story: acquiring two asset components (land and building) by paying partly in cash and partly on credit. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "INCOMPLETE - Building and land purchase from vendor",
+        "rationale": "Cannot determine correct entry due to two critical ambiguities: (1) The tax calculation basis is unclear - 'the balance plus 10% sales tax' could mean tax on the $4.5M paid now ($450K) or tax on the full $9M ($900K), resulting in different cash payments ($4,950,000 vs $5,400,000) and different liability structures. (2) The allocation method between land and building is ambiguous - the transaction mentions fair values totaling $12M for assets purchased at $9M, but doesn't specify the allocation method. Standard IFRS would use relative fair value allocation (6:3 ratio), but the explicit mention of specific fair values without stating this creates uncertainty. These are genuine business facts that affect the structural composition of the entry, not accounting treatment choices.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Was the 10% sales tax calculated on the $4,500,000 paid now (resulting in $450,000 tax), or on the entire $9,000,000 purchase price (resulting in $900,000 tax)?",
+          "Should the $9,000,000 purchase price be allocated between land and building based on their relative fair values (Land: $6,000,000 and Building: $3,000,000), or is there a different allocation method intended?"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 595,
+        "output_tokens": 661,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 568,
+        "output_tokens": 218,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 570,
+        "output_tokens": 252,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 738,
+        "output_tokens": 233,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 738,
+        "output_tokens": 388,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1491,
+        "output_tokens": 439,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

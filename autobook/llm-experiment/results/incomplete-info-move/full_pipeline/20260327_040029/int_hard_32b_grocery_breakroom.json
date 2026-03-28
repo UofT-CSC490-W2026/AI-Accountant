@@ -1,0 +1,426 @@
+{
+  "test_case_id": "int_hard_32b_grocery_breakroom",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of tea, beverages, and refreshments for employee break room",
+    "rationale": "Break room supplies are an operating expense (employee welfare/office supplies). The debit tuple (0,0,1,0,0,0) indicates one expense increase line. The credit tuple (1,0,0,0,0,0) indicates one liability increase line for the corporate credit card payable. The base amount is $1,200 and sales tax of $120 (10%) was charged. Since these are grocery items (tea, beverages, refreshments), they would typically be tax-exempt basic groceries in Canada, but the transaction explicitly states 10% sales tax was charged, suggesting these are taxable prepared/specialty items not qualifying for exemption. The sales tax paid is recoverable as GST/HST Receivable (assuming this is GST or HST). Total debits: $1,200 + $120 = $1,320; Total credits: $1,320.",
+    "lines": [
+      {
+        "account_name": "Office Supplies Expense",
+        "type": "debit",
+        "amount": 1200.0
+      },
+      {
+        "account_name": "GST Receivable",
+        "type": "debit",
+        "amount": 120.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 1320.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0416883,
+  "raw_cost_usd": 0.073065,
+  "total_latency_ms": 28505,
+  "total_input_tokens": 17315,
+  "total_output_tokens": 1408,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 548,
+      "output_tokens": 35,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2672,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0028062,
+      "raw_cost_usd": 0.008541,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 521,
+      "output_tokens": 113,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1662,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036003000000000003,
+      "raw_cost_usd": 0.006681,
+      "output": {
+        "reason": "This transaction has two credit lines: (1) Sales tax payable of $120 = liability increase, and (2) Credit card payable of $1,320 = liability increase. Total: 2 liability increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This transaction has two credit lines: (1) Sales tax payable of $120 = liability increase, and (2) Credit card payable of $1,320 = liability increase. Total: 2 liability increases."
+    },
+    "debit_classifier": {
+      "input_tokens": 523,
+      "output_tokens": 152,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1685,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0041976,
+      "raw_cost_usd": 0.007335,
+      "output": {
+        "reason": "The transaction involves purchasing tea, beverages, and refreshments for the employee break room. This creates TWO debit lines: (1) Employee supplies/refreshments expense of $1,200 - expense increase, and (2) Sales tax expense of $120 (recoverable input tax credits typically don't apply to employee consumables under IFRS) - expense increase. Total: 2 expense increases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing tea, beverages, and refreshments for the employee break room. This creates TWO debit lines: (1) Employee supplies/refreshments expense of $1,200 - expense increase, and (2) Sales tax expense of $120 (recoverable input tax credits typically don't apply to employee consumables under IFRS) - expense increase. Total: 2 expense increases."
+    },
+    "debit_corrector": {
+      "input_tokens": 691,
+      "output_tokens": 230,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2335,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0060162,
+      "raw_cost_usd": 0.010455,
+      "output": {
+        "reason": "The transaction involves purchasing tea, beverages, and refreshments for the employee break room, paid by corporate credit card. This is a single expense transaction with two components: the base expense ($1,200) and sales tax ($120), both forming one office/refreshment expense. The debit side should record ONE expense increase line (office supplies/refreshments expense), not two. The credit side correctly shows two liability increases (accounts payable to the grocery store for $1,200 and sales tax payable for $120). The initial debit tuple of (0,0,2,0,0,0) incorrectly counted this as two separate expense increases when it should be one consolidated expense line. Corrected to (0,0,1,0,0,0).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing tea, beverages, and refreshments for the employee break room, paid by corporate credit card. This is a single expense transaction with two components: the base expense ($1,200) and sales tax ($120), both forming one office/refreshment expense. The debit side should record ONE expense increase line (office supplies/refreshments expense), not two. The credit side correctly shows two liability increases (accounts payable to the grocery store for $1,200 and sales tax payable for $120). The initial debit tuple of (0,0,2,0,0,0) incorrectly counted this as two separate expense increases when it should be one consolidated expense line. Corrected to (0,0,1,0,0,0)."
+    },
+    "credit_corrector": {
+      "input_tokens": 691,
+      "output_tokens": 284,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2343,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.006828600000000001,
+      "raw_cost_usd": 0.011289,
+      "output": {
+        "reason": "The transaction involves purchasing supplies for the break room ($1,200) and sales tax ($1,320 total), paid by corporate credit card. This creates:\n\nDebit side (2 lines):\n- Expense increase for supplies/refreshments: $1,200\n- Expense increase for sales tax: $120\n\nCredit side:\n- Liability increase (credit card payable): $1,320\n\nThe initial credit tuple of (2,0,0,0,0,0) incorrectly shows 2 liability increases, but there is only ONE liability being increased - the corporate credit card payable for the total amount of $1,320. The debit side correctly shows 2 expense increases (supplies and tax are often recorded separately), but on the credit side, the payment method creates a single liability increase regardless of how many expense lines exist on the debit side.\n\nCorrected to (1,0,0,0,0,0) to reflect one liability increase (credit card payable).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing supplies for the break room ($1,200) and sales tax ($1,320 total), paid by corporate credit card. This creates:\n\nDebit side (2 lines):\n- Expense increase for supplies/refreshments: $1,200\n- Expense increase for sales tax: $120\n\nCredit side:\n- Liability increase (credit card payable): $1,320\n\nThe initial credit tuple of (2,0,0,0,0,0) incorrectly shows 2 liability increases, but there is only ONE liability being increased - the corporate credit card payable for the total amount of $1,320. The debit side correctly shows 2 expense increases (supplies and tax are often recorded separately), but on the credit side, the payment method creates a single liability increase regardless of how many expense lines exist on the debit side.\n\nCorrected to (1,0,0,0,0,0) to reflect one liability increase (credit card payable)."
+    },
+    "entry_builder": {
+      "input_tokens": 700,
+      "output_tokens": 414,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3212,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0090636,
+      "raw_cost_usd": 0.015846,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of tea, beverages, and refreshments for employee break room",
+        "rationale": "Break room supplies are an operating expense (employee welfare/office supplies). The debit tuple (0,0,1,0,0,0) indicates one expense increase line. The credit tuple (1,0,0,0,0,0) indicates one liability increase line for the corporate credit card payable. The base amount is $1,200 and sales tax of $120 (10%) was charged. Since these are grocery items (tea, beverages, refreshments), they would typically be tax-exempt basic groceries in Canada, but the transaction explicitly states 10% sales tax was charged, suggesting these are taxable prepared/specialty items not qualifying for exemption. The sales tax paid is recoverable as GST/HST Receivable (assuming this is GST or HST). Total debits: $1,200 + $120 = $1,320; Total credits: $1,320.",
+        "lines": [
+          {
+            "account_name": "Office Supplies Expense",
+            "type": "debit",
+            "amount": 1200.0
+          },
+          {
+            "account_name": "GST Receivable",
+            "type": "debit",
+            "amount": 120.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2020,
+      "output_tokens": 180,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3406,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0091758,
+      "raw_cost_usd": 0.012918,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry is correct. Balance verified: debits ($1,200 + $120 = $1,320) equal credits ($1,320). Break room supplies correctly recorded as Office Supplies Expense. The 10% sales tax ($120) is properly recorded as GST Receivable (recoverable input tax for business expenses under Canadian tax rules). Credit Card Payable correctly records the total liability of $1,320. All accounts are appropriate, amounts match transaction text, and debits/credits are on correct sides."
+      },
+      "reason": "Entry is correct. Balance verified: debits ($1,200 + $120 = $1,320) equal credits ($1,320). Break room supplies correctly recorded as Office Supplies Expense. The 10% sales tax ($120) is properly recorded as GST Receivable (recoverable input tax for business expenses under Canadian tax rules). Credit Card Payable correctly records the total liability of $1,320. All accounts are appropriate, amounts match transaction text, and debits/credits are on correct sides."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "The transaction involves purchasing tea, beverages, and refreshments for the employee break room. This creates TWO debit lines: (1) Employee supplies/refreshments expense of $1,200 - expense increase, and (2) Sales tax expense of $120 (recoverable input tax credits typically don't apply to employee consumables under IFRS) - expense increase. Total: 2 expense increases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This transaction has two credit lines: (1) Sales tax payable of $120 = liability increase, and (2) Credit card payable of $1,320 = liability increase. Total: 2 liability increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves purchasing tea, beverages, and refreshments for the employee break room, paid by corporate credit card. This is a single expense transaction with two components: the base expense ($1,200) and sales tax ($120), both forming one office/refreshment expense. The debit side should record ONE expense increase line (office supplies/refreshments expense), not two. The credit side correctly shows two liability increases (accounts payable to the grocery store for $1,200 and sales tax payable for $120). The initial debit tuple of (0,0,2,0,0,0) incorrectly counted this as two separate expense increases when it should be one consolidated expense line. Corrected to (0,0,1,0,0,0).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves purchasing supplies for the break room ($1,200) and sales tax ($1,320 total), paid by corporate credit card. This creates:\n\nDebit side (2 lines):\n- Expense increase for supplies/refreshments: $1,200\n- Expense increase for sales tax: $120\n\nCredit side:\n- Liability increase (credit card payable): $1,320\n\nThe initial credit tuple of (2,0,0,0,0,0) incorrectly shows 2 liability increases, but there is only ONE liability being increased - the corporate credit card payable for the total amount of $1,320. The debit side correctly shows 2 expense increases (supplies and tax are often recorded separately), but on the credit side, the payment method creates a single liability increase regardless of how many expense lines exist on the debit side.\n\nCorrected to (1,0,0,0,0,0) to reflect one liability increase (credit card payable).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of tea, beverages, and refreshments for employee break room",
+        "rationale": "Break room supplies are an operating expense (employee welfare/office supplies). The debit tuple (0,0,1,0,0,0) indicates one expense increase line. The credit tuple (1,0,0,0,0,0) indicates one liability increase line for the corporate credit card payable. The base amount is $1,200 and sales tax of $120 (10%) was charged. Since these are grocery items (tea, beverages, refreshments), they would typically be tax-exempt basic groceries in Canada, but the transaction explicitly states 10% sales tax was charged, suggesting these are taxable prepared/specialty items not qualifying for exemption. The sales tax paid is recoverable as GST/HST Receivable (assuming this is GST or HST). Total debits: $1,200 + $120 = $1,320; Total credits: $1,320.",
+        "lines": [
+          {
+            "account_name": "Office Supplies Expense",
+            "type": "debit",
+            "amount": 1200.0
+          },
+          {
+            "account_name": "GST Receivable",
+            "type": "debit",
+            "amount": 120.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry is correct. Balance verified: debits ($1,200 + $120 = $1,320) equal credits ($1,320). Break room supplies correctly recorded as Office Supplies Expense. The 10% sales tax ($120) is properly recorded as GST Receivable (recoverable input tax for business expenses under Canadian tax rules). Credit Card Payable correctly records the total liability of $1,320. All accounts are appropriate, amounts match transaction text, and debits/credits are on correct sides."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 548,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 113,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 523,
+        "output_tokens": 152,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 691,
+        "output_tokens": 230,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 691,
+        "output_tokens": 284,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 700,
+        "output_tokens": 414,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2020,
+        "output_tokens": 180,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

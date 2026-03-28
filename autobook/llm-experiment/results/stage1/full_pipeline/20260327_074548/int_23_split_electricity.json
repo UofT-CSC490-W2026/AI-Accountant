@@ -1,0 +1,426 @@
+{
+  "test_case_id": "int_23_split_electricity",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Factory and office electricity charges paid via corporate credit card",
+    "rationale": "Factory electricity ($15,000) is a manufacturing overhead expense that relates to production activities. Office electricity ($5,500) is an administrative/operating expense. Both are paid using corporate credit card, creating a liability (credit card payable). The debit tuple (0,0,2,0,0,0) correctly indicates two expense increases, and credit tuple (1,0,0,0,0,0) correctly indicates one liability increase. No tax applies as electricity charges are typically billed inclusive of any applicable taxes by the utility provider.",
+    "lines": [
+      {
+        "account_name": "Manufacturing Overhead",
+        "type": "debit",
+        "amount": 15000.0
+      },
+      {
+        "account_name": "Utilities Expense",
+        "type": "debit",
+        "amount": 5500.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 20500.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0377685,
+  "raw_cost_usd": 0.069588,
+  "total_latency_ms": 30496,
+  "total_input_tokens": 17126,
+  "total_output_tokens": 1214,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 529,
+      "output_tokens": 35,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2662,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0027519000000000003,
+      "raw_cost_usd": 0.008511,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 504,
+      "output_tokens": 108,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1666,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034806,
+      "raw_cost_usd": 0.006618,
+      "output": {
+        "reason": "Factory electricity ($15,000) = expense increase (manufacturing overhead/cost of production), Office electricity ($5,500) = expense increase (administrative expense). Two separate debit lines, both are expense increases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Factory electricity ($15,000) = expense increase (manufacturing overhead/cost of production), Office electricity ($5,500) = expense increase (administrative expense). Two separate debit lines, both are expense increases."
+    },
+    "credit_classifier": {
+      "input_tokens": 502,
+      "output_tokens": 122,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1643,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036783000000000002,
+      "raw_cost_usd": 0.006759,
+      "output": {
+        "reason": "Payment made using corporate credit card creates a liability increase (credit card payable). The credit card balance increases by the total amount ($15,000 + $5,500 = $20,500). This is one credit line representing the liability increase to the credit card company.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Payment made using corporate credit card creates a liability increase (credit card payable). The credit card balance increases by the total amount ($15,000 + $5,500 = $20,500). This is one credit line representing the liability increase to the credit card company."
+    },
+    "credit_corrector": {
+      "input_tokens": 672,
+      "output_tokens": 165,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2324,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004986600000000001,
+      "raw_cost_usd": 0.009447,
+      "output": {
+        "reason": "The transaction describes paying electricity charges using a corporate credit card. This creates a liability (credit card payable) increase of 1 line on the credit side. The debit side shows 2 expense increases (factory electricity and office electricity), which is correct - these are two separate expense accounts being debited. The credit side correctly shows 1 liability increase representing the single credit card payable account being credited for the total amount. The initial credit tuple is correct - no correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes paying electricity charges using a corporate credit card. This creates a liability (credit card payable) increase of 1 line on the credit side. The debit side shows 2 expense increases (factory electricity and office electricity), which is correct - these are two separate expense accounts being debited. The credit side correctly shows 1 liability increase representing the single credit card payable account being credited for the total amount. The initial credit tuple is correct - no correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 672,
+      "output_tokens": 258,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2316,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063792,
+      "raw_cost_usd": 0.010818,
+      "output": {
+        "reason": "The transaction involves paying electricity charges for two different purposes: factory electricity ($15,000) and office electricity ($5,500), both paid using a corporate credit card. \n\nFactory electricity is a manufacturing overhead cost (expense), and office electricity is an administrative/operating expense. Both are period expenses that should be debited to increase expense accounts.\n\nThe initial debit tuple shows 2 expense increases (c=2), which correctly represents the two separate expense line items (factory electricity and office electricity).\n\nThe credit tuple shows 1 liability increase (a=1), which is consistent with the payment method - using a corporate credit card creates a liability (credit card payable/accounts payable).\n\nThe debit and credit sides tell a consistent story: two expenses are being incurred (debit side) and a liability is being created through credit card usage (credit side). The initial debit classification is correct. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves paying electricity charges for two different purposes: factory electricity ($15,000) and office electricity ($5,500), both paid using a corporate credit card. \n\nFactory electricity is a manufacturing overhead cost (expense), and office electricity is an administrative/operating expense. Both are period expenses that should be debited to increase expense accounts.\n\nThe initial debit tuple shows 2 expense increases (c=2), which correctly represents the two separate expense line items (factory electricity and office electricity).\n\nThe credit tuple shows 1 liability increase (a=1), which is consistent with the payment method - using a corporate credit card creates a liability (credit card payable/accounts payable).\n\nThe debit and credit sides tell a consistent story: two expenses are being incurred (debit side) and a liability is being created through credit card usage (credit side). The initial debit classification is correct. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 761,
+      "output_tokens": 326,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3428,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0079731,
+      "raw_cost_usd": 0.015174,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Factory and office electricity charges paid via corporate credit card",
+        "rationale": "Factory electricity ($15,000) is a manufacturing overhead expense that relates to production activities. Office electricity ($5,500) is an administrative/operating expense. Both are paid using corporate credit card, creating a liability (credit card payable). The debit tuple (0,0,2,0,0,0) correctly indicates two expense increases, and credit tuple (1,0,0,0,0,0) correctly indicates one liability increase. No tax applies as electricity charges are typically billed inclusive of any applicable taxes by the utility provider.",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 15000.0
+          },
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 5500.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 20500.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1701,
+      "output_tokens": 200,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3087,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0085188,
+      "raw_cost_usd": 0.012261,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records electricity expenses split between factory (Manufacturing Overhead $15,000) and office (Utilities Expense $5,500) with payment via credit card (Credit Card Payable $20,500). Balance verified: debits $20,500 = credits $20,500. Accounts are appropriate: factory electricity properly classified as manufacturing overhead (production cost), office electricity as utilities expense (administrative cost). Credit card payment correctly increases liability. All amounts match transaction text. No tax lines needed as utility bills are typically tax-inclusive. Directionality correct: expenses debited to increase, liability credited to increase."
+      },
+      "reason": "Entry correctly records electricity expenses split between factory (Manufacturing Overhead $15,000) and office (Utilities Expense $5,500) with payment via credit card (Credit Card Payable $20,500). Balance verified: debits $20,500 = credits $20,500. Accounts are appropriate: factory electricity properly classified as manufacturing overhead (production cost), office electricity as utilities expense (administrative cost). Credit card payment correctly increases liability. All amounts match transaction text. No tax lines needed as utility bills are typically tax-inclusive. Directionality correct: expenses debited to increase, liability credited to increase."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Factory electricity ($15,000) = expense increase (manufacturing overhead/cost of production), Office electricity ($5,500) = expense increase (administrative expense). Two separate debit lines, both are expense increases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Payment made using corporate credit card creates a liability increase (credit card payable). The credit card balance increases by the total amount ($15,000 + $5,500 = $20,500). This is one credit line representing the liability increase to the credit card company.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves paying electricity charges for two different purposes: factory electricity ($15,000) and office electricity ($5,500), both paid using a corporate credit card. \n\nFactory electricity is a manufacturing overhead cost (expense), and office electricity is an administrative/operating expense. Both are period expenses that should be debited to increase expense accounts.\n\nThe initial debit tuple shows 2 expense increases (c=2), which correctly represents the two separate expense line items (factory electricity and office electricity).\n\nThe credit tuple shows 1 liability increase (a=1), which is consistent with the payment method - using a corporate credit card creates a liability (credit card payable/accounts payable).\n\nThe debit and credit sides tell a consistent story: two expenses are being incurred (debit side) and a liability is being created through credit card usage (credit side). The initial debit classification is correct. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes paying electricity charges using a corporate credit card. This creates a liability (credit card payable) increase of 1 line on the credit side. The debit side shows 2 expense increases (factory electricity and office electricity), which is correct - these are two separate expense accounts being debited. The credit side correctly shows 1 liability increase representing the single credit card payable account being credited for the total amount. The initial credit tuple is correct - no correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Factory and office electricity charges paid via corporate credit card",
+        "rationale": "Factory electricity ($15,000) is a manufacturing overhead expense that relates to production activities. Office electricity ($5,500) is an administrative/operating expense. Both are paid using corporate credit card, creating a liability (credit card payable). The debit tuple (0,0,2,0,0,0) correctly indicates two expense increases, and credit tuple (1,0,0,0,0,0) correctly indicates one liability increase. No tax applies as electricity charges are typically billed inclusive of any applicable taxes by the utility provider.",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 15000.0
+          },
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 5500.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 20500.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records electricity expenses split between factory (Manufacturing Overhead $15,000) and office (Utilities Expense $5,500) with payment via credit card (Credit Card Payable $20,500). Balance verified: debits $20,500 = credits $20,500. Accounts are appropriate: factory electricity properly classified as manufacturing overhead (production cost), office electricity as utilities expense (administrative cost). Credit card payment correctly increases liability. All amounts match transaction text. No tax lines needed as utility bills are typically tax-inclusive. Directionality correct: expenses debited to increase, liability credited to increase."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 529,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 108,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 502,
+        "output_tokens": 122,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 672,
+        "output_tokens": 165,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 672,
+        "output_tokens": 258,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 761,
+        "output_tokens": 326,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1701,
+        "output_tokens": 200,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

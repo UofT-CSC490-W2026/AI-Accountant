@@ -1,0 +1,467 @@
+{
+  "test_case_id": "basic_07_loan_to_equity",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Conversion of $200 bank loan to equity through issuance of 400 common shares",
+    "rationale": "Debt-to-equity conversion: the liability (Loan Payable) is extinguished by issuing common shares. Under IFRS, the book value of the liability ($200) is transferred to equity. The 400 shares imply a stated value of $0.50 per share. Debit Loan Payable (liability decrease) and credit Common Shares (equity increase). No tax implications for this equity transaction.",
+    "lines": [
+      {
+        "account_name": "Loan Payable",
+        "type": "debit",
+        "amount": 200.0
+      },
+      {
+        "account_name": "Common Shares",
+        "type": "credit",
+        "amount": 200.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0411105,
+  "raw_cost_usd": 0.07293,
+  "total_latency_ms": 27079,
+  "total_input_tokens": 17560,
+  "total_output_tokens": 1350,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 518,
+      "output_tokens": 218,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2651,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0054639,
+      "raw_cost_usd": 0.011223,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "conversion terms (book value vs fair value)",
+            "resolved": true,
+            "resolution": "Convention 'converted X to Y' implies book value transfer \u2014 the $200 loan liability is extinguished and equity is credited for $200 (400 shares at $0.50 stated value)",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "share class and characteristics",
+            "resolved": true,
+            "resolution": "Transaction states 'common shares' explicitly \u2014 no ambiguity on share class",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "creditor identity",
+            "resolved": true,
+            "resolution": "Creditor identity does not affect the entry structure \u2014 liability is extinguished and equity is issued regardless of who held the loan",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 124,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1655,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036876,
+      "raw_cost_usd": 0.006825,
+      "output": {
+        "reason": "Converting a bank loan to equity means the company is extinguishing its liability obligation. On the debit side, this creates 1 liability decrease (the loan payable is reduced). The issuance of common shares affects the credit side (equity increase), not the debit side.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Converting a bank loan to equity means the company is extinguishing its liability obligation. On the debit side, this creates 1 liability decrease (the loan payable is reduced). The issuance of common shares affects the credit side (equity increase), not the debit side."
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 218,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1632,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0050853,
+      "raw_cost_usd": 0.008166,
+      "output": {
+        "reason": "Converting a loan to equity means the loan liability is extinguished. The credit side records: (1) Liability decrease (loan payable reduced by $200) credited, which under IFRS means we are decreasing a liability account, so this is a liability decrease (slot a = 0), but wait - crediting a liability increases it, debiting decreases it. Since we're classifying credits only and the loan is being eliminated, we DEBIT the liability to decrease it (not credit). On the CREDIT side: (2) Equity increase - issuing common shares increases share capital, which is an equity increase (slot b = 1). So the credit side shows only the equity increase from issuing shares.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Converting a loan to equity means the loan liability is extinguished. The credit side records: (1) Liability decrease (loan payable reduced by $200) credited, which under IFRS means we are decreasing a liability account, so this is a liability decrease (slot a = 0), but wait - crediting a liability increases it, debiting decreases it. Since we're classifying credits only and the loan is being eliminated, we DEBIT the liability to decrease it (not credit). On the CREDIT side: (2) Equity increase - issuing common shares increases share capital, which is an equity increase (slot b = 1). So the credit side shows only the equity increase from issuing shares."
+    },
+    "credit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 193,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2313,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053736,
+      "raw_cost_usd": 0.009834,
+      "output": {
+        "reason": "The transaction is a debt-to-equity conversion where a $200 bank loan (liability) is converted into equity by issuing 400 common shares. This requires: (1) decreasing the liability (bank loan payable) - which appears correctly on the debit side as liability decrease (d=1), and (2) increasing equity (common shares) - which is correctly classified in the initial credit tuple as equity increase (b=1). The debit and credit tuples tell a consistent story of a liability being extinguished and equity being created. The initial credit classification is correct - no changes needed.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a debt-to-equity conversion where a $200 bank loan (liability) is converted into equity by issuing 400 common shares. This requires: (1) decreasing the liability (bank loan payable) - which appears correctly on the debit side as liability decrease (d=1), and (2) increasing equity (common shares) - which is correctly classified in the initial credit tuple as equity increase (b=1). The debit and credit tuples tell a consistent story of a liability being extinguished and equity being created. The initial credit classification is correct - no changes needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 141,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2305,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0045912,
+      "raw_cost_usd": 0.00903,
+      "output": {
+        "reason": "Converting a bank loan to equity is a debt-to-equity conversion. The liability (loan payable) is being extinguished, which requires a debit to liability decrease (slot d). The credit side shows equity increase (slot b), which is correct for issuing common shares. The initial debit tuple correctly classifies this as liability decrease. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Converting a bank loan to equity is a debt-to-equity conversion. The liability (loan payable) is being extinguished, which requires a debit to liability decrease (slot d). The credit side shows equity increase (slot b), which is correct for issuing common shares. The initial debit tuple correctly classifies this as liability decrease. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1083,
+      "output_tokens": 276,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3750,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081891,
+      "raw_cost_usd": 0.01539,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Conversion of $200 bank loan to equity through issuance of 400 common shares",
+        "rationale": "Debt-to-equity conversion: the liability (Loan Payable) is extinguished by issuing common shares. Under IFRS, the book value of the liability ($200) is transferred to equity. The 400 shares imply a stated value of $0.50 per share. Debit Loan Payable (liability decrease) and credit Common Shares (equity increase). No tax implications for this equity transaction.",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1868,
+      "output_tokens": 180,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3254,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0087198,
+      "raw_cost_usd": 0.012462,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records debt-to-equity conversion. Debit to Loan Payable ($200) properly extinguishes the liability. Credit to Common Shares ($200) properly records equity increase from issuing 400 shares. Entry balances (debits = credits = $200). Under IFRS, debt-to-equity conversions are recorded at book value of the liability extinguished, which is correctly applied here. No tax implications for equity transactions. All accounts, amounts, and directionality are correct."
+      },
+      "reason": "Entry correctly records debt-to-equity conversion. Debit to Loan Payable ($200) properly extinguishes the liability. Credit to Common Shares ($200) properly records equity increase from issuing 400 shares. Entry balances (debits = credits = $200). Under IFRS, debt-to-equity conversions are recorded at book value of the liability extinguished, which is correctly applied here. No tax implications for equity transactions. All accounts, amounts, and directionality are correct."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "conversion terms (book value vs fair value)",
+            "resolved": true,
+            "resolution": "Convention 'converted X to Y' implies book value transfer \u2014 the $200 loan liability is extinguished and equity is credited for $200 (400 shares at $0.50 stated value)",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "share class and characteristics",
+            "resolved": true,
+            "resolution": "Transaction states 'common shares' explicitly \u2014 no ambiguity on share class",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "creditor identity",
+            "resolved": true,
+            "resolution": "Creditor identity does not affect the entry structure \u2014 liability is extinguished and equity is issued regardless of who held the loan",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Converting a bank loan to equity means the company is extinguishing its liability obligation. On the debit side, this creates 1 liability decrease (the loan payable is reduced). The issuance of common shares affects the credit side (equity increase), not the debit side.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Converting a loan to equity means the loan liability is extinguished. The credit side records: (1) Liability decrease (loan payable reduced by $200) credited, which under IFRS means we are decreasing a liability account, so this is a liability decrease (slot a = 0), but wait - crediting a liability increases it, debiting decreases it. Since we're classifying credits only and the loan is being eliminated, we DEBIT the liability to decrease it (not credit). On the CREDIT side: (2) Equity increase - issuing common shares increases share capital, which is an equity increase (slot b = 1). So the credit side shows only the equity increase from issuing shares.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Converting a bank loan to equity is a debt-to-equity conversion. The liability (loan payable) is being extinguished, which requires a debit to liability decrease (slot d). The credit side shows equity increase (slot b), which is correct for issuing common shares. The initial debit tuple correctly classifies this as liability decrease. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction is a debt-to-equity conversion where a $200 bank loan (liability) is converted into equity by issuing 400 common shares. This requires: (1) decreasing the liability (bank loan payable) - which appears correctly on the debit side as liability decrease (d=1), and (2) increasing equity (common shares) - which is correctly classified in the initial credit tuple as equity increase (b=1). The debit and credit tuples tell a consistent story of a liability being extinguished and equity being created. The initial credit classification is correct - no changes needed.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Conversion of $200 bank loan to equity through issuance of 400 common shares",
+        "rationale": "Debt-to-equity conversion: the liability (Loan Payable) is extinguished by issuing common shares. Under IFRS, the book value of the liability ($200) is transferred to equity. The 400 shares imply a stated value of $0.50 per share. Debit Loan Payable (liability decrease) and credit Common Shares (equity increase). No tax implications for this equity transaction.",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records debt-to-equity conversion. Debit to Loan Payable ($200) properly extinguishes the liability. Credit to Common Shares ($200) properly records equity increase from issuing 400 shares. Entry balances (debits = credits = $200). Under IFRS, debt-to-equity conversions are recorded at book value of the liability extinguished, which is correctly applied here. No tax implications for equity transactions. All accounts, amounts, and directionality are correct."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 218,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 124,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 218,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 193,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 141,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1083,
+        "output_tokens": 276,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1868,
+        "output_tokens": 180,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

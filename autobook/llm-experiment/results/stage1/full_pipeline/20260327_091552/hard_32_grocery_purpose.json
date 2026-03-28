@@ -1,0 +1,383 @@
+{
+  "test_case_id": "hard_32_grocery_purpose",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Tea, beverages, and refreshments purchased from grocery store",
+    "rationale": "INCOMPLETE_INFORMATION: The transaction describes a $1,200 purchase of tea, beverages, and refreshments from a grocery store, but the business purpose is not specified. This is a critical ambiguity because different purposes map to structurally different journal entries: (1) Office supplies for employee consumption would be Office Supplies Expense or General Office Expense; (2) Client meeting refreshments would be Entertainment Expense or Hospitality Expense; (3) Resale inventory would be Inventory (asset account), not an expense; (4) Event catering supplies would be Marketing Expense or Event Expense. The disambiguator correctly identified that without knowing the intended use, we cannot determine the correct account classification. The relatively large amount ($1,200) and the generic nature of the items (tea, beverages, refreshments) do not provide sufficient context to make a reasonable assumption. This is not a case of being unsure about accounting treatment\u2014the accounting treatment is clear once we know the purpose\u2014but rather missing a business fact that only the transaction initiator would know.",
+    "lines": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "What was the business purpose of purchasing these tea, beverages, and refreshments? (e.g., office supplies for employee consumption, client meeting refreshments, resale inventory, event catering supplies, etc.)"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0353595,
+  "raw_cost_usd": 0.063426,
+  "total_latency_ms": 33921,
+  "total_input_tokens": 14372,
+  "total_output_tokens": 1354,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 539,
+      "output_tokens": 281,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2672,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0064719,
+      "raw_cost_usd": 0.012231,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of tea, beverages, and refreshments purchase",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Office supplies for employee consumption (general office expense)",
+              "Client meeting refreshments (entertainment/hospitality expense)",
+              "Resale inventory (cost of goods sold)",
+              "Event catering supplies (marketing/event expense)"
+            ],
+            "clarification_question": "What was the business purpose of purchasing these tea, beverages, and refreshments?",
+            "why_entry_differs": "Each purpose maps to a different account: office expense vs entertainment expense vs inventory (asset) vs marketing expense, which affects both the account classification and potential tax treatment",
+            "why_not_resolved": "The transaction describes only the items purchased (tea, beverages, refreshments) without indicating their intended use. 'General' business type does not narrow the purpose. The relatively large amount ($1,200) could support any of these interpretations, and there is no standard accounting convention that defaults grocery purchases to a specific purpose without additional context."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 512,
+      "output_tokens": 94,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1653,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032883,
+      "raw_cost_usd": 0.006369,
+      "output": {
+        "reason": "Payment made by corporate credit card creates a liability increase (credit card payable). The credit card balance owed increases by $1,320.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Payment made by corporate credit card creates a liability increase (credit card payable). The credit card balance owed increases by $1,320."
+    },
+    "debit_classifier": {
+      "input_tokens": 514,
+      "output_tokens": 121,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1676,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037056,
+      "raw_cost_usd": 0.006843,
+      "output": {
+        "reason": "Purchase of tea, beverages, and refreshments creates 1 asset increase (inventory or supplies). The sales tax is also capitalized into the asset cost. Payment by credit card is a credit-side entry (liability increase) and does not affect the debit classification.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Purchase of tea, beverages, and refreshments creates 1 asset increase (inventory or supplies). The sales tax is also capitalized into the asset cost. Payment by credit card is a credit-side entry (liability increase) and does not affect the debit classification."
+    },
+    "debit_corrector": {
+      "input_tokens": 682,
+      "output_tokens": 188,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2326,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053592,
+      "raw_cost_usd": 0.009798,
+      "output": {
+        "reason": "The transaction describes purchasing tea, beverages, and refreshments for immediate consumption/use in the business. This is an operating expense, not an asset acquisition. The initial debit tuple incorrectly classified this as an asset increase (1,0,0,0,0,0). The correct treatment is to debit expense increase. The credit tuple showing liability increase (1,0,0,0,0,0) is consistent with the corporate credit card creating a payable. Corrected debit to (0,0,1,0,0,0) - expense increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes purchasing tea, beverages, and refreshments for immediate consumption/use in the business. This is an operating expense, not an asset acquisition. The initial debit tuple incorrectly classified this as an asset increase (1,0,0,0,0,0). The correct treatment is to debit expense increase. The credit tuple showing liability increase (1,0,0,0,0,0) is consistent with the corporate credit card creating a payable. Corrected debit to (0,0,1,0,0,0) - expense increase."
+    },
+    "credit_corrector": {
+      "input_tokens": 682,
+      "output_tokens": 256,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2334,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063816,
+      "raw_cost_usd": 0.010842,
+      "output": {
+        "reason": "The transaction involves purchasing supplies (tea, beverages, refreshments) for $1,320 paid by corporate credit card. This creates two accounting effects: (1) an expense increase for the supplies purchased (debit to expense), and (2) a liability increase for the credit card payable (credit to liability). The initial credit tuple correctly shows (1,0,0,0,0,0) = one liability increase line, which represents the credit card payable. The debit tuple shows (1,0,0,0,0,0) = one asset increase, which appears incorrect - it should be (0,0,1,0,0,0) for an expense increase since these are consumable supplies, not inventory for resale. However, my role is only to review the credit tuple. The credit side is correctly classified as a liability increase (credit card payable). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing supplies (tea, beverages, refreshments) for $1,320 paid by corporate credit card. This creates two accounting effects: (1) an expense increase for the supplies purchased (debit to expense), and (2) a liability increase for the credit card payable (credit to liability). The initial credit tuple correctly shows (1,0,0,0,0,0) = one liability increase line, which represents the credit card payable. The debit tuple shows (1,0,0,0,0,0) = one asset increase, which appears incorrect - it should be (0,0,1,0,0,0) for an expense increase since these are consumable supplies, not inventory for resale. However, my role is only to review the credit tuple. The credit side is correctly classified as a liability increase (credit card payable). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1048,
+      "output_tokens": 414,
+      "cache_read_tokens": 2663,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3711,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0101529,
+      "raw_cost_usd": 0.017343,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Tea, beverages, and refreshments purchased from grocery store",
+        "rationale": "INCOMPLETE_INFORMATION: The transaction describes a $1,200 purchase of tea, beverages, and refreshments from a grocery store, but the business purpose is not specified. This is a critical ambiguity because different purposes map to structurally different journal entries: (1) Office supplies for employee consumption would be Office Supplies Expense or General Office Expense; (2) Client meeting refreshments would be Entertainment Expense or Hospitality Expense; (3) Resale inventory would be Inventory (asset account), not an expense; (4) Event catering supplies would be Marketing Expense or Event Expense. The disambiguator correctly identified that without knowing the intended use, we cannot determine the correct account classification. The relatively large amount ($1,200) and the generic nature of the items (tea, beverages, refreshments) do not provide sufficient context to make a reasonable assumption. This is not a case of being unsure about accounting treatment\u2014the accounting treatment is clear once we know the purpose\u2014but rather missing a business fact that only the transaction initiator would know.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "What was the business purpose of purchasing these tea, beverages, and refreshments? (e.g., office supplies for employee consumption, client meeting refreshments, resale inventory, event catering supplies, etc.)"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "What was the business purpose of purchasing these tea, beverages, and refreshments? (e.g., office supplies for employee consumption, client meeting refreshments, resale inventory, event catering supplies, etc.)"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of tea, beverages, and refreshments purchase",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Office supplies for employee consumption (general office expense)",
+              "Client meeting refreshments (entertainment/hospitality expense)",
+              "Resale inventory (cost of goods sold)",
+              "Event catering supplies (marketing/event expense)"
+            ],
+            "clarification_question": "What was the business purpose of purchasing these tea, beverages, and refreshments?",
+            "why_entry_differs": "Each purpose maps to a different account: office expense vs entertainment expense vs inventory (asset) vs marketing expense, which affects both the account classification and potential tax treatment",
+            "why_not_resolved": "The transaction describes only the items purchased (tea, beverages, refreshments) without indicating their intended use. 'General' business type does not narrow the purpose. The relatively large amount ($1,200) could support any of these interpretations, and there is no standard accounting convention that defaults grocery purchases to a specific purpose without additional context."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Purchase of tea, beverages, and refreshments creates 1 asset increase (inventory or supplies). The sales tax is also capitalized into the asset cost. Payment by credit card is a credit-side entry (liability increase) and does not affect the debit classification.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Payment made by corporate credit card creates a liability increase (credit card payable). The credit card balance owed increases by $1,320.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes purchasing tea, beverages, and refreshments for immediate consumption/use in the business. This is an operating expense, not an asset acquisition. The initial debit tuple incorrectly classified this as an asset increase (1,0,0,0,0,0). The correct treatment is to debit expense increase. The credit tuple showing liability increase (1,0,0,0,0,0) is consistent with the corporate credit card creating a payable. Corrected debit to (0,0,1,0,0,0) - expense increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves purchasing supplies (tea, beverages, refreshments) for $1,320 paid by corporate credit card. This creates two accounting effects: (1) an expense increase for the supplies purchased (debit to expense), and (2) a liability increase for the credit card payable (credit to liability). The initial credit tuple correctly shows (1,0,0,0,0,0) = one liability increase line, which represents the credit card payable. The debit tuple shows (1,0,0,0,0,0) = one asset increase, which appears incorrect - it should be (0,0,1,0,0,0) for an expense increase since these are consumable supplies, not inventory for resale. However, my role is only to review the credit tuple. The credit side is correctly classified as a liability increase (credit card payable). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Tea, beverages, and refreshments purchased from grocery store",
+        "rationale": "INCOMPLETE_INFORMATION: The transaction describes a $1,200 purchase of tea, beverages, and refreshments from a grocery store, but the business purpose is not specified. This is a critical ambiguity because different purposes map to structurally different journal entries: (1) Office supplies for employee consumption would be Office Supplies Expense or General Office Expense; (2) Client meeting refreshments would be Entertainment Expense or Hospitality Expense; (3) Resale inventory would be Inventory (asset account), not an expense; (4) Event catering supplies would be Marketing Expense or Event Expense. The disambiguator correctly identified that without knowing the intended use, we cannot determine the correct account classification. The relatively large amount ($1,200) and the generic nature of the items (tea, beverages, refreshments) do not provide sufficient context to make a reasonable assumption. This is not a case of being unsure about accounting treatment\u2014the accounting treatment is clear once we know the purpose\u2014but rather missing a business fact that only the transaction initiator would know.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "What was the business purpose of purchasing these tea, beverages, and refreshments? (e.g., office supplies for employee consumption, client meeting refreshments, resale inventory, event catering supplies, etc.)"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 539,
+        "output_tokens": 281,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 512,
+        "output_tokens": 94,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 514,
+        "output_tokens": 121,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 682,
+        "output_tokens": 188,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 682,
+        "output_tokens": 256,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1048,
+        "output_tokens": 414,
+        "input_token_details": {
+          "cache_read": 2663,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,349 @@
+{
+  "test_case_id": "basic_02_inventory_on_account",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase inventory on account",
+    "rationale": "Inventory is acquired as an asset (not expensed immediately per IFRS) since it will be held for resale. The purchase on account creates an accounts payable liability. No tax information was provided, so no tax lines are added. Debit tuple (1,0,0,0,0,0) indicates one asset increase line; credit tuple (1,0,0,0,0,0) indicates one liability increase line.",
+    "lines": [
+      {
+        "account_name": "Inventory",
+        "type": "debit",
+        "amount": 300.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 300.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0243873,
+  "raw_cost_usd": 0.046287,
+  "total_latency_ms": 16127,
+  "total_input_tokens": 11149,
+  "total_output_tokens": 856,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 482,
+      "output_tokens": 113,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1644,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034896,
+      "raw_cost_usd": 0.006627,
+      "output": {
+        "reason": "Inventory purchase = asset increase. The inventory account (an asset) is debited to increase its balance. The \"on account\" indicates a credit to accounts payable (liability increase), but we only classify the debit side here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Inventory purchase = asset increase. The inventory account (an asset) is debited to increase its balance. The \"on account\" indicates a credit to accounts payable (liability increase), but we only classify the debit side here."
+    },
+    "credit_classifier": {
+      "input_tokens": 480,
+      "output_tokens": 106,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1621,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033723000000000004,
+      "raw_cost_usd": 0.006453,
+      "output": {
+        "reason": "Purchasing inventory on account means we acquire inventory (asset increase on debit side) and create an accounts payable (liability increase on credit side). The credit is to accounts payable = liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Purchasing inventory on account means we acquire inventory (asset increase on debit side) and create an accounts payable (liability increase on credit side). The credit is to accounts payable = liability increase."
+    },
+    "credit_corrector": {
+      "input_tokens": 650,
+      "output_tokens": 180,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2302,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051456,
+      "raw_cost_usd": 0.009606,
+      "output": {
+        "reason": "Transaction is \"Purchase inventory $300 on account\". This means: (1) Inventory (an asset) increases, and (2) Accounts Payable (a liability) increases. Debit tuple shows (1,0,0,0,0,0) = one asset increase, which correctly represents the inventory increase. Credit side should show the liability increase from accounts payable, which is slot a = liability increase. The initial credit tuple (1,0,0,0,0,0) correctly represents this. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Transaction is \"Purchase inventory $300 on account\". This means: (1) Inventory (an asset) increases, and (2) Accounts Payable (a liability) increases. Debit tuple shows (1,0,0,0,0,0) = one asset increase, which correctly represents the inventory increase. Credit side should show the liability increase from accounts payable, which is slot a = liability increase. The initial credit tuple (1,0,0,0,0,0) correctly represents this. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 650,
+      "output_tokens": 179,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2294,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005128199999999999,
+      "raw_cost_usd": 0.009567,
+      "output": {
+        "reason": "The transaction is a purchase of inventory on account. Under IFRS, inventory is an asset. Purchasing inventory increases the asset account (debit to Inventory). The \"on account\" means accounts payable increases (credit to Accounts Payable/liability). The initial debit tuple (1,0,0,0,0,0) correctly records one asset increase. The credit tuple (1,0,0,0,0,0) correctly records one liability increase. Both sides are consistent with proper accounting treatment. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a purchase of inventory on account. Under IFRS, inventory is an asset. Purchasing inventory increases the asset account (debit to Inventory). The \"on account\" means accounts payable increases (credit to Accounts Payable/liability). The initial debit tuple (1,0,0,0,0,0) correctly records one asset increase. The credit tuple (1,0,0,0,0,0) correctly records one liability increase. Both sides are consistent with proper accounting treatment. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 776,
+      "output_tokens": 278,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3288,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0072516,
+      "raw_cost_usd": 0.014034,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase inventory on account",
+        "rationale": "Inventory is acquired as an asset (not expensed immediately per IFRS) since it will be held for resale. The purchase on account creates an accounts payable liability. No tax information was provided, so no tax lines are added. Debit tuple (1,0,0,0,0,0) indicates one asset increase line; credit tuple (1,0,0,0,0,0) indicates one liability increase line.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 300.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Inventory purchase = asset increase. The inventory account (an asset) is debited to increase its balance. The \"on account\" indicates a credit to accounts payable (liability increase), but we only classify the debit side here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Purchasing inventory on account means we acquire inventory (asset increase on debit side) and create an accounts payable (liability increase on credit side). The credit is to accounts payable = liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is a purchase of inventory on account. Under IFRS, inventory is an asset. Purchasing inventory increases the asset account (debit to Inventory). The \"on account\" means accounts payable increases (credit to Accounts Payable/liability). The initial debit tuple (1,0,0,0,0,0) correctly records one asset increase. The credit tuple (1,0,0,0,0,0) correctly records one liability increase. Both sides are consistent with proper accounting treatment. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Transaction is \"Purchase inventory $300 on account\". This means: (1) Inventory (an asset) increases, and (2) Accounts Payable (a liability) increases. Debit tuple shows (1,0,0,0,0,0) = one asset increase, which correctly represents the inventory increase. Credit side should show the liability increase from accounts payable, which is slot a = liability increase. The initial credit tuple (1,0,0,0,0,0) correctly represents this. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase inventory on account",
+        "rationale": "Inventory is acquired as an asset (not expensed immediately per IFRS) since it will be held for resale. The purchase on account creates an accounts payable liability. No tax information was provided, so no tax lines are added. Debit tuple (1,0,0,0,0,0) indicates one asset increase line; credit tuple (1,0,0,0,0,0) indicates one liability increase line.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 300.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 482,
+        "output_tokens": 113,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 480,
+        "output_tokens": 106,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 650,
+        "output_tokens": 180,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 650,
+        "output_tokens": 179,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 776,
+        "output_tokens": 278,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

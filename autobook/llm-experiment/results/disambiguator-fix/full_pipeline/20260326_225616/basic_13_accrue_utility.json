@@ -1,0 +1,411 @@
+{
+  "test_case_id": "basic_13_accrue_utility",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Accrue utility bill expense",
+    "rationale": "Recording utility expense incurred but not yet paid. Debit Utilities Expense (expense increase, slot c=1) to recognize the cost of utilities consumed during the period. Credit Accounts Payable (liability increase, slot a=1) to record the obligation to pay the utility provider. This accrual follows the matching principle under IFRS, recognizing expenses in the period they are incurred regardless of payment timing. No tax is applicable as utility bills typically include embedded taxes already charged by the provider (not a taxable supply to the business).",
+    "lines": [
+      {
+        "account_name": "Utilities Expense",
+        "type": "debit",
+        "amount": 50.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 50.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0348267,
+  "raw_cost_usd": 0.065361,
+  "total_latency_ms": 21066,
+  "total_input_tokens": 16312,
+  "total_output_tokens": 1095,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 509,
+      "output_tokens": 35,
+      "cache_read_tokens": 1812,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2321,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0025956,
+      "raw_cost_usd": 0.007488,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 481,
+      "output_tokens": 106,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1622,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033753000000000003,
+      "raw_cost_usd": 0.006456,
+      "output": {
+        "reason": "Accruing a utility bill means recording an expense and a corresponding liability (accounts payable). On the credit side, we record the liability increase (utilities payable). This is a liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Accruing a utility bill means recording an expense and a corresponding liability (accounts payable). On the credit side, we record the liability increase (utilities payable). This is a liability increase."
+    },
+    "debit_classifier": {
+      "input_tokens": 483,
+      "output_tokens": 118,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1645,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035675999999999998,
+      "raw_cost_usd": 0.006705,
+      "output": {
+        "reason": "Accruing a utility bill recognizes the utility expense that has been incurred. The debit side records an expense increase (utilities expense). The credit side (handled separately) would record a liability increase (accounts payable/accrued expenses).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Accruing a utility bill recognizes the utility expense that has been incurred. The debit side records an expense increase (utilities expense). The credit side (handled separately) would record a liability increase (accounts payable/accrued expenses)."
+    },
+    "credit_corrector": {
+      "input_tokens": 651,
+      "output_tokens": 160,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2303,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004848600000000001,
+      "raw_cost_usd": 0.009309,
+      "output": {
+        "reason": "The transaction \"Accrue $50 utility bill\" means recording an expense that has been incurred but not yet paid. The debit side correctly records an expense increase (c=1). The credit side should record a liability increase (accounts payable/accrued expenses), which is exactly what the initial credit tuple shows (a=1). The two sides tell a consistent story: debit expense (increase), credit liability (increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Accrue $50 utility bill\" means recording an expense that has been incurred but not yet paid. The debit side correctly records an expense increase (c=1). The credit side should record a liability increase (accounts payable/accrued expenses), which is exactly what the initial credit tuple shows (a=1). The two sides tell a consistent story: debit expense (increase), credit liability (increase). No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 651,
+      "output_tokens": 236,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2295,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059862,
+      "raw_cost_usd": 0.010425,
+      "output": {
+        "reason": "The transaction \"Accrue $50 utility bill\" means recognizing an expense that has been incurred but not yet paid. Under IFRS, this requires:\n- Debit: Utility Expense (expense increase) \n- Credit: Utilities Payable (liability increase)\n\nThe initial debit tuple (0,0,1,0,0,0) correctly shows one expense increase (slot c=1), which is appropriate for accruing a utility expense.\n\nThe credit tuple (1,0,0,0,0,0) shows one liability increase (slot a=1), which is also correct - the company now owes the utility company.\n\nThe two sides tell a consistent story: the business is recognizing an expense and a corresponding payable. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Accrue $50 utility bill\" means recognizing an expense that has been incurred but not yet paid. Under IFRS, this requires:\n- Debit: Utility Expense (expense increase) \n- Credit: Utilities Payable (liability increase)\n\nThe initial debit tuple (0,0,1,0,0,0) correctly shows one expense increase (slot c=1), which is appropriate for accruing a utility expense.\n\nThe credit tuple (1,0,0,0,0,0) shows one liability increase (slot a=1), which is also correct - the company now owes the utility company.\n\nThe two sides tell a consistent story: the business is recognizing an expense and a corresponding payable. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 660,
+      "output_tokens": 286,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3172,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0070236000000000005,
+      "raw_cost_usd": 0.013806,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Accrue utility bill expense",
+        "rationale": "Recording utility expense incurred but not yet paid. Debit Utilities Expense (expense increase, slot c=1) to recognize the cost of utilities consumed during the period. Credit Accounts Payable (liability increase, slot a=1) to record the obligation to pay the utility provider. This accrual follows the matching principle under IFRS, recognizing expenses in the period they are incurred regardless of payment timing. No tax is applicable as utility bills typically include embedded taxes already charged by the provider (not a taxable supply to the business).",
+        "lines": [
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 50.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 50.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1568,
+      "output_tokens": 154,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2954,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0074298,
+      "raw_cost_usd": 0.011172,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records utility expense accrual. Debits Utilities Expense $50 (expense increase), credits Accounts Payable $50 (liability increase). Balance verified (debits = credits). Follows matching principle under IFRS by recognizing expense in period incurred. No tax lines needed as utility bills typically contain embedded taxes. Amounts match transaction text. All necessary lines present."
+      },
+      "reason": "Entry correctly records utility expense accrual. Debits Utilities Expense $50 (expense increase), credits Accounts Payable $50 (liability increase). Balance verified (debits = credits). Follows matching principle under IFRS by recognizing expense in period incurred. No tax lines needed as utility bills typically contain embedded taxes. Amounts match transaction text. All necessary lines present."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Accruing a utility bill recognizes the utility expense that has been incurred. The debit side records an expense increase (utilities expense). The credit side (handled separately) would record a liability increase (accounts payable/accrued expenses).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Accruing a utility bill means recording an expense and a corresponding liability (accounts payable). On the credit side, we record the liability increase (utilities payable). This is a liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction \"Accrue $50 utility bill\" means recognizing an expense that has been incurred but not yet paid. Under IFRS, this requires:\n- Debit: Utility Expense (expense increase) \n- Credit: Utilities Payable (liability increase)\n\nThe initial debit tuple (0,0,1,0,0,0) correctly shows one expense increase (slot c=1), which is appropriate for accruing a utility expense.\n\nThe credit tuple (1,0,0,0,0,0) shows one liability increase (slot a=1), which is also correct - the company now owes the utility company.\n\nThe two sides tell a consistent story: the business is recognizing an expense and a corresponding payable. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction \"Accrue $50 utility bill\" means recording an expense that has been incurred but not yet paid. The debit side correctly records an expense increase (c=1). The credit side should record a liability increase (accounts payable/accrued expenses), which is exactly what the initial credit tuple shows (a=1). The two sides tell a consistent story: debit expense (increase), credit liability (increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Accrue utility bill expense",
+        "rationale": "Recording utility expense incurred but not yet paid. Debit Utilities Expense (expense increase, slot c=1) to recognize the cost of utilities consumed during the period. Credit Accounts Payable (liability increase, slot a=1) to record the obligation to pay the utility provider. This accrual follows the matching principle under IFRS, recognizing expenses in the period they are incurred regardless of payment timing. No tax is applicable as utility bills typically include embedded taxes already charged by the provider (not a taxable supply to the business).",
+        "lines": [
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 50.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 50.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records utility expense accrual. Debits Utilities Expense $50 (expense increase), credits Accounts Payable $50 (liability increase). Balance verified (debits = credits). Follows matching principle under IFRS by recognizing expense in period incurred. No tax lines needed as utility bills typically contain embedded taxes. Amounts match transaction text. All necessary lines present."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 509,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 1812,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 481,
+        "output_tokens": 106,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 483,
+        "output_tokens": 118,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 651,
+        "output_tokens": 160,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 651,
+        "output_tokens": 236,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 660,
+        "output_tokens": 286,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1568,
+        "output_tokens": 154,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

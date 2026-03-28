@@ -1,0 +1,23 @@
+experiment_name: a4p3-rl-baseline
+nanochat_ref: a4-p2
+gpu: H100
+timeout_hours: 24
+data_shards: -1
+data_workers: 8
+
+train:
+  - name: rl_baseline
+    args:
+      script: scripts.chat_rl
+      init_from_source: sft
+      init_from_tag: a4p2-sft-metamath-swiglu
+      init_from_step: 24633
+      model_tag: a4p3-rl-baseline
+      model_step: 24633
+      run: a4p3-rl-baseline
+
+eval:
+  - checkpoint: a4p3-rl-baseline
+    after_stage: rl_baseline
+    evals: [custom]
+    custom_eval: p3/evals/gsm8k_eval_rl.py

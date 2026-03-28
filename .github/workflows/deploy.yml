@@ -1,54 +1,172 @@
-name: Deploy Autobook API
+name: Deploy Autobook
 
 on:
   push:
-    branches: [main]
+    branches: [autobook]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deploy target"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - prod
 
 env:
   AWS_REGION: ca-central-1
-  ENV: ${{ vars.ENV }}
-  CLUSTER: ${{ vars.CLUSTER_NAME_PREFIX }}-${{ vars.ENV }}
-  SERVICE: ${{ vars.SERVICE_NAME_PREFIX }}-${{ vars.ENV }}
 
 jobs:
-  deploy:
+  # ── Detect which services changed ──────────────────────────────
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.detect.outputs.api }}
+      workers: ${{ steps.detect.outputs.workers }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed services
+        id: detect
+        run: |
+          ENVIRONMENT="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'dev' }}"
+          DEPLOY_TAG="deployed/${ENVIRONMENT}"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "api=true" >> $GITHUB_OUTPUT
+            echo 'workers=["normalizer","precedent","ml_inference","agent","resolution","posting","flywheel"]' >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Diff against last successful deploy tag; deploy everything on first run
+          if git rev-parse "${DEPLOY_TAG}" >/dev/null 2>&1; then
+            CHANGED=$(git diff --name-only "${DEPLOY_TAG}" HEAD)
+          else
+            echo "::notice::No ${DEPLOY_TAG} tag found — deploying everything"
+            echo "api=true" >> $GITHUB_OUTPUT
+            echo 'workers=["normalizer","precedent","ml_inference","agent","resolution","posting","flywheel"]' >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Check if shared code changed — triggers all services
+          SHARED_PATTERNS=(
+            "autobook/backend/config.py"
+            "autobook/backend/auth/"
+            "autobook/backend/db/"
+            "autobook/backend/queues/"
+            "autobook/backend/cache/"
+            "autobook/backend/utils/"
+            "autobook/backend/schemas/"
+            "autobook/backend/local_identity.py"
+            "autobook/backend/accounting_engine/"
+            "autobook/backend/services/shared/"
+            "autobook/pyproject.toml"
+            "autobook/uv.lock"
+            "autobook/Dockerfile"
+          )
+
+          SHARED_CHANGED=false
+          for pattern in "${SHARED_PATTERNS[@]}"; do
+            if echo "$CHANGED" | grep -q "^${pattern}"; then
+              SHARED_CHANGED=true
+              break
+            fi
+          done
+
+          API_CHANGED=false
+          if [ "$SHARED_CHANGED" = "true" ]; then
+            API_CHANGED=true
+          elif echo "$CHANGED" | grep -q "^autobook/backend/api/"; then
+            API_CHANGED=true
+          fi
+
+          # Detect changed workers
+          WORKERS=()
+          declare -A SERVICE_PATHS=(
+            ["normalizer"]="autobook/backend/services/normalizer/"
+            ["precedent"]="autobook/backend/services/precedent/"
+            ["ml_inference"]="autobook/backend/services/ml_inference/"
+            ["agent"]="autobook/backend/services/agent/"
+            ["resolution"]="autobook/backend/services/resolution/"
+            ["posting"]="autobook/backend/services/posting/"
+            ["flywheel"]="autobook/backend/services/flywheel/"
+          )
+
+          if [ "$SHARED_CHANGED" = "true" ]; then
+            # Shared code changed — all workers need redeployment
+            WORKERS=("\"normalizer\"" "\"precedent\"" "\"ml_inference\"" "\"agent\"" "\"resolution\"" "\"posting\"" "\"flywheel\"")
+          else
+            for svc in "${!SERVICE_PATHS[@]}"; do
+              if echo "$CHANGED" | grep -q "^${SERVICE_PATHS[$svc]}"; then
+                WORKERS+=("\"$svc\"")
+              fi
+            done
+          fi
+
+          echo "api=${API_CHANGED}" >> $GITHUB_OUTPUT
+
+          if [ ${#WORKERS[@]} -eq 0 ]; then
+            echo 'workers=[]' >> $GITHUB_OUTPUT
+          else
+            JOINED=$(IFS=,; echo "${WORKERS[*]}")
+            echo "workers=[${JOINED}]" >> $GITHUB_OUTPUT
+          fi
+
+  # ── Deploy API (Docker → ECR → ECS) ──────────────────────────
+  deploy-api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
 
+    env:
+      ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'dev' }}
+
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set deploy variables
+        run: |
+          echo "CLUSTER=autobook-${ENVIRONMENT}" >> $GITHUB_ENV
+          echo "SERVICE_NAME=autobook-${ENVIRONMENT}-api" >> $GITHUB_ENV
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/autobook-${{ env.ENVIRONMENT }}-github-actions
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set variables
-        run: |
-          echo "ECR_REPO=${{ steps.ecr-login.outputs.registry }}/${{ env.SERVICE }}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
-
       - name: Build and push
         run: |
+          ECR_REPO="${{ steps.ecr-login.outputs.registry }}/${SERVICE_NAME}"
+          IMAGE_TAG="${{ github.sha }}"
+
           docker build \
             -f autobook/Dockerfile \
+            --target autobook-api \
             -t $ECR_REPO:$IMAGE_TAG \
             -t $ECR_REPO:latest \
             autobook/
+
           docker push $ECR_REPO:$IMAGE_TAG
           docker push $ECR_REPO:latest
+
+          echo "ECR_REPO=$ECR_REPO" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Register new task definition revision
         run: |
           TASK_DEF=$(aws ecs describe-task-definition \
-            --task-definition ${{ env.SERVICE }} \
+            --task-definition $SERVICE_NAME \
             --query 'taskDefinition')
 
           NEW_TASK_DEF=$(echo $TASK_DEF | jq \
@@ -68,24 +186,108 @@ jobs:
       - name: Deploy to ECS
         run: |
           aws ecs update-service \
-            --cluster ${{ env.CLUSTER }} \
-            --service ${{ env.SERVICE }} \
-            --task-definition $NEW_TASK_DEF_ARN
+            --cluster $CLUSTER \
+            --service $SERVICE_NAME \
+            --task-definition $NEW_TASK_DEF_ARN \
+            --desired-count 1
 
       - name: Wait for deployment
         run: |
           aws ecs wait services-stable \
-            --cluster ${{ env.CLUSTER }} \
-            --services ${{ env.SERVICE }}
+            --cluster $CLUSTER \
+            --services $SERVICE_NAME
 
       - name: Verify deployment
         run: |
           DEPLOYED=$(aws ecs describe-services \
-            --cluster ${{ env.CLUSTER }} \
-            --services ${{ env.SERVICE }} \
+            --cluster $CLUSTER \
+            --services $SERVICE_NAME \
             --query 'services[0].deployments[?status==`PRIMARY`].taskDefinition' \
             --output text)
           if [[ "$DEPLOYED" != "$NEW_TASK_DEF_ARN" ]]; then
-            echo "::error::Deploy rolled back by circuit breaker"
+            echo "::error::Deploy of api rolled back by circuit breaker"
             exit 1
           fi
+
+  # ── Deploy Workers (Docker → ECR → Lambda) ────────────────────
+  deploy-workers:
+    needs: changes
+    if: needs.changes.outputs.workers != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.changes.outputs.workers) }}
+
+    env:
+      ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'dev' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/autobook-${{ env.ENVIRONMENT }}-github-actions
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push worker image
+        run: |
+          # Map service name to Dockerfile target (hyphens, not underscores)
+          declare -A TARGET_MAP=(
+            ["normalizer"]="autobook-normalizer"
+            ["precedent"]="autobook-precedent"
+            ["ml_inference"]="autobook-ml-inference"
+            ["agent"]="autobook-agent"
+            ["resolution"]="autobook-resolution"
+            ["posting"]="autobook-posting"
+            ["flywheel"]="autobook-flywheel"
+          )
+
+          TARGET="${TARGET_MAP[${{ matrix.service }}]}"
+          ECR_REPO="${{ steps.ecr-login.outputs.registry }}/autobook-${ENVIRONMENT}-${{ matrix.service }}"
+          IMAGE_TAG="${{ github.sha }}"
+
+          docker build \
+            -f autobook/Dockerfile \
+            --target "$TARGET" \
+            -t "$ECR_REPO:$IMAGE_TAG" \
+            -t "$ECR_REPO:latest" \
+            autobook/
+
+          docker push "$ECR_REPO:$IMAGE_TAG"
+          docker push "$ECR_REPO:latest"
+
+          echo "ECR_REPO=$ECR_REPO" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Deploy to Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name autobook-${ENVIRONMENT}-${{ matrix.service }} \
+            --image-uri "$ECR_REPO:$IMAGE_TAG"
+
+  # ── Tag successful deploy ──────────────────────────────────────
+  tag-deployed:
+    needs: [changes, deploy-api, deploy-workers]
+    if: always() && !failure() && !cancelled()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update deployed tag
+        run: |
+          ENVIRONMENT="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'dev' }}"
+          DEPLOY_TAG="deployed/${ENVIRONMENT}"
+          git tag -f "${DEPLOY_TAG}"
+          git push origin "${DEPLOY_TAG}" --force

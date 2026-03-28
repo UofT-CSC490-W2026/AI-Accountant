@@ -1,0 +1,349 @@
+{
+  "test_case_id": "int_hard_32a_grocery_entertainment",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Grocery store purchase of tea, beverages, and refreshments for client entertainment, paid by corporate credit card",
+    "rationale": "Client entertainment expenses are operating expenses under IFRS. The $1,200 base amount is debited to Meals and Entertainment Expense (or Client Entertainment Expense). The 10% sales tax ($120) is included in the total cost since groceries (tea, beverages, refreshments) are typically tax-exempt in Canada for basic items, but the transaction explicitly states 10% sales tax was charged, suggesting these are prepared/specialty items that are taxable. Since no HST/GST breakdown is provided and the tax appears to be a combined rate, the full $1,320 is treated as the expense amount. The corporate credit card creates a liability (Credit Card Payable). Tuple guidance: 1 expense debit, 1 liability credit - matches the transaction structure.",
+    "lines": [
+      {
+        "account_name": "Meals and Entertainment Expense",
+        "type": "debit",
+        "amount": 1320.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 1320.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0280902,
+  "raw_cost_usd": 0.050241,
+  "total_latency_ms": 23907,
+  "total_input_tokens": 11442,
+  "total_output_tokens": 1061,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 521,
+      "output_tokens": 105,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1683,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034866,
+      "raw_cost_usd": 0.006624,
+      "output": {
+        "reason": "Client entertainment expenses (tea, beverages, refreshments) = expense increase. The sales tax is also part of the expense. This is a single debit line for entertainment/hospitality expense.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Client entertainment expenses (tea, beverages, refreshments) = expense increase. The sales tax is also part of the expense. This is a single debit line for entertainment/hospitality expense."
+    },
+    "credit_classifier": {
+      "input_tokens": 519,
+      "output_tokens": 116,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1660,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036393000000000003,
+      "raw_cost_usd": 0.00672,
+      "output": {
+        "reason": "The transaction involves two credit lines: (1) Sales tax payable increases by $120 = liability increase, and (2) Corporate credit card payable increases by $1,320 = liability increase. Total: 2 liability increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves two credit lines: (1) Sales tax payable increases by $120 = liability increase, and (2) Corporate credit card payable increases by $1,320 = liability increase. Total: 2 liability increases."
+    },
+    "debit_corrector": {
+      "input_tokens": 689,
+      "output_tokens": 230,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2333,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.006010199999999999,
+      "raw_cost_usd": 0.010449,
+      "output": {
+        "reason": "The transaction describes purchasing tea, beverages, and refreshments for client entertainment, paid by corporate credit card. Under IFRS, client entertainment costs are operating expenses (entertainment expense or meals & entertainment expense). The debit side correctly records 1 expense increase (slot c). The credit side shows 2 liability increases (slot a), which is consistent: one for the credit card payable ($1,320) and potentially one for the sales tax payable if recorded separately, though typically both would be combined into accounts payable/credit card payable. The slight tension in line count (1 debit line vs 2 credit lines) is acceptable as the system allows independent line counts. The debit classification is correct - this is an expense increase, not an asset. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes purchasing tea, beverages, and refreshments for client entertainment, paid by corporate credit card. Under IFRS, client entertainment costs are operating expenses (entertainment expense or meals & entertainment expense). The debit side correctly records 1 expense increase (slot c). The credit side shows 2 liability increases (slot a), which is consistent: one for the credit card payable ($1,320) and potentially one for the sales tax payable if recorded separately, though typically both would be combined into accounts payable/credit card payable. The slight tension in line count (1 debit line vs 2 credit lines) is acceptable as the system allows independent line counts. The debit classification is correct - this is an expense increase, not an asset. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 689,
+      "output_tokens": 234,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2341,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0060726,
+      "raw_cost_usd": 0.010533,
+      "output": {
+        "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates:\n1. Debit: Entertainment expense increase (1 line) - correctly shown in debit tuple as (0,0,1,0,0,0)\n2. Credit: Credit card liability increase (1 line) - should be (1,0,0,0,0,0)\n\nThe initial credit tuple of (2,0,0,0,0,0) shows 2 liability increases, which is incorrect. When paying by corporate credit card, there is only ONE credit entry: the increase in the credit card payable liability. The initial classifier appears to have double-counted the liability or incorrectly split the transaction. The correct credit tuple should show 1 liability increase only.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates:\n1. Debit: Entertainment expense increase (1 line) - correctly shown in debit tuple as (0,0,1,0,0,0)\n2. Credit: Credit card liability increase (1 line) - should be (1,0,0,0,0,0)\n\nThe initial credit tuple of (2,0,0,0,0,0) shows 2 liability increases, which is incorrect. When paying by corporate credit card, there is only ONE credit entry: the increase in the credit card payable liability. The initial classifier appears to have double-counted the liability or incorrectly split the transaction. The correct credit tuple should show 1 liability increase only."
+    },
+    "entry_builder": {
+      "input_tokens": 820,
+      "output_tokens": 376,
+      "cache_read_tokens": 2605,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3425,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0088815,
+      "raw_cost_usd": 0.015915,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Grocery store purchase of tea, beverages, and refreshments for client entertainment, paid by corporate credit card",
+        "rationale": "Client entertainment expenses are operating expenses under IFRS. The $1,200 base amount is debited to Meals and Entertainment Expense (or Client Entertainment Expense). The 10% sales tax ($120) is included in the total cost since groceries (tea, beverages, refreshments) are typically tax-exempt in Canada for basic items, but the transaction explicitly states 10% sales tax was charged, suggesting these are prepared/specialty items that are taxable. Since no HST/GST breakdown is provided and the tax appears to be a combined rate, the full $1,320 is treated as the expense amount. The corporate credit card creates a liability (Credit Card Payable). Tuple guidance: 1 expense debit, 1 liability credit - matches the transaction structure.",
+        "lines": [
+          {
+            "account_name": "Meals and Entertainment Expense",
+            "type": "debit",
+            "amount": 1320.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Client entertainment expenses (tea, beverages, refreshments) = expense increase. The sales tax is also part of the expense. This is a single debit line for entertainment/hospitality expense.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction involves two credit lines: (1) Sales tax payable increases by $120 = liability increase, and (2) Corporate credit card payable increases by $1,320 = liability increase. Total: 2 liability increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes purchasing tea, beverages, and refreshments for client entertainment, paid by corporate credit card. Under IFRS, client entertainment costs are operating expenses (entertainment expense or meals & entertainment expense). The debit side correctly records 1 expense increase (slot c). The credit side shows 2 liability increases (slot a), which is consistent: one for the credit card payable ($1,320) and potentially one for the sales tax payable if recorded separately, though typically both would be combined into accounts payable/credit card payable. The slight tension in line count (1 debit line vs 2 credit lines) is acceptable as the system allows independent line counts. The debit classification is correct - this is an expense increase, not an asset. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates:\n1. Debit: Entertainment expense increase (1 line) - correctly shown in debit tuple as (0,0,1,0,0,0)\n2. Credit: Credit card liability increase (1 line) - should be (1,0,0,0,0,0)\n\nThe initial credit tuple of (2,0,0,0,0,0) shows 2 liability increases, which is incorrect. When paying by corporate credit card, there is only ONE credit entry: the increase in the credit card payable liability. The initial classifier appears to have double-counted the liability or incorrectly split the transaction. The correct credit tuple should show 1 liability increase only.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Grocery store purchase of tea, beverages, and refreshments for client entertainment, paid by corporate credit card",
+        "rationale": "Client entertainment expenses are operating expenses under IFRS. The $1,200 base amount is debited to Meals and Entertainment Expense (or Client Entertainment Expense). The 10% sales tax ($120) is included in the total cost since groceries (tea, beverages, refreshments) are typically tax-exempt in Canada for basic items, but the transaction explicitly states 10% sales tax was charged, suggesting these are prepared/specialty items that are taxable. Since no HST/GST breakdown is provided and the tax appears to be a combined rate, the full $1,320 is treated as the expense amount. The corporate credit card creates a liability (Credit Card Payable). Tuple guidance: 1 expense debit, 1 liability credit - matches the transaction structure.",
+        "lines": [
+          {
+            "account_name": "Meals and Entertainment Expense",
+            "type": "debit",
+            "amount": 1320.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 105,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 519,
+        "output_tokens": 116,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 230,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 234,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 820,
+        "output_tokens": 376,
+        "input_token_details": {
+          "cache_read": 2605,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

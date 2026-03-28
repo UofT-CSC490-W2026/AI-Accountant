@@ -1,0 +1,31 @@
+experiment_name: a4p2-sft-altmix-smoke
+nanochat_ref: a4-p2
+gpu: H100
+timeout_hours: 1
+data_shards: 1
+data_workers: 2
+
+train:
+  - name: sft_altmix_smoke
+    args:
+      script: scripts.chat_sft
+      init_from_source: base
+      init_from_tag: nano-swiglu-fp8-full
+      init_from_step: 4357
+      model_tag: a4p2-sft-altmix-smoke-swiglu-v1
+      model_step: 4357
+      load_optimizer: 0
+      num_iterations: 40
+      device_batch_size: 8
+      total_batch_size: 4096
+      eval_every: -1
+      chatcore_every: -1
+      mmlu_epochs: 5
+      gsm8k_epochs: 8
+      run: a4p2-sft-altmix-smoke
+
+eval:
+  - checkpoint: a4p2-sft-altmix-smoke-swiglu-v1
+    after_stage: sft_altmix_smoke
+    evals: [custom]
+    custom_eval: p2/evals/gsm8k_eval_sft_smoke.py

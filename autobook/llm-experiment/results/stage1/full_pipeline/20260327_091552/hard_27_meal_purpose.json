@@ -1,0 +1,383 @@
+{
+  "test_case_id": "hard_27_meal_purpose",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2024-01-01",
+    "description": "Meal expense paid with corporate credit card",
+    "rationale": "Cannot determine correct expense account without knowing business purpose. Meal purchases can be: (1) Client entertainment \u2192 Meals & Entertainment Expense (50% tax deductible), (2) Employee travel meal \u2192 Travel Expense (different deductibility), (3) Team meeting \u2192 Office Expense, or (4) Employee perk \u2192 Employee Benefits Expense. Each has different account classification and tax treatment under CRA rules. The transaction text provides no context to determine which applies.",
+    "lines": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "What was the business purpose of this $125 meal? (e.g., client entertainment, employee travel meal, team meeting, employee benefit)"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0303795,
+  "raw_cost_usd": 0.058446,
+  "total_latency_ms": 25501,
+  "total_input_tokens": 14197,
+  "total_output_tokens": 1057,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 516,
+      "output_tokens": 244,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2649,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058479,
+      "raw_cost_usd": 0.011607,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of the meal",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Client entertainment (meals & entertainment expense)",
+              "Employee meal during travel (travel expense)",
+              "Team meeting meal (office expense)",
+              "Employee benefit/perk (employee benefits expense)"
+            ],
+            "clarification_question": "What was the business purpose of this $125 meal?",
+            "why_entry_differs": "Different purposes map to different expense accounts: meals & entertainment (50% deductible for tax), travel meals (different deductibility rules), office expenses, or employee benefits. The account classification and tax treatment vary significantly.",
+            "why_not_resolved": "The transaction only states 'a meal' without context. There is no standard convention for meal purchases - they can serve multiple business purposes. The general business type provides no specific context to narrow the purpose."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 106,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1653,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034116,
+      "raw_cost_usd": 0.006549,
+      "output": {
+        "reason": "Meal expense = expense increase. The $125 meal is a business expense (meals and entertainment). The corporate credit card is the credit side (liability increase), not part of the debit classification.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Meal expense = expense increase. The $125 meal is a business expense (meals and entertainment). The corporate credit card is the credit side (liability increase), not part of the debit classification."
+    },
+    "credit_classifier": {
+      "input_tokens": 489,
+      "output_tokens": 82,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1630,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0030393,
+      "raw_cost_usd": 0.00612,
+      "output": {
+        "reason": "Corporate credit card used = liability increase (credit card payable increases by $125)",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Corporate credit card used = liability increase (credit card payable increases by $125)"
+    },
+    "debit_corrector": {
+      "input_tokens": 659,
+      "output_tokens": 152,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2303,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0047501999999999996,
+      "raw_cost_usd": 0.009189,
+      "output": {
+        "reason": "The transaction is a meal expense paid using a corporate credit card. The debit side correctly records an expense increase (c=1) for the meal cost. The credit side shows a liability increase (a=1), which is consistent because using a corporate credit card creates a liability (credit card payable). The debit and credit tell a consistent story: expense up (debit), liability up (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a meal expense paid using a corporate credit card. The debit side correctly records an expense increase (c=1) for the meal cost. The credit side shows a liability increase (a=1), which is consistent because using a corporate credit card creates a liability (credit card payable). The debit and credit tell a consistent story: expense up (debit), liability up (credit). No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 659,
+      "output_tokens": 207,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2311,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0055776,
+      "raw_cost_usd": 0.010038,
+      "output": {
+        "reason": "The transaction describes a meal purchase using a corporate credit card. This creates two accounting effects: (1) an expense is incurred (debit to Meals & Entertainment expense), and (2) a liability is created (credit to Credit Card Payable). The debit tuple shows (0,0,1,0,0,0) = expense increase, which is correct. The initial credit tuple shows (1,0,0,0,0,0) = liability increase, which is also correct because using a corporate credit card creates a payable (liability). The two sides tell a consistent story: expense up (debit) and liability up (credit). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a meal purchase using a corporate credit card. This creates two accounting effects: (1) an expense is incurred (debit to Meals & Entertainment expense), and (2) a liability is created (credit to Credit Card Payable). The debit tuple shows (0,0,1,0,0,0) = expense increase, which is correct. The initial credit tuple shows (1,0,0,0,0,0) = liability increase, which is also correct because using a corporate credit card creates a payable (liability). The two sides tell a consistent story: expense up (debit) and liability up (credit). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 988,
+      "output_tokens": 266,
+      "cache_read_tokens": 2663,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3651,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0077529,
+      "raw_cost_usd": 0.014943,
+      "output": {
+        "date": "2024-01-01",
+        "description": "Meal expense paid with corporate credit card",
+        "rationale": "Cannot determine correct expense account without knowing business purpose. Meal purchases can be: (1) Client entertainment \u2192 Meals & Entertainment Expense (50% tax deductible), (2) Employee travel meal \u2192 Travel Expense (different deductibility), (3) Team meeting \u2192 Office Expense, or (4) Employee perk \u2192 Employee Benefits Expense. Each has different account classification and tax treatment under CRA rules. The transaction text provides no context to determine which applies.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "What was the business purpose of this $125 meal? (e.g., client entertainment, employee travel meal, team meeting, employee benefit)"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "What was the business purpose of this $125 meal? (e.g., client entertainment, employee travel meal, team meeting, employee benefit)"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of the meal",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Client entertainment (meals & entertainment expense)",
+              "Employee meal during travel (travel expense)",
+              "Team meeting meal (office expense)",
+              "Employee benefit/perk (employee benefits expense)"
+            ],
+            "clarification_question": "What was the business purpose of this $125 meal?",
+            "why_entry_differs": "Different purposes map to different expense accounts: meals & entertainment (50% deductible for tax), travel meals (different deductibility rules), office expenses, or employee benefits. The account classification and tax treatment vary significantly.",
+            "why_not_resolved": "The transaction only states 'a meal' without context. There is no standard convention for meal purchases - they can serve multiple business purposes. The general business type provides no specific context to narrow the purpose."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Meal expense = expense increase. The $125 meal is a business expense (meals and entertainment). The corporate credit card is the credit side (liability increase), not part of the debit classification.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Corporate credit card used = liability increase (credit card payable increases by $125)",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is a meal expense paid using a corporate credit card. The debit side correctly records an expense increase (c=1) for the meal cost. The credit side shows a liability increase (a=1), which is consistent because using a corporate credit card creates a liability (credit card payable). The debit and credit tell a consistent story: expense up (debit), liability up (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes a meal purchase using a corporate credit card. This creates two accounting effects: (1) an expense is incurred (debit to Meals & Entertainment expense), and (2) a liability is created (credit to Credit Card Payable). The debit tuple shows (0,0,1,0,0,0) = expense increase, which is correct. The initial credit tuple shows (1,0,0,0,0,0) = liability increase, which is also correct because using a corporate credit card creates a payable (liability). The two sides tell a consistent story: expense up (debit) and liability up (credit). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2024-01-01",
+        "description": "Meal expense paid with corporate credit card",
+        "rationale": "Cannot determine correct expense account without knowing business purpose. Meal purchases can be: (1) Client entertainment \u2192 Meals & Entertainment Expense (50% tax deductible), (2) Employee travel meal \u2192 Travel Expense (different deductibility), (3) Team meeting \u2192 Office Expense, or (4) Employee perk \u2192 Employee Benefits Expense. Each has different account classification and tax treatment under CRA rules. The transaction text provides no context to determine which applies.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "What was the business purpose of this $125 meal? (e.g., client entertainment, employee travel meal, team meeting, employee benefit)"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 516,
+        "output_tokens": 244,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 106,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 489,
+        "output_tokens": 82,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 659,
+        "output_tokens": 152,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 659,
+        "output_tokens": 207,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 988,
+        "output_tokens": 266,
+        "input_token_details": {
+          "cache_read": 2663,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

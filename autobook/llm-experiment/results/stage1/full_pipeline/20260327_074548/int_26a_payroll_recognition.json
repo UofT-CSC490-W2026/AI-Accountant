@@ -1,0 +1,433 @@
+{
+  "test_case_id": "int_26a_payroll_recognition",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    4,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-01-31",
+    "description": "January payroll recognition",
+    "rationale": "Cannot determine correct entry without allocation of deductions between employee groups",
+    "lines": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "How should the employee-borne statutory deductions ($2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax) be allocated between the production workers ($25,000 gross) and the administrative staff ($20,000 gross)? Please provide the actual withholding amounts for each employee group."
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0445887,
+  "raw_cost_usd": 0.072666,
+  "total_latency_ms": 32861,
+  "total_input_tokens": 15102,
+  "total_output_tokens": 1824,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 604,
+      "output_tokens": 505,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2737,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0100269,
+      "raw_cost_usd": 0.015786,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "allocation of statutory deductions between production and administrative employees",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Deductions split proportionally by gross wages (25,000:20,000 ratio)",
+              "Deductions split equally per employee (5:5 ratio)",
+              "Deductions allocated based on actual withholdings per employee group"
+            ],
+            "clarification_question": "How should the $2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax be allocated between production workers ($25,000) and administrative staff ($20,000)?",
+            "why_entry_differs": "Production wages are debited to Work in Process (manufacturing cost), while administrative salaries are debited to Administrative Expense. The net pay calculation and payable amounts differ for each group depending on which deductions apply to which employees.",
+            "why_not_resolved": "The transaction states total deductions but does not specify how they split between the two employee groups. No accounting convention prescribes a default allocation method for mixed employee populations."
+          },
+          {
+            "aspect": "employer portion of statutory contributions",
+            "resolved": true,
+            "resolution": "Transaction states 'employee-borne statutory deductions' explicitly, indicating only employee withholdings are included. Employer portions (CPP, EI, EHT, WSIB) are not part of this transaction.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "pension contribution type",
+            "resolved": true,
+            "resolution": "Listed as 'employee-borne statutory deductions' in Ontario context defaults to CPP (Canada Pension Plan) contributions, which are statutory and employee-borne.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "health insurance premium nature",
+            "resolved": true,
+            "resolution": "Listed among statutory deductions and withheld from employee pay indicates employee-paid portion of a group health plan, treated as a payable to the insurer.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 579,
+      "output_tokens": 169,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1741,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004620600000000001,
+      "raw_cost_usd": 0.007758,
+      "output": {
+        "reason": "The debit side has two expense increases: (1) Production worker wages $25,000 = manufacturing/production expense increase (or work-in-progress cost), and (2) Administrative salaries $20,000 = administrative expense increase. The withholdings are employee-borne deductions that reduce the liability owed to employees but do not affect the expense recognition. The net payment from chequing account is the credit side (asset decrease). Total: 2 expense increase lines.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The debit side has two expense increases: (1) Production worker wages $25,000 = manufacturing/production expense increase (or work-in-progress cost), and (2) Administrative salaries $20,000 = administrative expense increase. The withholdings are employee-borne deductions that reduce the liability owed to employees but do not affect the expense recognition. The net payment from chequing account is the credit side (asset decrease). Total: 2 expense increase lines."
+    },
+    "credit_classifier": {
+      "input_tokens": 577,
+      "output_tokens": 249,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1718,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005808300000000001,
+      "raw_cost_usd": 0.008889,
+      "output": {
+        "reason": "The credit side consists of:\n1. Pension contributions payable $2,000 = liability increase (amount withheld from employees, owed to pension authority)\n2. Health insurance premiums payable $3,250 = liability increase (amount withheld from employees, owed to insurer)\n3. Employment insurance premiums payable $1,050 = liability increase (amount withheld from employees, owed to government)\n4. Income tax payable $1,450 = liability increase (amount withheld from employees, owed to tax authority)\n5. Cash/chequing account decrease for net pay = asset decrease (net amount: $45,000 gross - $7,750 deductions = $37,250 paid out)\n\nTotal: 4 liability increases + 1 asset decrease",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The credit side consists of:\n1. Pension contributions payable $2,000 = liability increase (amount withheld from employees, owed to pension authority)\n2. Health insurance premiums payable $3,250 = liability increase (amount withheld from employees, owed to insurer)\n3. Employment insurance premiums payable $1,050 = liability increase (amount withheld from employees, owed to government)\n4. Income tax payable $1,450 = liability increase (amount withheld from employees, owed to tax authority)\n5. Cash/chequing account decrease for net pay = asset decrease (net amount: $45,000 gross - $7,750 deductions = $37,250 paid out)\n\nTotal: 4 liability increases + 1 asset decrease"
+    },
+    "credit_corrector": {
+      "input_tokens": 747,
+      "output_tokens": 315,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2399,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0074616000000000005,
+      "raw_cost_usd": 0.011922,
+      "output": {
+        "reason": "The initial credit tuple is correct. This payroll transaction involves:\n\nDEBITS (2 expense increases):\n1. Production worker wages $25,000 (expense increase - manufacturing labor)\n2. Administrative salaries $20,000 (expense increase - admin expense)\n\nCREDITS (4 liability increases + 1 asset decrease):\nLiability increases for amounts withheld and owed:\n1. Pension contributions payable $2,000\n2. Health insurance premiums payable $3,250\n3. Employment insurance premiums payable $1,050\n4. Income tax withholdings payable $1,450\n\nAsset decrease:\n5. Cash/chequing account decrease for net pay ($45,000 - $7,750 = $37,250)\n\nThe credit tuple (4,0,0,1,0,0) correctly represents 4 liability increases (the statutory deductions withheld that create payables) and 1 asset decrease (the cash payment of net wages). This is consistent with the debit tuple showing 2 expense increases for the gross wages and salaries. No correction needed.",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. This payroll transaction involves:\n\nDEBITS (2 expense increases):\n1. Production worker wages $25,000 (expense increase - manufacturing labor)\n2. Administrative salaries $20,000 (expense increase - admin expense)\n\nCREDITS (4 liability increases + 1 asset decrease):\nLiability increases for amounts withheld and owed:\n1. Pension contributions payable $2,000\n2. Health insurance premiums payable $3,250\n3. Employment insurance premiums payable $1,050\n4. Income tax withholdings payable $1,450\n\nAsset decrease:\n5. Cash/chequing account decrease for net pay ($45,000 - $7,750 = $37,250)\n\nThe credit tuple (4,0,0,1,0,0) correctly represents 4 liability increases (the statutory deductions withheld that create payables) and 1 asset decrease (the cash payment of net wages). This is consistent with the debit tuple showing 2 expense increases for the gross wages and salaries. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 747,
+      "output_tokens": 341,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2391,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0078492,
+      "raw_cost_usd": 0.012288,
+      "output": {
+        "reason": "The initial debit tuple is correct. This transaction involves:\n\n1. Recognition of two types of expenses:\n   - Production worker wages $25,000 (manufacturing/COGS expense)\n   - Administrative salaries $20,000 (operating expense)\n   Both are expense increases, requiring debits = 2 lines\n\n2. The withholdings ($2,000 + $3,250 + $1,050 + $1,450 = $7,750) create liabilities owed to government/benefit providers, requiring credits to liability accounts\n\n3. The net payment ($45,000 - $7,750 = $37,250) reduces cash (asset decrease), requiring a credit\n\nThe credit tuple showing (4,0,0,1,0,0) indicates 4 liability increases (for the 4 types of withholdings) and 1 asset decrease (cash payment), which is consistent with the transaction structure.\n\nThe debit side correctly captures the two expense increases (production wages and administrative salaries). Under IFRS, both types of compensation are period expenses when recognized - production wages become part of inventory cost/COGS, and administrative salaries are operating expenses. Both require debits to expense accounts.\n\nNo correction needed.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial debit tuple is correct. This transaction involves:\n\n1. Recognition of two types of expenses:\n   - Production worker wages $25,000 (manufacturing/COGS expense)\n   - Administrative salaries $20,000 (operating expense)\n   Both are expense increases, requiring debits = 2 lines\n\n2. The withholdings ($2,000 + $3,250 + $1,050 + $1,450 = $7,750) create liabilities owed to government/benefit providers, requiring credits to liability accounts\n\n3. The net payment ($45,000 - $7,750 = $37,250) reduces cash (asset decrease), requiring a credit\n\nThe credit tuple showing (4,0,0,1,0,0) indicates 4 liability increases (for the 4 types of withholdings) and 1 asset decrease (cash payment), which is consistent with the transaction structure.\n\nThe debit side correctly captures the two expense increases (production wages and administrative salaries). Under IFRS, both types of compensation are period expenses when recognized - production wages become part of inventory cost/COGS, and administrative salaries are operating expenses. Both require debits to expense accounts.\n\nNo correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1449,
+      "output_tokens": 245,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4116,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008822100000000001,
+      "raw_cost_usd": 0.016023,
+      "output": {
+        "date": "2026-01-31",
+        "description": "January payroll recognition",
+        "rationale": "Cannot determine correct entry without allocation of deductions between employee groups",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "How should the employee-borne statutory deductions ($2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax) be allocated between the production workers ($25,000 gross) and the administrative staff ($20,000 gross)? Please provide the actual withholding amounts for each employee group."
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of statutory deductions between production and administrative employees",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Deductions split proportionally by gross wages (25,000:20,000 ratio)",
+              "Deductions split equally per employee (5:5 ratio)",
+              "Deductions allocated based on actual withholdings per employee group"
+            ],
+            "clarification_question": "How should the $2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax be allocated between production workers ($25,000) and administrative staff ($20,000)?",
+            "why_entry_differs": "Production wages are debited to Work in Process (manufacturing cost), while administrative salaries are debited to Administrative Expense. The net pay calculation and payable amounts differ for each group depending on which deductions apply to which employees.",
+            "why_not_resolved": "The transaction states total deductions but does not specify how they split between the two employee groups. No accounting convention prescribes a default allocation method for mixed employee populations."
+          },
+          {
+            "aspect": "employer portion of statutory contributions",
+            "resolved": true,
+            "resolution": "Transaction states 'employee-borne statutory deductions' explicitly, indicating only employee withholdings are included. Employer portions (CPP, EI, EHT, WSIB) are not part of this transaction.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "pension contribution type",
+            "resolved": true,
+            "resolution": "Listed as 'employee-borne statutory deductions' in Ontario context defaults to CPP (Canada Pension Plan) contributions, which are statutory and employee-borne.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "health insurance premium nature",
+            "resolved": true,
+            "resolution": "Listed among statutory deductions and withheld from employee pay indicates employee-paid portion of a group health plan, treated as a payable to the insurer.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "The debit side has two expense increases: (1) Production worker wages $25,000 = manufacturing/production expense increase (or work-in-progress cost), and (2) Administrative salaries $20,000 = administrative expense increase. The withholdings are employee-borne deductions that reduce the liability owed to employees but do not affect the expense recognition. The net payment from chequing account is the credit side (asset decrease). Total: 2 expense increase lines.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit side consists of:\n1. Pension contributions payable $2,000 = liability increase (amount withheld from employees, owed to pension authority)\n2. Health insurance premiums payable $3,250 = liability increase (amount withheld from employees, owed to insurer)\n3. Employment insurance premiums payable $1,050 = liability increase (amount withheld from employees, owed to government)\n4. Income tax payable $1,450 = liability increase (amount withheld from employees, owed to tax authority)\n5. Cash/chequing account decrease for net pay = asset decrease (net amount: $45,000 gross - $7,750 deductions = $37,250 paid out)\n\nTotal: 4 liability increases + 1 asset decrease",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The initial debit tuple is correct. This transaction involves:\n\n1. Recognition of two types of expenses:\n   - Production worker wages $25,000 (manufacturing/COGS expense)\n   - Administrative salaries $20,000 (operating expense)\n   Both are expense increases, requiring debits = 2 lines\n\n2. The withholdings ($2,000 + $3,250 + $1,050 + $1,450 = $7,750) create liabilities owed to government/benefit providers, requiring credits to liability accounts\n\n3. The net payment ($45,000 - $7,750 = $37,250) reduces cash (asset decrease), requiring a credit\n\nThe credit tuple showing (4,0,0,1,0,0) indicates 4 liability increases (for the 4 types of withholdings) and 1 asset decrease (cash payment), which is consistent with the transaction structure.\n\nThe debit side correctly captures the two expense increases (production wages and administrative salaries). Under IFRS, both types of compensation are period expenses when recognized - production wages become part of inventory cost/COGS, and administrative salaries are operating expenses. Both require debits to expense accounts.\n\nNo correction needed.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. This payroll transaction involves:\n\nDEBITS (2 expense increases):\n1. Production worker wages $25,000 (expense increase - manufacturing labor)\n2. Administrative salaries $20,000 (expense increase - admin expense)\n\nCREDITS (4 liability increases + 1 asset decrease):\nLiability increases for amounts withheld and owed:\n1. Pension contributions payable $2,000\n2. Health insurance premiums payable $3,250\n3. Employment insurance premiums payable $1,050\n4. Income tax withholdings payable $1,450\n\nAsset decrease:\n5. Cash/chequing account decrease for net pay ($45,000 - $7,750 = $37,250)\n\nThe credit tuple (4,0,0,1,0,0) correctly represents 4 liability increases (the statutory deductions withheld that create payables) and 1 asset decrease (the cash payment of net wages). This is consistent with the debit tuple showing 2 expense increases for the gross wages and salaries. No correction needed.",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-01-31",
+        "description": "January payroll recognition",
+        "rationale": "Cannot determine correct entry without allocation of deductions between employee groups",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "How should the employee-borne statutory deductions ($2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax) be allocated between the production workers ($25,000 gross) and the administrative staff ($20,000 gross)? Please provide the actual withholding amounts for each employee group."
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 604,
+        "output_tokens": 505,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 579,
+        "output_tokens": 169,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 577,
+        "output_tokens": 249,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 747,
+        "output_tokens": 315,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 747,
+        "output_tokens": 341,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1449,
+        "output_tokens": 245,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

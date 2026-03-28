@@ -1,0 +1,485 @@
+{
+  "test_case_id": "int_30_short_term_loan_advance",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Short-term loan advanced to business partner, $2,000,000 at 4.5% annual interest",
+    "rationale": "The loan advanced is a financial asset (Loans Receivable or Notes Receivable - Short-term) debited to reflect the increase in assets. The chequing account (Cash or Bank) is credited to reflect the outflow of funds. This is a non-taxable financial transaction under IFRS - loans are not subject to HST/GST. The interest component will be recognized as revenue when earned (monthly), not at loan origination. The debit tuple (1,0,0,0,0,0) represents one asset increase line (the receivable), and the credit tuple (0,0,0,1,0,0) represents one asset decrease line (the bank account).",
+    "lines": [
+      {
+        "account_name": "Loans Receivable - Short-term",
+        "type": "debit",
+        "amount": 2000000.0
+      },
+      {
+        "account_name": "Chequing Account",
+        "type": "credit",
+        "amount": 2000000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0453873,
+  "raw_cost_usd": 0.076764,
+  "total_latency_ms": 27810,
+  "total_input_tokens": 17678,
+  "total_output_tokens": 1582,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 567,
+      "output_tokens": 221,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2691,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0056532,
+      "raw_cost_usd": 0.011388,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "interest payment timing",
+            "resolved": true,
+            "resolution": "Explicitly stated as 'receivable at the end of each month' \u2014 monthly accrual and collection pattern is clear",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "loan principal amount",
+            "resolved": true,
+            "resolution": "Explicitly stated as $2,000,000",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method",
+            "resolved": true,
+            "resolution": "Explicitly stated as transfer from Target's chequing account",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "loan term and interest rate",
+            "resolved": true,
+            "resolution": "Explicitly stated as one year at 4.5% annual rate",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 542,
+      "output_tokens": 133,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1704,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0039696,
+      "raw_cost_usd": 0.007107,
+      "output": {
+        "reason": "Target advances $2,000,000 short-term loan to business partner. This creates a new financial asset (Loan Receivable or Notes Receivable - short-term). The debit records 1 asset increase. The cash transferred out is the credit side (asset decrease), which we don't classify here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Target advances $2,000,000 short-term loan to business partner. This creates a new financial asset (Loan Receivable or Notes Receivable - short-term). The debit records 1 asset increase. The cash transferred out is the credit side (asset decrease), which we don't classify here."
+    },
+    "credit_classifier": {
+      "input_tokens": 540,
+      "output_tokens": 120,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1681,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037623,
+      "raw_cost_usd": 0.006843,
+      "output": {
+        "reason": "The credit side represents cash leaving Target's chequing account to advance the loan. Cash is an asset, and when cash is transferred out, it is an asset decrease, which is recorded as a credit. This is a single credit line: Cash (asset decrease).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The credit side represents cash leaving Target's chequing account to advance the loan. Cash is an asset, and when cash is transferred out, it is an asset decrease, which is recorded as a credit. This is a single credit line: Cash (asset decrease)."
+    },
+    "debit_corrector": {
+      "input_tokens": 710,
+      "output_tokens": 249,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2354,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063582,
+      "raw_cost_usd": 0.010797,
+      "output": {
+        "reason": "The transaction involves advancing a short-term loan to a business partner. From Target's perspective:\n\nDEBIT side: Target is acquiring a new asset - a loan receivable (notes receivable or loans receivable). This is an asset increase, correctly classified as (1,0,0,0,0,0).\n\nCREDIT side: Target is transferring cash from its chequing account, which is an asset decrease, correctly classified as (0,0,0,1,0,0) where slot d = asset decrease.\n\nThe two sides tell a consistent story: one asset (cash) decreases while another asset (loan receivable) increases. The initial debit tuple is correct. \n\nNote: The interest receivable mentioned in the transaction will be recorded separately in future periods as interest is earned each month, but is not part of this initial loan advance entry.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves advancing a short-term loan to a business partner. From Target's perspective:\n\nDEBIT side: Target is acquiring a new asset - a loan receivable (notes receivable or loans receivable). This is an asset increase, correctly classified as (1,0,0,0,0,0).\n\nCREDIT side: Target is transferring cash from its chequing account, which is an asset decrease, correctly classified as (0,0,0,1,0,0) where slot d = asset decrease.\n\nThe two sides tell a consistent story: one asset (cash) decreases while another asset (loan receivable) increases. The initial debit tuple is correct. \n\nNote: The interest receivable mentioned in the transaction will be recorded separately in future periods as interest is earned each month, but is not part of this initial loan advance entry."
+    },
+    "credit_corrector": {
+      "input_tokens": 710,
+      "output_tokens": 338,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2362,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076956,
+      "raw_cost_usd": 0.012156,
+      "output": {
+        "reason": "The transaction describes advancing a short-term loan of $2,000,000 from Target's chequing account to a business partner. \n\nAccounting analysis:\n- Debit: Loans Receivable (or Notes Receivable) $2,000,000 - an asset increase (slot a=1 in debit tuple)\n- Credit: Chequing Account (Cash) $2,000,000 - an asset decrease (slot d=1 in credit tuple)\n\nThe initial credit tuple (0,0,0,1,0,0) correctly identifies this as an asset decrease (d=1), which represents the reduction in the chequing account balance when the funds are transferred out.\n\nThe debit tuple (1,0,0,0,0,0) also correctly shows an asset increase (a=1), representing the creation of the loan receivable asset.\n\nThese two sides tell a consistent story: one asset (cash) decreases while another asset (loan receivable) increases. This is a straightforward asset exchange transaction at the time of loan disbursement.\n\nNote: The interest revenue will be recognized separately each month as it is earned, but that is not part of this initial disbursement entry.\n\nNo correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes advancing a short-term loan of $2,000,000 from Target's chequing account to a business partner. \n\nAccounting analysis:\n- Debit: Loans Receivable (or Notes Receivable) $2,000,000 - an asset increase (slot a=1 in debit tuple)\n- Credit: Chequing Account (Cash) $2,000,000 - an asset decrease (slot d=1 in credit tuple)\n\nThe initial credit tuple (0,0,0,1,0,0) correctly identifies this as an asset decrease (d=1), which represents the reduction in the chequing account balance when the funds are transferred out.\n\nThe debit tuple (1,0,0,0,0,0) also correctly shows an asset increase (a=1), representing the creation of the loan receivable asset.\n\nThese two sides tell a consistent story: one asset (cash) decreases while another asset (loan receivable) increases. This is a straightforward asset exchange transaction at the time of loan disbursement.\n\nNote: The interest revenue will be recognized separately each month as it is earned, but that is not part of this initial disbursement entry.\n\nNo correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 719,
+      "output_tokens": 347,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3231,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081156,
+      "raw_cost_usd": 0.014898,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Short-term loan advanced to business partner, $2,000,000 at 4.5% annual interest",
+        "rationale": "The loan advanced is a financial asset (Loans Receivable or Notes Receivable - Short-term) debited to reflect the increase in assets. The chequing account (Cash or Bank) is credited to reflect the outflow of funds. This is a non-taxable financial transaction under IFRS - loans are not subject to HST/GST. The interest component will be recognized as revenue when earned (monthly), not at loan origination. The debit tuple (1,0,0,0,0,0) represents one asset increase line (the receivable), and the credit tuple (0,0,0,1,0,0) represents one asset decrease line (the bank account).",
+        "lines": [
+          {
+            "account_name": "Loans Receivable - Short-term",
+            "type": "debit",
+            "amount": 2000000.0
+          },
+          {
+            "account_name": "Chequing Account",
+            "type": "credit",
+            "amount": 2000000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2269,
+      "output_tokens": 174,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3655,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0098328,
+      "raw_cost_usd": 0.013575,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records the loan advance as an asset-for-asset exchange. Debits equal credits ($2,000,000). Loans Receivable - Short-term is appropriately debited to recognize the financial asset created. Chequing Account is correctly credited for the cash outflow. Amount matches transaction text. No tax lines needed as loans are non-taxable financial transactions under IFRS. Interest revenue will be properly recognized monthly as earned, not at origination. All checks pass."
+      },
+      "reason": "Entry correctly records the loan advance as an asset-for-asset exchange. Debits equal credits ($2,000,000). Loans Receivable - Short-term is appropriately debited to recognize the financial asset created. Chequing Account is correctly credited for the cash outflow. Amount matches transaction text. No tax lines needed as loans are non-taxable financial transactions under IFRS. Interest revenue will be properly recognized monthly as earned, not at origination. All checks pass."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "interest payment timing",
+            "resolved": true,
+            "resolution": "Explicitly stated as 'receivable at the end of each month' \u2014 monthly accrual and collection pattern is clear",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "loan principal amount",
+            "resolved": true,
+            "resolution": "Explicitly stated as $2,000,000",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method",
+            "resolved": true,
+            "resolution": "Explicitly stated as transfer from Target's chequing account",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "loan term and interest rate",
+            "resolved": true,
+            "resolution": "Explicitly stated as one year at 4.5% annual rate",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Target advances $2,000,000 short-term loan to business partner. This creates a new financial asset (Loan Receivable or Notes Receivable - short-term). The debit records 1 asset increase. The cash transferred out is the credit side (asset decrease), which we don't classify here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit side represents cash leaving Target's chequing account to advance the loan. Cash is an asset, and when cash is transferred out, it is an asset decrease, which is recorded as a credit. This is a single credit line: Cash (asset decrease).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves advancing a short-term loan to a business partner. From Target's perspective:\n\nDEBIT side: Target is acquiring a new asset - a loan receivable (notes receivable or loans receivable). This is an asset increase, correctly classified as (1,0,0,0,0,0).\n\nCREDIT side: Target is transferring cash from its chequing account, which is an asset decrease, correctly classified as (0,0,0,1,0,0) where slot d = asset decrease.\n\nThe two sides tell a consistent story: one asset (cash) decreases while another asset (loan receivable) increases. The initial debit tuple is correct. \n\nNote: The interest receivable mentioned in the transaction will be recorded separately in future periods as interest is earned each month, but is not part of this initial loan advance entry.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes advancing a short-term loan of $2,000,000 from Target's chequing account to a business partner. \n\nAccounting analysis:\n- Debit: Loans Receivable (or Notes Receivable) $2,000,000 - an asset increase (slot a=1 in debit tuple)\n- Credit: Chequing Account (Cash) $2,000,000 - an asset decrease (slot d=1 in credit tuple)\n\nThe initial credit tuple (0,0,0,1,0,0) correctly identifies this as an asset decrease (d=1), which represents the reduction in the chequing account balance when the funds are transferred out.\n\nThe debit tuple (1,0,0,0,0,0) also correctly shows an asset increase (a=1), representing the creation of the loan receivable asset.\n\nThese two sides tell a consistent story: one asset (cash) decreases while another asset (loan receivable) increases. This is a straightforward asset exchange transaction at the time of loan disbursement.\n\nNote: The interest revenue will be recognized separately each month as it is earned, but that is not part of this initial disbursement entry.\n\nNo correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Short-term loan advanced to business partner, $2,000,000 at 4.5% annual interest",
+        "rationale": "The loan advanced is a financial asset (Loans Receivable or Notes Receivable - Short-term) debited to reflect the increase in assets. The chequing account (Cash or Bank) is credited to reflect the outflow of funds. This is a non-taxable financial transaction under IFRS - loans are not subject to HST/GST. The interest component will be recognized as revenue when earned (monthly), not at loan origination. The debit tuple (1,0,0,0,0,0) represents one asset increase line (the receivable), and the credit tuple (0,0,0,1,0,0) represents one asset decrease line (the bank account).",
+        "lines": [
+          {
+            "account_name": "Loans Receivable - Short-term",
+            "type": "debit",
+            "amount": 2000000.0
+          },
+          {
+            "account_name": "Chequing Account",
+            "type": "credit",
+            "amount": 2000000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records the loan advance as an asset-for-asset exchange. Debits equal credits ($2,000,000). Loans Receivable - Short-term is appropriately debited to recognize the financial asset created. Chequing Account is correctly credited for the cash outflow. Amount matches transaction text. No tax lines needed as loans are non-taxable financial transactions under IFRS. Interest revenue will be properly recognized monthly as earned, not at origination. All checks pass."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 567,
+        "output_tokens": 221,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 542,
+        "output_tokens": 133,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 540,
+        "output_tokens": 120,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 710,
+        "output_tokens": 249,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 710,
+        "output_tokens": 338,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 719,
+        "output_tokens": 347,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2269,
+        "output_tokens": 174,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,431 @@
+{
+  "test_case_id": "int_31_vehicle_nonrecoverable_tax",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Vehicle purchase from Ford",
+    "rationale": "Cannot determine correct entry structure without knowing ownership. If company retains ownership: debit Vehicle (asset) $52,800, credit Loan Payable $52,800 (non-recoverable tax capitalized to asset cost per IFRS). If vehicle is compensation to executive: debit Compensation Expense or Shareholder Loan $52,800, credit Loan Payable $52,800. These are structurally different entries affecting different accounts and financial statement categories.",
+    "lines": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "Does the company retain ownership and control of the vehicle, or is this vehicle being provided as compensation/benefit to the executive?"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0402147,
+  "raw_cost_usd": 0.068292,
+  "total_latency_ms": 33473,
+  "total_input_tokens": 14824,
+  "total_output_tokens": 1588,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 561,
+      "output_tokens": 474,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2694,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0094329,
+      "raw_cost_usd": 0.015192,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "asset classification (vehicle vs. executive benefit)",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Record as company vehicle asset (if company retains ownership and control)",
+              "Record as taxable benefit/compensation to executive (if vehicle is effectively transferred to executive)"
+            ],
+            "clarification_question": "Does the company retain ownership and control of the vehicle, or is this vehicle being provided as compensation/benefit to the executive?",
+            "why_entry_differs": "Company asset: debit Vehicle/PPE and Sales Tax (asset if recoverable, expense if not), credit Loan Payable. Executive benefit: debit Compensation Expense or Shareholder Loan (if shareholder-executive), credit Loan Payable, with different tax implications.",
+            "why_not_resolved": "The phrase 'for an executive's commuting and business use' is ambiguous\u2014it could mean the company owns the vehicle but allows executive use (company asset), or the vehicle is being provided as compensation (benefit/transfer). Standard convention does not provide a default, and the transaction text does not clarify ownership retention."
+          },
+          {
+            "aspect": "sales tax recoverability",
+            "resolved": true,
+            "resolution": "Transaction explicitly states '10% non-recoverable sales tax', so the $4,800 tax is treated as part of asset cost or expense, not as recoverable input tax credit",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method for financing",
+            "resolved": true,
+            "resolution": "Payment method does not affect the journal entry\u2014financing creates a liability regardless of how payments will be made",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "identity of Target and Ford",
+            "resolved": true,
+            "resolution": "Target is the purchasing entity (the corporation), Ford is the vendor\u2014identities are clear and don't change the entry structure",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 536,
+      "output_tokens": 171,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1698,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004521600000000001,
+      "raw_cost_usd": 0.007659,
+      "output": {
+        "reason": "Two asset increases on the debit side: (1) Vehicle/Equipment asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, but since it's explicitly stated as a separate component in the transaction, it represents a second debit line. Both are asset acquisitions debited to the books.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two asset increases on the debit side: (1) Vehicle/Equipment asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, but since it's explicitly stated as a separate component in the transaction, it represents a second debit line. Both are asset acquisitions debited to the books."
+    },
+    "credit_classifier": {
+      "input_tokens": 534,
+      "output_tokens": 126,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1675,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038343,
+      "raw_cost_usd": 0.006915,
+      "output": {
+        "reason": "The entire purchase amount of $52,800 (vehicle cost $48,000 + non-recoverable sales tax $4,800) is financed through a dealer payment plan, creating a liability (accounts payable or notes payable). This represents one liability increase on the credit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The entire purchase amount of $52,800 (vehicle cost $48,000 + non-recoverable sales tax $4,800) is financed through a dealer payment plan, creating a liability (accounts payable or notes payable). This represents one liability increase on the credit side."
+    },
+    "credit_corrector": {
+      "input_tokens": 704,
+      "output_tokens": 263,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2356,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0065526000000000004,
+      "raw_cost_usd": 0.011013,
+      "output": {
+        "reason": "The transaction involves Target purchasing a sedan financed through a dealer payment plan. Under IFRS, this creates:\n\nDEBIT side:\n- Vehicle (asset increase) for $48,000\n- Sales tax (asset increase, as it's non-recoverable and capitalizable to the vehicle cost) for $4,800\nTotal: 2 asset increases, which matches the debit tuple (2,0,0,0,0,0)\n\nCREDIT side:\n- Accounts payable or financing liability (liability increase) for $52,800\nThis is 1 liability increase.\n\nThe initial credit tuple (1,0,0,0,0,0) correctly represents one liability increase from the financing arrangement. The debit and credit sides tell a consistent story: Target acquired assets (vehicle + capitalized sales tax) and incurred a liability to pay for them over 3 months. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves Target purchasing a sedan financed through a dealer payment plan. Under IFRS, this creates:\n\nDEBIT side:\n- Vehicle (asset increase) for $48,000\n- Sales tax (asset increase, as it's non-recoverable and capitalizable to the vehicle cost) for $4,800\nTotal: 2 asset increases, which matches the debit tuple (2,0,0,0,0,0)\n\nCREDIT side:\n- Accounts payable or financing liability (liability increase) for $52,800\nThis is 1 liability increase.\n\nThe initial credit tuple (1,0,0,0,0,0) correctly represents one liability increase from the financing arrangement. The debit and credit sides tell a consistent story: Target acquired assets (vehicle + capitalized sales tax) and incurred a liability to pay for them over 3 months. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 704,
+      "output_tokens": 293,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2348,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0070002,
+      "raw_cost_usd": 0.011439,
+      "output": {
+        "reason": "The initial debit tuple is correct. Target purchased a sedan for $48,000 plus $4,800 non-recoverable sales tax (totaling $52,800), financed through a dealer payment plan. This transaction involves:\n\n1. Vehicle (asset increase): The sedan is a fixed asset used for business purposes - debit to increase asset\n2. Sales tax (asset increase): Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, not expensed\n\nBoth the $48,000 vehicle cost and the $4,800 non-recoverable sales tax should be debited to assets (likely combined into the vehicle's cost basis of $52,800).\n\nThe credit side showing 1 liability increase is consistent - the $52,800 financed amount creates a liability (dealer payment plan payable).\n\nThe debit tuple correctly shows 2 asset increases, representing the proper accounting treatment under IFRS where non-recoverable taxes are capitalized as part of the asset cost. No correction needed.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial debit tuple is correct. Target purchased a sedan for $48,000 plus $4,800 non-recoverable sales tax (totaling $52,800), financed through a dealer payment plan. This transaction involves:\n\n1. Vehicle (asset increase): The sedan is a fixed asset used for business purposes - debit to increase asset\n2. Sales tax (asset increase): Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, not expensed\n\nBoth the $48,000 vehicle cost and the $4,800 non-recoverable sales tax should be debited to assets (likely combined into the vehicle's cost basis of $52,800).\n\nThe credit side showing 1 liability increase is consistent - the $52,800 financed amount creates a liability (dealer payment plan payable).\n\nThe debit tuple correctly shows 2 asset increases, representing the proper accounting treatment under IFRS where non-recoverable taxes are capitalized as part of the asset cost. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1386,
+      "output_tokens": 261,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4053,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0088731,
+      "raw_cost_usd": 0.016074,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Vehicle purchase from Ford",
+        "rationale": "Cannot determine correct entry structure without knowing ownership. If company retains ownership: debit Vehicle (asset) $52,800, credit Loan Payable $52,800 (non-recoverable tax capitalized to asset cost per IFRS). If vehicle is compensation to executive: debit Compensation Expense or Shareholder Loan $52,800, credit Loan Payable $52,800. These are structurally different entries affecting different accounts and financial statement categories.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Does the company retain ownership and control of the vehicle, or is this vehicle being provided as compensation/benefit to the executive?"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "asset classification (vehicle vs. executive benefit)",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Record as company vehicle asset (if company retains ownership and control)",
+              "Record as taxable benefit/compensation to executive (if vehicle is effectively transferred to executive)"
+            ],
+            "clarification_question": "Does the company retain ownership and control of the vehicle, or is this vehicle being provided as compensation/benefit to the executive?",
+            "why_entry_differs": "Company asset: debit Vehicle/PPE and Sales Tax (asset if recoverable, expense if not), credit Loan Payable. Executive benefit: debit Compensation Expense or Shareholder Loan (if shareholder-executive), credit Loan Payable, with different tax implications.",
+            "why_not_resolved": "The phrase 'for an executive's commuting and business use' is ambiguous\u2014it could mean the company owns the vehicle but allows executive use (company asset), or the vehicle is being provided as compensation (benefit/transfer). Standard convention does not provide a default, and the transaction text does not clarify ownership retention."
+          },
+          {
+            "aspect": "sales tax recoverability",
+            "resolved": true,
+            "resolution": "Transaction explicitly states '10% non-recoverable sales tax', so the $4,800 tax is treated as part of asset cost or expense, not as recoverable input tax credit",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method for financing",
+            "resolved": true,
+            "resolution": "Payment method does not affect the journal entry\u2014financing creates a liability regardless of how payments will be made",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "identity of Target and Ford",
+            "resolved": true,
+            "resolution": "Target is the purchasing entity (the corporation), Ford is the vendor\u2014identities are clear and don't change the entry structure",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Two asset increases on the debit side: (1) Vehicle/Equipment asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, but since it's explicitly stated as a separate component in the transaction, it represents a second debit line. Both are asset acquisitions debited to the books.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The entire purchase amount of $52,800 (vehicle cost $48,000 + non-recoverable sales tax $4,800) is financed through a dealer payment plan, creating a liability (accounts payable or notes payable). This represents one liability increase on the credit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The initial debit tuple is correct. Target purchased a sedan for $48,000 plus $4,800 non-recoverable sales tax (totaling $52,800), financed through a dealer payment plan. This transaction involves:\n\n1. Vehicle (asset increase): The sedan is a fixed asset used for business purposes - debit to increase asset\n2. Sales tax (asset increase): Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset, not expensed\n\nBoth the $48,000 vehicle cost and the $4,800 non-recoverable sales tax should be debited to assets (likely combined into the vehicle's cost basis of $52,800).\n\nThe credit side showing 1 liability increase is consistent - the $52,800 financed amount creates a liability (dealer payment plan payable).\n\nThe debit tuple correctly shows 2 asset increases, representing the proper accounting treatment under IFRS where non-recoverable taxes are capitalized as part of the asset cost. No correction needed.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves Target purchasing a sedan financed through a dealer payment plan. Under IFRS, this creates:\n\nDEBIT side:\n- Vehicle (asset increase) for $48,000\n- Sales tax (asset increase, as it's non-recoverable and capitalizable to the vehicle cost) for $4,800\nTotal: 2 asset increases, which matches the debit tuple (2,0,0,0,0,0)\n\nCREDIT side:\n- Accounts payable or financing liability (liability increase) for $52,800\nThis is 1 liability increase.\n\nThe initial credit tuple (1,0,0,0,0,0) correctly represents one liability increase from the financing arrangement. The debit and credit sides tell a consistent story: Target acquired assets (vehicle + capitalized sales tax) and incurred a liability to pay for them over 3 months. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Vehicle purchase from Ford",
+        "rationale": "Cannot determine correct entry structure without knowing ownership. If company retains ownership: debit Vehicle (asset) $52,800, credit Loan Payable $52,800 (non-recoverable tax capitalized to asset cost per IFRS). If vehicle is compensation to executive: debit Compensation Expense or Shareholder Loan $52,800, credit Loan Payable $52,800. These are structurally different entries affecting different accounts and financial statement categories.",
+        "lines": [],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Does the company retain ownership and control of the vehicle, or is this vehicle being provided as compensation/benefit to the executive?"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 561,
+        "output_tokens": 474,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 536,
+        "output_tokens": 171,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 534,
+        "output_tokens": 126,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 704,
+        "output_tokens": 263,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 704,
+        "output_tokens": 293,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1386,
+        "output_tokens": 261,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,360 @@
+{
+  "test_case_id": "hard_02_investment_classification",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    2,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Acquisition of 10% equity stake in Ford common shares and related transaction costs",
+    "rationale": "Under IFRS, the 10% ownership stake requires classification as either a financial asset (passive investment) or investment in associate (significant influence). The disambiguator correctly identifies that while 10% is below the 20% presumption threshold for significant influence, IFRS allows significant influence at lower percentages if other indicators exist (board representation, participation in policy-making, material transactions, etc.). However, the transaction text provides no evidence of such indicators - it simply states BlackRock acquired shares. In the absence of evidence of significant influence, the default treatment for a 10% stake is as a financial asset. The transaction fee of $100,000 is correctly capitalized as part of the investment cost under IFRS (except for FVTPL, but that classification is typically for trading securities, not a strategic 10% stake). Total investment cost is $3,100,000. The tuples indicate 2 debit lines (asset increases) and 2 credit lines (asset decreases), which aligns with: (1) Investment account debit for shares, (2) Investment account debit for transaction costs (or combined), and (1) Cash/Bank credit for share purchase, (2) Cash/Bank credit for fee payment. However, these can be combined into single lines: one debit to Investment and one credit to Cash for the total $3,100,000.",
+    "lines": [
+      {
+        "account_name": "Investment in Equity Securities",
+        "type": "debit",
+        "amount": 3100000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 3100000.0
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0277167,
+  "raw_cost_usd": 0.046884,
+  "total_latency_ms": 25200,
+  "total_input_tokens": 9903,
+  "total_output_tokens": 1145,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 535,
+      "output_tokens": 387,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2668,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0080499,
+      "raw_cost_usd": 0.013809,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "investment classification intent",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Passive investment (financial asset at fair value or amortized cost)",
+              "Investment in associate (significant influence, equity method)",
+              "Available-for-sale investment"
+            ],
+            "clarification_question": "Does BlackRock intend to exercise significant influence over Ford, or is this a passive investment?",
+            "why_entry_differs": "Passive investments are recorded at cost (or fair value depending on classification) in a financial asset account, while significant influence (typically 20-50% ownership) requires equity method accounting with an 'Investment in Associate' account. At 10%, either treatment is possible depending on other factors like board representation or operational involvement.",
+            "why_not_resolved": "While 10% ownership is below the 20% threshold that presumes significant influence, IFRS and ASPE allow significant influence at lower percentages if other indicators exist (board seats, material transactions, etc.). The transaction text does not specify intent or other influence factors, and 'general' business type does not narrow the purpose."
+          },
+          {
+            "aspect": "treatment of transaction fee",
+            "resolved": true,
+            "resolution": "Transaction costs directly attributable to acquiring an investment are capitalized as part of the investment cost under both IFRS and ASPE (except for FVTPL classification). The $100,000 fee is added to the investment basis, making total cost $3,100,000.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 508,
+      "output_tokens": 130,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1649,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038163000000000003,
+      "raw_cost_usd": 0.006897,
+      "output": {
+        "reason": "This transaction involves two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Total: 2 asset decrease lines.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "This transaction involves two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Total: 2 asset decrease lines."
+    },
+    "debit_classifier": {
+      "input_tokens": 510,
+      "output_tokens": 135,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1672,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0039036,
+      "raw_cost_usd": 0.007041,
+      "output": {
+        "reason": "BlackRock acquires an investment in Ford shares ($3,000,000) = 1 asset increase (Investment in equity securities). Transaction fee ($100,000) is capitalized as part of the investment cost under IFRS = 1 asset increase (added to investment cost). Total: 2 asset increase lines.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "BlackRock acquires an investment in Ford shares ($3,000,000) = 1 asset increase (Investment in equity securities). Transaction fee ($100,000) is capitalized as part of the investment cost under IFRS = 1 asset increase (added to investment cost). Total: 2 asset increase lines."
+    },
+    "entry_builder": {
+      "input_tokens": 1251,
+      "output_tokens": 493,
+      "cache_read_tokens": 2663,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3914,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0119469,
+      "raw_cost_usd": 0.019137,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity stake in Ford common shares and related transaction costs",
+        "rationale": "Under IFRS, the 10% ownership stake requires classification as either a financial asset (passive investment) or investment in associate (significant influence). The disambiguator correctly identifies that while 10% is below the 20% presumption threshold for significant influence, IFRS allows significant influence at lower percentages if other indicators exist (board representation, participation in policy-making, material transactions, etc.). However, the transaction text provides no evidence of such indicators - it simply states BlackRock acquired shares. In the absence of evidence of significant influence, the default treatment for a 10% stake is as a financial asset. The transaction fee of $100,000 is correctly capitalized as part of the investment cost under IFRS (except for FVTPL, but that classification is typically for trading securities, not a strategic 10% stake). Total investment cost is $3,100,000. The tuples indicate 2 debit lines (asset increases) and 2 credit lines (asset decreases), which aligns with: (1) Investment account debit for shares, (2) Investment account debit for transaction costs (or combined), and (1) Cash/Bank credit for share purchase, (2) Cash/Bank credit for fee payment. However, these can be combined into single lines: one debit to Investment and one credit to Cash for the total $3,100,000.",
+        "lines": [
+          {
+            "account_name": "Investment in Equity Securities",
+            "type": "debit",
+            "amount": 3100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3100000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "Does BlackRock intend to exercise significant influence over Ford, or is this a passive investment?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "investment classification intent",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Passive investment (financial asset at fair value or amortized cost)",
+              "Investment in associate (significant influence, equity method)",
+              "Available-for-sale investment"
+            ],
+            "clarification_question": "Does BlackRock intend to exercise significant influence over Ford, or is this a passive investment?",
+            "why_entry_differs": "Passive investments are recorded at cost (or fair value depending on classification) in a financial asset account, while significant influence (typically 20-50% ownership) requires equity method accounting with an 'Investment in Associate' account. At 10%, either treatment is possible depending on other factors like board representation or operational involvement.",
+            "why_not_resolved": "While 10% ownership is below the 20% threshold that presumes significant influence, IFRS and ASPE allow significant influence at lower percentages if other indicators exist (board seats, material transactions, etc.). The transaction text does not specify intent or other influence factors, and 'general' business type does not narrow the purpose."
+          },
+          {
+            "aspect": "treatment of transaction fee",
+            "resolved": true,
+            "resolution": "Transaction costs directly attributable to acquiring an investment are capitalized as part of the investment cost under both IFRS and ASPE (except for FVTPL classification). The $100,000 fee is added to the investment basis, making total cost $3,100,000.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "BlackRock acquires an investment in Ford shares ($3,000,000) = 1 asset increase (Investment in equity securities). Transaction fee ($100,000) is capitalized as part of the investment cost under IFRS = 1 asset increase (added to investment cost). Total: 2 asset increase lines.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This transaction involves two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Total: 2 asset decrease lines.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "BlackRock acquires an investment in Ford shares ($3,000,000) = 1 asset increase (Investment in equity securities). Transaction fee ($100,000) is capitalized as part of the investment cost under IFRS = 1 asset increase (added to investment cost). Total: 2 asset increase lines.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "This transaction involves two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Total: 2 asset decrease lines.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity stake in Ford common shares and related transaction costs",
+        "rationale": "Under IFRS, the 10% ownership stake requires classification as either a financial asset (passive investment) or investment in associate (significant influence). The disambiguator correctly identifies that while 10% is below the 20% presumption threshold for significant influence, IFRS allows significant influence at lower percentages if other indicators exist (board representation, participation in policy-making, material transactions, etc.). However, the transaction text provides no evidence of such indicators - it simply states BlackRock acquired shares. In the absence of evidence of significant influence, the default treatment for a 10% stake is as a financial asset. The transaction fee of $100,000 is correctly capitalized as part of the investment cost under IFRS (except for FVTPL, but that classification is typically for trading securities, not a strategic 10% stake). Total investment cost is $3,100,000. The tuples indicate 2 debit lines (asset increases) and 2 credit lines (asset decreases), which aligns with: (1) Investment account debit for shares, (2) Investment account debit for transaction costs (or combined), and (1) Cash/Bank credit for share purchase, (2) Cash/Bank credit for fee payment. However, these can be combined into single lines: one debit to Investment and one credit to Cash for the total $3,100,000.",
+        "lines": [
+          {
+            "account_name": "Investment in Equity Securities",
+            "type": "debit",
+            "amount": 3100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3100000.0
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 535,
+        "output_tokens": 387,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 130,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 510,
+        "output_tokens": 135,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1251,
+        "output_tokens": 493,
+        "input_token_details": {
+          "cache_read": 2663,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

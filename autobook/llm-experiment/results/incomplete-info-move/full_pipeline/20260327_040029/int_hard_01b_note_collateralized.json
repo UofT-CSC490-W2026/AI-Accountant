@@ -1,0 +1,633 @@
+{
+  "test_case_id": "int_hard_01b_note_collateralized",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Discounting of non-interest-bearing promissory note at bank (collateralized borrowing)",
+    "rationale": "Under IFRS 9, when a note receivable is discounted and management determines that risks and rewards are not transferred, the transaction is treated as a collateralized borrowing rather than a derecognition of the receivable. The note receivable remains on the books (asset), and the cash received from the bank creates a liability (note payable to bank or bank loan). The discount charge of $1,667 (calculated as: $100,000 \u00d7 15% \u00d7 40/360 days remaining) represents interest expense. The entry records: (1) Cash received of $98,333 (debit, asset increase), and (2) Bank loan/note payable of $98,333 (credit, liability increase). Both tuples show count of 1, matching one debit line and one credit line. The discount/interest expense will be recognized over the borrowing period through a subsequent adjusting entry, not at the initial transaction date. This entry reflects only the cash receipt and corresponding liability recognition.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 98333.33
+      },
+      {
+        "account_name": "Bank Loan Payable",
+        "type": "credit",
+        "amount": 98333.33
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.1137162,
+  "raw_cost_usd": 0.176286,
+  "total_latency_ms": 67436,
+  "total_input_tokens": 41502,
+  "total_output_tokens": 3452,
+  "total_llm_calls": 14,
+  "iteration_count": 2,
+  "final_decision": "error",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 595,
+      "output_tokens": 35,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2719,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0029471999999999996,
+      "raw_cost_usd": 0.008682,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 1212,
+      "output_tokens": 473,
+      "cache_read_tokens": 2282,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3494,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.011415600000000001,
+      "raw_cost_usd": 0.017577000000000002,
+      "output": {
+        "reason": "This is a collateralized borrowing transaction where Ford discounts the note at the bank. Since risks and rewards are not transferred, Ford is effectively borrowing against the note. The credit side reflects:\n1. A liability increase for the cash proceeds received ($98,356.16) - this is the loan payable to the bank\n2. An asset decrease for the discount charges/interest expense paid upfront (the difference between face value $100,000 and net proceeds $98,356.16)\n\nThe key insight from the fix context is that the liability increase equals the net cash received ($98,356.16), not the face value. The discount charges are treated as a separate line item (either prepaid interest being expensed or cash outflow for financing costs).\n\nTherefore, the credit side has:\n- 1 line for liability increase (loan payable = cash received)\n- 1 line for asset decrease (cash paid for discount charges or prepaid interest consumed)\n\nTotal credit lines: [1,0,0,1,0,0]",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "This is a collateralized borrowing transaction where Ford discounts the note at the bank. Since risks and rewards are not transferred, Ford is effectively borrowing against the note. The credit side reflects:\n1. A liability increase for the cash proceeds received ($98,356.16) - this is the loan payable to the bank\n2. An asset decrease for the discount charges/interest expense paid upfront (the difference between face value $100,000 and net proceeds $98,356.16)\n\nThe key insight from the fix context is that the liability increase equals the net cash received ($98,356.16), not the face value. The discount charges are treated as a separate line item (either prepaid interest being expensed or cash outflow for financing costs).\n\nTherefore, the credit side has:\n- 1 line for liability increase (loan payable = cash received)\n- 1 line for asset decrease (cash paid for discount charges or prepaid interest consumed)\n\nTotal credit lines: [1,0,0,1,0,0]"
+    },
+    "debit_classifier": {
+      "input_tokens": 570,
+      "output_tokens": 176,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1732,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004698600000000001,
+      "raw_cost_usd": 0.007836,
+      "output": {
+        "reason": "Under IFRS, when discounting a note is treated as a collateralized borrowing (risks and rewards not transferred), the transaction is recorded as a loan secured by the note, not a sale of the receivable. The debit side has: (1) Cash = asset increase (net proceeds received from the bank), and (2) Discount/Interest expense = expense increase (the discount charges deducted by the bank represent financing costs). The original note receivable remains on the books as it was not derecognized.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IFRS, when discounting a note is treated as a collateralized borrowing (risks and rewards not transferred), the transaction is recorded as a loan secured by the note, not a sale of the receivable. The debit side has: (1) Cash = asset increase (net proceeds received from the bank), and (2) Discount/Interest expense = expense increase (the discount charges deducted by the bank represent financing costs). The original note receivable remains on the books as it was not derecognized."
+    },
+    "credit_corrector": {
+      "input_tokens": 1476,
+      "output_tokens": 620,
+      "cache_read_tokens": 3304,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4780,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.014719200000000002,
+      "raw_cost_usd": 0.02364,
+      "output": {
+        "reason": "The transaction involves discounting a note receivable at the bank. Since management determined this is a collateralized borrowing (not a sale of the receivable), Ford retains the risks and rewards of the note receivable. \n\nUnder IFRS, when a note is discounted as a collateralized borrowing:\n- Ford receives cash (asset increase - debit)\n- Ford recognizes a liability to the bank (liability increase - credit)\n- The note receivable remains on Ford's books (no asset decrease)\n- Interest expense is recognized over time as the note matures (expense increase - debit)\n\nThe initial credit tuple incorrectly included slot d (asset decrease) suggesting the note receivable was removed. However, in a collateralized borrowing, the underlying receivable is NOT derecognized - it stays on the books as collateral. Only the liability for the loan from the bank is recognized.\n\nThe correct credit entry is simply (1,0,0,0,0,0) - one liability increase line representing the obligation to the bank. The debit side showing asset increase (cash received) and expense increase (discount charges treated as interest expense) is consistent with this treatment.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves discounting a note receivable at the bank. Since management determined this is a collateralized borrowing (not a sale of the receivable), Ford retains the risks and rewards of the note receivable. \n\nUnder IFRS, when a note is discounted as a collateralized borrowing:\n- Ford receives cash (asset increase - debit)\n- Ford recognizes a liability to the bank (liability increase - credit)\n- The note receivable remains on Ford's books (no asset decrease)\n- Interest expense is recognized over time as the note matures (expense increase - debit)\n\nThe initial credit tuple incorrectly included slot d (asset decrease) suggesting the note receivable was removed. However, in a collateralized borrowing, the underlying receivable is NOT derecognized - it stays on the books as collateral. Only the liability for the loan from the bank is recognized.\n\nThe correct credit entry is simply (1,0,0,0,0,0) - one liability increase line representing the obligation to the bank. The debit side showing asset increase (cash received) and expense increase (discount charges treated as interest expense) is consistent with this treatment."
+    },
+    "debit_corrector": {
+      "input_tokens": 1476,
+      "output_tokens": 565,
+      "cache_read_tokens": 3288,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4764,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0138894,
+      "raw_cost_usd": 0.022767,
+      "output": {
+        "reason": "This transaction involves discounting a note receivable treated as a collateralized borrowing under IFRS. When Ford discounts the note at the bank, Ford receives cash (asset increase) and records a liability (the obligation to repay if the note isn't collected). The initial debit tuple showed (1,0,1,0,0,0) with an expense increase, likely for the discount charges. However, under the collateralized borrowing treatment, the discount charges should be recorded as interest expense over the remaining note period (accrual basis), not immediately as an expense at the time of discounting. At the point of discounting, the journal entry is: Debit Cash (asset increase) and Credit Notes Payable/Loan (liability increase). The discount/financing cost will be recognized as interest expense over time through subsequent adjusting entries. Therefore, corrected to (1,0,0,0,0,0) - one asset increase only.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This transaction involves discounting a note receivable treated as a collateralized borrowing under IFRS. When Ford discounts the note at the bank, Ford receives cash (asset increase) and records a liability (the obligation to repay if the note isn't collected). The initial debit tuple showed (1,0,1,0,0,0) with an expense increase, likely for the discount charges. However, under the collateralized borrowing treatment, the discount charges should be recorded as interest expense over the remaining note period (accrual basis), not immediately as an expense at the time of discounting. At the point of discounting, the journal entry is: Debit Cash (asset increase) and Credit Notes Payable/Loan (liability increase). The discount/financing cost will be recognized as interest expense over time through subsequent adjusting entries. Therefore, corrected to (1,0,0,0,0,0) - one asset increase only."
+    },
+    "entry_builder": {
+      "input_tokens": 1494,
+      "output_tokens": 860,
+      "cache_read_tokens": 5024,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6518,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.018889200000000002,
+      "raw_cost_usd": 0.032454,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Discounting of non-interest-bearing promissory note at bank (collateralized borrowing)",
+        "rationale": "Under IFRS 9, when a note receivable is discounted and management determines that risks and rewards are not transferred, the transaction is treated as a collateralized borrowing rather than a derecognition of the receivable. The note receivable remains on the books (asset), and the cash received from the bank creates a liability (note payable to bank or bank loan). The discount charge of $1,667 (calculated as: $100,000 \u00d7 15% \u00d7 40/360 days remaining) represents interest expense. The entry records: (1) Cash received of $98,333 (debit, asset increase), and (2) Bank loan/note payable of $98,333 (credit, liability increase). Both tuples show count of 1, matching one debit line and one credit line. The discount/interest expense will be recognized over the borrowing period through a subsequent adjusting entry, not at the initial transaction date. This entry reflects only the cash receipt and corresponding liability recognition.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98333.33
+          },
+          {
+            "account_name": "Bank Loan Payable",
+            "type": "credit",
+            "amount": 98333.33
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 5987,
+      "output_tokens": 440,
+      "cache_read_tokens": 2772,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8759,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.025392599999999998,
+      "raw_cost_usd": 0.032877,
+      "output": {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Interest expense of $1,667 is missing from the entry. Under IFRS 9 collateralized borrowing treatment, when the bank discounts the note, the discount charges represent financing costs that should be recognized immediately as interest expense. The entry should record: DR Cash $98,333, DR Interest Expense $1,667, CR Bank Loan Payable $100,000. The current entry only shows Cash and Bank Loan Payable at $98,333 each, omitting the interest expense component entirely. The rationale incorrectly states that interest expense will be recognized through subsequent adjusting entry, but the discount charges are incurred upfront when the note is discounted and should be expensed at transaction date."
+      },
+      "reason": "Interest expense of $1,667 is missing from the entry. Under IFRS 9 collateralized borrowing treatment, when the bank discounts the note, the discount charges represent financing costs that should be recognized immediately as interest expense. The entry should record: DR Cash $98,333, DR Interest Expense $1,667, CR Bank Loan Payable $100,000. The current entry only shows Cash and Bank Loan Payable at $98,333 each, omitting the interest expense component entirely. The rationale incorrectly states that interest expense will be recognized through subsequent adjusting entry, but the discount charges are incurred upfront when the note is discounted and should be expensed at transaction date."
+    },
+    "diagnostician": {
+      "input_tokens": 5518,
+      "output_tokens": 283,
+      "cache_read_tokens": 3218,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8736,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.021764400000000003,
+      "raw_cost_usd": 0.030453,
+      "output": {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 3,
+            "fix_context": "Discount charges on note discounting under collateralized borrowing treatment are financing costs incurred at transaction date and must be expensed immediately as interest expense. Do not defer this expense to future periods. Maintain the original debit tuple (1,0,1,0,0,0) with one asset increase (Cash) and one expense increase (Interest Expense)."
+          }
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    2
+  ],
+  "rejection_reason": "The liability amount is incorrect. In a collateralized borrowing under IFRS 9, the liability should equal the cash proceeds received ($98,356.16), not the face value of the note ($100,000). The entry correctly debits Cash $98,356.16 and Interest Expense $1,643.84, but incorrectly credits Notes Payable - Bank for $100,000. The correct credit should be $98,356.16, representing the obligation to repay the bank the amount actually borrowed. The interest expense of $1,643.84 represents the financing cost over the 40-day period, not an addition to the liability.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Under IFRS, when discounting a note is treated as a collateralized borrowing (risks and rewards not transferred), the transaction is recorded as a loan secured by the note, not a sale of the receivable. The debit side has: (1) Cash = asset increase (net proceeds received from the bank), and (2) Discount/Interest expense = expense increase (the discount charges deducted by the bank represent financing costs). The original note receivable remains on the books as it was not derecognized.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Under IFRS, when discounting a note is treated as a collateralized borrowing (risks and rewards not transferred), the transaction is recorded as a loan secured by the note, not a sale of the receivable. The debit side has: (1) Cash = asset increase (net proceeds received from the bank), and (2) Discount/Interest expense = expense increase (the discount charges deducted by the bank represent financing costs). The original note receivable remains on the books as it was not derecognized.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This is a collateralized borrowing transaction (not a sale of the note). When Ford discounts the note at the bank, the credit side entries are: (1) Cash increases from the net proceeds received = asset increase on debit side, so we need a corresponding credit. Since management determined this is a collateralized borrowing, the note receivable remains on Ford's books and (2) a liability is created for the bank loan/obligation = liability increase. The credit side therefore shows: liability increase (1 line for the bank obligation).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "This is a collateralized borrowing transaction where Ford discounts the note at the bank. Since risks and rewards are not transferred, Ford is effectively borrowing against the note. The credit side reflects:\n1. A liability increase for the cash proceeds received ($98,356.16) - this is the loan payable to the bank\n2. An asset decrease for the discount charges/interest expense paid upfront (the difference between face value $100,000 and net proceeds $98,356.16)\n\nThe key insight from the fix context is that the liability increase equals the net cash received ($98,356.16), not the face value. The discount charges are treated as a separate line item (either prepaid interest being expensed or cash outflow for financing costs).\n\nTherefore, the credit side has:\n- 1 line for liability increase (loan payable = cash received)\n- 1 line for asset decrease (cash paid for discount charges or prepaid interest consumed)\n\nTotal credit lines: [1,0,0,1,0,0]",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves Ford discounting a note receivable at a bank, treated as a collateralized borrowing under IFRS 9.\n\nFrom the debit side:\n1. Cash (asset) increases - Ford receives net proceeds from the bank (1 asset increase line)\n2. Interest/discount expense increases - The discount charges represent financing cost (1 expense increase line)\n\nFrom the credit side:\n1. Liability increases - The borrowing creates a financial liability (1 liability increase line)\n\nThe initial debit tuple (1,0,1,0,0,0) correctly identifies:\n- One asset increase (cash received)\n- One expense increase (discount charges/interest expense)\n\nThis is consistent with the accounting treatment for a collateralized borrowing where:\n- DR Cash (net amount)\n- DR Interest Expense (discount charges)\n- CR Notes Payable/Liability (borrowing)\n\nThe note receivable remains on Ford's books since risks and rewards are not transferred. The initial debit tuple is correct - no correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "This transaction involves discounting a note receivable treated as a collateralized borrowing under IFRS. When Ford discounts the note at the bank, Ford receives cash (asset increase) and records a liability (the obligation to repay if the note isn't collected). The initial debit tuple showed (1,0,1,0,0,0) with an expense increase, likely for the discount charges. However, under the collateralized borrowing treatment, the discount charges should be recorded as interest expense over the remaining note period (accrual basis), not immediately as an expense at the time of discounting. At the point of discounting, the journal entry is: Debit Cash (asset increase) and Credit Notes Payable/Loan (liability increase). The discount/financing cost will be recognized as interest expense over time through subsequent adjusting entries. Therefore, corrected to (1,0,0,0,0,0) - one asset increase only.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes discounting a note receivable at a bank, which management has determined is a collateralized borrowing (not a sale/derecognition). Under IFRS, when a financial asset transfer does not qualify for derecognition because risks and rewards are not transferred, the entity recognizes a financial liability for the consideration received.\n\nThe journal entry should be:\n- Debit: Cash (asset increase) - for the net proceeds received\n- Debit: Interest/Discount expense (expense increase) - for the discount charges for the 40 remaining days\n- Credit: Loan/Notes Payable (liability increase) - for the borrowing obligation\n\nThe initial credit tuple (1,0,0,0,0,0) correctly shows one liability increase line, which represents the financial liability created by this collateralized borrowing arrangement. The debit tuple showing (1,0,1,0,0,0) - one asset increase (cash) and one expense increase (discount expense) - is consistent with this accounting treatment.\n\nThe credit classification is correct as is.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction involves discounting a note receivable at the bank. Since management determined this is a collateralized borrowing (not a sale of the receivable), Ford retains the risks and rewards of the note receivable. \n\nUnder IFRS, when a note is discounted as a collateralized borrowing:\n- Ford receives cash (asset increase - debit)\n- Ford recognizes a liability to the bank (liability increase - credit)\n- The note receivable remains on Ford's books (no asset decrease)\n- Interest expense is recognized over time as the note matures (expense increase - debit)\n\nThe initial credit tuple incorrectly included slot d (asset decrease) suggesting the note receivable was removed. However, in a collateralized borrowing, the underlying receivable is NOT derecognized - it stays on the books as collateral. Only the liability for the loan from the bank is recognized.\n\nThe correct credit entry is simply (1,0,0,0,0,0) - one liability increase line representing the obligation to the bank. The debit side showing asset increase (cash received) and expense increase (discount charges treated as interest expense) is consistent with this treatment.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Discount of non-interest-bearing promissory note at bank; collateralized borrowing treatment",
+        "rationale": "Under IFRS, when management determines that risks and rewards are not transferred, the discounting is treated as a collateralized borrowing rather than a derecognition of the receivable. The transaction involves: (1) Cash received (asset increase) = face value less discount charges; (2) A liability created (liability payable to bank) = the cash proceeds; (3) Interest expense recognized = the discount charges for the 40-day period the bank holds the note. Calculation: Note face value $100,000, 40 days remaining (90-50), annual discount rate 15%. Discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $100,000 - $1,643.84 = $98,356.16. The debit tuple (1,0,1,0,0,0) indicates one asset increase and one expense increase. The credit tuple (1,0,0,0,0,0) indicates one liability increase. The Notes Receivable remains on the books as collateral.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98356.16
+          },
+          {
+            "account_name": "Interest Expense",
+            "type": "debit",
+            "amount": 1643.84
+          },
+          {
+            "account_name": "Notes Payable - Bank",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Discounting of non-interest-bearing promissory note at bank (collateralized borrowing)",
+        "rationale": "Under IFRS 9, when a note receivable is discounted and management determines that risks and rewards are not transferred, the transaction is treated as a collateralized borrowing rather than a derecognition of the receivable. The note receivable remains on the books (asset), and the cash received from the bank creates a liability (note payable to bank or bank loan). The discount charge of $1,667 (calculated as: $100,000 \u00d7 15% \u00d7 40/360 days remaining) represents interest expense. The entry records: (1) Cash received of $98,333 (debit, asset increase), and (2) Bank loan/note payable of $98,333 (credit, liability increase). Both tuples show count of 1, matching one debit line and one credit line. The discount/interest expense will be recognized over the borrowing period through a subsequent adjusting entry, not at the initial transaction date. This entry reflects only the cash receipt and corresponding liability recognition.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98333.33
+          },
+          {
+            "account_name": "Bank Loan Payable",
+            "type": "credit",
+            "amount": 98333.33
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "The liability amount is incorrect. In a collateralized borrowing under IFRS 9, the liability should equal the cash proceeds received ($98,356.16), not the face value of the note ($100,000). The entry correctly debits Cash $98,356.16 and Interest Expense $1,643.84, but incorrectly credits Notes Payable - Bank for $100,000. The correct credit should be $98,356.16, representing the obligation to repay the bank the amount actually borrowed. The interest expense of $1,643.84 represents the financing cost over the 40-day period, not an addition to the liability."
+      },
+      {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Interest expense of $1,667 is missing from the entry. Under IFRS 9 collateralized borrowing treatment, when the bank discounts the note, the discount charges represent financing costs that should be recognized immediately as interest expense. The entry should record: DR Cash $98,333, DR Interest Expense $1,667, CR Bank Loan Payable $100,000. The current entry only shows Cash and Bank Loan Payable at $98,333 each, omitting the interest expense component entirely. The rationale incorrectly states that interest expense will be recognized through subsequent adjusting entry, but the discount charges are incurred upfront when the note is discounted and should be expensed at transaction date."
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 2,
+            "fix_context": "In a collateralized borrowing, the liability created should equal the cash proceeds received ($98,356.16), not the face value of the note. The credit tuple should reflect that the liability increase amount matches the net cash received."
+          }
+        ],
+        "stuck_reason": null
+      },
+      {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 3,
+            "fix_context": "Discount charges on note discounting under collateralized borrowing treatment are financing costs incurred at transaction date and must be expensed immediately as interest expense. Do not defer this expense to future periods. Maintain the original debit tuple (1,0,1,0,0,0) with one asset increase (Cash) and one expense increase (Interest Expense)."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [
+      "In a collateralized borrowing, the liability created should equal the cash proceeds received ($98,356.16), not the face value of the note. The credit tuple should reflect that the liability increase amount matches the net cash received."
+    ],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": null,
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 595,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 568,
+        "output_tokens": 180,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 570,
+        "output_tokens": 176,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 738,
+        "output_tokens": 299,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 738,
+        "output_tokens": 295,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 747,
+        "output_tokens": 459,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2344,
+        "output_tokens": 213,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 2073,
+        "output_tokens": 126,
+        "input_token_details": {
+          "cache_read": 1609,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 644,
+        "output_tokens": 293,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 738,
+        "output_tokens": 270,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 738,
+        "output_tokens": 321,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 747,
+        "output_tokens": 401,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 3643,
+        "output_tokens": 227,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 3445,
+        "output_tokens": 157,
+        "input_token_details": {
+          "cache_read": 1609,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

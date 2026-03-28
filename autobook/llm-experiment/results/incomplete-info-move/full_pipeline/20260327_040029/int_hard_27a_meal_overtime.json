@@ -1,0 +1,603 @@
+{
+  "test_case_id": "int_hard_27a_meal_overtime",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Employee meal benefit for overtime workers paid by corporate credit card",
+    "rationale": "The $125 payment represents the total amount paid (tax-inclusive) for a meal provided to employees working overtime as an employee benefit. Per fix context, this is the final amount paid, not a pre-tax base. Under IFRS, employee benefits are operating expenses. The debit tuple (0,0,1,0,0,0) indicates one expense increase line, and the credit tuple (1,0,0,0,0,0) indicates one liability increase line for the credit card payable. Since the $125 is the total amount already paid including any embedded tax, no separate tax calculation is needed - the full amount goes to the expense account and the offsetting credit card liability.",
+    "lines": [
+      {
+        "account_name": "Employee Benefits Expense",
+        "type": "debit",
+        "amount": 125.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 125.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0707301,
+  "raw_cost_usd": 0.12132,
+  "total_latency_ms": 41777,
+  "total_input_tokens": 30840,
+  "total_output_tokens": 1920,
+  "total_llm_calls": 11,
+  "iteration_count": 2,
+  "final_decision": "error",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 529,
+      "output_tokens": 35,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2653,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0027492,
+      "raw_cost_usd": 0.008484,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 504,
+      "output_tokens": 99,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1666,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033456,
+      "raw_cost_usd": 0.006483,
+      "output": {
+        "reason": "The meal provided to employees working overtime as an employee benefit is an employee benefit expense. This increases the expense account, resulting in 1 expense increase debit line.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The meal provided to employees working overtime as an employee benefit is an employee benefit expense. This increases the expense account, resulting in 1 expense increase debit line."
+    },
+    "credit_classifier": {
+      "input_tokens": 502,
+      "output_tokens": 115,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1643,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035733,
+      "raw_cost_usd": 0.006654,
+      "output": {
+        "reason": "Corporate credit card used = liability increase. When the company uses a credit card to purchase the meal, it creates an obligation to pay the credit card company, which is a liability (credit card payable). The credit side records this increase in liability.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Corporate credit card used = liability increase. When the company uses a credit card to purchase the meal, it creates an obligation to pay the credit card company, which is a liability (credit card payable). The credit side records this increase in liability."
+    },
+    "debit_corrector": {
+      "input_tokens": 672,
+      "output_tokens": 177,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2316,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051642,
+      "raw_cost_usd": 0.009603,
+      "output": {
+        "reason": "The meal provided to employees working overtime is an employee benefit, which represents an expense increase under IFRS (employee benefits expense). The debit tuple correctly classifies this as c=1 (expense increase). The credit tuple shows a=1 (liability increase), which is consistent - when using a corporate credit card, the company incurs a liability (credit card payable) that increases. The transaction semantics are: Debit: Employee benefits expense (expense increase), Credit: Credit card payable (liability increase). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The meal provided to employees working overtime is an employee benefit, which represents an expense increase under IFRS (employee benefits expense). The debit tuple correctly classifies this as c=1 (expense increase). The credit tuple shows a=1 (liability increase), which is consistent - when using a corporate credit card, the company incurs a liability (credit card payable) that increases. The transaction semantics are: Debit: Employee benefits expense (expense increase), Credit: Credit card payable (liability increase). No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 672,
+      "output_tokens": 160,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2324,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049116,
+      "raw_cost_usd": 0.009372,
+      "output": {
+        "reason": "The transaction describes a meal purchased using a corporate credit card. This creates a liability (credit card payable) that needs to be paid later. The credit side correctly records this as a liability increase (slot a=1). The debit side shows an expense increase (employee benefit expense), which is also correct - the meal expense is being recognized. The two sides tell a consistent story: debit expense, credit accounts payable/credit card liability. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a meal purchased using a corporate credit card. This creates a liability (credit card payable) that needs to be paid later. The credit side correctly records this as a liability increase (slot a=1). The debit side shows an expense increase (employee benefit expense), which is also correct - the meal expense is being recognized. The two sides tell a consistent story: debit expense, credit accounts payable/credit card liability. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1437,
+      "output_tokens": 695,
+      "cache_read_tokens": 5024,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6461,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0162432,
+      "raw_cost_usd": 0.029808,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Employee meal benefit for overtime workers paid by corporate credit card",
+        "rationale": "The $125 payment represents the total amount paid (tax-inclusive) for a meal provided to employees working overtime as an employee benefit. Per fix context, this is the final amount paid, not a pre-tax base. Under IFRS, employee benefits are operating expenses. The debit tuple (0,0,1,0,0,0) indicates one expense increase line, and the credit tuple (1,0,0,0,0,0) indicates one liability increase line for the credit card payable. Since the $125 is the total amount already paid including any embedded tax, no separate tax calculation is needed - the full amount goes to the expense account and the offsetting credit card liability.",
+        "lines": [
+          {
+            "account_name": "Employee Benefits Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4073,
+      "output_tokens": 367,
+      "cache_read_tokens": 2772,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6845,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0185556,
+      "raw_cost_usd": 0.02604,
+      "output": {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Missing HST lines. The transaction states $125 was paid for a meal using a corporate credit card. In Canada, restaurant meals are subject to HST/GST. The entry treats $125 as tax-inclusive but does not separate out the recoverable HST component. For a tax-inclusive $125 payment in Ontario (13% HST), the breakdown should be approximately $110.62 base expense + $14.38 HST Receivable = $125 Credit Card Payable. The business can recover the HST on this employee benefit expense, so a separate HST Receivable line is required."
+      },
+      "reason": "Missing HST lines. The transaction states $125 was paid for a meal using a corporate credit card. In Canada, restaurant meals are subject to HST/GST. The entry treats $125 as tax-inclusive but does not separate out the recoverable HST component. For a tax-inclusive $125 payment in Ontario (13% HST), the breakdown should be approximately $110.62 base expense + $14.38 HST Receivable = $125 Credit Card Payable. The business can recover the HST on this employee benefit expense, so a separate HST Receivable line is required."
+    },
+    "diagnostician": {
+      "input_tokens": 3714,
+      "output_tokens": 272,
+      "cache_read_tokens": 3218,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6932,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0161874,
+      "raw_cost_usd": 0.024876,
+      "output": {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "The $125 is tax-inclusive. In Ontario (13% HST), restaurant meals are taxable and HST is recoverable on employee benefit expenses. Break down as: $110.62 base Employee Benefits Expense + $14.38 HST Receivable debit, with $125 Credit Card Payable credit."
+          }
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Transaction text states $125 was paid, but the journal entry assumes $125 is the pre-tax amount and adds $16.25 HST, totaling $141.25. The transaction clearly states \"$125 for a meal\" as the amount paid, which should be interpreted as the total amount paid, not the base amount before tax. The entry incorrectly inflates the transaction by calculating additional HST on top of the stated amount.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "The meal provided to employees working overtime as an employee benefit is an employee benefit expense. This increases the expense account, resulting in 1 expense increase debit line.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The meal provided to employees working overtime as an employee benefit is an employee benefit expense. This increases the expense account, resulting in 1 expense increase debit line.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Corporate credit card used = liability increase. When the company uses a credit card to purchase the meal, it creates an obligation to pay the credit card company, which is a liability (credit card payable). The credit side records this increase in liability.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Corporate credit card used = liability increase. When the company uses a credit card to purchase the meal, it creates an obligation to pay the credit card company, which is a liability (credit card payable). The credit side records this increase in liability.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The meal provided to employees working overtime is an employee benefit, which represents an expense increase under IFRS (employee benefits expense). The debit tuple correctly classifies this as c=1 (expense increase). The credit tuple shows a=1 (liability increase), which is consistent - when using a corporate credit card, the company incurs a liability (credit card payable) that increases. The transaction semantics are: Debit: Employee benefits expense (expense increase), Credit: Credit card payable (liability increase). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The meal provided to employees working overtime is an employee benefit, which represents an expense increase under IFRS (employee benefits expense). The debit tuple correctly classifies this as c=1 (expense increase). The credit tuple shows a=1 (liability increase), which is consistent - when using a corporate credit card, the company incurs a liability (credit card payable) that increases. The transaction semantics are: Debit: Employee benefits expense (expense increase), Credit: Credit card payable (liability increase). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes a meal purchased using a corporate credit card. This creates a liability (credit card payable) that needs to be paid later. The credit side correctly records this as a liability increase (slot a=1). The debit side shows an expense increase (employee benefit expense), which is also correct - the meal expense is being recognized. The two sides tell a consistent story: debit expense, credit accounts payable/credit card liability. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction describes a meal purchased using a corporate credit card. This creates a liability (credit card payable) that needs to be paid later. The credit side correctly records this as a liability increase (slot a=1). The debit side shows an expense increase (employee benefit expense), which is also correct - the meal expense is being recognized. The two sides tell a consistent story: debit expense, credit accounts payable/credit card liability. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Employee meal benefit for overtime workers paid via corporate credit card",
+        "rationale": "The meal provided to employees working overtime is an employee benefit expense. Under IFRS, this is a compensation-related expense (employee benefits). The corporate credit card creates a liability (credit card payable). Since this is a prepared meal, it is likely exempt from HST/GST under Canadian tax rules (prepared food for employees as a benefit is often considered a taxable benefit for payroll purposes but the purchase itself may be exempt or the business may not recover the tax). However, assuming this is a restaurant meal purchase, HST would apply. In Ontario (assuming ON jurisdiction), HST at 13% would apply to restaurant meals. The business can recover this HST. Total payment: $125 base + $16.25 HST = $141.25.",
+        "lines": [
+          {
+            "account_name": "Employee Benefits Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 16.25
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 141.25
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Employee meal benefit for overtime workers paid by corporate credit card",
+        "rationale": "The $125 payment represents the total amount paid (tax-inclusive) for a meal provided to employees working overtime as an employee benefit. Per fix context, this is the final amount paid, not a pre-tax base. Under IFRS, employee benefits are operating expenses. The debit tuple (0,0,1,0,0,0) indicates one expense increase line, and the credit tuple (1,0,0,0,0,0) indicates one liability increase line for the credit card payable. Since the $125 is the total amount already paid including any embedded tax, no separate tax calculation is needed - the full amount goes to the expense account and the offsetting credit card liability.",
+        "lines": [
+          {
+            "account_name": "Employee Benefits Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Transaction text states $125 was paid, but the journal entry assumes $125 is the pre-tax amount and adds $16.25 HST, totaling $141.25. The transaction clearly states \"$125 for a meal\" as the amount paid, which should be interpreted as the total amount paid, not the base amount before tax. The entry incorrectly inflates the transaction by calculating additional HST on top of the stated amount."
+      },
+      {
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Missing HST lines. The transaction states $125 was paid for a meal using a corporate credit card. In Canada, restaurant meals are subject to HST/GST. The entry treats $125 as tax-inclusive but does not separate out the recoverable HST component. For a tax-inclusive $125 payment in Ontario (13% HST), the breakdown should be approximately $110.62 base expense + $14.38 HST Receivable = $125 Credit Card Payable. The business can recover the HST on this employee benefit expense, so a separate HST Receivable line is required."
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Transaction states '$125 for a meal' was paid, meaning $125 is the total amount paid (tax-inclusive), not a pre-tax base amount. Do not add HST on top of the stated payment amount."
+          }
+        ],
+        "stuck_reason": null
+      },
+      {
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "The $125 is tax-inclusive. In Ontario (13% HST), restaurant meals are taxable and HST is recoverable on employee benefit expenses. Break down as: $110.62 base Employee Benefits Expense + $14.38 HST Receivable debit, with $125 Credit Card Payable credit."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Transaction states '$125 for a meal' was paid, meaning $125 is the total amount paid (tax-inclusive), not a pre-tax base amount. Do not add HST on top of the stated payment amount."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": null,
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 529,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 99,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 502,
+        "output_tokens": 115,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 672,
+        "output_tokens": 177,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 672,
+        "output_tokens": 160,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 681,
+        "output_tokens": 373,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1683,
+        "output_tokens": 164,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1459,
+        "output_tokens": 115,
+        "input_token_details": {
+          "cache_read": 1609,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 756,
+        "output_tokens": 322,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2390,
+        "output_tokens": 203,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 2255,
+        "output_tokens": 157,
+        "input_token_details": {
+          "cache_read": 1609,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

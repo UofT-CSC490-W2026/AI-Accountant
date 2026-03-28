@@ -1,0 +1,30 @@
+# P2 Ablation Template — one run per YAML file
+#
+# You need 3 separate configs (one per ablation):
+#   1. p2_baseline.yaml   — nanochat_ref: main (unmodified nanochat)
+#   2. p2_ablation1.yaml  — nanochat_ref: p2-change1 (your first architecture change)
+#   3. p2_ablation2.yaml  — nanochat_ref: p2-change2 (your second architecture change)
+#
+# For each: copy this file, fill in the values, push your branch to the fork, then run:
+#   modal run --detach a3/shared/scripts/main.py --config a3/p2/configs/p2_baseline.yaml
+#
+# Remember: push your branch to the fork BEFORE running. Modal pulls from GitHub, not your laptop.
+
+experiment_name: p2-baseline         # change per ablation: p2-baseline, p2-ablation1, p2-ablation2
+nanochat_ref: main                   # git branch on the nanochat fork — change per ablation
+gpu: A100-80GB                       # A100-80GB for picochat is fine; T4 may also work
+
+train:
+  - name: train
+    args:
+      depth: 6                       # picochat
+      max_seq_len: 512               # standard sequence length
+      model_tag: pico-baseline       # change per ablation: pico-baseline, pico-ablation1, pico-ablation2
+      device_batch_size: 512         # reduce to 256 or 128 if OOM
+      run: p2-baseline               # W&B run name — change per ablation
+    # num_iterations omitted — nanochat auto-computes from scaling law
+
+eval:
+  - checkpoint: pico-baseline        # must match model_tag above
+    after_stage: train
+    evals: [bpb, core]

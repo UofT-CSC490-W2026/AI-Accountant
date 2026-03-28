@@ -1,0 +1,454 @@
+{
+  "test_case_id": "int_05_bond_issuance_discount",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2024-12-31",
+    "description": "Issuance of $3,000,000 bonds at discount, 10% coupon, 3-year term",
+    "rationale": "Bonds issued at discount because market rate (15%) exceeds coupon rate (10%). Present value calculation: PV of principal = $3,000,000 / (1.15)^3 = $1,972,547; PV of interest payments = $300,000 \u00d7 [(1 - (1.15)^-3) / 0.15] = $684,752. Total proceeds = $2,657,299. Cash debited for proceeds received. Bonds Payable credited at face value. Discount on Bonds Payable debited for the difference, representing the contra-liability that will be amortized over the bond term using the effective interest method per IFRS 9.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 2657299.0
+      },
+      {
+        "account_name": "Discount on Bonds Payable",
+        "type": "debit",
+        "amount": 342701.0
+      },
+      {
+        "account_name": "Bonds Payable",
+        "type": "credit",
+        "amount": 3000000.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0558135,
+  "raw_cost_usd": 0.087633,
+  "total_latency_ms": 39386,
+  "total_input_tokens": 18621,
+  "total_output_tokens": 2118,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 568,
+      "output_tokens": 283,
+      "cache_read_tokens": 2133,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2701,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0065889,
+      "raw_cost_usd": 0.012348,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "exact proceeds received from bond issuance",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Calculate present value using 15% market rate: PV of principal + PV of interest payments",
+              "Use a stated proceeds amount if provided elsewhere",
+              "Request the actual cash amount received"
+            ],
+            "clarification_question": "What was the actual cash amount received from issuing these bonds?",
+            "why_entry_differs": "The debit to Cash and credit to Bonds Payable (and corresponding Discount on Bonds Payable) require the exact proceeds amount. Different proceeds amounts will result in different discount values.",
+            "why_not_resolved": "While the transaction states bonds were 'issued at a discount to reflect the market interest rate of 15%', it does not provide the actual proceeds amount. The present value calculation requires assumptions about timing (e.g., issue date relative to interest payment dates) and whether there are any issuance costs. Standard convention does not provide a default proceeds amount without explicit calculation parameters."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 541,
+      "output_tokens": 150,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1682,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0042153,
+      "raw_cost_usd": 0.007296,
+      "output": {
+        "reason": "Bonds payable issued = liability increase. When Clorox issues bonds, they create a liability (bonds payable) that must be repaid. Even though the bonds are issued at a discount (proceeds < face value), the credit side records the liability increase. The discount is typically recorded separately on the debit side as a contra-liability, but the primary credit entry is the bonds payable liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Bonds payable issued = liability increase. When Clorox issues bonds, they create a liability (bonds payable) that must be repaid. Even though the bonds are issued at a discount (proceeds < face value), the credit side records the liability increase. The discount is typically recorded separately on the debit side as a contra-liability, but the primary credit entry is the bonds payable liability increase."
+    },
+    "debit_classifier": {
+      "input_tokens": 543,
+      "output_tokens": 196,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1705,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049176,
+      "raw_cost_usd": 0.008055,
+      "output": {
+        "reason": "When bonds are issued at a discount, the debit side records: (1) Cash received = asset increase (proceeds less than face value), and (2) Discount on bonds payable = expense/contra-liability increase. Under IFRS, the discount is typically recorded as a debit to a contra-liability account (Discount on Bonds Payable) which effectively represents a financing cost/expense that will be amortized over the bond term. This gives us 1 asset increase (cash) + 1 expense increase (discount) = [1,0,1,0,0,0].",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "When bonds are issued at a discount, the debit side records: (1) Cash received = asset increase (proceeds less than face value), and (2) Discount on bonds payable = expense/contra-liability increase. Under IFRS, the discount is typically recorded as a debit to a contra-liability account (Discount on Bonds Payable) which effectively represents a financing cost/expense that will be amortized over the bond term. This gives us 1 asset increase (cash) + 1 expense increase (discount) = [1,0,1,0,0,0]."
+    },
+    "debit_corrector": {
+      "input_tokens": 711,
+      "output_tokens": 247,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2355,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063311999999999995,
+      "raw_cost_usd": 0.01077,
+      "output": {
+        "reason": "The transaction is a bond issuance at a discount. When bonds are issued, the company receives cash (asset increase) and records a liability for the bonds payable. The initial debit tuple incorrectly included an expense increase (slot c=1), but at issuance, no expense is recorded. The discount on bonds payable is a contra-liability account that reduces the carrying value of the bond liability, not an immediate expense. The discount will be amortized to interest expense over the bond's life, but that happens in future periods, not at issuance. At issuance, the debit side should only show the cash received (asset increase). The credit tuple showing liability increase (a=1) is consistent with this understanding. Corrected debit tuple to (1,0,0,0,0,0) - one asset increase only.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a bond issuance at a discount. When bonds are issued, the company receives cash (asset increase) and records a liability for the bonds payable. The initial debit tuple incorrectly included an expense increase (slot c=1), but at issuance, no expense is recorded. The discount on bonds payable is a contra-liability account that reduces the carrying value of the bond liability, not an immediate expense. The discount will be amortized to interest expense over the bond's life, but that happens in future periods, not at issuance. At issuance, the debit side should only show the cash received (asset increase). The credit tuple showing liability increase (a=1) is consistent with this understanding. Corrected debit tuple to (1,0,0,0,0,0) - one asset increase only."
+    },
+    "credit_corrector": {
+      "input_tokens": 711,
+      "output_tokens": 622,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2363,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0119586,
+      "raw_cost_usd": 0.016419,
+      "output": {
+        "reason": "The transaction involves issuing bonds at a discount. Under IFRS, this requires:\n\n1. Debit: Cash (asset increase) for the proceeds received (less than face value due to discount)\n2. Debit: Discount on bonds payable (contra-liability, recorded as an asset increase OR as a reduction to the liability - accounting treatment varies, but the debit classifier appears to have recorded this as an expense increase, which is incorrect for initial issuance)\n3. Credit: Bonds payable (liability increase) at face value of $3,000,000\n\nHowever, the proper journal entry at issuance should be:\n- Dr. Cash (proceeds at market rate)\n- Dr. Discount on Bonds Payable (difference between face and proceeds)\n- Cr. Bonds Payable (face value)\n\nThe discount is typically recorded as a contra-liability (reducing the net liability), not as an immediate expense. The discount is amortized over the bond term.\n\nLooking at the debit tuple (1,0,1,0,0,0), it shows asset increase + expense increase, which is incorrect - the discount should not be expensed immediately.\n\nFor the credit side: When bonds are issued at face value with a discount recorded separately, we need:\n- Credit to Bonds Payable (liability increase) = 1 line\n- If using gross method, the discount is a debit to a contra-liability account\n\nBut actually, under modern IFRS practice (IFRS 9), bonds are often recorded at net proceeds (fair value), which would be a single credit to liability. However, if using the traditional gross method where discount is tracked separately, we would credit the face value.\n\nThe initial credit tuple (1,0,0,0,0,0) shows only liability increase, which would be correct if recording at net proceeds OR if recording face value with discount tracked separately as a debit.\n\nWait - reviewing more carefully: The debit side shows expense increase, which suggests the classifier may have confused initial recording with subsequent amortization. At issuance, there should be NO expense. \n\nThe credit should actually be TWO lines if using gross method:\n1. Bonds Payable at face value (liability increase)\n2. Discount on Bonds Payable as a contra-liability (which is an asset decrease from the credit perspective)\n\nCorrecting to (1,0,0,1,0,0): one liability increase for the bonds payable, one asset decrease for the discount contra-account.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves issuing bonds at a discount. Under IFRS, this requires:\n\n1. Debit: Cash (asset increase) for the proceeds received (less than face value due to discount)\n2. Debit: Discount on bonds payable (contra-liability, recorded as an asset increase OR as a reduction to the liability - accounting treatment varies, but the debit classifier appears to have recorded this as an expense increase, which is incorrect for initial issuance)\n3. Credit: Bonds payable (liability increase) at face value of $3,000,000\n\nHowever, the proper journal entry at issuance should be:\n- Dr. Cash (proceeds at market rate)\n- Dr. Discount on Bonds Payable (difference between face and proceeds)\n- Cr. Bonds Payable (face value)\n\nThe discount is typically recorded as a contra-liability (reducing the net liability), not as an immediate expense. The discount is amortized over the bond term.\n\nLooking at the debit tuple (1,0,1,0,0,0), it shows asset increase + expense increase, which is incorrect - the discount should not be expensed immediately.\n\nFor the credit side: When bonds are issued at face value with a discount recorded separately, we need:\n- Credit to Bonds Payable (liability increase) = 1 line\n- If using gross method, the discount is a debit to a contra-liability account\n\nBut actually, under modern IFRS practice (IFRS 9), bonds are often recorded at net proceeds (fair value), which would be a single credit to liability. However, if using the traditional gross method where discount is tracked separately, we would credit the face value.\n\nThe initial credit tuple (1,0,0,0,0,0) shows only liability increase, which would be correct if recording at net proceeds OR if recording face value with discount tracked separately as a debit.\n\nWait - reviewing more carefully: The debit side shows expense increase, which suggests the classifier may have confused initial recording with subsequent amortization. At issuance, there should be NO expense. \n\nThe credit should actually be TWO lines if using gross method:\n1. Bonds Payable at face value (liability increase)\n2. Discount on Bonds Payable as a contra-liability (which is an asset decrease from the credit perspective)\n\nCorrecting to (1,0,0,1,0,0): one liability increase for the bonds payable, one asset decrease for the discount contra-account."
+    },
+    "entry_builder": {
+      "input_tokens": 1077,
+      "output_tokens": 384,
+      "cache_read_tokens": 2667,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3744,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0097911,
+      "raw_cost_usd": 0.016992,
+      "output": {
+        "date": "2024-12-31",
+        "description": "Issuance of $3,000,000 bonds at discount, 10% coupon, 3-year term",
+        "rationale": "Bonds issued at discount because market rate (15%) exceeds coupon rate (10%). Present value calculation: PV of principal = $3,000,000 / (1.15)^3 = $1,972,547; PV of interest payments = $300,000 \u00d7 [(1 - (1.15)^-3) / 0.15] = $684,752. Total proceeds = $2,657,299. Cash debited for proceeds received. Bonds Payable credited at face value. Discount on Bonds Payable debited for the difference, representing the contra-liability that will be amortized over the bond term using the effective interest method per IFRS 9.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 2657299.0
+          },
+          {
+            "account_name": "Discount on Bonds Payable",
+            "type": "debit",
+            "amount": 342701.0
+          },
+          {
+            "account_name": "Bonds Payable",
+            "type": "credit",
+            "amount": 3000000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2685,
+      "output_tokens": 236,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4071,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.012010799999999999,
+      "raw_cost_usd": 0.015753,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records bond issuance at discount per IFRS 9. Balance verified: debits ($2,657,299 + $342,701 = $3,000,000) equal credits ($3,000,000). Present value calculations are correct: PV of principal $1,972,547 + PV of annuity $684,752 = $2,657,299 proceeds. Discount of $342,701 ($3,000,000 - $2,657,299) properly recorded as contra-liability debit. All three accounts (Cash, Discount on Bonds Payable, Bonds Payable) are appropriate and amounts are reasonable. Entry follows gross method with discount tracked separately for subsequent effective interest amortization."
+      },
+      "reason": "Entry correctly records bond issuance at discount per IFRS 9. Balance verified: debits ($2,657,299 + $342,701 = $3,000,000) equal credits ($3,000,000). Present value calculations are correct: PV of principal $1,972,547 + PV of annuity $684,752 = $2,657,299 proceeds. Discount of $342,701 ($3,000,000 - $2,657,299) properly recorded as contra-liability debit. All three accounts (Cash, Discount on Bonds Payable, Bonds Payable) are appropriate and amounts are reasonable. Entry follows gross method with discount tracked separately for subsequent effective interest amortization."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "exact proceeds received from bond issuance",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Calculate present value using 15% market rate: PV of principal + PV of interest payments",
+              "Use a stated proceeds amount if provided elsewhere",
+              "Request the actual cash amount received"
+            ],
+            "clarification_question": "What was the actual cash amount received from issuing these bonds?",
+            "why_entry_differs": "The debit to Cash and credit to Bonds Payable (and corresponding Discount on Bonds Payable) require the exact proceeds amount. Different proceeds amounts will result in different discount values.",
+            "why_not_resolved": "While the transaction states bonds were 'issued at a discount to reflect the market interest rate of 15%', it does not provide the actual proceeds amount. The present value calculation requires assumptions about timing (e.g., issue date relative to interest payment dates) and whether there are any issuance costs. Standard convention does not provide a default proceeds amount without explicit calculation parameters."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "When bonds are issued at a discount, the debit side records: (1) Cash received = asset increase (proceeds less than face value), and (2) Discount on bonds payable = expense/contra-liability increase. Under IFRS, the discount is typically recorded as a debit to a contra-liability account (Discount on Bonds Payable) which effectively represents a financing cost/expense that will be amortized over the bond term. This gives us 1 asset increase (cash) + 1 expense increase (discount) = [1,0,1,0,0,0].",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Bonds payable issued = liability increase. When Clorox issues bonds, they create a liability (bonds payable) that must be repaid. Even though the bonds are issued at a discount (proceeds < face value), the credit side records the liability increase. The discount is typically recorded separately on the debit side as a contra-liability, but the primary credit entry is the bonds payable liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is a bond issuance at a discount. When bonds are issued, the company receives cash (asset increase) and records a liability for the bonds payable. The initial debit tuple incorrectly included an expense increase (slot c=1), but at issuance, no expense is recorded. The discount on bonds payable is a contra-liability account that reduces the carrying value of the bond liability, not an immediate expense. The discount will be amortized to interest expense over the bond's life, but that happens in future periods, not at issuance. At issuance, the debit side should only show the cash received (asset increase). The credit tuple showing liability increase (a=1) is consistent with this understanding. Corrected debit tuple to (1,0,0,0,0,0) - one asset increase only.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves issuing bonds at a discount. Under IFRS, this requires:\n\n1. Debit: Cash (asset increase) for the proceeds received (less than face value due to discount)\n2. Debit: Discount on bonds payable (contra-liability, recorded as an asset increase OR as a reduction to the liability - accounting treatment varies, but the debit classifier appears to have recorded this as an expense increase, which is incorrect for initial issuance)\n3. Credit: Bonds payable (liability increase) at face value of $3,000,000\n\nHowever, the proper journal entry at issuance should be:\n- Dr. Cash (proceeds at market rate)\n- Dr. Discount on Bonds Payable (difference between face and proceeds)\n- Cr. Bonds Payable (face value)\n\nThe discount is typically recorded as a contra-liability (reducing the net liability), not as an immediate expense. The discount is amortized over the bond term.\n\nLooking at the debit tuple (1,0,1,0,0,0), it shows asset increase + expense increase, which is incorrect - the discount should not be expensed immediately.\n\nFor the credit side: When bonds are issued at face value with a discount recorded separately, we need:\n- Credit to Bonds Payable (liability increase) = 1 line\n- If using gross method, the discount is a debit to a contra-liability account\n\nBut actually, under modern IFRS practice (IFRS 9), bonds are often recorded at net proceeds (fair value), which would be a single credit to liability. However, if using the traditional gross method where discount is tracked separately, we would credit the face value.\n\nThe initial credit tuple (1,0,0,0,0,0) shows only liability increase, which would be correct if recording at net proceeds OR if recording face value with discount tracked separately as a debit.\n\nWait - reviewing more carefully: The debit side shows expense increase, which suggests the classifier may have confused initial recording with subsequent amortization. At issuance, there should be NO expense. \n\nThe credit should actually be TWO lines if using gross method:\n1. Bonds Payable at face value (liability increase)\n2. Discount on Bonds Payable as a contra-liability (which is an asset decrease from the credit perspective)\n\nCorrecting to (1,0,0,1,0,0): one liability increase for the bonds payable, one asset decrease for the discount contra-account.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2024-12-31",
+        "description": "Issuance of $3,000,000 bonds at discount, 10% coupon, 3-year term",
+        "rationale": "Bonds issued at discount because market rate (15%) exceeds coupon rate (10%). Present value calculation: PV of principal = $3,000,000 / (1.15)^3 = $1,972,547; PV of interest payments = $300,000 \u00d7 [(1 - (1.15)^-3) / 0.15] = $684,752. Total proceeds = $2,657,299. Cash debited for proceeds received. Bonds Payable credited at face value. Discount on Bonds Payable debited for the difference, representing the contra-liability that will be amortized over the bond term using the effective interest method per IFRS 9.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 2657299.0
+          },
+          {
+            "account_name": "Discount on Bonds Payable",
+            "type": "debit",
+            "amount": 342701.0
+          },
+          {
+            "account_name": "Bonds Payable",
+            "type": "credit",
+            "amount": 3000000.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records bond issuance at discount per IFRS 9. Balance verified: debits ($2,657,299 + $342,701 = $3,000,000) equal credits ($3,000,000). Present value calculations are correct: PV of principal $1,972,547 + PV of annuity $684,752 = $2,657,299 proceeds. Discount of $342,701 ($3,000,000 - $2,657,299) properly recorded as contra-liability debit. All three accounts (Cash, Discount on Bonds Payable, Bonds Payable) are appropriate and amounts are reasonable. Entry follows gross method with discount tracked separately for subsequent effective interest amortization."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 568,
+        "output_tokens": 283,
+        "input_token_details": {
+          "cache_read": 2133,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 541,
+        "output_tokens": 150,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 543,
+        "output_tokens": 196,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 711,
+        "output_tokens": 247,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 711,
+        "output_tokens": 622,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1077,
+        "output_tokens": 384,
+        "input_token_details": {
+          "cache_read": 2667,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2685,
+        "output_tokens": 236,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

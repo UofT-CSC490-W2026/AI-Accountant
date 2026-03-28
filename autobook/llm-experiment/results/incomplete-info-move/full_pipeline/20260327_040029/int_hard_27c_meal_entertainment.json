@@ -1,0 +1,411 @@
+{
+  "test_case_id": "int_hard_27c_meal_entertainment",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Client entertainment meal paid with corporate credit card",
+    "rationale": "Client entertainment is a business expense under IFRS. The transaction specifies the meal was for client entertainment, so it should be recorded as Meals and Entertainment Expense (or similar entertainment expense account). Under Canadian tax rules, only 50% of meals and entertainment expenses are deductible for tax purposes, but the full amount is still recorded as an expense in the accounting entry. The corporate credit card creates a liability (Credit Card Payable). Since no province is specified and no tax rules lookup was provided, I'm treating this as a tax-exempt food purchase (many meal transactions at restaurants include tax in the stated amount). The debit tuple (0,0,1,0,0,0) indicates one expense increase line, and the credit tuple (1,0,0,0,0,0) indicates one liability increase line.",
+    "lines": [
+      {
+        "account_name": "Meals and Entertainment Expense",
+        "type": "debit",
+        "amount": 125.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 125.0
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0361743,
+  "raw_cost_usd": 0.067551,
+  "total_latency_ms": 23969,
+  "total_input_tokens": 16817,
+  "total_output_tokens": 1140,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 523,
+      "output_tokens": 35,
+      "cache_read_tokens": 2124,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2647,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0027312,
+      "raw_cost_usd": 0.008466,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 496,
+      "output_tokens": 82,
+      "cache_read_tokens": 1141,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1637,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0030603,
+      "raw_cost_usd": 0.006141,
+      "output": {
+        "reason": "Corporate credit card used = liability increase (credit card payable increases by $125)",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Corporate credit card used = liability increase (credit card payable increases by $125)"
+    },
+    "debit_classifier": {
+      "input_tokens": 498,
+      "output_tokens": 117,
+      "cache_read_tokens": 1162,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1660,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035976,
+      "raw_cost_usd": 0.006735,
+      "output": {
+        "reason": "Client entertainment meal = expense increase. The $125 meal is a business expense (entertainment/meals expense), which is increased by a debit. The corporate credit card creates a liability on the credit side, but we only classify the debit side here.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Client entertainment meal = expense increase. The $125 meal is a business expense (entertainment/meals expense), which is increased by a debit. The corporate credit card creates a liability on the credit side, but we only classify the debit side here."
+    },
+    "debit_corrector": {
+      "input_tokens": 666,
+      "output_tokens": 162,
+      "cache_read_tokens": 1644,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2310,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049212,
+      "raw_cost_usd": 0.00936,
+      "output": {
+        "reason": "The transaction describes a client entertainment meal paid with a corporate credit card. Under IFRS, entertainment expenses for clients are classified as operating expenses (specifically, entertainment or meals & entertainment expense). The debit should record an expense increase (slot c). The credit side shows a liability increase (slot a), which is consistent because using a corporate credit card creates a payable (credit card liability). The initial debit tuple correctly classifies this as an expense increase. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a client entertainment meal paid with a corporate credit card. Under IFRS, entertainment expenses for clients are classified as operating expenses (specifically, entertainment or meals & entertainment expense). The debit should record an expense increase (slot c). The credit side shows a liability increase (slot a), which is consistent because using a corporate credit card creates a payable (credit card liability). The initial debit tuple correctly classifies this as an expense increase. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 666,
+      "output_tokens": 225,
+      "cache_read_tokens": 1652,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2318,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005868600000000001,
+      "raw_cost_usd": 0.010329,
+      "output": {
+        "reason": "The transaction describes a meal paid using a corporate credit card for client entertainment. This creates two accounting effects:\n\n1. DEBIT: Entertainment/Meal expense increases (expense increase) - the debit tuple (0,0,1,0,0,0) correctly shows this as slot c.\n\n2. CREDIT: Credit card payable increases (liability increase) - when a corporate credit card is used, the company incurs a liability to the credit card company that must be paid later.\n\nThe initial credit tuple (1,0,0,0,0,0) correctly classifies this as a liability increase (slot a). The story is consistent: expense goes up (debit) and credit card payable goes up (credit). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a meal paid using a corporate credit card for client entertainment. This creates two accounting effects:\n\n1. DEBIT: Entertainment/Meal expense increases (expense increase) - the debit tuple (0,0,1,0,0,0) correctly shows this as slot c.\n\n2. CREDIT: Credit card payable increases (liability increase) - when a corporate credit card is used, the company incurs a liability to the credit card company that must be paid later.\n\nThe initial credit tuple (1,0,0,0,0,0) correctly classifies this as a liability increase (slot a). The story is consistent: expense goes up (debit) and credit card payable goes up (credit). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 675,
+      "output_tokens": 348,
+      "cache_read_tokens": 2512,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3187,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0079986,
+      "raw_cost_usd": 0.014781,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Client entertainment meal paid with corporate credit card",
+        "rationale": "Client entertainment is a business expense under IFRS. The transaction specifies the meal was for client entertainment, so it should be recorded as Meals and Entertainment Expense (or similar entertainment expense account). Under Canadian tax rules, only 50% of meals and entertainment expenses are deductible for tax purposes, but the full amount is still recorded as an expense in the accounting entry. The corporate credit card creates a liability (Credit Card Payable). Since no province is specified and no tax rules lookup was provided, I'm treating this as a tax-exempt food purchase (many meal transactions at restaurants include tax in the stated amount). The debit tuple (0,0,1,0,0,0) indicates one expense increase line, and the credit tuple (1,0,0,0,0,0) indicates one liability increase line.",
+        "lines": [
+          {
+            "account_name": "Meals and Entertainment Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1672,
+      "output_tokens": 171,
+      "cache_read_tokens": 1386,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3058,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0079968,
+      "raw_cost_usd": 0.011739,
+      "output": {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records client entertainment meal expense. Balance verified: $125 debit = $125 credit. Meals and Entertainment Expense properly debited (expense increase), Credit Card Payable properly credited (liability increase). Amount matches transaction ($125). The assumption that tax is included in the stated amount is reasonable for meal purchases. The note about 50% deductibility is a tax reporting issue that does not affect the accounting entry itself. All required lines present, directionality correct."
+      },
+      "reason": "Entry correctly records client entertainment meal expense. Balance verified: $125 debit = $125 credit. Meals and Entertainment Expense properly debited (expense increase), Credit Card Payable properly credited (liability increase). Amount matches transaction ($125). The assumption that tax is included in the stated amount is reasonable for meal purchases. The note about 50% deductibility is a tax reporting issue that does not affect the accounting entry itself. All required lines present, directionality correct."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Client entertainment meal = expense increase. The $125 meal is a business expense (entertainment/meals expense), which is increased by a debit. The corporate credit card creates a liability on the credit side, but we only classify the debit side here.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Corporate credit card used = liability increase (credit card payable increases by $125)",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes a client entertainment meal paid with a corporate credit card. Under IFRS, entertainment expenses for clients are classified as operating expenses (specifically, entertainment or meals & entertainment expense). The debit should record an expense increase (slot c). The credit side shows a liability increase (slot a), which is consistent because using a corporate credit card creates a payable (credit card liability). The initial debit tuple correctly classifies this as an expense increase. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes a meal paid using a corporate credit card for client entertainment. This creates two accounting effects:\n\n1. DEBIT: Entertainment/Meal expense increases (expense increase) - the debit tuple (0,0,1,0,0,0) correctly shows this as slot c.\n\n2. CREDIT: Credit card payable increases (liability increase) - when a corporate credit card is used, the company incurs a liability to the credit card company that must be paid later.\n\nThe initial credit tuple (1,0,0,0,0,0) correctly classifies this as a liability increase (slot a). The story is consistent: expense goes up (debit) and credit card payable goes up (credit). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Client entertainment meal paid with corporate credit card",
+        "rationale": "Client entertainment is a business expense under IFRS. The transaction specifies the meal was for client entertainment, so it should be recorded as Meals and Entertainment Expense (or similar entertainment expense account). Under Canadian tax rules, only 50% of meals and entertainment expenses are deductible for tax purposes, but the full amount is still recorded as an expense in the accounting entry. The corporate credit card creates a liability (Credit Card Payable). Since no province is specified and no tax rules lookup was provided, I'm treating this as a tax-exempt food purchase (many meal transactions at restaurants include tax in the stated amount). The debit tuple (0,0,1,0,0,0) indicates one expense increase line, and the credit tuple (1,0,0,0,0,0) indicates one liability increase line.",
+        "lines": [
+          {
+            "account_name": "Meals and Entertainment Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT",
+        "reason": "Entry correctly records client entertainment meal expense. Balance verified: $125 debit = $125 credit. Meals and Entertainment Expense properly debited (expense increase), Credit Card Payable properly credited (liability increase). Amount matches transaction ($125). The assumption that tax is included in the stated amount is reasonable for meal purchases. The note about 50% deductibility is a tax reporting issue that does not affect the accounting entry itself. All required lines present, directionality correct."
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 523,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2124,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 496,
+        "output_tokens": 82,
+        "input_token_details": {
+          "cache_read": 1141,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 498,
+        "output_tokens": 117,
+        "input_token_details": {
+          "cache_read": 1162,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 666,
+        "output_tokens": 162,
+        "input_token_details": {
+          "cache_read": 1644,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 666,
+        "output_tokens": 225,
+        "input_token_details": {
+          "cache_read": 1652,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 675,
+        "output_tokens": 348,
+        "input_token_details": {
+          "cache_read": 2512,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1672,
+        "output_tokens": 171,
+        "input_token_details": {
+          "cache_read": 1386,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}
