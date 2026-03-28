@@ -61,7 +61,14 @@ Crediting an account means:
 Common misclassifications to watch for:
 - Owner's capital recorded as liability increase instead of equity increase
 - Missing inventory credit (asset decrease) on sales with COGS
-- Loan proceeds recorded as revenue instead of liability increase"""
+- Loan proceeds recorded as revenue instead of liability increase
+- Bundled payments counted as one event type when they contain \
+distinct economic events (e.g., liability clearing + new expense)
+- Contra accounts collapsed into a net amount instead of recorded \
+separately (e.g., discount on bonds omitted, net PV used instead)
+- Items classified by description instead of business purpose
+- Components with same account/treatment not combined into single line
+- Non-depreciable items (land) mixed with depreciable items (improvements)"""
 
 # ── 4. System Knowledge ──────────────────────────────────────────────────
 

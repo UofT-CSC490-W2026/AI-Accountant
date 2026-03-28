@@ -52,7 +52,15 @@ Crediting an account means:
 
 Every transaction has debit lines and credit lines. Total debits = total \
 credits in dollar amounts. Dividends (owner withdrawals) behave like \
-expenses: increased by debit."""
+expenses: increased by debit.
+
+Count each economically distinct event as a separate line — if a single \
+payment clears an obligation and incurs a new expense, count both. When \
+face value and present value differ, count the contra account as its own \
+line. Combine into a single line when components share the same account \
+and same treatment. Classify by business purpose, not item description. \
+Non-depreciable items (land, permanent landscaping) must use distinct \
+accounts from depreciable items (improvements, structures)."""
 
 # ── 4. System Knowledge ──────────────────────────────────────────────────
 

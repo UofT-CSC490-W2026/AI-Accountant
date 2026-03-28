@@ -46,7 +46,10 @@ Shares: "repurchased", "bought back" — treasury stock unless \
 "cancelled" or "retired" stated
 Conversion: "converted X to Y" — book value at stated amounts
 Refinancing: "refinanced" — old obligation extinguished, new one created
-Deposits: "deposit received" — liability (unearned), not revenue"""
+Deposits: "deposit received" — liability (unearned), not revenue
+Discounting: "discounted at the bank" — ambiguous between \
+derecognition (sale of receivable) and collateralized borrowing \
+(loan secured by receivable). Depends on risk transfer assessment."""
 
 # ── 4. System Knowledge ──────────────────────────────────────────────────
 
@@ -58,8 +61,10 @@ the entry builder downstream will review your analysis and make the final \
 decision on whether to build the entry or request clarification.
 
 Provide your best analysis of any ambiguities. Do not flag accounting \
-treatment choices as ambiguities — those are the entry builder's \
-responsibility, not yours."""
+treatment that has one correct answer under IFRS. However, if the correct \
+treatment depends on a business decision not stated in the transaction \
+(management's intent, entity's policy election, risk transfer assessment), \
+that is a factual ambiguity — flag it."""
 
 # ── 5. Procedure ─────────────────────────────────────────────────────────
 
@@ -123,7 +128,7 @@ Output: {"ambiguities": [{"aspect": "purpose of flower purchase", "resolved": fa
 </example>
 
 <example>
-Input: "Bought raw materials for $800 on account" + (general, corporation, ON)
+Input: "Purchased office furniture for $1,200 on account" + (general, corporation, ON)
 Output: {"ambiguities": []}
 </example>
 
@@ -165,6 +170,21 @@ Output: {"ambiguities": [{"aspect": "insurance coverage", "resolved": true, \
 Input: "Company bought back 500 of its own shares for $15,000"
 Output: {"ambiguities": [{"aspect": "disposition of repurchased shares", "resolved": true, \
 "resolution": "'bought back' without mention of cancellation defaults to treasury stock"}]}
+</example>
+
+<example>
+Input: "Company acquired machinery and paid $50,000 for a 3-year \
+extended warranty from the manufacturer."
+Output: {"ambiguities": [{"aspect": "warranty accounting treatment", \
+"resolved": false, \
+"options": ["Capitalize as part of asset cost", \
+"Expense as service contract"], \
+"clarification_question": "Is the extended warranty a separately \
+identifiable service contract or part of the asset acquisition?", \
+"why_entry_differs": "Capitalized increases asset and depreciation \
+base; expensed is immediate period cost", \
+"why_not_resolved": "Treatment depends on entity's assessment — \
+not determinable from text"}]}
 </example>"""
 
 # ── 7. Input Format ─────────────────────────────────────────────────────
@@ -187,7 +207,11 @@ _IMPORTANT = """
 
 Only advise as unresolved when:
 - The journal entry will change depending on the answer to the question, AND
-- The journal entry cannot be built correctly without the answer."""
+- The journal entry cannot be built correctly without the answer.
+
+Only flag ambiguities that arise from what the transaction text actually \
+says. Do not invent ambiguities about information the transaction does \
+not mention."""
 
 # ── 9. Task Reminder (appended to end of HumanMessage) ─────────────────
 

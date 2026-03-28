@@ -37,8 +37,10 @@ transaction text could produce structurally different entries (different \
 accounts, different amounts) depending on facts only the person who \
 initiated the transaction would know.
 
-It does NOT mean: you are unsure about accounting treatment, or the \
-transaction is complex. If you can build a reasonable entry, do so."""
+It does NOT mean: the transaction is complex or you are unsure which \
+standard applies. However, if the correct treatment depends on a business \
+decision not stated in the transaction (management's intent, entity's \
+policy election), that IS missing information — output INCOMPLETE_INFORMATION."""
 
 # ── 3. Domain Knowledge ─────────────────────────────────────────────────
 
@@ -59,6 +61,14 @@ Double-entry rules:
 
 Dividends behave like expenses: increased by debit.
 
+Count each economically distinct event as a separate line. When face \
+value and present value differ, record both with a contra account. Use \
+separate accounts when items have different subsequent treatment. \
+Combine into a single line when components share the same account and \
+treatment. Classify by business purpose, not item description. \
+Non-depreciable items (land, permanent landscaping) must use distinct \
+accounts from depreciable items (improvements, structures).
+
 Canadian tax regimes:
 - ON, NB, NL, NS, PE: HST (13-15%, single combined tax)
 - BC, SK, MB: GST (5%) + provincial sales tax (6-7%)
@@ -70,7 +80,13 @@ Tax line rules:
 - Purchases: HST/GST paid is recorded as HST Receivable (debit, asset)
 - Sales: HST/GST collected is recorded as HST Payable (credit, liability)
 - Tax amount = rate x base amount
-- Tax lines are ADDITIONAL and do not count toward tuple sums."""
+- Tax lines are ADDITIONAL and do not count toward tuple sums.
+
+The transaction text is the source of truth. When it conflicts \
+with your knowledge:
+- Stated amounts: use exactly as written, do not decompose
+- Stated tax rates: use the stated rate, not provincial defaults
+- Stated accounting policy: follow it, do not apply alternatives"""
 
 # ── 4. System Knowledge ─────────────────────────────────────────────────
 
@@ -118,7 +134,10 @@ _PROCEDURE = """
    - AND: Is the answer NOT determinable from the transaction text, \
 accounting conventions, or user context?
    If BOTH true, output INCOMPLETE_INFORMATION with a clarification question. \
-If either is false, proceed with the default interpretation.
+If either is false, proceed with the default interpretation. \
+If your reasoning mentions multiple valid interpretations \
+(e.g., "depending on classification," "could be X or Y"), \
+that is a signal to output INCOMPLETE_INFORMATION — do not pick one.
 4. For each tuple slot with a non-zero count, create that many journal lines \
 with appropriate accounts.
 5. Infer dollar amounts from the transaction text.
@@ -133,14 +152,14 @@ _EXAMPLES = """
 ## Examples
 
 <example>
-Transaction: "Bought raw materials for $800 on account"
+Transaction: "Purchased office furniture for $1,200 on account"
 Output: {"debit_tuple": [1,0,0,0,0,0], "credit_tuple": [1,0,0,0,0,0], \
-"journal_entry": {"date": "2026-03-24", "description": "Purchase raw materials on account", \
-"rationale": "Inventory increases (asset), accounts payable increases (liability)", \
-"lines": [{"account_name": "Raw Materials", "type": "debit", "amount": 800.00}, \
-{"account_name": "Accounts Payable", "type": "credit", "amount": 800.00}]}, \
+"journal_entry": {"date": "2026-03-24", "description": "Purchase office furniture on account", \
+"rationale": "Office furniture asset increases, accounts payable increases (liability)", \
+"lines": [{"account_name": "PP&E — Office Furniture", "type": "debit", "amount": 1200.00}, \
+{"account_name": "Accounts Payable", "type": "credit", "amount": 1200.00}]}, \
 "decision": "APPROVED", "clarification_questions": null, "stuck_reason": null, \
-"reason": "Asset acquired on credit — inventory in, liability up"}
+"reason": "Asset acquired on credit — furniture in, liability up"}
 </example>
 
 <example>
@@ -167,7 +186,7 @@ Output: {"debit_tuple": [0,1,0,0,0,0], "credit_tuple": [0,0,0,1,0,0], \
 </example>
 
 <example>
-Transaction: "Annual general meeting approved the budget (no financial transaction)"
+Transaction: "Board passed a motion to change the company logo"
 Output: {"debit_tuple": [0,0,0,0,0,0], "credit_tuple": [0,0,0,0,0,0], \
 "journal_entry": null, \
 "decision": "APPROVED", "clarification_questions": null, "stuck_reason": null, \
@@ -210,6 +229,19 @@ Output: {"debit_tuple": [0,0,0,0,0,0], "credit_tuple": [0,0,0,0,0,0], \
 "stuck_reason": null, \
 "reason": "Could be office decoration, client gift, employee recognition, or event marketing \
 — each maps to a different account"}
+</example>
+
+<example>
+Transaction: "Company received $500,000 from a bank, pledging its \
+accounts receivable portfolio"
+Output: {"debit_tuple": [1,0,0,0,0,0], "credit_tuple": [1,0,0,0,0,0], \
+"journal_entry": null, \
+"decision": "INCOMPLETE_INFORMATION", \
+"clarification_questions": ["Was this a sale of receivables (factoring) \
+or a secured borrowing using receivables as collateral?"], \
+"stuck_reason": null, \
+"reason": "Both produce balanced entries but with different accounts — \
+sale removes receivables, borrowing keeps them"}
 </example>"""
 
 # ── 8. Output Format ─────────────────────────────────────────────────────

@@ -44,8 +44,10 @@ transaction text could produce structurally different entries (different \
 accounts, different amounts) depending on facts only the person who \
 initiated the transaction would know.
 
-It does NOT mean: you are unsure about accounting treatment, or the \
-transaction is complex. If you can build a reasonable entry, do so."""
+It does NOT mean: the transaction is complex or you are unsure which \
+standard applies. However, if the correct treatment depends on a business \
+decision not stated in the transaction (management's intent, entity's \
+policy election), that IS missing information — output INCOMPLETE_INFORMATION."""
 
 # ── 3. Domain Knowledge ──────────────────────────────────────────────────
 
@@ -55,6 +57,11 @@ _DOMAIN = """
 Double-entry rules:
 - Every entry must have total debits = total credits.
 - All amounts must be positive (> 0).
+- Use separate accounts when items have different subsequent treatment \
+(e.g., depreciable vs non-depreciable). Combine into a single line when \
+components share the same account and treatment. Classify accounts by \
+business purpose, not item description. Non-depreciable items (land, \
+permanent landscaping) must use distinct accounts from depreciable items.
 
 Debiting an account means:
 - Asset: increases its balance
@@ -82,7 +89,13 @@ Canadian tax regimes:
 Tax line rules:
 - Purchases: HST/GST paid is recorded as HST Receivable (debit, asset)
 - Sales: HST/GST collected is recorded as HST Payable (credit, liability)
-- Tax amount = rate x base amount"""
+- Tax amount = rate x base amount
+
+The transaction text is the source of truth. When it conflicts \
+with your knowledge:
+- Stated amounts: use exactly as written, do not decompose
+- Stated tax rates: use the stated rate, not provincial defaults
+- Stated accounting policy: follow it, do not apply alternatives"""
 
 # ── 4. System Knowledge ──────────────────────────────────────────────────
 
@@ -171,6 +184,17 @@ Output: {"decision": "INCOMPLETE_INFORMATION", \
 "lines": []}
 Note: Could be office decoration, client gift, employee recognition, or event marketing \
 — each maps to a different account. Do not guess.
+</example>
+
+<example>
+Transaction: "Company received $500,000 from a bank, pledging its \
+accounts receivable portfolio"
+Debit tuple: (1,0,0,0,0,0), Credit tuple: (1,0,0,0,0,0)
+Output: {"decision": "INCOMPLETE_INFORMATION", \
+"clarification_questions": ["Was this a sale of receivables (factoring) \
+or a secured borrowing using receivables as collateral?"], "lines": []}
+Note: Both produce balanced entries but with different accounts — sale \
+removes receivables, borrowing keeps them. Do not pick one.
 </example>"""
 
 # ── 6. Procedure (conditional on disambiguator_active) ───────────────────
@@ -183,7 +207,9 @@ for this transaction? If building from these tuples would violate \
 accounting standards or contradict the transaction text, override.
 
 2. Review the disambiguator's analysis below. It may have flagged ambiguities. \
-The disambiguator's flags are informed opinions. \
+The disambiguator's flags are informed opinions. For each unresolved \
+ambiguity, you MUST include a response in disambiguator_responses — either \
+"proceed" with a reason why it does not affect the entry, or "incomplete". \
 For each unresolved ambiguity, apply this test:
    - Would the debit/credit structure genuinely differ depending on the answer?
    - AND: Is the answer NOT determinable from the transaction text, \
