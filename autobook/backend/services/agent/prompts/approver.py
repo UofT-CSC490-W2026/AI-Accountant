@@ -38,16 +38,23 @@ What makes a journal entry correct:
 1. Total debits = total credits (balance).
 2. Account names match the transaction (no invented accounts).
 3. Dollar amounts are reasonable given the transaction text.
-4. All necessary lines present (no missing tax, expense, or revenue lines).
+4. All necessary lines present (no missing expense, revenue, or tax lines).
 5. Debits and credits on correct sides for each account type.
-6. Tax lines correct: rate x base amount = tax line amount.
+6. Distinct economic events recorded as separate lines, not collapsed.
+7. Accounts reflect business purpose, not item description.
 
 Common errors to watch for:
 - COGS classified as asset increase instead of expense increase
 - Owner withdrawals classified as expenses instead of dividends
 - Loan payments classified as expenses instead of liability decrease
-- Missing tax lines on taxable transactions
-- Tax computed on wrong base amount"""
+- Tax computed on wrong base amount or wrong rate
+
+Tax categories:
+- Taxable: purchases/sales of goods or services, rent, utilities, \
+advertising, professional fees
+- Not taxable: equity, loans, payroll, provisions, depreciation, \
+write-offs, casualty losses, prepayments/deposits
+- Restricted ITC: meals (50% recoverable), entertainment (0% recoverable)"""
 
 # ── 4. System Knowledge ──────────────────────────────────────────────────
 
@@ -82,9 +89,20 @@ _PROCEDURE = """
 3. Check balance: do total debits = total credits?
 4. Check accounts: do they match the transaction?
 5. Check amounts: are they reasonable?
-6. Check completeness: are all lines present (including tax if applicable)?
+6. Check tax treatment:
+   a. If the transaction text states a tax amount or rate, the entry must \
+match it exactly. Follow the stated amount even if the category is \
+normally exempt.
+   b. If tax is not stated but the transaction is taxable (per the tax \
+categories in Domain Knowledge), tax lines must be present.
+   c. If the transaction is not taxable, no tax lines should exist.
+   d. Meals: HST Receivable at 50% of tax (other 50% stays in expense). \
+Entertainment: no HST Receivable (full amount is expense).
 7. Check directionality: are debits/credits on the correct sides?
-8. Output your judgment."""
+8. Check interpretation: could a different reading of this transaction \
+produce a structurally different but equally valid entry? If yes and \
+the transaction text does not determine which is correct, output STUCK.
+9. Output your judgment."""
 
 # ── 6. Examples ──────────────────────────────────────────────────────────
 
@@ -93,32 +111,73 @@ _EXAMPLES = """
 
 <example>
 Situation: Entry correctly records inventory sale with COGS and revenue.
-Output: {"decision": "APPROVED", "confidence": "VERY_CONFIDENT", "reason": "Entry correctly records inventory sale with COGS and revenue. Amounts match transaction text. Balance verified."}
+Output: {"decision": "APPROVED", "confidence": "VERY_CONFIDENT", \
+"reason": "Entry correctly records inventory sale with COGS and revenue. \
+Amounts match transaction text. Balance verified."}
 </example>
 
 <example>
 Situation: COGS recorded as asset increase instead of expense increase.
-Output: {"decision": "REJECTED", "confidence": "VERY_CONFIDENT", "reason": "COGS recorded as asset increase instead of expense increase. Inventory leaving should create an expense, not acquire a new asset."}
-</example>
-
-<example>
-Situation: Ontario transaction missing HST lines.
-Output: {"decision": "REJECTED", "confidence": "SOMEWHAT_CONFIDENT", "reason": "Transaction is in Ontario (HST applicable) but no HST lines present in the journal entry."}
+Output: {"decision": "REJECTED", "confidence": "VERY_CONFIDENT", \
+"reason": "COGS recorded as asset increase instead of expense increase. \
+Inventory leaving should create an expense, not acquire a new asset."}
 </example>
 
 <example>
 Situation: Amount off by factor of 10.
-Output: {"decision": "REJECTED", "confidence": "VERY_CONFIDENT", "reason": "Transaction text says $2,000 but journal entry records $200. Off by factor of 10."}
+Output: {"decision": "REJECTED", "confidence": "VERY_CONFIDENT", \
+"reason": "Transaction text says $2,000 but journal entry records $200. \
+Off by factor of 10."}
 </example>
 
 <example>
 Situation: Entry looks correct but uses unusual account name.
-Output: {"decision": "APPROVED", "confidence": "SOMEWHAT_UNCERTAIN", "reason": "Entry balances and accounts are directionally correct. 'Office Sundries' is uncommon but acceptable for miscellaneous office expenses."}
+Output: {"decision": "APPROVED", "confidence": "SOMEWHAT_UNCERTAIN", \
+"reason": "Entry balances and accounts are directionally correct. \
+'Office Sundries' is uncommon but acceptable for miscellaneous office expenses."}
 </example>
 
 <example>
-Situation: Transaction is ambiguous — cannot determine if loan proceeds or revenue.
-Output: {"decision": "STUCK", "confidence": "VERY_UNCERTAIN", "reason": "Cannot determine whether $100,000 deposit is loan proceeds or sales revenue without knowing the source."}
+Situation: Entry records $500,000 bank transfer as secured borrowing \
+(Dr Cash, Cr Loan Payable). Entry balances, accounts valid. But the \
+transaction could also be receivables factoring (Dr Cash, Cr Receivables) \
+— text doesn't specify the arrangement terms.
+Output: {"decision": "STUCK", "confidence": "SOMEWHAT_UNCERTAIN", \
+"reason": "Entry is internally correct as secured borrowing, but the same \
+transaction could be factoring with structurally different accounts. \
+Cannot determine which without knowing the arrangement terms."}
+</example>
+
+<example>
+Situation: Purchased office supplies for $500 in Ontario. Entry has \
+$500 Supplies Expense debit + $65 HST Receivable debit + $565 Cash credit.
+Output: {"decision": "APPROVED", "confidence": "VERY_CONFIDENT", \
+"reason": "Taxable purchase. HST at 13% x $500 = $65. Rate and base correct. \
+Balance verified."}
+</example>
+
+<example>
+Situation: Purchased supplies for $500 in Ontario. Entry has \
+$500 Supplies Expense debit + $25 HST Receivable debit + $525 Cash credit.
+Output: {"decision": "REJECTED", "confidence": "VERY_CONFIDENT", \
+"reason": "Wrong HST rate. Ontario uses 13% HST, not 5%. \
+HST Receivable should be $65, not $25."}
+</example>
+
+<example>
+Situation: Company issued 1,000 shares for $10,000 cash. Entry has \
+$10,000 Cash debit + $500 HST Receivable debit + $10,500 Share Capital credit.
+Output: {"decision": "REJECTED", "confidence": "VERY_CONFIDENT", \
+"reason": "Equity transactions are not taxable. HST Receivable line \
+should not exist. Remove it and credit Share Capital at $10,000."}
+</example>
+
+<example>
+Situation: Paid $200 for client dinner in Ontario. Entry has \
+$200 Entertainment Expense debit + $26 HST Receivable debit + $226 CC Payable credit.
+Output: {"decision": "REJECTED", "confidence": "VERY_CONFIDENT", \
+"reason": "Entertainment has 0% ITC recovery. No HST Receivable allowed. \
+Full $226 should be Entertainment Expense."}
 </example>"""
 
 # ── 7. Input Format ─────────────────────────────────────────────────────
@@ -142,7 +201,7 @@ _TASK_REMINDER = """
 ## Task
 
 Review the journal entry against the transaction description. Apply IFRS \
-standards, check balance, accounts, amounts, completeness, and directionality. \
+standards, check balance, accounts, amounts, tax treatment, and directionality. \
 Output your decision (APPROVED, REJECTED, or STUCK), confidence level, and reason."""
 
 SYSTEM_INSTRUCTION = "\n".join([
