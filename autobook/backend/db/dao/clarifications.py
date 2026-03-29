@@ -43,6 +43,27 @@ def _resolve_posting_payload(task: ClarificationTask, edited_entry: dict | None)
     return {**base_entry_payload, **edited_entry_payload}, edited_line_payload
 
 
+def _apply_entry_defaults(task: ClarificationTask, entry_payload: dict) -> dict:
+    normalized_payload = dict(entry_payload)
+
+    if "date" not in normalized_payload:
+        transaction_date = getattr(getattr(task, "transaction", None), "date", None)
+        if transaction_date is not None:
+            normalized_payload["date"] = transaction_date
+
+    if "description" not in normalized_payload:
+        transaction_description = getattr(getattr(task, "transaction", None), "description", None)
+        normalized_payload["description"] = transaction_description or task.source_text
+
+    if "rationale" not in normalized_payload:
+        normalized_payload["rationale"] = task.explanation
+
+    if "origin_tier" not in normalized_payload:
+        normalized_payload["origin_tier"] = 3
+
+    return normalized_payload
+
+
 class ClarificationDAO:
     @staticmethod
     def insert(
@@ -106,6 +127,7 @@ class ClarificationDAO:
             raise ValueError(f"unsupported clarification action {action!r}")
 
         entry_payload, line_payload = _resolve_posting_payload(task, edited_entry)
+        entry_payload = _apply_entry_defaults(task, entry_payload)
         entry_payload.setdefault("transaction_id", task.transaction_id)
         entry_payload.setdefault("status", "posted")
 
