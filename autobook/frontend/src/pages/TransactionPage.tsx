@@ -35,6 +35,7 @@ export function TransactionPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
+  const [statementCount, setStatementCount] = useState<number>(1);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
   const isMockMode = import.meta.env.VITE_USE_MOCK_API !== "false";
 
@@ -115,6 +116,7 @@ export function TransactionPage() {
 
   function handleInputChange(value: string) {
     setInput(value);
+    setStatementCount(1);
     setProcessingId(null);
     setResolvedEvent(null);
     setError(null);
@@ -129,6 +131,7 @@ export function TransactionPage() {
 
   function handleFileChange(file: File | null) {
     setSelectedFile(file);
+    setStatementCount(1);
     setProcessingId(null);
     setResolvedEvent(null);
     setError(null);
@@ -154,6 +157,7 @@ export function TransactionPage() {
         store: store,
         post_stages: activePostStages,
       });
+      setStatementCount(response.statement_count ?? 1);
       processingIdRef.current = response.parse_id;
       setProcessingId(response.parse_id);
     } catch (submitError) {
@@ -183,8 +187,14 @@ export function TransactionPage() {
         store: store,
         post_stages: activePostStages,
       });
+      setStatementCount(response.statement_count ?? 1);
       setProcessingId(response.parse_id);
-      setUploadNotice(`Submitted ${selectedFile.name} for processing.`);
+      const count = response.statement_count ?? 1;
+      setUploadNotice(
+        count > 1
+          ? `Submitted ${selectedFile.name} with ${count} statements for processing.`
+          : `Submitted ${selectedFile.name} for processing.`,
+      );
     } catch (submitError) {
       setPipelineLocked(false);
       setError(
@@ -305,6 +315,22 @@ export function TransactionPage() {
 
   const isPosted =
     resolvedEvent?.type === "entry.posted" || resolvedEvent?.type === "clarification.resolved";
+  const batch = resolvedEvent?.batch;
+  const isBatchResult = (batch?.total_statements ?? statementCount) > 1;
+  const modalHeading = isBatchResult
+    ? isPosted
+      ? "Batch Posted"
+      : "Batch Review Needed"
+    : isPosted
+      ? "Entry Posted"
+      : "Clarification Required";
+  const modalEyebrow = isBatchResult
+    ? isPosted
+      ? "Batch Complete"
+      : "Batch Requires Review"
+    : isPosted
+      ? "Entry Posted"
+      : "Human Review Needed";
 
   function dismissModal() {
     setResolvedEvent(null);
@@ -461,14 +487,36 @@ export function TransactionPage() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <p className="eyebrow">
-                {isPosted ? "Entry Posted" : "Human Review Needed"}
+                {modalEyebrow}
               </p>
               <h2>
-                {isPosted ? "Entry Posted" : "Clarification Required"}
+                {modalHeading}
               </h2>
             </div>
 
             <div className="event-details">
+              {batch ? (
+                <>
+                  <div className="detail-row">
+                    <span className="detail-label">Statements</span>
+                    <span className="detail-value">
+                      {batch.completed_statements}/{batch.total_statements}
+                    </span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Auto Posted</span>
+                    <span className="detail-value">{batch.auto_posted_count}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Needs Clarification</span>
+                    <span className="detail-value">{batch.needs_clarification_count}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Failed</span>
+                    <span className="detail-value">{batch.failed_count}</span>
+                  </div>
+                </>
+              ) : null}
               {resolvedEvent.journal_entry_id && (
                 <div className="detail-row">
                   <span className="detail-label">Journal Entry ID</span>
@@ -577,5 +625,6 @@ function buildResolvedEvent(status: ParseStatus): RealtimeEvent {
     explanation: status.explanation ?? undefined,
     status: status.status,
     proposed_entry: status.proposed_entry ?? undefined,
+    batch: status.batch ?? undefined,
   };
 }

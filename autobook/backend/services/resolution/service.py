@@ -7,7 +7,7 @@ from db.dao.clarifications import ClarificationDAO
 from db.dao.transactions import TransactionDAO
 from queues import sqs
 from queues.pubsub import pub
-from services.shared.parse_status import set_status_sync
+from services.shared.parse_status import record_batch_result_sync, set_status_sync
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -47,6 +47,11 @@ def _persist_pending_clarification(message: dict) -> str:
             confidence=(message.get("confidence") or {}).get("overall") or 0,
             proposed_entry=message.get("proposed_entry"),
             verdict="needs_human_review",
+            parse_id=message.get("parse_id"),
+            parent_parse_id=message.get("parent_parse_id"),
+            child_parse_id=message.get("parse_id"),
+            statement_index=int(message.get("statement_index") or 0),
+            statement_total=int(message.get("statement_total") or 1),
         )
         db.commit()
         return str(task.id)
@@ -82,6 +87,16 @@ def execute(message: dict) -> None:
             status="rejected",
             input_text=message.get("input_text"),
         )
+        if message.get("parent_parse_id"):
+            record_batch_result_sync(
+                parent_parse_id=message["parent_parse_id"],
+                child_parse_id=message["parse_id"],
+                user_id=message["user_id"],
+                statement_index=int(message.get("statement_index") or 0),
+                total_statements=int(message.get("statement_total") or 1),
+                status="rejected",
+                input_text=message.get("input_text"),
+            )
         return
 
     if not _is_resolved(message):
@@ -101,6 +116,17 @@ def execute(message: dict) -> None:
             proposed_entry=message.get("proposed_entry"),
             clarification_id=clarification_id,
         )
+        if message.get("parent_parse_id"):
+            record_batch_result_sync(
+                parent_parse_id=message["parent_parse_id"],
+                child_parse_id=message["parse_id"],
+                user_id=message["user_id"],
+                statement_index=int(message.get("statement_index") or 0),
+                total_statements=int(message.get("statement_total") or 1),
+                status="needs_clarification",
+                input_text=message.get("input_text"),
+                clarification_id=clarification_id,
+            )
         return
 
     clarification["required"] = False
@@ -126,4 +152,14 @@ def execute(message: dict) -> None:
         confidence=message.get("confidence"),
         proposed_entry=message.get("proposed_entry"),
     )
+    if message.get("parent_parse_id"):
+        record_batch_result_sync(
+            parent_parse_id=message["parent_parse_id"],
+            child_parse_id=message["parse_id"],
+            user_id=message["user_id"],
+            statement_index=int(message.get("statement_index") or 0),
+            total_statements=int(message.get("statement_total") or 1),
+            status="resolved",
+            input_text=message.get("input_text"),
+        )
     sqs.enqueue.posting(result)

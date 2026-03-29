@@ -43,6 +43,30 @@ class ParseResponse(BaseModel):
 class ParseAccepted(BaseModel):
     parse_id: str
     status: str = "accepted"
+    statement_count: int = 1
+
+
+class BatchItem(BaseModel):
+    child_parse_id: str
+    statement_index: int
+    input_text: str | None = None
+    status: str
+    clarification_id: str | None = None
+    journal_entry_id: str | None = None
+    error: str | None = None
+
+
+class BatchSummary(BaseModel):
+    total_statements: int
+    completed_statements: int
+    pending_statements: int
+    auto_posted_count: int
+    needs_clarification_count: int
+    resolved_count: int
+    rejected_count: int
+    failed_count: int
+    status: str
+    items: list[BatchItem]
 
 
 class ParseStatusResponse(BaseModel):
@@ -58,3 +82,4 @@ class ParseStatusResponse(BaseModel):
     clarification_id: str | None = None
     journal_entry_id: str | None = None
     error: str | None = None
+    batch: BatchSummary | None = None

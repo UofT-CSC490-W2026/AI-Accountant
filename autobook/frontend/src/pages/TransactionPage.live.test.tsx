@@ -145,4 +145,33 @@ describe("transaction page live realtime flow", () => {
     expect(await screen.findByRole("heading", { name: /entry posted/i })).toBeInTheDocument();
     expect(getParseStatus).toHaveBeenCalledWith("parse_live_3");
   });
+
+  test("renders a batch summary when polling completes a multi-statement parse", async () => {
+    sessionStorage.setItem("autobook_pending_parse_id", "parse_live_batch");
+    getParseStatus.mockResolvedValue({
+      parse_id: "parse_live_batch",
+      status: "needs_clarification",
+      occurred_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      explanation: "Processed 2 statements.",
+      batch: {
+        total_statements: 2,
+        completed_statements: 2,
+        pending_statements: 0,
+        auto_posted_count: 1,
+        needs_clarification_count: 1,
+        resolved_count: 0,
+        rejected_count: 0,
+        failed_count: 0,
+        status: "needs_clarification",
+        items: [],
+      },
+    });
+
+    renderTransactionPage();
+
+    expect(await screen.findByRole("heading", { name: /batch review needed/i })).toBeInTheDocument();
+    expect(screen.getByText("2/2")).toBeInTheDocument();
+    expect(screen.getAllByText("1")).toHaveLength(2);
+  });
 });

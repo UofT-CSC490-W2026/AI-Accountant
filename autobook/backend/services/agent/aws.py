@@ -4,7 +4,7 @@ import logging
 from queues import sqs
 from queues.pubsub import pub
 from services.agent.service import execute
-from services.shared.parse_status import set_status_sync
+from services.shared.parse_status import record_batch_result_sync, set_status_sync
 from services.shared.routing import next_stage, should_post
 
 logger = logging.getLogger(__name__)
@@ -75,6 +75,16 @@ def handler(event, context):
                 if nxt:
                     sqs.enqueue.by_name(nxt, result)
                 else:
+                    if result.get("parent_parse_id"):
+                        record_batch_result_sync(
+                            parent_parse_id=result["parent_parse_id"],
+                            child_parse_id=result["parse_id"],
+                            user_id=result["user_id"],
+                            statement_index=int(result.get("statement_index") or 0),
+                            total_statements=int(result.get("statement_total") or 1),
+                            status="resolved",
+                            input_text=result.get("input_text"),
+                        )
                     pub.pipeline_result(
                         parse_id=result["parse_id"],
                         user_id=result["user_id"],
@@ -98,4 +108,15 @@ def handler(event, context):
                     stage="agent",
                     error=str(exc),
                 )
+                if message.get("parent_parse_id"):
+                    record_batch_result_sync(
+                        parent_parse_id=message["parent_parse_id"],
+                        child_parse_id=message["parse_id"],
+                        user_id=message["user_id"],
+                        statement_index=int(message.get("statement_index") or 0),
+                        total_statements=int(message.get("statement_total") or 1),
+                        status="failed",
+                        input_text=message.get("input_text") or message.get("description"),
+                        error=str(exc),
+                    )
             raise

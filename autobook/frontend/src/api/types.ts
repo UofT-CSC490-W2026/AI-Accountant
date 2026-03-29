@@ -22,6 +22,30 @@ export type AuthTokenResponse = {
 export type ParseAccepted = {
   parse_id: string;
   status: "accepted";
+  statement_count?: number;
+};
+
+export type BatchItem = {
+  child_parse_id: string;
+  statement_index: number;
+  input_text?: string | null;
+  status: string;
+  clarification_id?: string | null;
+  journal_entry_id?: string | null;
+  error?: string | null;
+};
+
+export type BatchSummary = {
+  total_statements: number;
+  completed_statements: number;
+  pending_statements: number;
+  auto_posted_count: number;
+  needs_clarification_count: number;
+  resolved_count: number;
+  rejected_count: number;
+  failed_count: number;
+  status: string;
+  items: BatchItem[];
 };
 
 export type ParseStatus = {
@@ -50,6 +74,7 @@ export type ParseStatus = {
   clarification_id?: string | null;
   journal_entry_id?: string | null;
   error?: string | null;
+  batch?: BatchSummary | null;
 };
 
 export type JournalLine = {
@@ -174,6 +199,7 @@ export type RealtimeEvent = {
   stage?: string;
   result?: Record<string, unknown>;
   error?: string;
+  batch?: BatchSummary;
 };
 
 export type RealtimeListener = (event: RealtimeEvent) => void;

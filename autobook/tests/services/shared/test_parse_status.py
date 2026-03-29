@@ -71,6 +71,57 @@ def test_normalize_confidence_adds_threshold():
     assert result["auto_post_threshold"] == get_settings().AUTO_POST_THRESHOLD
 
 
+def test_build_batch_summary_counts_items():
+    result = ps.build_batch_summary(
+        total_statements=3,
+        items=[
+            {"child_parse_id": "p1_s1", "statement_index": 0, "status": "auto_posted"},
+            {"child_parse_id": "p1_s2", "statement_index": 1, "status": "needs_clarification"},
+        ],
+    )
+
+    assert result["completed_statements"] == 2
+    assert result["pending_statements"] == 1
+    assert result["auto_posted_count"] == 1
+    assert result["needs_clarification_count"] == 1
+    assert result["status"] == "processing"
+
+
+def test_record_batch_result_sync_tracks_child_results():
+    ps.set_status_sync(
+        parse_id="parent-1",
+        user_id="u1",
+        status="accepted",
+        batch=ps.build_batch_summary(total_statements=2, items=[]),
+    )
+
+    ps.record_batch_result_sync(
+        parent_parse_id="parent-1",
+        child_parse_id="parent-1_s1",
+        user_id="u1",
+        statement_index=0,
+        total_statements=2,
+        status="auto_posted",
+        input_text="Bought laptop",
+        journal_entry_id="je-1",
+    )
+    result = ps.record_batch_result_sync(
+        parent_parse_id="parent-1",
+        child_parse_id="parent-1_s2",
+        user_id="u1",
+        statement_index=1,
+        total_statements=2,
+        status="needs_clarification",
+        input_text="Transferred money",
+        clarification_id="cl-1",
+    )
+
+    assert result["status"] == "needs_clarification"
+    assert result["batch"]["completed_statements"] == 2
+    assert result["batch"]["needs_clarification_count"] == 1
+    assert result["batch"]["items"][1]["clarification_id"] == "cl-1"
+
+
 def test_set_status_sync():
     result = ps.set_status_sync(parse_id="p1", user_id="u1", status="processing", stage="normalizer")
     assert result["parse_id"] == "p1"

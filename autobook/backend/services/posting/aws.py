@@ -3,7 +3,7 @@ import logging
 
 from services.posting.service import execute
 from queues.pubsub import pub
-from services.shared.parse_status import set_status_sync
+from services.shared.parse_status import record_batch_result_sync, set_status_sync
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -31,4 +31,15 @@ def handler(event, context):
                     stage="posting",
                     error=str(exc),
                 )
+                if message.get("parent_parse_id"):
+                    record_batch_result_sync(
+                        parent_parse_id=message["parent_parse_id"],
+                        child_parse_id=message["parse_id"],
+                        user_id=message["user_id"],
+                        statement_index=int(message.get("statement_index") or 0),
+                        total_statements=int(message.get("statement_total") or 1),
+                        status="failed",
+                        input_text=message.get("input_text"),
+                        error=str(exc),
+                    )
             raise

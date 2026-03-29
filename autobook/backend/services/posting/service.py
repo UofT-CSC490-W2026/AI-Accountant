@@ -7,7 +7,7 @@ from db.dao.journal_entries import JournalEntryDAO
 from db.dao.transactions import TransactionDAO
 from queues import sqs
 from queues.pubsub import pub
-from services.shared.parse_status import set_status_sync
+from services.shared.parse_status import record_batch_result_sync, set_status_sync
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +127,17 @@ def execute(message: dict) -> None:
         proposed_entry=proposed_entry,
         journal_entry_id=journal_entry_id,
     )
+    if message.get("parent_parse_id"):
+        record_batch_result_sync(
+            parent_parse_id=message["parent_parse_id"],
+            child_parse_id=message["parse_id"],
+            user_id=message["user_id"],
+            statement_index=int(message.get("statement_index") or 0),
+            total_statements=int(message.get("statement_total") or 1),
+            status="auto_posted",
+            input_text=message.get("input_text"),
+            journal_entry_id=journal_entry_id,
+        )
 
     result = {
         **message,
