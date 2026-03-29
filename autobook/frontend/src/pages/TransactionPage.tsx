@@ -40,7 +40,7 @@ export function TransactionPage() {
 
   const [store, setStore] = useState(true);
   const [stages, setStages] = useState<Record<Branch, boolean>>({ precedent: true, ml: true, llm: true });
-  const [post, setPost] = useState<Record<Branch, boolean>>({ precedent: true, ml: true, llm: false });
+  const [post, setPost] = useState<Record<Branch, boolean>>({ precedent: true, ml: true, llm: true });
   const [activeStage, setActiveStage] = useState<string | null>(null);
   const activeStageRef = useRef<string | null>(null);
   const [completedStages, setCompletedStages] = useState<Set<string>>(new Set());

@@ -81,6 +81,9 @@ describe("transaction page live realtime flow", () => {
         input_text: "Bought a laptop for $2400",
         source: "manual_text",
         currency: "CAD",
+        stages: ["precedent", "ml", "llm"],
+        store: true,
+        post_stages: ["precedent", "ml", "llm"],
       });
     });
   });

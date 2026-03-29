@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 DEFAULT_STAGES = ["precedent", "ml", "llm"]
-DEFAULT_POST_STAGES = ["precedent", "ml"]
+DEFAULT_POST_STAGES = ["precedent", "ml", "llm"]
 
 
 class ParseRequest(BaseModel):

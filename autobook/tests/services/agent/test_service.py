@@ -42,7 +42,12 @@ class TestBuildInitialState:
 
 class TestExtractResult:
     def test_extracts_entry_and_decision(self):
-        entry = {"lines": [{"account_name": "Cash", "type": "debit", "amount": 100}]}
+        entry = {
+            "date": "2026-03-29",
+            "description": "Record bank activity",
+            "rationale": "Use the cash account for the settlement line.",
+            "lines": [{"account_name": "Cash", "type": "debit", "amount": 100}],
+        }
         final_state = {
             "iteration": 0,
             "output_entry_builder": [entry],
@@ -52,10 +57,14 @@ class TestExtractResult:
             "stuck_reason": None,
             "validation_error": None,
         }
-        result = _extract_result(final_state, {"parse_id": "p1"})
+        result = _extract_result(final_state, {"parse_id": "p1", "transaction_id": "txn-1"})
         assert result["decision"] == "APPROVED"
-        assert result["proposed_entry"] == entry
+        assert result["proposed_entry"]["entry"]["description"] == "Record bank activity"
+        assert result["proposed_entry"]["lines"][0]["account_code"] == "1000"
         assert result["parse_id"] == "p1"
+        assert result["clarification"]["required"] is False
+        assert result["confidence"]["overall"] == 0.95
+        assert result["explanation"] == "Use the cash account for the settlement line."
 
     def test_defaults_decision_to_approved(self):
         final_state = {
@@ -69,6 +78,8 @@ class TestExtractResult:
         }
         result = _extract_result(final_state, {})
         assert result["decision"] == "APPROVED"
+        assert result["clarification"]["required"] is True
+        assert result["confidence"]["overall"] == 0.0
 
     def test_extracts_clarification(self):
         final_state = {
@@ -83,11 +94,21 @@ class TestExtractResult:
         result = _extract_result(final_state, {})
         assert result["decision"] == "INCOMPLETE_INFORMATION"
         assert result["clarification_questions"] == ["What was the purpose?"]
+        assert result["clarification"]["required"] is True
+        assert result["confidence"]["overall"] == 0.0
+        assert result["explanation"] == "Clarification required: What was the purpose?"
 
     def test_extracts_approver_confidence(self):
         final_state = {
             "iteration": 0,
-            "output_entry_builder": [None],
+            "output_entry_builder": [{
+                "date": "2026-03-29",
+                "description": "Record rent",
+                "lines": [
+                    {"account_name": "Rent Expense", "type": "debit", "amount": 2000},
+                    {"account_name": "Cash", "type": "credit", "amount": 2000},
+                ],
+            }],
             "output_approver": [{"confidence": "VERY_CONFIDENT"}],
             "decision": "APPROVED",
             "clarification_questions": None,
@@ -96,6 +117,7 @@ class TestExtractResult:
         }
         result = _extract_result(final_state, {})
         assert result["approver_confidence"] == "VERY_CONFIDENT"
+        assert result["confidence"]["overall"] == 0.99
 
     def test_no_entry_when_out_of_range(self):
         final_state = {
@@ -109,11 +131,40 @@ class TestExtractResult:
         }
         result = _extract_result(final_state, {})
         assert result["proposed_entry"] is None
+        assert result["clarification"]["required"] is True
+
+    def test_requires_human_review_when_account_name_is_not_mapped(self):
+        final_state = {
+            "iteration": 0,
+            "output_entry_builder": [{
+                "date": "2026-03-29",
+                "description": "Record custom asset",
+                "lines": [{"account_name": "Custom Asset Bucket", "type": "debit", "amount": 100}],
+            }],
+            "output_approver": [{"confidence": "VERY_CONFIDENT"}],
+            "decision": "APPROVED",
+            "clarification_questions": None,
+            "stuck_reason": None,
+            "validation_error": None,
+        }
+
+        result = _extract_result(final_state, {})
+
+        assert result["clarification"]["required"] is True
+        assert result["confidence"]["overall"] == 0.0
+        assert "could not be mapped to account codes" in result["explanation"]
 
 
 class TestExecute:
     def test_invokes_graph_and_returns_result(self):
-        entry = {"lines": [{"account_name": "Rent", "type": "debit", "amount": 2000}]}
+        entry = {
+            "date": "2026-03-29",
+            "description": "Rent payment",
+            "lines": [
+                {"account_name": "Rent Expense", "type": "debit", "amount": 2000},
+                {"account_name": "Cash", "type": "credit", "amount": 2000},
+            ],
+        }
         final_state = {
             "iteration": 0,
             "output_entry_builder": [entry],
@@ -128,6 +179,7 @@ class TestExecute:
             result = execute({"parse_id": "p1", "input_text": "Pay rent $2000"})
 
         assert result["decision"] == "APPROVED"
-        assert result["proposed_entry"] == entry
+        assert result["proposed_entry"]["lines"][0]["account_code"] == "5200"
+        assert result["clarification"]["required"] is False
         assert result["parse_id"] == "p1"
         mock_app.invoke.assert_called_once()
