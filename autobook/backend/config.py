@@ -44,14 +44,21 @@ class Settings(BaseSettings):
     QDRANT_URL: str = "http://localhost:6333"
     QDRANT_API_KEY: str | None = None
     BEDROCK_MODEL_ROUTING: dict[str, str] = {
-        "disambiguator":     "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "debit_classifier":  "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "credit_classifier": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "debit_corrector":   "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "credit_corrector":  "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "entry_builder":     "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "approver":          "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-        "diagnostician":     "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        # V3 agents
+        "ambiguity_detector":  "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "complexity_detector": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "debit_classifier":    "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "credit_classifier":   "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "tax_specialist":      "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "decision_maker":      "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "entry_drafter":       "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        # Legacy agents
+        "disambiguator":       "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "debit_corrector":     "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "credit_corrector":    "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "entry_builder":       "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "approver":            "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "diagnostician":       "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
     }
     BEDROCK_THINKING_EFFORT: dict[str, str] = {}  # empty = no thinking; post-ablation: set per agent
 
