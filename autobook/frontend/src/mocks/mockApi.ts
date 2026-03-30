@@ -344,11 +344,12 @@ export const mockApi = {
     clarificationsStore = clarificationsStore.filter((item) => item.clarification_id !== clarificationId);
 
     if (input.action === "approve" || input.action === "edit") {
+      const currentLines = currentItem?.proposed_entry?.lines;
       const journalEntryId = postJournalEntry(
         currentItem?.clarification_id,
         currentItem?.source_text ?? "Clarified transfer posting",
         input.edited_entry?.lines ??
-          currentItem?.proposed_entry.lines ??
+          currentLines ??
           (structuredClone(parseNeedsClarificationFixture.proposed_entry.lines) as LedgerEntry["lines"]),
         "clarification.resolved",
       );
