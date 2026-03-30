@@ -1,0 +1,60 @@
+======================================================================
+Test Case: int_12_site_improvements
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [2, 0, 0, 0, 0, 0]  ✓
+  Credit: [0, 0, 0, 2, 0, 0]  ✓
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (5):
+  [RESOLVED] capitalization vs. expense treatment of fencing, streetlights, and walkways
+    Resolution: These are permanent improvements surrounding a factory asset. Under IAS 16, costs that enhance or are integral to bringing property, plant, and equipment to working condition are capitalized. Infrastructure improvements like fencing, streetlights, and walkways are capital expenditures.
+  [RESOLVED] capitalization vs. expense treatment of permanent landscaping
+    Resolution: Described as 'permanent landscaping installations' — the word 'permanent' indicates long-lived improvements that are capitalized under IAS 16, not maintenance expense.
+  [UNRESOLVED] whether improvements are part of building cost or separate land improvements
+    Options: ['Capitalize as part of Factory Building asset (depreciable)', 'Capitalize as separate Land Improvements asset (depreciable)', 'Capitalize as part of Land asset (non-depreciable)']
+    Question: Should these improvements be recorded as part of the factory building asset, as separate land improvements, or as part of the land itself?
+    Why not resolved: The transaction states these surround the factory but does not specify whether they are integral to the building structure, improvements to land separate from the building, or enhancements to land value. Accounting standards require separate classification for items with different useful lives, but the text does not provide enough detail to determine the appropriate asset account.
+  [RESOLVED] payment method for fencing, streetlights, and walkways
+    Resolution: 'Incurred in cash' indicates cash payment — credits Cash account
+  [RESOLVED] payment method for landscaping
+    Resolution: 'Paid by cheque' indicates cash payment — credits Cash account (cheques are cash equivalents in accounting)
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [2, 0, 0, 0, 0, 0]
+Reason: Two distinct asset increases: (1) Fencing, streetlights, and walkways = depreciable land improvements asset, and (2) Permanent landscaping installations = non-depreciable land improvements asset. These must use separate accounts because they have different depreciation treatment under IFRS - the first is depreciable infrastructure, while permanent landscaping is typically non-depreciable. Both are asset increases (debits), resulting in 2 debit lines.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 0, 2, 0, 0]
+Reason: Two asset decreases: (1) Cash paid $1,750,000 for fencing, streetlights, and walkways = asset decrease; (2) Cash (via cheque) paid $2,360,000 for permanent landscaping = asset decrease. Both payments reduce cash/bank assets. The items purchased (infrastructure improvements and permanent landscaping) are capitalized as separate assets on the debit side, but on the credit side we have two distinct payment methods reducing liquid assets.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Disambiguator Responses:
+  [PROCEED] whether improvements are part of building cost or separate land improvements
+    Under IAS 16, components with different useful lives must be accounted for separately. Buildings have useful lives of 25-50 years and are structural. Land is non-depreciable. Fencing, streetlights, walkways, and landscaping are improvements to land with finite useful lives (typically 15-20 years) but are not structural building components. The transaction describes them as 'surrounding' the factory, not integral to it. Standard accounting practice classifies such infrastructure as Land Improvements—a separate depreciable asset account. This is not ambiguous; it follows the component accounting principle in IAS 16.16.
+Rationale: Under IAS 16, permanent improvements surrounding the factory are capitalized. Fencing, streetlights, and walkways ($1,750,000) are infrastructure improvements that enhance the factory's functionality and security. Permanent landscaping ($2,360,000) represents long-lived improvements. Both are depreciable land improvements with finite useful lives, distinct from non-depreciable land. These improvements are recorded as Land Improvements (separate from both the building and land) because they: (1) are attached to or improve the land, (2) have finite useful lives unlike land itself, and (3) are not integral structural components of the building. This classification allows proper depreciation over their useful lives (typically 15-20 years for such improvements). Two cash payments reduce the Cash account.
+Entry:
+  debit  Land Improvements                             $  1,750,000.00
+  debit  Land Improvements                             $  2,360,000.00
+  credit Cash                                          $  1,750,000.00
+  credit Cash                                          $  2,360,000.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Land Improvements                             $  1,750,000.00
+  debit  Land Improvements                             $  2,360,000.00
+  credit Cash                                          $  1,750,000.00
+  credit Cash                                          $  2,360,000.00
+======================================================================

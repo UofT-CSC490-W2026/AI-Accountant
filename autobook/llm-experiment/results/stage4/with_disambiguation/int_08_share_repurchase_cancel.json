@@ -1,0 +1,590 @@
+{
+  "test_case_id": "int_08_share_repurchase_cancel",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    2,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Under IFRS, when an entity repurchases and cancels its own shares, the transaction is recorded as a reduction in equity. The par value portion ($5.00 \u00d7 10,000 = $50,000) reduces Common Stock. The excess over par ($1.00 \u00d7 10,000 = $10,000) is charged to Retained Earnings, following the standard treatment when no specific share premium account is mentioned. Total cash paid is $6.00 \u00d7 10,000 = $60,000. This is a capital transaction, not an expense or dividend.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Common Stock",
+        "amount": 50000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Retained Earnings",
+        "amount": 10000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 60000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0515127,
+  "raw_cost_usd": 0.078888,
+  "total_latency_ms": 35912,
+  "total_input_tokens": 12566,
+  "total_output_tokens": 2746,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 546,
+      "output_tokens": 231,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2893,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058071,
+      "raw_cost_usd": 0.012144,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "disposition of repurchased shares",
+            "resolution": "Transaction explicitly states shares were 'immediately cancelled' \u2014 not held as treasury stock"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Payment method ('in cash') does not affect which accounts are debited/credited \u2014 discarded as non-material to entry structure"
+          },
+          {
+            "aspect": "accounting treatment for share cancellation",
+            "resolution": "Share cancellation has one correct treatment under IFRS: reduce share capital by par value ($50,000), reduce cash by total paid ($60,000), with excess over par ($10,000) charged to retained earnings or contributed surplus per entity's policy"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 519,
+      "output_tokens": 375,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2035,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076368,
+      "raw_cost_usd": 0.01173,
+      "output": {
+        "liability_increase_reason": "No liabilities are created or increased in this share repurchase and cancellation transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase. The transaction reduces equity through share cancellation and payment to shareholders.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Share repurchase is a capital transaction, not an operating activity that generates revenue.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases by $60,000 (10,000 shares \u00d7 $6.00) paid to repurchase the shares from shareholders.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend or drawing accounts are involved in this share repurchase transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Share repurchase and cancellation is a capital transaction that affects equity accounts, not expense accounts.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 521,
+      "output_tokens": 442,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2067,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0086568,
+      "raw_cost_usd": 0.012831,
+      "output": {
+        "asset_increase_reason": "Cash is paid out to repurchase shares, which is a credit to Cash (asset decrease), not a debit.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "This is a share repurchase and cancellation, not a dividend distribution to owners.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Share repurchases are equity transactions, not expenses under IFRS.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being settled in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "Two equity decreases: (1) Common Stock is debited to remove the par value of $50,000 (10,000 shares \u00d7 $5 par), and (2) Additional Paid-in Capital is debited to remove the excess of $10,000 ($6 repurchase price - $5 par = $1 per share \u00d7 10,000 shares). Since the shares are immediately cancelled, we reverse the original equity accounts rather than using treasury stock.",
+        "equity_decrease_count": 2,
+        "revenue_decrease_reason": "Share repurchases are equity transactions and do not affect revenue accounts.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 841,
+      "output_tokens": 1698,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5571,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.029412,
+      "raw_cost_usd": 0.042183,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Accounting method for share repurchase and cancellation",
+            "reason": "Under IFRS, when shares are repurchased and cancelled, the entity must determine how to allocate the repurchase price between par value and the excess. The transaction states par value is $5.00 and repurchase price is $6.00 per share. The par value portion ($50,000) reduces Common Stock. The excess ($10,000) could be allocated to: (1) Retained Earnings, (2) Share Premium/Additional Paid-in Capital if it exists from original issuance, or (3) a combination. The correct treatment depends on the entity's accounting policy election and whether there is existing share premium from these shares. However, IFRS provides clear guidance: the entire repurchase amount is deducted from equity, with par value reducing share capital and any excess typically charged to retained earnings or share premium. This is determinable from accounting standards and does not require additional business facts.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "No asset increase in a share repurchase transaction. Cash is paid out (asset decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "Share repurchase is not a dividend. It is a capital transaction reducing equity.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Share repurchase is an equity transaction, not an expense. No expense is recognized.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is involved in this share repurchase and cancellation transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "The classifier correctly identifies 2 equity decreases: (1) Common Stock is reduced by par value (10,000 shares \u00d7 $5.00 = $50,000), and (2) Retained Earnings is reduced by the excess over par (10,000 shares \u00d7 $1.00 = $10,000). These are two distinct equity accounts being reduced.",
+          "action": "accept",
+          "count": 2,
+          "accounts": [
+            "Common Stock",
+            "Retained Earnings"
+          ]
+        },
+        "debit_revenue_decrease": {
+          "reason": "Share repurchase does not affect revenue accounts.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability is created in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "This is a share repurchase and cancellation, which decreases equity. No equity account increases.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Share repurchase does not generate revenue.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier correctly identifies 1 asset decrease: Cash is paid out for the total repurchase price (10,000 shares \u00d7 $6.00 = $60,000).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend account is involved in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense account is involved in this equity transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS, when an entity repurchases and cancels its own shares, the transaction is recorded as a reduction in equity. The par value portion ($5.00 \u00d7 10,000 = $50,000) reduces Common Stock. The excess over par ($1.00 \u00d7 10,000 = $10,000) is charged to Retained Earnings, following the standard treatment when no specific share premium account is mentioned. Total cash paid is $6.00 \u00d7 10,000 = $60,000. This is a capital transaction, not an expense or dividend.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Common Stock",
+              "amount": 50000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Retained Earnings",
+              "amount": 10000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 60000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction describes a share repurchase and immediate cancellation. Under IFRS, this is treated as a capital transaction reducing equity. The classifier tuples correctly identify 2 debit lines (equity decreases) and 1 credit line (asset decrease). The par value of $50,000 reduces Common Stock, the excess of $10,000 reduces Retained Earnings, and Cash decreases by the total payment of $60,000. Total debits ($60,000) equal total credits ($60,000). No tax applies to equity transactions. The entry is complete and follows IFRS standards.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "disposition of repurchased shares",
+            "resolution": "Transaction explicitly states shares were 'immediately cancelled' \u2014 not held as treasury stock"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Payment method ('in cash') does not affect which accounts are debited/credited \u2014 discarded as non-material to entry structure"
+          },
+          {
+            "aspect": "accounting treatment for share cancellation",
+            "resolution": "Share cancellation has one correct treatment under IFRS: reduce share capital by par value ($50,000), reduce cash by total paid ($60,000), with excess over par ($10,000) charged to retained earnings or contributed surplus per entity's policy"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Cash is paid out to repurchase shares, which is a credit to Cash (asset decrease), not a debit.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "This is a share repurchase and cancellation, not a dividend distribution to owners.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Share repurchases are equity transactions, not expenses under IFRS.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being settled in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "Two equity decreases: (1) Common Stock is debited to remove the par value of $50,000 (10,000 shares \u00d7 $5 par), and (2) Additional Paid-in Capital is debited to remove the excess of $10,000 ($6 repurchase price - $5 par = $1 per share \u00d7 10,000 shares). Since the shares are immediately cancelled, we reverse the original equity accounts rather than using treasury stock.",
+        "equity_decrease_count": 2,
+        "revenue_decrease_reason": "Share repurchases are equity transactions and do not affect revenue accounts.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased in this share repurchase and cancellation transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase. The transaction reduces equity through share cancellation and payment to shareholders.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Share repurchase is a capital transaction, not an operating activity that generates revenue.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases by $60,000 (10,000 shares \u00d7 $6.00) paid to repurchase the shares from shareholders.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend or drawing accounts are involved in this share repurchase transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Share repurchase and cancellation is a capital transaction that affects equity accounts, not expense accounts.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Cash is paid out to repurchase shares, which is a credit to Cash (asset decrease), not a debit.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "This is a share repurchase and cancellation, not a dividend distribution to owners.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Share repurchases are equity transactions, not expenses under IFRS.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being settled in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "Two equity decreases: (1) Common Stock is debited to remove the par value of $50,000 (10,000 shares \u00d7 $5 par), and (2) Additional Paid-in Capital is debited to remove the excess of $10,000 ($6 repurchase price - $5 par = $1 per share \u00d7 10,000 shares). Since the shares are immediately cancelled, we reverse the original equity accounts rather than using treasury stock.",
+        "equity_decrease_count": 2,
+        "revenue_decrease_reason": "Share repurchases are equity transactions and do not affect revenue accounts.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased in this share repurchase and cancellation transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase. The transaction reduces equity through share cancellation and payment to shareholders.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Share repurchase is a capital transaction, not an operating activity that generates revenue.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases by $60,000 (10,000 shares \u00d7 $6.00) paid to repurchase the shares from shareholders.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend or drawing accounts are involved in this share repurchase transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Share repurchase and cancellation is a capital transaction that affects equity accounts, not expense accounts.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Accounting method for share repurchase and cancellation",
+            "reason": "Under IFRS, when shares are repurchased and cancelled, the entity must determine how to allocate the repurchase price between par value and the excess. The transaction states par value is $5.00 and repurchase price is $6.00 per share. The par value portion ($50,000) reduces Common Stock. The excess ($10,000) could be allocated to: (1) Retained Earnings, (2) Share Premium/Additional Paid-in Capital if it exists from original issuance, or (3) a combination. The correct treatment depends on the entity's accounting policy election and whether there is existing share premium from these shares. However, IFRS provides clear guidance: the entire repurchase amount is deducted from equity, with par value reducing share capital and any excess typically charged to retained earnings or share premium. This is determinable from accounting standards and does not require additional business facts.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "No asset increase in a share repurchase transaction. Cash is paid out (asset decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "Share repurchase is not a dividend. It is a capital transaction reducing equity.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Share repurchase is an equity transaction, not an expense. No expense is recognized.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is involved in this share repurchase and cancellation transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "The classifier correctly identifies 2 equity decreases: (1) Common Stock is reduced by par value (10,000 shares \u00d7 $5.00 = $50,000), and (2) Retained Earnings is reduced by the excess over par (10,000 shares \u00d7 $1.00 = $10,000). These are two distinct equity accounts being reduced.",
+          "action": "accept",
+          "count": 2,
+          "accounts": [
+            "Common Stock",
+            "Retained Earnings"
+          ]
+        },
+        "debit_revenue_decrease": {
+          "reason": "Share repurchase does not affect revenue accounts.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability is created in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "This is a share repurchase and cancellation, which decreases equity. No equity account increases.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Share repurchase does not generate revenue.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier correctly identifies 1 asset decrease: Cash is paid out for the total repurchase price (10,000 shares \u00d7 $6.00 = $60,000).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend account is involved in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense account is involved in this equity transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS, when an entity repurchases and cancels its own shares, the transaction is recorded as a reduction in equity. The par value portion ($5.00 \u00d7 10,000 = $50,000) reduces Common Stock. The excess over par ($1.00 \u00d7 10,000 = $10,000) is charged to Retained Earnings, following the standard treatment when no specific share premium account is mentioned. Total cash paid is $6.00 \u00d7 10,000 = $60,000. This is a capital transaction, not an expense or dividend.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Common Stock",
+              "amount": 50000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Retained Earnings",
+              "amount": 10000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 60000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction describes a share repurchase and immediate cancellation. Under IFRS, this is treated as a capital transaction reducing equity. The classifier tuples correctly identify 2 debit lines (equity decreases) and 1 credit line (asset decrease). The par value of $50,000 reduces Common Stock, the excess of $10,000 reduces Retained Earnings, and Cash decreases by the total payment of $60,000. Total debits ($60,000) equal total credits ($60,000). No tax applies to equity transactions. The entry is complete and follows IFRS standards.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 546,
+        "output_tokens": 231,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 519,
+        "output_tokens": 375,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 442,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 841,
+        "output_tokens": 1698,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

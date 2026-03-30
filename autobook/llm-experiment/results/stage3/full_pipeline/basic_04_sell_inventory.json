@@ -1,0 +1,629 @@
+{
+  "test_case_id": "basic_04_sell_inventory",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2024-01-01",
+    "description": "Sale of inventory for cash",
+    "rationale": "Sale of inventory requires two accounting effects: (1) recognize revenue and HST collected, and (2) recognize cost of goods sold by removing inventory at cost. Cash increases by sale price plus HST. Revenue is $500, COGS expense is $300 (inventory reduction). HST at 13% on $500 sale = $65, collected on behalf of CRA. Debit tuple (1,0,1,0,0,0) = 1 asset increase (Cash) + 1 expense increase (COGS). Credit tuple (0,0,1,1,0,0) = 1 revenue increase (Sales Revenue) + 1 asset decrease (Inventory). Tax line adds HST Payable credit and increases Cash debit.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 565.0
+      },
+      {
+        "account_name": "Cost of Goods Sold",
+        "type": "debit",
+        "amount": 300.0
+      },
+      {
+        "account_name": "Sales Revenue",
+        "type": "credit",
+        "amount": 500.0
+      },
+      {
+        "account_name": "Inventory",
+        "type": "credit",
+        "amount": 300.0
+      },
+      {
+        "account_name": "HST Payable",
+        "type": "credit",
+        "amount": 65.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.07219350000000001,
+  "raw_cost_usd": 0.128313,
+  "total_latency_ms": 57896,
+  "total_input_tokens": 31451,
+  "total_output_tokens": 2264,
+  "total_llm_calls": 10,
+  "iteration_count": 2,
+  "final_decision": "APPROVED",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 513,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2908,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0027825,
+      "raw_cost_usd": 0.009249,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 486,
+      "output_tokens": 97,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1727,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032853,
+      "raw_cost_usd": 0.006636,
+      "output": {
+        "reason": "Two credit lines: (1) Inventory leaving the business = asset decrease (cost $300), (2) Sale of goods = revenue increase ($500)",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Inventory leaving the business = asset decrease (cost $300), (2) Sale of goods = revenue increase ($500)"
+    },
+    "debit_classifier": {
+      "input_tokens": 488,
+      "output_tokens": 119,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1750,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036276,
+      "raw_cost_usd": 0.007035,
+      "output": {
+        "reason": "Two debit lines: (1) Cash received = asset increase, (2) Cost of Goods Sold (COGS) = expense increase. The $300 inventory cost must be expensed when the sale occurs under IFRS matching principle.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two debit lines: (1) Cash received = asset increase, (2) Cost of Goods Sold (COGS) = expense increase. The $300 inventory cost must be expensed when the sale occurs under IFRS matching principle."
+    },
+    "debit_corrector": {
+      "input_tokens": 656,
+      "output_tokens": 220,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2402,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005791800000000001,
+      "raw_cost_usd": 0.010506,
+      "output": {
+        "reason": "The transaction \"Sell inventory (cost $300) for $500 cash\" involves two distinct economic events: (1) receiving cash of $500 (asset increase), and (2) recognizing cost of goods sold of $300 (expense increase). The initial debit tuple (1,0,1,0,0,0) correctly captures both: one asset increase line (cash) and one expense increase line (COGS). The credit tuple (0,0,1,1,0,0) shows revenue increase (the $500 sale) and asset decrease (inventory reduction of $300), which is consistent with the debit side. This is a standard sale transaction properly recorded under IFRS. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Sell inventory (cost $300) for $500 cash\" involves two distinct economic events: (1) receiving cash of $500 (asset increase), and (2) recognizing cost of goods sold of $300 (expense increase). The initial debit tuple (1,0,1,0,0,0) correctly captures both: one asset increase line (cash) and one expense increase line (COGS). The credit tuple (0,0,1,1,0,0) shows revenue increase (the $500 sale) and asset decrease (inventory reduction of $300), which is consistent with the debit side. This is a standard sale transaction properly recorded under IFRS. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 656,
+      "output_tokens": 261,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2410,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0064091999999999994,
+      "raw_cost_usd": 0.011145,
+      "output": {
+        "reason": "The initial credit tuple is correct. This transaction involves a sale of inventory, which has two distinct economic events:\n\n1. Revenue recognition: The sale generates $500 in revenue, which is a revenue increase (credit to revenue account) - slot c = 1\n2. Cost of goods sold: The inventory with cost $300 must be removed from assets, which is an asset decrease (credit to inventory account) - slot d = 1\n\nThe credit side correctly shows (0,0,1,1,0,0): one revenue increase and one asset decrease.\n\nCross-validation with debit tuple (1,0,1,0,0,0): The debit side shows one asset increase (cash received $500) and one expense increase (COGS $300), which is consistent with the credit side. The two sides tell a coherent story of a typical inventory sale transaction under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. This transaction involves a sale of inventory, which has two distinct economic events:\n\n1. Revenue recognition: The sale generates $500 in revenue, which is a revenue increase (credit to revenue account) - slot c = 1\n2. Cost of goods sold: The inventory with cost $300 must be removed from assets, which is an asset decrease (credit to inventory account) - slot d = 1\n\nThe credit side correctly shows (0,0,1,1,0,0): one revenue increase and one asset decrease.\n\nCross-validation with debit tuple (1,0,1,0,0,0): The debit side shows one asset increase (cash received $500) and one expense increase (COGS $300), which is consistent with the credit side. The two sides tell a coherent story of a typical inventory sale transaction under IFRS. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1564,
+      "output_tokens": 800,
+      "cache_read_tokens": 6428,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7992,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.018620400000000002,
+      "raw_cost_usd": 0.035976,
+      "output": {
+        "date": "2024-01-01",
+        "description": "Sale of inventory for cash",
+        "rationale": "Sale of inventory requires two accounting effects: (1) recognize revenue and HST collected, and (2) recognize cost of goods sold by removing inventory at cost. Cash increases by sale price plus HST. Revenue is $500, COGS expense is $300 (inventory reduction). HST at 13% on $500 sale = $65, collected on behalf of CRA. Debit tuple (1,0,1,0,0,0) = 1 asset increase (Cash) + 1 expense increase (COGS). Credit tuple (0,0,1,1,0,0) = 1 revenue increase (Sales Revenue) + 1 asset decrease (Inventory). Tax line adds HST Payable credit and increases Cash debit.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 565.0
+          },
+          {
+            "account_name": "Cost of Goods Sold",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "Sales Revenue",
+            "type": "credit",
+            "amount": 500.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "HST Payable",
+            "type": "credit",
+            "amount": 65.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4717,
+      "output_tokens": 334,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8821,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0203922,
+      "raw_cost_usd": 0.031473,
+      "output": {
+        "reason": "Entry correctly records inventory sale with revenue recognition and COGS expense. Balance verified: debits ($565 + $300 = $865) = credits ($500 + $300 + $65 = $865). Sale of goods is taxable; HST at 13% on $500 base = $65 correctly recorded as HST Payable. Cash debit of $565 reflects sale price plus tax collected. All accounts appropriate and directionally correct.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records inventory sale with revenue recognition and COGS expense. Balance verified: debits ($565 + $300 = $865) = credits ($500 + $300 + $65 = $865). Sale of goods is taxable; HST at 13% on $500 base = $65 correctly recorded as HST Payable. Cash debit of $565 reflects sale price plus tax collected. All accounts appropriate and directionally correct."
+    },
+    "diagnostician": {
+      "input_tokens": 1586,
+      "output_tokens": 398,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3441,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0112845,
+      "raw_cost_usd": 0.016293,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    0,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    0,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Transaction is a taxable sale of goods but no HST/GST lines present. The transaction text does not state tax is included or that the business is exempt. Sales of inventory are taxable transactions requiring HST Receivable (on purchase) and HST Payable (on sale). The $500 sale should generate HST Payable, and total cash received should be $500 + applicable HST. Entry missing required tax lines.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Two debit lines: (1) Cash received = asset increase, (2) Cost of Goods Sold (COGS) = expense increase. The $300 inventory cost must be expensed when the sale occurs under IFRS matching principle.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Two debit lines: (1) Cash received = asset increase, (2) Cost of Goods Sold (COGS) = expense increase. The $300 inventory cost must be expensed when the sale occurs under IFRS matching principle.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Inventory leaving the business = asset decrease (cost $300), (2) Sale of goods = revenue increase ($500)",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Two credit lines: (1) Inventory leaving the business = asset decrease (cost $300), (2) Sale of goods = revenue increase ($500)",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction \"Sell inventory (cost $300) for $500 cash\" involves two distinct economic events: (1) receiving cash of $500 (asset increase), and (2) recognizing cost of goods sold of $300 (expense increase). The initial debit tuple (1,0,1,0,0,0) correctly captures both: one asset increase line (cash) and one expense increase line (COGS). The credit tuple (0,0,1,1,0,0) shows revenue increase (the $500 sale) and asset decrease (inventory reduction of $300), which is consistent with the debit side. This is a standard sale transaction properly recorded under IFRS. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction \"Sell inventory (cost $300) for $500 cash\" involves two distinct economic events: (1) receiving cash of $500 (asset increase), and (2) recognizing cost of goods sold of $300 (expense increase). The initial debit tuple (1,0,1,0,0,0) correctly captures both: one asset increase line (cash) and one expense increase line (COGS). The credit tuple (0,0,1,1,0,0) shows revenue increase (the $500 sale) and asset decrease (inventory reduction of $300), which is consistent with the debit side. This is a standard sale transaction properly recorded under IFRS. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. This transaction involves a sale of inventory, which has two distinct economic events:\n\n1. Revenue recognition: The sale generates $500 in revenue, which is a revenue increase (credit to revenue account) - slot c = 1\n2. Cost of goods sold: The inventory with cost $300 must be removed from assets, which is an asset decrease (credit to inventory account) - slot d = 1\n\nThe credit side correctly shows (0,0,1,1,0,0): one revenue increase and one asset decrease.\n\nCross-validation with debit tuple (1,0,1,0,0,0): The debit side shows one asset increase (cash received $500) and one expense increase (COGS $300), which is consistent with the credit side. The two sides tell a coherent story of a typical inventory sale transaction under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The initial credit tuple is correct. This transaction involves a sale of inventory, which has two distinct economic events:\n\n1. Revenue recognition: The sale generates $500 in revenue, which is a revenue increase (credit to revenue account) - slot c = 1\n2. Cost of goods sold: The inventory with cost $300 must be removed from assets, which is an asset decrease (credit to inventory account) - slot d = 1\n\nThe credit side correctly shows (0,0,1,1,0,0): one revenue increase and one asset decrease.\n\nCross-validation with debit tuple (1,0,1,0,0,0): The debit side shows one asset increase (cash received $500) and one expense increase (COGS $300), which is consistent with the credit side. The two sides tell a coherent story of a typical inventory sale transaction under IFRS. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Sale of inventory for cash",
+        "rationale": "This is a sale of inventory transaction requiring two accounting effects under IFRS: (1) recognize revenue from the sale at $500, and (2) recognize cost of goods sold expense of $300 and remove the inventory asset. The debit tuple (1,0,1,0,0,0) correctly identifies one asset increase (cash) and one expense increase (COGS). The credit tuple (0,0,1,1,0,0) correctly identifies one revenue increase (sales revenue) and one asset decrease (inventory). No tax information provided, so no tax lines added.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 500.0
+          },
+          {
+            "account_name": "Cost of Goods Sold",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "Sales Revenue",
+            "type": "credit",
+            "amount": 500.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 300.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2024-01-01",
+        "description": "Sale of inventory for cash",
+        "rationale": "Sale of inventory requires two accounting effects: (1) recognize revenue and HST collected, and (2) recognize cost of goods sold by removing inventory at cost. Cash increases by sale price plus HST. Revenue is $500, COGS expense is $300 (inventory reduction). HST at 13% on $500 sale = $65, collected on behalf of CRA. Debit tuple (1,0,1,0,0,0) = 1 asset increase (Cash) + 1 expense increase (COGS). Credit tuple (0,0,1,1,0,0) = 1 revenue increase (Sales Revenue) + 1 asset decrease (Inventory). Tax line adds HST Payable credit and increases Cash debit.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 565.0
+          },
+          {
+            "account_name": "Cost of Goods Sold",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "Sales Revenue",
+            "type": "credit",
+            "amount": 500.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "HST Payable",
+            "type": "credit",
+            "amount": 65.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Transaction is a taxable sale of goods but no HST/GST lines present. The transaction text does not state tax is included or that the business is exempt. Sales of inventory are taxable transactions requiring HST Receivable (on purchase) and HST Payable (on sale). The $500 sale should generate HST Payable, and total cash received should be $500 + applicable HST. Entry missing required tax lines.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Entry correctly records inventory sale with revenue recognition and COGS expense. Balance verified: debits ($565 + $300 = $865) = credits ($500 + $300 + $65 = $865). Sale of goods is taxable; HST at 13% on $500 base = $65 correctly recorded as HST Payable. Cash debit of $565 reflects sale price plus tax collected. All accounts appropriate and directionally correct.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because the entry is missing HST/GST tax lines on a taxable sale of goods. The transaction text does not indicate tax is included or that the business is exempt, so HST Payable and additional cash should be recorded.\n\nTracing through the pipeline:\n- Agents 1-4 (classifiers and correctors) correctly identified the tuple structure for the sale transaction (cash increase, COGS expense, revenue increase, inventory decrease). Their job is to classify directional categories, not to add tax lines.\n- Agent 5 (Entry Builder) constructed the journal entry and explicitly noted \"No tax information provided, so no tax lines added\" in its rationale.\n\nThe root cause is Agent 5. While the transaction text doesn't explicitly mention tax, sales of inventory in Canada are taxable transactions by default unless stated otherwise. Agent 5 should have recognized this is a taxable sale and added the appropriate HST lines (HST Payable credit and increase the Cash debit by the HST amount).\n\nThis is fixable by instructing Agent 5 to treat inventory sales as taxable transactions requiring HST unless explicitly stated as tax-exempt or tax-included.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Sale of inventory is a taxable transaction requiring HST. Add HST Payable credit line (HST on $500 sale) and increase Cash debit by the same HST amount to reflect total cash received."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Sale of inventory is a taxable transaction requiring HST. Add HST Payable credit line (HST on $500 sale) and increase Cash debit by the same HST amount to reflect total cash received."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 513,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 486,
+        "output_tokens": 97,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 488,
+        "output_tokens": 119,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 656,
+        "output_tokens": 220,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 656,
+        "output_tokens": 261,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 745,
+        "output_tokens": 360,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1809,
+        "output_tokens": 164,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1586,
+        "output_tokens": 398,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 819,
+        "output_tokens": 440,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2908,
+        "output_tokens": 170,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

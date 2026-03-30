@@ -1,0 +1,596 @@
+{
+  "test_case_id": "int_24_advertising",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Digital marketing campaign is an operating expense. The transaction states $22,000 inclusive of sales tax was paid. Without a specified tax rate in the transaction or tax_rules, I cannot mathematically separate the base amount from the tax component. However, the transaction clearly indicates tax is included. Assuming a common rate of 13% HST/GST (typical for services in Canada): Base = 22,000 / 1.13 = $19,469.03, Tax = $2,530.97. The marketing expense is debited for the base amount, tax receivable (recoverable input tax) is debited for the tax portion, and cash is credited for the total payment.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Marketing Expense",
+        "amount": 19469.03
+      },
+      {
+        "type": "debit",
+        "account_name": "Tax Receivable",
+        "amount": 2530.97
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 22000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.054711,
+  "raw_cost_usd": 0.081792,
+  "total_latency_ms": 41485,
+  "total_input_tokens": 12389,
+  "total_output_tokens": 2975,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 529,
+      "output_tokens": 445,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2876,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008966100000000001,
+      "raw_cost_usd": 0.015303,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "nature of commissioned campaign",
+            "resolution": "Digital marketing campaign for products is clearly an advertising/marketing expense, not an asset acquisition"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Cash payment stated explicitly; method does not affect entry structure"
+          },
+          {
+            "aspect": "sales tax treatment",
+            "resolution": "Ontario corporation can claim input tax credit on business marketing expenses; HST recoverable should be separated from expense"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "sales tax rate applicable",
+            "options": [
+              "13% HST (Ontario standard rate) - expense $19,469, HST recoverable $2,531",
+              "15% HST (if supplier in Atlantic province) - expense $19,130, HST recoverable $2,870",
+              "5% GST only (if supplier GST-registered but HST-exempt) - expense $20,952, GST recoverable $1,048"
+            ],
+            "clarification_question": "What sales tax rate was charged on this $22,000 marketing campaign invoice?",
+            "why_entry_differs": "Different tax rates result in different expense amounts and different HST/GST recoverable amounts. The split between Marketing Expense and HST Recoverable depends on the rate applied.",
+            "why_not_resolved": "Transaction states 'inclusive of sales tax' but does not specify the rate. While Ontario standard rate is 13% HST, the supplier's location or tax status could result in different rates. The exact split between expense and recoverable tax cannot be determined without knowing the rate charged."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 502,
+      "output_tokens": 355,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2018,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0072858,
+      "raw_cost_usd": 0.011379,
+      "output": {
+        "liability_increase_reason": "No liabilities are created or increased; the payment is made in cash immediately.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No owner investment or equity contribution occurs in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned; this is an expense transaction for marketing services.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash is paid out for the digital marketing campaign, resulting in one asset (cash) decrease of $22,000.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividend reversals occur in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense is being reversed or reduced; marketing expense is being incurred (debited), not decreased.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 504,
+      "output_tokens": 413,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2050,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081708,
+      "raw_cost_usd": 0.012345,
+      "output": {
+        "asset_increase_reason": "No asset increases. The digital marketing campaign is a service consumed immediately for current period benefit, not a future economic resource. Marketing costs are expensed as incurred under IFRS.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends. This is an operating expense transaction, not an owner withdrawal.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Two expense increases: (1) Marketing/Advertising expense for the campaign service, and (2) Sales tax expense (or tax expense) for the tax component. These are economically distinct expenses requiring separate debit lines.",
+        "expense_increase_count": 2,
+        "liability_decrease_reason": "No liability decreases. Payment is made in cash, not settling a pre-existing payable.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity decreases. This is an expense transaction, not a direct equity reduction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases. This is a purchase of marketing services, not a sales-related adjustment.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 824,
+      "output_tokens": 1762,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5445,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0302883,
+      "raw_cost_usd": 0.042765,
+      "output": {
+        "incomplete_information_reasoning": "The transaction states that Mondelez paid $22,000 cash inclusive of sales tax for a digital marketing campaign. All necessary business facts are present: (1) the service type is clearly identified as a digital marketing campaign for snack products, (2) the total amount paid including tax is stated, (3) the payment method is cash. The business purpose is unambiguous - marketing campaigns are operating expenses. The only technical question is the tax rate, but since the amount is stated as inclusive of tax, I can work backwards once I know the applicable rate. However, no tax rate is provided in the transaction or tax_rules. This is a technical parameter, not a missing business fact. In the absence of a stated rate, I will need to make a reasonable assumption or note that tax cannot be separated without the rate.",
+        "debit_asset_increase": {
+          "reason": "The classifier proposes 0 asset increases. This is correct - we are paying cash (asset decrease), not acquiring an asset. The marketing campaign is a service consumed immediately, not a capitalizable asset.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "The classifier proposes 0 dividend increases. This is correct - this is a business expense transaction, not a dividend distribution.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier proposes 2 expense increases. However, this appears to be an error. A digital marketing campaign is a single service purchase that should be recorded as one expense line (Marketing Expense or Advertising Expense). The '2' likely reflects the classifier attempting to separate the base amount from tax, but tax receivable is an asset, not an expense. I will override to 1 expense line for the marketing campaign itself.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Marketing Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "The classifier proposes 0 liability decreases. This is correct - we are paying cash directly, not settling a pre-existing liability.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "The classifier proposes 0 equity decreases. This is correct - this is an expense transaction, not a direct equity transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "The classifier proposes 0 revenue decreases. This is correct - this is an expense transaction, not a revenue adjustment.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "The classifier proposes 0 liability increases. This is correct - we paid cash, so no liability is created.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "The classifier proposes 0 equity increases. This is correct - this is an expense transaction, not an equity contribution.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "The classifier proposes 0 revenue increases. This is correct - this is an expense transaction from Mondelez's perspective, not revenue.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier proposes 1 asset decrease. This is correct - cash is being paid out. The account is Cash.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "The classifier proposes 0 dividend decreases. This is correct - this is not a dividend transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "The classifier proposes 0 expense decreases. This is correct - we are recording an expense, not reversing one.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Digital marketing campaign is an operating expense. The transaction states $22,000 inclusive of sales tax was paid. Without a specified tax rate in the transaction or tax_rules, I cannot mathematically separate the base amount from the tax component. However, the transaction clearly indicates tax is included. Assuming a common rate of 13% HST/GST (typical for services in Canada): Base = 22,000 / 1.13 = $19,469.03, Tax = $2,530.97. The marketing expense is debited for the base amount, tax receivable (recoverable input tax) is debited for the tax portion, and cash is credited for the total payment.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Marketing Expense",
+              "amount": 19469.03
+            },
+            {
+              "type": "debit",
+              "account_name": "Tax Receivable",
+              "amount": 2530.97
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 22000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is clear: Mondelez paid for a digital marketing campaign with cash, and the amount is inclusive of sales tax. The business purpose is unambiguous - marketing expenses are operating expenses. The debit tuple proposed 2 expense increases, which I overrode to 1 because the marketing campaign itself is a single expense line; the second debit is for tax receivable (an asset), which is added separately per the tax handling rules. Without a specified tax rate, I applied a reasonable assumption of 13% (common for services). The entry balances: debits ($19,469.03 + $2,530.97) = credits ($22,000.00). All accounting standards are satisfied.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "nature of commissioned campaign",
+            "resolution": "Digital marketing campaign for products is clearly an advertising/marketing expense, not an asset acquisition"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Cash payment stated explicitly; method does not affect entry structure"
+          },
+          {
+            "aspect": "sales tax treatment",
+            "resolution": "Ontario corporation can claim input tax credit on business marketing expenses; HST recoverable should be separated from expense"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "sales tax rate applicable",
+            "options": [
+              "13% HST (Ontario standard rate) - expense $19,469, HST recoverable $2,531",
+              "15% HST (if supplier in Atlantic province) - expense $19,130, HST recoverable $2,870",
+              "5% GST only (if supplier GST-registered but HST-exempt) - expense $20,952, GST recoverable $1,048"
+            ],
+            "clarification_question": "What sales tax rate was charged on this $22,000 marketing campaign invoice?",
+            "why_entry_differs": "Different tax rates result in different expense amounts and different HST/GST recoverable amounts. The split between Marketing Expense and HST Recoverable depends on the rate applied.",
+            "why_not_resolved": "Transaction states 'inclusive of sales tax' but does not specify the rate. While Ontario standard rate is 13% HST, the supplier's location or tax status could result in different rates. The exact split between expense and recoverable tax cannot be determined without knowing the rate charged."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No asset increases. The digital marketing campaign is a service consumed immediately for current period benefit, not a future economic resource. Marketing costs are expensed as incurred under IFRS.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends. This is an operating expense transaction, not an owner withdrawal.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Two expense increases: (1) Marketing/Advertising expense for the campaign service, and (2) Sales tax expense (or tax expense) for the tax component. These are economically distinct expenses requiring separate debit lines.",
+        "expense_increase_count": 2,
+        "liability_decrease_reason": "No liability decreases. Payment is made in cash, not settling a pre-existing payable.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity decreases. This is an expense transaction, not a direct equity reduction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases. This is a purchase of marketing services, not a sales-related adjustment.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased; the payment is made in cash immediately.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No owner investment or equity contribution occurs in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned; this is an expense transaction for marketing services.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash is paid out for the digital marketing campaign, resulting in one asset (cash) decrease of $22,000.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividend reversals occur in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense is being reversed or reduced; marketing expense is being incurred (debited), not decreased.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No asset increases. The digital marketing campaign is a service consumed immediately for current period benefit, not a future economic resource. Marketing costs are expensed as incurred under IFRS.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends. This is an operating expense transaction, not an owner withdrawal.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Two expense increases: (1) Marketing/Advertising expense for the campaign service, and (2) Sales tax expense (or tax expense) for the tax component. These are economically distinct expenses requiring separate debit lines.",
+        "expense_increase_count": 2,
+        "liability_decrease_reason": "No liability decreases. Payment is made in cash, not settling a pre-existing payable.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity decreases. This is an expense transaction, not a direct equity reduction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases. This is a purchase of marketing services, not a sales-related adjustment.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased; the payment is made in cash immediately.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No owner investment or equity contribution occurs in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned; this is an expense transaction for marketing services.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash is paid out for the digital marketing campaign, resulting in one asset (cash) decrease of $22,000.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividend reversals occur in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense is being reversed or reduced; marketing expense is being incurred (debited), not decreased.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction states that Mondelez paid $22,000 cash inclusive of sales tax for a digital marketing campaign. All necessary business facts are present: (1) the service type is clearly identified as a digital marketing campaign for snack products, (2) the total amount paid including tax is stated, (3) the payment method is cash. The business purpose is unambiguous - marketing campaigns are operating expenses. The only technical question is the tax rate, but since the amount is stated as inclusive of tax, I can work backwards once I know the applicable rate. However, no tax rate is provided in the transaction or tax_rules. This is a technical parameter, not a missing business fact. In the absence of a stated rate, I will need to make a reasonable assumption or note that tax cannot be separated without the rate.",
+        "debit_asset_increase": {
+          "reason": "The classifier proposes 0 asset increases. This is correct - we are paying cash (asset decrease), not acquiring an asset. The marketing campaign is a service consumed immediately, not a capitalizable asset.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "The classifier proposes 0 dividend increases. This is correct - this is a business expense transaction, not a dividend distribution.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier proposes 2 expense increases. However, this appears to be an error. A digital marketing campaign is a single service purchase that should be recorded as one expense line (Marketing Expense or Advertising Expense). The '2' likely reflects the classifier attempting to separate the base amount from tax, but tax receivable is an asset, not an expense. I will override to 1 expense line for the marketing campaign itself.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Marketing Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "The classifier proposes 0 liability decreases. This is correct - we are paying cash directly, not settling a pre-existing liability.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "The classifier proposes 0 equity decreases. This is correct - this is an expense transaction, not a direct equity transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "The classifier proposes 0 revenue decreases. This is correct - this is an expense transaction, not a revenue adjustment.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "The classifier proposes 0 liability increases. This is correct - we paid cash, so no liability is created.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "The classifier proposes 0 equity increases. This is correct - this is an expense transaction, not an equity contribution.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "The classifier proposes 0 revenue increases. This is correct - this is an expense transaction from Mondelez's perspective, not revenue.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier proposes 1 asset decrease. This is correct - cash is being paid out. The account is Cash.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "The classifier proposes 0 dividend decreases. This is correct - this is not a dividend transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "The classifier proposes 0 expense decreases. This is correct - we are recording an expense, not reversing one.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Digital marketing campaign is an operating expense. The transaction states $22,000 inclusive of sales tax was paid. Without a specified tax rate in the transaction or tax_rules, I cannot mathematically separate the base amount from the tax component. However, the transaction clearly indicates tax is included. Assuming a common rate of 13% HST/GST (typical for services in Canada): Base = 22,000 / 1.13 = $19,469.03, Tax = $2,530.97. The marketing expense is debited for the base amount, tax receivable (recoverable input tax) is debited for the tax portion, and cash is credited for the total payment.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Marketing Expense",
+              "amount": 19469.03
+            },
+            {
+              "type": "debit",
+              "account_name": "Tax Receivable",
+              "amount": 2530.97
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 22000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is clear: Mondelez paid for a digital marketing campaign with cash, and the amount is inclusive of sales tax. The business purpose is unambiguous - marketing expenses are operating expenses. The debit tuple proposed 2 expense increases, which I overrode to 1 because the marketing campaign itself is a single expense line; the second debit is for tax receivable (an asset), which is added separately per the tax handling rules. Without a specified tax rate, I applied a reasonable assumption of 13% (common for services). The entry balances: debits ($19,469.03 + $2,530.97) = credits ($22,000.00). All accounting standards are satisfied.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 529,
+        "output_tokens": 445,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 502,
+        "output_tokens": 355,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 413,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 824,
+        "output_tokens": 1762,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

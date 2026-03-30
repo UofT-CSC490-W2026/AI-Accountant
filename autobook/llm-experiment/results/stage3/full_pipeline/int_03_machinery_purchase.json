@@ -1,0 +1,429 @@
+{
+  "test_case_id": "int_03_machinery_purchase",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    4,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of machinery from Ford for factory expansion, including freight, installation, and testing costs",
+    "rationale": "Under IAS 16, the cost of property, plant, and equipment includes the purchase price and all costs directly attributable to bringing the asset to the location and condition necessary for it to be capable of operating in the manner intended by management. This includes freight, installation, and testing/commissioning costs. All four components ($700,000 machinery + $30,000 freight + $20,000 installation + $50,000 testing) are capitalized to Machinery. The machinery purchase on account creates Accounts Payable, while the ancillary costs paid by cheque reduce Cash. The classifier tuples suggest 4 asset increases and 1 liability increase + 1 asset decrease, which aligns with capitalizing all costs to one Machinery account (net 1 asset increase), creating a liability, and reducing cash.",
+    "lines": [
+      {
+        "account_name": "Machinery",
+        "type": "debit",
+        "amount": 800000.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 700000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 100000.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0530262,
+  "raw_cost_usd": 0.089919,
+  "total_latency_ms": 36503,
+  "total_input_tokens": 19993,
+  "total_output_tokens": 1996,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 557,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2952,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0029145,
+      "raw_cost_usd": 0.009381,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 532,
+      "output_tokens": 178,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1794,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0046446000000000005,
+      "raw_cost_usd": 0.008052,
+      "output": {
+        "reason": "Under IFRS (IAS 16), machinery purchase price ($700,000) plus all costs directly attributable to bringing the asset to working condition (freight $30,000, installation $20,000, testing and commissioning $50,000) are capitalized as a single asset increase. Total machinery cost = $800,000. This represents 1 debit line: asset (machinery/PPE) increase. The different payment methods (on account vs. cheque) affect the credit side only, not the debit classification.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IFRS (IAS 16), machinery purchase price ($700,000) plus all costs directly attributable to bringing the asset to working condition (freight $30,000, installation $20,000, testing and commissioning $50,000) are capitalized as a single asset increase. Total machinery cost = $800,000. This represents 1 debit line: asset (machinery/PPE) increase. The different payment methods (on account vs. cheque) affect the credit side only, not the debit classification."
+    },
+    "credit_classifier": {
+      "input_tokens": 530,
+      "output_tokens": 341,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1771,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0070773,
+      "raw_cost_usd": 0.010428,
+      "output": {
+        "reason": "This transaction involves acquiring machinery with multiple cost components. On the credit side:\n1. Accounts Payable increases by $700,000 (machinery purchased on account from Ford) = liability increase\n2. Cash/Bank decreases by $30,000 (freight paid by cheque) = asset decrease\n3. Cash/Bank decreases by $20,000 (installation paid by cheque) = asset decrease\n4. Cash/Bank decreases by $50,000 (testing and commissioning paid by cheque) = asset decrease\n\nUnder IFRS (IAS 16), all costs necessary to bring the asset to working condition (freight, installation, testing) are capitalized to the machinery asset account on the debit side. On the credit side, we have one liability increase and three separate asset decreases (though they could be combined as they're all cash payments, they represent three distinct economic events). However, since all three cash payments are from the same account type (cash/bank asset), they should be counted as one line per distinct payment purpose, but can be combined if they serve the same treatment. Here we have three separate payments for three different purposes, so: 1 liability increase + 3 asset decreases = (1,0,0,3,0,0).",
+        "tuple": [
+          1,
+          0,
+          0,
+          3,
+          0,
+          0
+        ]
+      },
+      "reason": "This transaction involves acquiring machinery with multiple cost components. On the credit side:\n1. Accounts Payable increases by $700,000 (machinery purchased on account from Ford) = liability increase\n2. Cash/Bank decreases by $30,000 (freight paid by cheque) = asset decrease\n3. Cash/Bank decreases by $20,000 (installation paid by cheque) = asset decrease\n4. Cash/Bank decreases by $50,000 (testing and commissioning paid by cheque) = asset decrease\n\nUnder IFRS (IAS 16), all costs necessary to bring the asset to working condition (freight, installation, testing) are capitalized to the machinery asset account on the debit side. On the credit side, we have one liability increase and three separate asset decreases (though they could be combined as they're all cash payments, they represent three distinct economic events). However, since all three cash payments are from the same account type (cash/bank asset), they should be counted as one line per distinct payment purpose, but can be combined if they serve the same treatment. Here we have three separate payments for three different purposes, so: 1 liability increase + 3 asset decreases = (1,0,0,3,0,0)."
+    },
+    "debit_corrector": {
+      "input_tokens": 700,
+      "output_tokens": 354,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2446,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0079338,
+      "raw_cost_usd": 0.012648,
+      "output": {
+        "reason": "The transaction involves multiple components that all capitalize to the machinery asset under IFRS IAS 16:\n1. Machinery purchase $700,000 (on account) - asset increase\n2. Freight $30,000 (paid by cheque) - asset increase (capitalizable cost)\n3. Installation $20,000 (paid by cheque) - asset increase (capitalizable cost)\n4. Testing and commissioning $50,000 (paid by cheque) - asset increase (capitalizable cost)\n\nUnder IFRS IAS 16, the cost of property, plant, and equipment includes all costs directly attributable to bringing the asset to the location and condition necessary for it to be capable of operating in the manner intended by management. This includes freight, installation, and testing costs.\n\nEach of these four components represents a separate debit line (even though they all increase the same asset account, they are distinct transactions/payments). The initial tuple (1,0,0,0,0,0) only counted one asset increase, but there are actually four separate debit lines.\n\nThe credit tuple (1,0,0,3,0,0) shows 1 liability increase (accounts payable for the machinery) and 3 asset decreases (cash payments for freight, installation, and testing), which is consistent with this analysis.",
+        "tuple": [
+          4,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves multiple components that all capitalize to the machinery asset under IFRS IAS 16:\n1. Machinery purchase $700,000 (on account) - asset increase\n2. Freight $30,000 (paid by cheque) - asset increase (capitalizable cost)\n3. Installation $20,000 (paid by cheque) - asset increase (capitalizable cost)\n4. Testing and commissioning $50,000 (paid by cheque) - asset increase (capitalizable cost)\n\nUnder IFRS IAS 16, the cost of property, plant, and equipment includes all costs directly attributable to bringing the asset to the location and condition necessary for it to be capable of operating in the manner intended by management. This includes freight, installation, and testing costs.\n\nEach of these four components represents a separate debit line (even though they all increase the same asset account, they are distinct transactions/payments). The initial tuple (1,0,0,0,0,0) only counted one asset increase, but there are actually four separate debit lines.\n\nThe credit tuple (1,0,0,3,0,0) shows 1 liability increase (accounts payable for the machinery) and 3 asset decreases (cash payments for freight, installation, and testing), which is consistent with this analysis."
+    },
+    "credit_corrector": {
+      "input_tokens": 700,
+      "output_tokens": 400,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2454,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0086262,
+      "raw_cost_usd": 0.013362,
+      "output": {
+        "reason": "The transaction involves purchasing machinery with multiple cost components. Under IFRS (IAS 16), all costs necessary to bring an asset to its intended use are capitalized as part of the asset cost.\n\nBreaking down the transaction:\n1. Machinery purchase on account ($700,000): Creates accounts payable (liability increase) - credit side\n2. Freight paid by cheque ($30,000): Cash payment (asset decrease) - credit side\n3. Installation paid by cheque ($20,000): Cash payment (asset decrease) - credit side\n4. Testing/commissioning paid by cheque ($50,000): Cash payment (asset decrease) - credit side\n\nThe initial credit tuple (1,0,0,3,0,0) correctly identifies 1 liability increase and 3 asset decreases, which matches the economic substance: one accounts payable created and three separate cash payments.\n\nHowever, the debit tuple shows only (1,0,0,0,0,0) - one asset increase - which is correct because all four cost components should be capitalized into a single Machinery asset account under IFRS.\n\nThe initial credit tuple is actually correct. The apparent tension with the debit tuple is expected: the credit side has 4 lines (1 liability + 3 cash payments) while the debit side has 1 line (total machinery capitalization). This is normal - debit and credit line counts need not match; they represent different aspects of the same transaction.\n\nCorrection: Upon reflection, the initial tuple is correct as stated.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing machinery with multiple cost components. Under IFRS (IAS 16), all costs necessary to bring an asset to its intended use are capitalized as part of the asset cost.\n\nBreaking down the transaction:\n1. Machinery purchase on account ($700,000): Creates accounts payable (liability increase) - credit side\n2. Freight paid by cheque ($30,000): Cash payment (asset decrease) - credit side\n3. Installation paid by cheque ($20,000): Cash payment (asset decrease) - credit side\n4. Testing/commissioning paid by cheque ($50,000): Cash payment (asset decrease) - credit side\n\nThe initial credit tuple (1,0,0,3,0,0) correctly identifies 1 liability increase and 3 asset decreases, which matches the economic substance: one accounts payable created and three separate cash payments.\n\nHowever, the debit tuple shows only (1,0,0,0,0,0) - one asset increase - which is correct because all four cost components should be capitalized into a single Machinery asset account under IFRS.\n\nThe initial credit tuple is actually correct. The apparent tension with the debit tuple is expected: the credit side has 4 lines (1 liability + 3 cash payments) while the debit side has 1 line (total machinery capitalization). This is normal - debit and credit line counts need not match; they represent different aspects of the same transaction.\n\nCorrection: Upon reflection, the initial tuple is correct as stated."
+    },
+    "entry_builder": {
+      "input_tokens": 789,
+      "output_tokens": 468,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4003,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.010351200000000001,
+      "raw_cost_usd": 0.019029,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of machinery from Ford for factory expansion, including freight, installation, and testing costs",
+        "rationale": "Under IAS 16, the cost of property, plant, and equipment includes the purchase price and all costs directly attributable to bringing the asset to the location and condition necessary for it to be capable of operating in the manner intended by management. This includes freight, installation, and testing/commissioning costs. All four components ($700,000 machinery + $30,000 freight + $20,000 installation + $50,000 testing) are capitalized to Machinery. The machinery purchase on account creates Accounts Payable, while the ancillary costs paid by cheque reduce Cash. The classifier tuples suggest 4 asset increases and 1 liability increase + 1 asset decrease, which aligns with capitalizing all costs to one Machinery account (net 1 asset increase), creating a liability, and reducing cash.",
+        "lines": [
+          {
+            "account_name": "Machinery",
+            "type": "debit",
+            "amount": 800000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 700000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2521,
+      "output_tokens": 220,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4573,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0114786,
+      "raw_cost_usd": 0.017019,
+      "output": {
+        "reason": "Entry correctly applies IAS 16 by capitalizing all directly attributable costs ($700,000 machinery + $30,000 freight + $20,000 installation + $50,000 testing = $800,000 total) to Machinery. Balance verified: $800,000 debit = $700,000 + $100,000 credits. Accounts Payable correctly records the on-account purchase, Cash correctly reduced by total cheque payments ($30,000 + $20,000 + $50,000 = $100,000). No tax applies to capital asset purchases between businesses (reverse charge mechanism under Canadian GST/HST). All amounts match transaction text.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly applies IAS 16 by capitalizing all directly attributable costs ($700,000 machinery + $30,000 freight + $20,000 installation + $50,000 testing = $800,000 total) to Machinery. Balance verified: $800,000 debit = $700,000 + $100,000 credits. Accounts Payable correctly records the on-account purchase, Cash correctly reduced by total cheque payments ($30,000 + $20,000 + $50,000 = $100,000). No tax applies to capital asset purchases between businesses (reverse charge mechanism under Canadian GST/HST). All amounts match transaction text."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Under IFRS (IAS 16), machinery purchase price ($700,000) plus all costs directly attributable to bringing the asset to working condition (freight $30,000, installation $20,000, testing and commissioning $50,000) are capitalized as a single asset increase. Total machinery cost = $800,000. This represents 1 debit line: asset (machinery/PPE) increase. The different payment methods (on account vs. cheque) affect the credit side only, not the debit classification.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "This transaction involves acquiring machinery with multiple cost components. On the credit side:\n1. Accounts Payable increases by $700,000 (machinery purchased on account from Ford) = liability increase\n2. Cash/Bank decreases by $30,000 (freight paid by cheque) = asset decrease\n3. Cash/Bank decreases by $20,000 (installation paid by cheque) = asset decrease\n4. Cash/Bank decreases by $50,000 (testing and commissioning paid by cheque) = asset decrease\n\nUnder IFRS (IAS 16), all costs necessary to bring the asset to working condition (freight, installation, testing) are capitalized to the machinery asset account on the debit side. On the credit side, we have one liability increase and three separate asset decreases (though they could be combined as they're all cash payments, they represent three distinct economic events). However, since all three cash payments are from the same account type (cash/bank asset), they should be counted as one line per distinct payment purpose, but can be combined if they serve the same treatment. Here we have three separate payments for three different purposes, so: 1 liability increase + 3 asset decreases = (1,0,0,3,0,0).",
+        "tuple": [
+          1,
+          0,
+          0,
+          3,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves multiple components that all capitalize to the machinery asset under IFRS IAS 16:\n1. Machinery purchase $700,000 (on account) - asset increase\n2. Freight $30,000 (paid by cheque) - asset increase (capitalizable cost)\n3. Installation $20,000 (paid by cheque) - asset increase (capitalizable cost)\n4. Testing and commissioning $50,000 (paid by cheque) - asset increase (capitalizable cost)\n\nUnder IFRS IAS 16, the cost of property, plant, and equipment includes all costs directly attributable to bringing the asset to the location and condition necessary for it to be capable of operating in the manner intended by management. This includes freight, installation, and testing costs.\n\nEach of these four components represents a separate debit line (even though they all increase the same asset account, they are distinct transactions/payments). The initial tuple (1,0,0,0,0,0) only counted one asset increase, but there are actually four separate debit lines.\n\nThe credit tuple (1,0,0,3,0,0) shows 1 liability increase (accounts payable for the machinery) and 3 asset decreases (cash payments for freight, installation, and testing), which is consistent with this analysis.",
+        "tuple": [
+          4,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves purchasing machinery with multiple cost components. Under IFRS (IAS 16), all costs necessary to bring an asset to its intended use are capitalized as part of the asset cost.\n\nBreaking down the transaction:\n1. Machinery purchase on account ($700,000): Creates accounts payable (liability increase) - credit side\n2. Freight paid by cheque ($30,000): Cash payment (asset decrease) - credit side\n3. Installation paid by cheque ($20,000): Cash payment (asset decrease) - credit side\n4. Testing/commissioning paid by cheque ($50,000): Cash payment (asset decrease) - credit side\n\nThe initial credit tuple (1,0,0,3,0,0) correctly identifies 1 liability increase and 3 asset decreases, which matches the economic substance: one accounts payable created and three separate cash payments.\n\nHowever, the debit tuple shows only (1,0,0,0,0,0) - one asset increase - which is correct because all four cost components should be capitalized into a single Machinery asset account under IFRS.\n\nThe initial credit tuple is actually correct. The apparent tension with the debit tuple is expected: the credit side has 4 lines (1 liability + 3 cash payments) while the debit side has 1 line (total machinery capitalization). This is normal - debit and credit line counts need not match; they represent different aspects of the same transaction.\n\nCorrection: Upon reflection, the initial tuple is correct as stated.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of machinery from Ford for factory expansion, including freight, installation, and testing costs",
+        "rationale": "Under IAS 16, the cost of property, plant, and equipment includes the purchase price and all costs directly attributable to bringing the asset to the location and condition necessary for it to be capable of operating in the manner intended by management. This includes freight, installation, and testing/commissioning costs. All four components ($700,000 machinery + $30,000 freight + $20,000 installation + $50,000 testing) are capitalized to Machinery. The machinery purchase on account creates Accounts Payable, while the ancillary costs paid by cheque reduce Cash. The classifier tuples suggest 4 asset increases and 1 liability increase + 1 asset decrease, which aligns with capitalizing all costs to one Machinery account (net 1 asset increase), creating a liability, and reducing cash.",
+        "lines": [
+          {
+            "account_name": "Machinery",
+            "type": "debit",
+            "amount": 800000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 700000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry correctly applies IAS 16 by capitalizing all directly attributable costs ($700,000 machinery + $30,000 freight + $20,000 installation + $50,000 testing = $800,000 total) to Machinery. Balance verified: $800,000 debit = $700,000 + $100,000 credits. Accounts Payable correctly records the on-account purchase, Cash correctly reduced by total cheque payments ($30,000 + $20,000 + $50,000 = $100,000). No tax applies to capital asset purchases between businesses (reverse charge mechanism under Canadian GST/HST). All amounts match transaction text.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 557,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 532,
+        "output_tokens": 178,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 530,
+        "output_tokens": 341,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 700,
+        "output_tokens": 354,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 700,
+        "output_tokens": 400,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 789,
+        "output_tokens": 468,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2521,
+        "output_tokens": 220,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

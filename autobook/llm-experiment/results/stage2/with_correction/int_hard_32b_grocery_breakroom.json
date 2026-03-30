@@ -1,0 +1,367 @@
+{
+  "test_case_id": "int_hard_32b_grocery_breakroom",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Employee break room refreshments purchased at Target",
+    "rationale": "Tea, beverages, and refreshments for employee break room are operating expenses (employee welfare/office supplies). The 10% sales tax is recorded as a receivable (input tax credit). Corporate credit card creates a liability. Debit tuple (0,0,1,0,0,0) indicates one expense line. Credit tuple (2,0,0,0,0,0) indicates two liability increases: one for the credit card payable and one for the sales tax receivable offset. However, sales tax on purchases creates a debit (asset increase - HST/GST Receivable), not a credit. The credit tuple appears to double-count liabilities. Following accounting standards: expense $1,200 (debit), sales tax receivable $120 (debit), credit card payable $1,320 (credit).",
+    "lines": [
+      {
+        "account_name": "Office Supplies Expense",
+        "type": "debit",
+        "amount": 1200.0
+      },
+      {
+        "account_name": "Sales Tax Receivable",
+        "type": "debit",
+        "amount": 120.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 1320.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0323994,
+  "raw_cost_usd": 0.057018,
+  "total_latency_ms": 33124,
+  "total_input_tokens": 12366,
+  "total_output_tokens": 1328,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 521,
+      "output_tokens": 127,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1762,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038403,
+      "raw_cost_usd": 0.007191,
+      "output": {
+        "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes $120 tax to the government), and (2) Credit card payable = liability increase (the business owes $1,320 to the credit card company). Total: 2 liability increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes $120 tax to the government), and (2) Credit card payable = liability increase (the business owes $1,320 to the credit card company). Total: 2 liability increases."
+    },
+    "debit_classifier": {
+      "input_tokens": 523,
+      "output_tokens": 116,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1785,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036876,
+      "raw_cost_usd": 0.007095,
+      "output": {
+        "reason": "Two debit lines: (1) Employee refreshments/break room supplies = expense increase (employee welfare/office expense), and (2) Sales tax paid = expense increase (tax expense). Both are consumed immediately for business operations and represent expense increases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two debit lines: (1) Employee refreshments/break room supplies = expense increase (employee welfare/office expense), and (2) Sales tax paid = expense increase (tax expense). Both are consumed immediately for business operations and represent expense increases."
+    },
+    "credit_corrector": {
+      "input_tokens": 691,
+      "output_tokens": 400,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2445,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008599200000000001,
+      "raw_cost_usd": 0.013335,
+      "output": {
+        "reason": "The initial credit tuple is correct. This transaction involves:\n1. Purchase of supplies/refreshments for $1,200 (expense increase on debit side)\n2. Sales tax of $120 (separate expense increase on debit side, as sales tax paid is part of the cost)\n3. Payment by corporate credit card creates a liability (accounts payable/credit card payable)\n\nThe credit side should record:\n- Liability increase for the credit card payable of $1,320 (slot a)\n\nHowever, the tuple shows (2,0,0,0,0,0) indicating TWO liability increases. Looking at the debit side showing (0,0,2,0,0,0) - two expense increases - this suggests the system is treating the base purchase ($1,200) and the sales tax ($120) as separate lines.\n\nOn the credit side, both amounts are paid via the same credit card, creating one liability. But if the system architecture requires matching the granularity and treats the $1,200 supplies expense and $120 tax expense as separate debit lines, it may be recording two separate liability increases to the same credit card account (one for $1,200 and one for $120), which would then be combined by Agent 5.\n\nGiven the debit shows 2 expense increases and both are paid by the same payment method (credit card), the credit tuple of (2,0,0,0,0,0) representing 2 liability increases is consistent with the transaction structure. No correction needed.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. This transaction involves:\n1. Purchase of supplies/refreshments for $1,200 (expense increase on debit side)\n2. Sales tax of $120 (separate expense increase on debit side, as sales tax paid is part of the cost)\n3. Payment by corporate credit card creates a liability (accounts payable/credit card payable)\n\nThe credit side should record:\n- Liability increase for the credit card payable of $1,320 (slot a)\n\nHowever, the tuple shows (2,0,0,0,0,0) indicating TWO liability increases. Looking at the debit side showing (0,0,2,0,0,0) - two expense increases - this suggests the system is treating the base purchase ($1,200) and the sales tax ($120) as separate lines.\n\nOn the credit side, both amounts are paid via the same credit card, creating one liability. But if the system architecture requires matching the granularity and treats the $1,200 supplies expense and $120 tax expense as separate debit lines, it may be recording two separate liability increases to the same credit card account (one for $1,200 and one for $120), which would then be combined by Agent 5.\n\nGiven the debit shows 2 expense increases and both are paid by the same payment method (credit card), the credit tuple of (2,0,0,0,0,0) representing 2 liability increases is consistent with the transaction structure. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 691,
+      "output_tokens": 274,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2437,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.006706800000000001,
+      "raw_cost_usd": 0.011421,
+      "output": {
+        "reason": "The transaction involves purchasing break room supplies ($1,200) and paying sales tax ($120), totaling $1,320, paid by corporate credit card. This creates two distinct economic events on the debit side: (1) an expense for the supplies consumed (break room refreshments are period expenses, not inventory), and (2) a liability increase for the sales tax payable. However, since both were paid immediately by credit card, the debit side should record only the total expense increase of $1,320. The credit card payment creates a liability increase (accounts payable to credit card company). The initial tuple showed 2 expense increases, incorrectly splitting the base amount and tax into separate lines. Under IFRS, sales tax paid on an expense is simply part of the expense cost. This is a single expense transaction, not two separate expense lines. Corrected to (0,0,1,0,0,0) - one expense increase line for the total $1,320.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing break room supplies ($1,200) and paying sales tax ($120), totaling $1,320, paid by corporate credit card. This creates two distinct economic events on the debit side: (1) an expense for the supplies consumed (break room refreshments are period expenses, not inventory), and (2) a liability increase for the sales tax payable. However, since both were paid immediately by credit card, the debit side should record only the total expense increase of $1,320. The credit card payment creates a liability increase (accounts payable to credit card company). The initial tuple showed 2 expense increases, incorrectly splitting the base amount and tax into separate lines. Under IFRS, sales tax paid on an expense is simply part of the expense cost. This is a single expense transaction, not two separate expense lines. Corrected to (0,0,1,0,0,0) - one expense increase line for the total $1,320."
+    },
+    "entry_builder": {
+      "input_tokens": 822,
+      "output_tokens": 411,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3937,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0095655,
+      "raw_cost_usd": 0.017976,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Employee break room refreshments purchased at Target",
+        "rationale": "Tea, beverages, and refreshments for employee break room are operating expenses (employee welfare/office supplies). The 10% sales tax is recorded as a receivable (input tax credit). Corporate credit card creates a liability. Debit tuple (0,0,1,0,0,0) indicates one expense line. Credit tuple (2,0,0,0,0,0) indicates two liability increases: one for the credit card payable and one for the sales tax receivable offset. However, sales tax on purchases creates a debit (asset increase - HST/GST Receivable), not a credit. The credit tuple appears to double-count liabilities. Following accounting standards: expense $1,200 (debit), sales tax receivable $120 (debit), credit card payable $1,320 (credit).",
+        "lines": [
+          {
+            "account_name": "Office Supplies Expense",
+            "type": "debit",
+            "amount": 1200.0
+          },
+          {
+            "account_name": "Sales Tax Receivable",
+            "type": "debit",
+            "amount": 120.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Two debit lines: (1) Employee refreshments/break room supplies = expense increase (employee welfare/office expense), and (2) Sales tax paid = expense increase (tax expense). Both are consumed immediately for business operations and represent expense increases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes $120 tax to the government), and (2) Credit card payable = liability increase (the business owes $1,320 to the credit card company). Total: 2 liability increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves purchasing break room supplies ($1,200) and paying sales tax ($120), totaling $1,320, paid by corporate credit card. This creates two distinct economic events on the debit side: (1) an expense for the supplies consumed (break room refreshments are period expenses, not inventory), and (2) a liability increase for the sales tax payable. However, since both were paid immediately by credit card, the debit side should record only the total expense increase of $1,320. The credit card payment creates a liability increase (accounts payable to credit card company). The initial tuple showed 2 expense increases, incorrectly splitting the base amount and tax into separate lines. Under IFRS, sales tax paid on an expense is simply part of the expense cost. This is a single expense transaction, not two separate expense lines. Corrected to (0,0,1,0,0,0) - one expense increase line for the total $1,320.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. This transaction involves:\n1. Purchase of supplies/refreshments for $1,200 (expense increase on debit side)\n2. Sales tax of $120 (separate expense increase on debit side, as sales tax paid is part of the cost)\n3. Payment by corporate credit card creates a liability (accounts payable/credit card payable)\n\nThe credit side should record:\n- Liability increase for the credit card payable of $1,320 (slot a)\n\nHowever, the tuple shows (2,0,0,0,0,0) indicating TWO liability increases. Looking at the debit side showing (0,0,2,0,0,0) - two expense increases - this suggests the system is treating the base purchase ($1,200) and the sales tax ($120) as separate lines.\n\nOn the credit side, both amounts are paid via the same credit card, creating one liability. But if the system architecture requires matching the granularity and treats the $1,200 supplies expense and $120 tax expense as separate debit lines, it may be recording two separate liability increases to the same credit card account (one for $1,200 and one for $120), which would then be combined by Agent 5.\n\nGiven the debit shows 2 expense increases and both are paid by the same payment method (credit card), the credit tuple of (2,0,0,0,0,0) representing 2 liability increases is consistent with the transaction structure. No correction needed.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Employee break room refreshments purchased at Target",
+        "rationale": "Tea, beverages, and refreshments for employee break room are operating expenses (employee welfare/office supplies). The 10% sales tax is recorded as a receivable (input tax credit). Corporate credit card creates a liability. Debit tuple (0,0,1,0,0,0) indicates one expense line. Credit tuple (2,0,0,0,0,0) indicates two liability increases: one for the credit card payable and one for the sales tax receivable offset. However, sales tax on purchases creates a debit (asset increase - HST/GST Receivable), not a credit. The credit tuple appears to double-count liabilities. Following accounting standards: expense $1,200 (debit), sales tax receivable $120 (debit), credit card payable $1,320 (credit).",
+        "lines": [
+          {
+            "account_name": "Office Supplies Expense",
+            "type": "debit",
+            "amount": 1200.0
+          },
+          {
+            "account_name": "Sales Tax Receivable",
+            "type": "debit",
+            "amount": 120.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 127,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 523,
+        "output_tokens": 116,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 691,
+        "output_tokens": 400,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 691,
+        "output_tokens": 274,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 822,
+        "output_tokens": 411,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

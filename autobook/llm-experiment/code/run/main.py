@@ -117,9 +117,10 @@ def main():
 
     pricing = PRICING[args.model]
 
+    warmup_only = args.warmup and not args.tier
     if args.warmup:
         warmup_caches()
-        if not args.variant:
+        if warmup_only:
             return
 
     if not args.variant:

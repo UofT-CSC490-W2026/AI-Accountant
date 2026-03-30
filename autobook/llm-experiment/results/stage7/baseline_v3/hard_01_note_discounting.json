@@ -1,0 +1,421 @@
+{
+  "test_case_id": "hard_01_note_discounting",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": null,
+  "actual_cost_usd": 0.0563481,
+  "raw_cost_usd": 0.092763,
+  "total_latency_ms": 25805,
+  "total_input_tokens": 18296,
+  "total_output_tokens": 2525,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "unknown": {
+      "input_tokens": 3740,
+      "output_tokens": 1754,
+      "cache_read_tokens": 9408,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 13148,
+      "llm_calls": 4,
+      "actual_cost_usd": 0.0403524,
+      "raw_cost_usd": 0.065754,
+      "output": null,
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 535,
+      "output_tokens": 377,
+      "cache_read_tokens": 2065,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2600,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0078795,
+      "raw_cost_usd": 0.013455,
+      "output": {
+        "asset_increase_reason": "Cash increases by the net proceeds received from the bank (face value minus discount charges for the remaining 40 days). This is 1 asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The discount charges represent the cost of early conversion to cash. The discount amount ($100,000 \u00d7 0.15 \u00d7 40/365) is a financing expense. This is 1 expense increase line.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are being reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenues are being reversed or reduced in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 534,
+      "output_tokens": 394,
+      "cache_read_tokens": 2014,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2548,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081162,
+      "raw_cost_usd": 0.013554,
+      "output": {
+        "liability_increase_reason": "No liabilities are created. The note discounting is treated as a derecognition (sale) of the receivable, not a collateralized borrowing.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are involved in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned. The transaction involves disposing of a financial asset (note receivable).",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Notes Receivable is removed from the books when the note is discounted at the bank. This is one line representing the derecognition of the $100,000 face value note.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend or drawing accounts are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or reduced. The discount charge is recorded as an expense (debit side), not an expense decrease.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "Did Ford transfer the note to the bank with full recourse, partial recourse, or without recourse? Does Ford retain any continuing involvement or obligation if the maker defaults?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "accounting treatment for note discounting",
+            "why_entry_depends_on_clarification": "Derecognition removes the note receivable and recognizes a gain/loss on disposal. Collateralized borrowing keeps the note on books and records a liability for the loan, with interest expense recognized over the remaining term.",
+            "why_ambiguity_not_resolved_by_given_info": "The term 'discounted at the bank' is ambiguous between sale (derecognition) and secured borrowing. The transaction does not specify whether Ford transferred risks and rewards, retained recourse obligations, or pledged the note as collateral.",
+            "clarification_question": "Did Ford transfer the note to the bank with full recourse, partial recourse, or without recourse? Does Ford retain any continuing involvement or obligation if the maker defaults?",
+            "options": [
+              "Derecognition (sale of note)",
+              "Collateralized borrowing (note pledged as security)"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "non-interest-bearing note received for trade receivable",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "note discounting treatment (derecognition vs collateralized borrowing)",
+            "why_llm_cannot_do_this": "The term 'discounted at the bank' is ambiguous between derecognition (sale of receivable) and collateralized borrowing. IFRS 9 derecognition requires assessment of whether substantially all risks and rewards transferred and whether control passed. The system lacks business facts about recourse provisions, credit risk retention, and servicing arrangements to determine correct treatment.",
+            "what_is_best_llm_can_do": "Default to derecognition treatment (remove note receivable, record cash proceeds, recognize gain/loss) without verifying IFRS 9.3.2 derecognition criteria are met",
+            "skeptical": true
+          },
+          {
+            "aspect": "discount calculation on non-interest-bearing note",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "timing calculation (90-day note, discounted at day 50, 40 days remaining)",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "This transaction involves discounting a promissory note at a bank, which is a financial instrument transaction. The text mentions a \"discount rate of 15%\" but this is a financial discount (interest charge by the bank), not a sales tax. No sales tax, GST, HST, or similar consumption tax is mentioned. Financial services and loan transactions are generally not subject to sales tax.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "The ambiguity detector flagged \"derecognition vs collateralized borrowing\" as unresolved. This is a material ambiguity because:\n1. Derecognition treatment: removes Notes Receivable (credit asset decrease), records Cash (debit asset increase), and recognizes discount as expense or loss (debit expense increase). Entry structure: Dr Cash, Dr Expense/Loss, Cr Notes Receivable.\n2. Collateralized borrowing treatment: keeps Notes Receivable on books, records Cash (debit asset increase), records Bank Loan (credit liability increase), and recognizes interest expense over time. Entry structure: Dr Cash, Cr Bank Loan (with subsequent interest accruals).\n\nThese produce structurally different entries with different account names. The transaction text uses \"discounted at the bank\" which is conventionally ambiguous. The fact is not determinable from the text\u2014recourse provisions and risk transfer are business facts only the transaction initiator knows. This ambiguity genuinely prevents building the correct entry.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "Did Ford transfer the note to the bank with full recourse, partial recourse, or without recourse? Does Ford retain any continuing involvement or obligation if the maker defaults?"
+        ],
+        "complexity_assessment": "The complexity detector flagged \"note discounting treatment\" as skeptical, stating the system lacks business facts about recourse provisions to determine IFRS 9 derecognition criteria. This assessment is correct\u2014the system cannot determine whether substantially all risks and rewards transferred without knowing the recourse terms. However, this is not an LLM knowledge gap; it's missing business facts. The appropriate decision is missing_info, not llm_stuck.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "The debit classifier counted: 1 asset increase (Cash), 1 expense increase (discount charges). The credit classifier counted: 1 asset decrease (Notes Receivable). This assumes derecognition treatment.\n\nIf the correct treatment is collateralized borrowing, the counts would be: Debit 1 asset increase (Cash), Credit 1 liability increase (Bank Loan). The expense would not be recognized immediately but over time.\n\nThe upstream classifications are internally consistent with derecognition treatment, but they assume the answer to the unresolved ambiguity. Since we don't know which treatment applies, we cannot validate the counts. However, the counts are technically correct IF derecognition applies. The issue is not that the classifier made an error\u2014it's that the business fact is unknown.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity detector correctly identified that \"discounted at the bank\" is ambiguous between derecognition (sale) and collateralized borrowing. These treatments produce structurally different entries with different account names and amounts:\n- Derecognition: removes Notes Receivable, recognizes immediate expense/loss\n- Collateralized borrowing: keeps Notes Receivable, records Bank Loan liability, recognizes interest over time\n\nThe recourse terms and risk transfer are business facts not stated in the transaction text and not determinable from accounting conventions. The person who initiated the transaction would know these facts. The complexity detector's skepticism is warranted but reflects missing business facts, not an LLM knowledge gap. The classifications are internally consistent but assume derecognition, which may not be correct.",
+        "decision": "missing_info"
+      }
+    ],
+    "output_entry_drafter": [],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "accounting treatment for note discounting",
+            "why_entry_depends_on_clarification": "Derecognition removes the note receivable and recognizes a gain/loss on disposal. Collateralized borrowing keeps the note on books and records a liability for the loan, with interest expense recognized over the remaining term.",
+            "why_ambiguity_not_resolved_by_given_info": "The term 'discounted at the bank' is ambiguous between sale (derecognition) and secured borrowing. The transaction does not specify whether Ford transferred risks and rewards, retained recourse obligations, or pledged the note as collateral.",
+            "clarification_question": "Did Ford transfer the note to the bank with full recourse, partial recourse, or without recourse? Does Ford retain any continuing involvement or obligation if the maker defaults?",
+            "options": [
+              "Derecognition (sale of note)",
+              "Collateralized borrowing (note pledged as security)"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Cash increases by the net proceeds received from the bank (face value minus discount charges for the remaining 40 days). This is 1 asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The discount charges represent the cost of early conversion to cash. The discount amount ($100,000 \u00d7 0.15 \u00d7 40/365) is a financing expense. This is 1 expense increase line.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are being reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenues are being reversed or reduced in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created. The note discounting is treated as a derecognition (sale) of the receivable, not a collateralized borrowing.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are involved in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned. The transaction involves disposing of a financial asset (note receivable).",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Notes Receivable is removed from the books when the note is discounted at the bank. This is one line representing the derecognition of the $100,000 face value note.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend or drawing accounts are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or reduced. The discount charge is recorded as an expense (debit side), not an expense decrease.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Cash increases by the net proceeds received from the bank (face value minus discount charges for the remaining 40 days). This is 1 asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The discount charges represent the cost of early conversion to cash. The discount amount ($100,000 \u00d7 0.15 \u00d7 40/365) is a financing expense. This is 1 expense increase line.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are being reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenues are being reversed or reduced in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created. The note discounting is treated as a derecognition (sale) of the receivable, not a collateralized borrowing.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are involved in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned. The transaction involves disposing of a financial asset (note receivable).",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Notes Receivable is removed from the books when the note is discounted at the bank. This is one line representing the derecognition of the $100,000 face value note.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend or drawing accounts are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or reduced. The discount charge is recorded as an expense (debit side), not an expense decrease.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 0,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 563,
+        "output_tokens": 188,
+        "input_token_details": {
+          "cache_read": 2197,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 553,
+        "output_tokens": 327,
+        "input_token_details": {
+          "cache_read": 1859,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 535,
+        "output_tokens": 377,
+        "input_token_details": {
+          "cache_read": 2065,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 577,
+        "output_tokens": 274,
+        "input_token_details": {
+          "cache_read": 2466,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 534,
+        "output_tokens": 394,
+        "input_token_details": {
+          "cache_read": 2014,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 2047,
+        "output_tokens": 965,
+        "input_token_details": {
+          "cache_read": 2886,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "unknown": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use"
+    }
+  }
+}

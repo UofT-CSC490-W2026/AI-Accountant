@@ -1,0 +1,352 @@
+{
+  "test_case_id": "int_19_service_revenue_cash",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Moving services provided to customer, payment received by certified cheque",
+    "rationale": "Atlas Van Lines provided moving services and received payment. This is a revenue transaction. Debit Cash (asset increase) for the amount received, credit Moving Services Revenue (revenue increase) for the service amount. The certified cheque is treated as cash since it is a guaranteed payment instrument. The debit tuple (1,0,0,0,0,0) indicates one asset increase line, and the credit tuple (0,0,1,0,0,0) indicates one revenue increase line, which aligns with this transaction structure. No tax information was provided, and moving services in Canada are typically subject to HST/GST, but since the transaction states the customer paid $25,500 without specifying whether this is inclusive or exclusive of tax, and no tax rules were provided, I am treating the stated amount as the total consideration received (tax-inclusive interpretation is standard when a single amount is stated for a completed transaction).",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 25500.0
+      },
+      {
+        "account_name": "Moving Services Revenue",
+        "type": "credit",
+        "amount": 25500.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0274044,
+  "raw_cost_usd": 0.052023,
+  "total_latency_ms": 17438,
+  "total_input_tokens": 12241,
+  "total_output_tokens": 1020,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 498,
+      "output_tokens": 114,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1760,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035826,
+      "raw_cost_usd": 0.00699,
+      "output": {
+        "reason": "Atlas Van Lines receives a certified cheque (cash equivalent) for $25,500. This represents an asset increase (cash/bank account). The debit side records: 1 line for asset increase (certified cheque received).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines receives a certified cheque (cash equivalent) for $25,500. This represents an asset increase (cash/bank account). The debit side records: 1 line for asset increase (certified cheque received)."
+    },
+    "credit_classifier": {
+      "input_tokens": 496,
+      "output_tokens": 115,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1737,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035853,
+      "raw_cost_usd": 0.006936,
+      "output": {
+        "reason": "Atlas Van Lines provided moving services and received payment. On the credit side: (1) Service revenue is recognized = revenue increase. The certified cheque received represents the debit side (asset increase in cash/bank), which is not classified here.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines provided moving services and received payment. On the credit side: (1) Service revenue is recognized = revenue increase. The certified cheque received represents the debit side (asset increase in cash/bank), which is not classified here."
+    },
+    "debit_corrector": {
+      "input_tokens": 666,
+      "output_tokens": 175,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2412,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051468,
+      "raw_cost_usd": 0.009861,
+      "output": {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving a certified cheque. This is a revenue-earning transaction. The debit side records receiving cash (certified cheque), which is an asset increase - correctly classified as (1,0,0,0,0,0). The credit side shows revenue increase (c=1), which is consistent with earning service revenue. The two sides tell a coherent story: debit cash (asset increase), credit service revenue (revenue increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving a certified cheque. This is a revenue-earning transaction. The debit side records receiving cash (certified cheque), which is an asset increase - correctly classified as (1,0,0,0,0,0). The credit side shows revenue increase (c=1), which is consistent with earning service revenue. The two sides tell a coherent story: debit cash (asset increase), credit service revenue (revenue increase). No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 666,
+      "output_tokens": 231,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2420,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059892,
+      "raw_cost_usd": 0.010725,
+      "output": {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving payment via certified cheque. This is a straightforward revenue transaction.\n\nDebit side: (1,0,0,0,0,0) = Asset increase (cash/certified cheque received)\nCredit side: (0,0,1,0,0,0) = Revenue increase (service revenue earned)\n\nThe two sides tell a consistent story: the company provided services (revenue earned) and received payment (asset increase). Under IFRS, revenue from services is recognized when the service is performed, which occurred here. The certified cheque represents an asset increase (cash equivalent).\n\nThe initial credit tuple correctly classifies this as a revenue increase (slot c = 1). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving payment via certified cheque. This is a straightforward revenue transaction.\n\nDebit side: (1,0,0,0,0,0) = Asset increase (cash/certified cheque received)\nCredit side: (0,0,1,0,0,0) = Revenue increase (service revenue earned)\n\nThe two sides tell a consistent story: the company provided services (revenue earned) and received payment (asset increase). Under IFRS, revenue from services is recognized when the service is performed, which occurred here. The certified cheque represents an asset increase (cash equivalent).\n\nThe initial credit tuple correctly classifies this as a revenue increase (slot c = 1). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 797,
+      "output_tokens": 385,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3912,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0091005,
+      "raw_cost_usd": 0.017511,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Moving services provided to customer, payment received by certified cheque",
+        "rationale": "Atlas Van Lines provided moving services and received payment. This is a revenue transaction. Debit Cash (asset increase) for the amount received, credit Moving Services Revenue (revenue increase) for the service amount. The certified cheque is treated as cash since it is a guaranteed payment instrument. The debit tuple (1,0,0,0,0,0) indicates one asset increase line, and the credit tuple (0,0,1,0,0,0) indicates one revenue increase line, which aligns with this transaction structure. No tax information was provided, and moving services in Canada are typically subject to HST/GST, but since the transaction states the customer paid $25,500 without specifying whether this is inclusive or exclusive of tax, and no tax rules were provided, I am treating the stated amount as the total consideration received (tax-inclusive interpretation is standard when a single amount is stated for a completed transaction).",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 25500.0
+          },
+          {
+            "account_name": "Moving Services Revenue",
+            "type": "credit",
+            "amount": 25500.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Atlas Van Lines receives a certified cheque (cash equivalent) for $25,500. This represents an asset increase (cash/bank account). The debit side records: 1 line for asset increase (certified cheque received).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Atlas Van Lines provided moving services and received payment. On the credit side: (1) Service revenue is recognized = revenue increase. The certified cheque received represents the debit side (asset increase in cash/bank), which is not classified here.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving a certified cheque. This is a revenue-earning transaction. The debit side records receiving cash (certified cheque), which is an asset increase - correctly classified as (1,0,0,0,0,0). The credit side shows revenue increase (c=1), which is consistent with earning service revenue. The two sides tell a coherent story: debit cash (asset increase), credit service revenue (revenue increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving payment via certified cheque. This is a straightforward revenue transaction.\n\nDebit side: (1,0,0,0,0,0) = Asset increase (cash/certified cheque received)\nCredit side: (0,0,1,0,0,0) = Revenue increase (service revenue earned)\n\nThe two sides tell a consistent story: the company provided services (revenue earned) and received payment (asset increase). Under IFRS, revenue from services is recognized when the service is performed, which occurred here. The certified cheque represents an asset increase (cash equivalent).\n\nThe initial credit tuple correctly classifies this as a revenue increase (slot c = 1). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Moving services provided to customer, payment received by certified cheque",
+        "rationale": "Atlas Van Lines provided moving services and received payment. This is a revenue transaction. Debit Cash (asset increase) for the amount received, credit Moving Services Revenue (revenue increase) for the service amount. The certified cheque is treated as cash since it is a guaranteed payment instrument. The debit tuple (1,0,0,0,0,0) indicates one asset increase line, and the credit tuple (0,0,1,0,0,0) indicates one revenue increase line, which aligns with this transaction structure. No tax information was provided, and moving services in Canada are typically subject to HST/GST, but since the transaction states the customer paid $25,500 without specifying whether this is inclusive or exclusive of tax, and no tax rules were provided, I am treating the stated amount as the total consideration received (tax-inclusive interpretation is standard when a single amount is stated for a completed transaction).",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 25500.0
+          },
+          {
+            "account_name": "Moving Services Revenue",
+            "type": "credit",
+            "amount": 25500.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 498,
+        "output_tokens": 114,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 496,
+        "output_tokens": 115,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 666,
+        "output_tokens": 175,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 666,
+        "output_tokens": 231,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 797,
+        "output_tokens": 385,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

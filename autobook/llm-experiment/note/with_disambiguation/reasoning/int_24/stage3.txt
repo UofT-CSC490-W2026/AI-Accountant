@@ -1,0 +1,52 @@
+======================================================================
+Test Case: int_24_advertising
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [0, 0, 1, 0, 0, 0]  ✓
+  Credit: [0, 0, 0, 1, 0, 0]  ✓
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (2):
+  [RESOLVED] sales tax rate and treatment
+    Resolution: Ontario context implies HST at 13%. 'Inclusive of sales tax' means the $22,000 includes HST, which must be extracted for input tax credit purposes. Base amount = $22,000 / 1.13 = $19,469.03, HST = $2,530.97
+  [UNRESOLVED] nature of digital marketing campaign
+    Options: ['Advertising expense (immediate recognition)', 'Prepaid marketing asset (if campaign spans future periods)', 'Intangible asset development (if creating reusable digital content)']
+    Question: Has the digital marketing campaign already been delivered/completed, or does it cover future periods or create reusable assets?
+    Why not resolved: Transaction states 'commissioned' which could mean either completed work paid for, or advance payment for future campaign. The timing and nature of deliverables determines whether this is an immediate expense or an asset requiring amortization
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 1, 0, 0, 0]
+Reason: Digital marketing campaign = expense increase. The $22,000 payment (inclusive of sales tax) represents advertising/marketing expense. Under IFRS, advertising costs are expensed as incurred. This is one debit line for the expense increase.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 0, 1, 0, 0]
+Reason: Cash payment of $22,000 (inclusive of sales tax) = asset decrease. The cash is leaving the business to pay for the marketing campaign.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Disambiguator Responses:
+  [PROCEED] nature of digital marketing campaign
+    The transaction uses past tense 'commissioned' and 'paying', indicating a completed service transaction. Digital marketing campaigns are typically expensed as incurred under IFRS unless they create separable intangible assets (rare). The language does not suggest prepayment or asset creation—it describes payment for services rendered. Standard accounting treatment is immediate expense recognition.
+Rationale: The transaction states Mondelez 'commissioned' and 'paying' a digital marketing campaign, indicating the service has been delivered and payment made. The use of past tense 'commissioned' and 'paying' suggests a completed transaction rather than a prepayment. Under IFRS, advertising and marketing costs are generally expensed as incurred unless they meet strict criteria for capitalization (IAS 38), which is rare for marketing campaigns. The $22,000 is inclusive of HST, so base amount = $22,000 / 1.13 = $19,469.03, HST = $2,530.97. HST paid on business expenses is recoverable as input tax credit (HST Receivable). The debit tuple (0,0,1,0,0,0) indicates one expense increase, and credit tuple (0,0,0,1,0,0) indicates one asset decrease, which aligns with expense recognition and cash payment.
+Entry:
+  debit  Marketing Expense                             $     19,469.03
+  debit  HST Receivable                                $      2,530.97
+  credit Cash                                          $     22,000.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Marketing Expense                             $     19,469.03
+  debit  HST Receivable                                $      2,530.97
+  credit Cash                                          $     22,000.00
+======================================================================

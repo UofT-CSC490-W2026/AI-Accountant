@@ -1,0 +1,584 @@
+{
+  "test_case_id": "int_hard_01a_note_derecognition",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Ford discounts a $100,000 non-interest-bearing note at the bank after holding it for 50 days. The note has 40 days remaining until maturity (90 - 50 = 40). The bank applies a 15% annual discount rate: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Ford receives net proceeds of $98,356.16 in cash. Since management confirmed this qualifies as derecognition under IFRS 9, the Notes Receivable is removed from the books, cash is received for the net proceeds, and the discount charge is recognized as a loss. No tax applies to financial instrument transactions of this nature.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Cash",
+        "amount": 98356.16
+      },
+      {
+        "type": "debit",
+        "account_name": "Loss on Note Discounting",
+        "amount": 1643.84
+      },
+      {
+        "type": "credit",
+        "account_name": "Notes Receivable",
+        "amount": 100000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.051675,
+  "raw_cost_usd": 0.07875599999999999,
+  "total_latency_ms": 33100,
+  "total_input_tokens": 12677,
+  "total_output_tokens": 2715,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 601,
+      "output_tokens": 356,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2948,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.007847100000000001,
+      "raw_cost_usd": 0.014184,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "whether discounting represents derecognition or collateralized borrowing",
+            "resolution": "Transaction explicitly states 'Management has determined that this qualifies as derecognition (transfer of risks and rewards) under IFRS 9' \u2014 this is a factored receivable (sale), not a loan"
+          },
+          {
+            "aspect": "calculation of discount amount and net proceeds",
+            "resolution": "All necessary facts provided: face value $100,000, 90-day note, discounted after 50 days (40 days remaining), 15% annual discount rate \u2014 discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84, net proceeds = $98,356.16"
+          },
+          {
+            "aspect": "original trade receivable amount",
+            "resolution": "Note received 'as settlement of a trade receivable' with face value $100,000 and non-interest-bearing \u2014 implies the trade receivable was also $100,000 (no gain/loss on settlement)"
+          },
+          {
+            "aspect": "whether note was interest-bearing",
+            "resolution": "Explicitly stated as 'non-interest-bearing' \u2014 no interest income to accrue"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 574,
+      "output_tokens": 380,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2090,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0078768,
+      "raw_cost_usd": 0.01197,
+      "output": {
+        "liability_increase_reason": "No liabilities are created. The note is derecognized (not treated as a secured borrowing), so no liability arises from the discounting transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are affected by this discounting transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. The discounting results in a loss (discount charges), not revenue.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "The Notes Receivable account decreases as the note is derecognized and removed from Ford's books when transferred to the bank.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed. The discount charges represent an expense (debit), not an expense decrease.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 576,
+      "output_tokens": 397,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2122,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008146800000000001,
+      "raw_cost_usd": 0.012321,
+      "output": {
+        "asset_increase_reason": "Cash increases when Ford receives the net proceeds from the bank after discounting the note. This is one asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The discount charges (financing cost) represent an expense increase. The bank deducts a discount for the 40 remaining days at 15% annual rate, which is a cost of early conversion to cash and qualifies as a financing expense.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being reduced. Ford is discounting a receivable (asset), not paying off a liability.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue is being reversed or decreased. The discount charge is treated as an expense, not a revenue reduction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 896,
+      "output_tokens": 1582,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5517,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0278043,
+      "raw_cost_usd": 0.040281,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear. Ford received a note for $100,000 face value, held it for 50 days, then discounted it at the bank at 15% annual rate. The note has 40 days remaining (90 - 50 = 40). The discount charge is calculated as: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Ford receives net proceeds of $98,356.16. Management has confirmed this qualifies as derecognition under IFRS 9, so the note is removed from assets. The difference between the carrying amount ($100,000) and proceeds ($98,356.16) is recognized as a loss on discounting ($1,643.84). All necessary business facts are present.",
+        "debit_asset_increase": {
+          "reason": "Accept. Cash is received from the bank as net proceeds after discounting the note.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this note discounting event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. The discount charge represents a loss/expense on the early discounting of the note, which is the difference between face value and proceeds received.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loss on Note Discounting"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this note discounting event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability is created. Management confirmed this qualifies as derecognition, not a secured borrowing.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this note discounting event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue is recognized in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. The Notes Receivable account is removed (derecognized) as the note is transferred to the bank with transfer of risks and rewards.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Notes Receivable"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this note discounting event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Ford discounts a $100,000 non-interest-bearing note at the bank after holding it for 50 days. The note has 40 days remaining until maturity (90 - 50 = 40). The bank applies a 15% annual discount rate: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Ford receives net proceeds of $98,356.16 in cash. Since management confirmed this qualifies as derecognition under IFRS 9, the Notes Receivable is removed from the books, cash is received for the net proceeds, and the discount charge is recognized as a loss. No tax applies to financial instrument transactions of this nature.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Cash",
+              "amount": 98356.16
+            },
+            {
+              "type": "debit",
+              "account_name": "Loss on Note Discounting",
+              "amount": 1643.84
+            },
+            {
+              "type": "credit",
+              "account_name": "Notes Receivable",
+              "amount": 100000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction provides all necessary information: face value ($100,000), timing (50 days after issue, 40 days remaining), discount rate (15% annual), and accounting treatment (derecognition per IFRS 9). The discount calculation is straightforward: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. The entry correctly derecognizes the note, records cash proceeds, and recognizes the loss. Total debits ($98,356.16 + $1,643.84 = $100,000) equal total credits ($100,000). The classifier tuples are appropriate: one asset increase (cash), one expense increase (loss), and one asset decrease (notes receivable). Entry is complete and compliant with IFRS 9.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "whether discounting represents derecognition or collateralized borrowing",
+            "resolution": "Transaction explicitly states 'Management has determined that this qualifies as derecognition (transfer of risks and rewards) under IFRS 9' \u2014 this is a factored receivable (sale), not a loan"
+          },
+          {
+            "aspect": "calculation of discount amount and net proceeds",
+            "resolution": "All necessary facts provided: face value $100,000, 90-day note, discounted after 50 days (40 days remaining), 15% annual discount rate \u2014 discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84, net proceeds = $98,356.16"
+          },
+          {
+            "aspect": "original trade receivable amount",
+            "resolution": "Note received 'as settlement of a trade receivable' with face value $100,000 and non-interest-bearing \u2014 implies the trade receivable was also $100,000 (no gain/loss on settlement)"
+          },
+          {
+            "aspect": "whether note was interest-bearing",
+            "resolution": "Explicitly stated as 'non-interest-bearing' \u2014 no interest income to accrue"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Cash increases when Ford receives the net proceeds from the bank after discounting the note. This is one asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The discount charges (financing cost) represent an expense increase. The bank deducts a discount for the 40 remaining days at 15% annual rate, which is a cost of early conversion to cash and qualifies as a financing expense.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being reduced. Ford is discounting a receivable (asset), not paying off a liability.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue is being reversed or decreased. The discount charge is treated as an expense, not a revenue reduction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created. The note is derecognized (not treated as a secured borrowing), so no liability arises from the discounting transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are affected by this discounting transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. The discounting results in a loss (discount charges), not revenue.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "The Notes Receivable account decreases as the note is derecognized and removed from Ford's books when transferred to the bank.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed. The discount charges represent an expense (debit), not an expense decrease.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Cash increases when Ford receives the net proceeds from the bank after discounting the note. This is one asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The discount charges (financing cost) represent an expense increase. The bank deducts a discount for the 40 remaining days at 15% annual rate, which is a cost of early conversion to cash and qualifies as a financing expense.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being reduced. Ford is discounting a receivable (asset), not paying off a liability.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue is being reversed or decreased. The discount charge is treated as an expense, not a revenue reduction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created. The note is derecognized (not treated as a secured borrowing), so no liability arises from the discounting transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are affected by this discounting transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. The discounting results in a loss (discount charges), not revenue.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "The Notes Receivable account decreases as the note is derecognized and removed from Ford's books when transferred to the bank.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed. The discount charges represent an expense (debit), not an expense decrease.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear. Ford received a note for $100,000 face value, held it for 50 days, then discounted it at the bank at 15% annual rate. The note has 40 days remaining (90 - 50 = 40). The discount charge is calculated as: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Ford receives net proceeds of $98,356.16. Management has confirmed this qualifies as derecognition under IFRS 9, so the note is removed from assets. The difference between the carrying amount ($100,000) and proceeds ($98,356.16) is recognized as a loss on discounting ($1,643.84). All necessary business facts are present.",
+        "debit_asset_increase": {
+          "reason": "Accept. Cash is received from the bank as net proceeds after discounting the note.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this note discounting event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. The discount charge represents a loss/expense on the early discounting of the note, which is the difference between face value and proceeds received.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loss on Note Discounting"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this note discounting event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability is created. Management confirmed this qualifies as derecognition, not a secured borrowing.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this note discounting event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue is recognized in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. The Notes Receivable account is removed (derecognized) as the note is transferred to the bank with transfer of risks and rewards.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Notes Receivable"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this note discounting event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Ford discounts a $100,000 non-interest-bearing note at the bank after holding it for 50 days. The note has 40 days remaining until maturity (90 - 50 = 40). The bank applies a 15% annual discount rate: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Ford receives net proceeds of $98,356.16 in cash. Since management confirmed this qualifies as derecognition under IFRS 9, the Notes Receivable is removed from the books, cash is received for the net proceeds, and the discount charge is recognized as a loss. No tax applies to financial instrument transactions of this nature.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Cash",
+              "amount": 98356.16
+            },
+            {
+              "type": "debit",
+              "account_name": "Loss on Note Discounting",
+              "amount": 1643.84
+            },
+            {
+              "type": "credit",
+              "account_name": "Notes Receivable",
+              "amount": 100000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction provides all necessary information: face value ($100,000), timing (50 days after issue, 40 days remaining), discount rate (15% annual), and accounting treatment (derecognition per IFRS 9). The discount calculation is straightforward: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. The entry correctly derecognizes the note, records cash proceeds, and recognizes the loss. Total debits ($98,356.16 + $1,643.84 = $100,000) equal total credits ($100,000). The classifier tuples are appropriate: one asset increase (cash), one expense increase (loss), and one asset decrease (notes receivable). Entry is complete and compliant with IFRS 9.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 601,
+        "output_tokens": 356,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 574,
+        "output_tokens": 380,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 576,
+        "output_tokens": 397,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 896,
+        "output_tokens": 1582,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

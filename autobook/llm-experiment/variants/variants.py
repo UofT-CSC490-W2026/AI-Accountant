@@ -45,4 +45,8 @@ VARIANTS: dict[str, dict | None] = {
 
     # F: Full pipeline — all features on
     "full_pipeline": {},
+
+    # V3: New architecture — specialized agents, 2-layer routing
+    # Uses graph_v3.py (separate graph, no ablation flags)
+    "baseline_v3": None,
 }

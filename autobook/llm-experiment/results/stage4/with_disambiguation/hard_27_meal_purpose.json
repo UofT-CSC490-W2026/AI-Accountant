@@ -1,0 +1,556 @@
+{
+  "test_case_id": "hard_27_meal_purpose",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Cannot determine the correct expense account without knowing the business purpose of the meal. Different purposes require different expense accounts under IFRS classification principles.",
+    "lines": []
+  },
+  "actual_cost_usd": 0.0469077,
+  "raw_cost_usd": 0.074283,
+  "total_latency_ms": 36328,
+  "total_input_tokens": 12446,
+  "total_output_tokens": 2463,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 516,
+      "output_tokens": 282,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2863,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0064821,
+      "raw_cost_usd": 0.012819,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "Corporate credit card stated \u2014 resolves to credit card payable, not cash"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "business purpose of meal",
+            "options": [
+              "Client entertainment (entertainment expense)",
+              "Employee meal during travel (travel expense)",
+              "Team meeting meal (office/admin expense)",
+              "Employee benefit/perk (employee benefits expense)"
+            ],
+            "clarification_question": "What was the business purpose of this $125 meal?",
+            "why_entry_differs": "Different purposes map to different expense accounts: entertainment expense vs travel expense vs office expense vs employee benefits, each with different tax treatment and reporting requirements",
+            "why_not_resolved": "No standard convention exists for meal purchases \u2014 context varies widely. Business type 'general' does not narrow the purpose. The amount ($125) and use of corporate card do not determine intent."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 390,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2037,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0077868,
+      "raw_cost_usd": 0.011961,
+      "output": {
+        "asset_increase_reason": "No asset increases. The meal is consumed immediately and provides no future economic benefit, so it is not capitalized as an asset.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends. This is a business expense, not an owner withdrawal.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Meal expense increases. The $125 meal is a period expense (likely meals & entertainment or employee meals expense) that is recognized immediately.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liability decreases. The corporate credit card creates a liability (credit side), it doesn't decrease one on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity decreases. This is an expense transaction, not a direct equity reduction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases. This is an expense incurred, not a revenue adjustment or refund.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 489,
+      "output_tokens": 317,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2005,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0066768,
+      "raw_cost_usd": 0.01077,
+      "output": {
+        "liability_increase_reason": "Corporate credit card balance increases when a purchase is made on credit",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase in this transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from paying for a meal",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No cash or other assets leave the business; payment is made on credit",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No owner withdrawals are involved",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or reduced",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 811,
+      "output_tokens": 1474,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5541,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.025962,
+      "raw_cost_usd": 0.038733,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Business purpose of meal",
+            "reason": "A $125 meal could be: (1) employee meal during business travel (Travel & Entertainment Expense), (2) client entertainment (Client Entertainment Expense), (3) team meal for employee morale (Employee Benefits Expense), (4) meal at a business conference (Conference Expense), or (5) working meal for internal meetings (Meals & Entertainment Expense). Each scenario maps to a different expense account under IFRS, and some may have different tax treatment or deductibility rules. The transaction text does not specify the business context.",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "What was the business purpose of this $125 meal? (e.g., client entertainment, employee travel meal, team meeting, conference attendance)"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. The debit tuple shows 0 for slot a (asset increase).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend in this transaction. The debit tuple shows 0 for slot b (dividend increase).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The debit tuple shows 1 for slot c (expense increase). The $125 meal is an operating expense, but the specific account depends on the business purpose which is not stated in the transaction.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "[Unknown - depends on business purpose]"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability decrease in this transaction. The debit tuple shows 0 for slot d (liability decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease in this transaction. The debit tuple shows 0 for slot e (equity decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease in this transaction. The debit tuple shows 0 for slot f (revenue decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "The credit tuple shows 1 for slot a (liability increase). Payment by corporate credit card creates a liability (Credit Card Payable or similar).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Corporate Credit Card Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction. The credit tuple shows 0 for slot b (equity increase).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue increase in this transaction. The credit tuple shows 0 for slot c (revenue increase).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset decrease in this transaction. The credit tuple shows 0 for slot d (asset decrease). Payment was made by credit card, not cash or other asset.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease in this transaction. The credit tuple shows 0 for slot e (dividend decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction. The credit tuple shows 0 for slot f (expense decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot determine the correct expense account without knowing the business purpose of the meal. Different purposes require different expense accounts under IFRS classification principles.",
+          "lines": []
+        },
+        "decision_rationale": "The transaction structure is clear: debit an expense account, credit Corporate Credit Card Payable for $125. However, the specific expense account cannot be determined without knowing the business purpose. A meal could be travel expense, client entertainment, employee benefits, conference expense, or general meals & entertainment - each requiring a different account. This is not a case of being unsure about accounting treatment; rather, the same transaction text would produce entries with different accounts depending on business facts only the transaction initiator knows. This meets the definition of INCOMPLETE_INFORMATION.",
+        "decision": "INCOMPLETE_INFORMATION"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "What was the business purpose of this $125 meal? (e.g., client entertainment, employee travel meal, team meeting, conference attendance)"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "Corporate credit card stated \u2014 resolves to credit card payable, not cash"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "business purpose of meal",
+            "options": [
+              "Client entertainment (entertainment expense)",
+              "Employee meal during travel (travel expense)",
+              "Team meeting meal (office/admin expense)",
+              "Employee benefit/perk (employee benefits expense)"
+            ],
+            "clarification_question": "What was the business purpose of this $125 meal?",
+            "why_entry_differs": "Different purposes map to different expense accounts: entertainment expense vs travel expense vs office expense vs employee benefits, each with different tax treatment and reporting requirements",
+            "why_not_resolved": "No standard convention exists for meal purchases \u2014 context varies widely. Business type 'general' does not narrow the purpose. The amount ($125) and use of corporate card do not determine intent."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No asset increases. The meal is consumed immediately and provides no future economic benefit, so it is not capitalized as an asset.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends. This is a business expense, not an owner withdrawal.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Meal expense increases. The $125 meal is a period expense (likely meals & entertainment or employee meals expense) that is recognized immediately.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liability decreases. The corporate credit card creates a liability (credit side), it doesn't decrease one on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity decreases. This is an expense transaction, not a direct equity reduction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases. This is an expense incurred, not a revenue adjustment or refund.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Corporate credit card balance increases when a purchase is made on credit",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase in this transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from paying for a meal",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No cash or other assets leave the business; payment is made on credit",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No owner withdrawals are involved",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or reduced",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No asset increases. The meal is consumed immediately and provides no future economic benefit, so it is not capitalized as an asset.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends. This is a business expense, not an owner withdrawal.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Meal expense increases. The $125 meal is a period expense (likely meals & entertainment or employee meals expense) that is recognized immediately.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liability decreases. The corporate credit card creates a liability (credit side), it doesn't decrease one on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity decreases. This is an expense transaction, not a direct equity reduction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases. This is an expense incurred, not a revenue adjustment or refund.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Corporate credit card balance increases when a purchase is made on credit",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase in this transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from paying for a meal",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No cash or other assets leave the business; payment is made on credit",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No owner withdrawals are involved",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or reduced",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Business purpose of meal",
+            "reason": "A $125 meal could be: (1) employee meal during business travel (Travel & Entertainment Expense), (2) client entertainment (Client Entertainment Expense), (3) team meal for employee morale (Employee Benefits Expense), (4) meal at a business conference (Conference Expense), or (5) working meal for internal meetings (Meals & Entertainment Expense). Each scenario maps to a different expense account under IFRS, and some may have different tax treatment or deductibility rules. The transaction text does not specify the business context.",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "What was the business purpose of this $125 meal? (e.g., client entertainment, employee travel meal, team meeting, conference attendance)"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. The debit tuple shows 0 for slot a (asset increase).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend in this transaction. The debit tuple shows 0 for slot b (dividend increase).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The debit tuple shows 1 for slot c (expense increase). The $125 meal is an operating expense, but the specific account depends on the business purpose which is not stated in the transaction.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "[Unknown - depends on business purpose]"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability decrease in this transaction. The debit tuple shows 0 for slot d (liability decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease in this transaction. The debit tuple shows 0 for slot e (equity decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease in this transaction. The debit tuple shows 0 for slot f (revenue decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "The credit tuple shows 1 for slot a (liability increase). Payment by corporate credit card creates a liability (Credit Card Payable or similar).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Corporate Credit Card Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction. The credit tuple shows 0 for slot b (equity increase).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue increase in this transaction. The credit tuple shows 0 for slot c (revenue increase).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset decrease in this transaction. The credit tuple shows 0 for slot d (asset decrease). Payment was made by credit card, not cash or other asset.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease in this transaction. The credit tuple shows 0 for slot e (dividend decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction. The credit tuple shows 0 for slot f (expense decrease).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot determine the correct expense account without knowing the business purpose of the meal. Different purposes require different expense accounts under IFRS classification principles.",
+          "lines": []
+        },
+        "decision_rationale": "The transaction structure is clear: debit an expense account, credit Corporate Credit Card Payable for $125. However, the specific expense account cannot be determined without knowing the business purpose. A meal could be travel expense, client entertainment, employee benefits, conference expense, or general meals & entertainment - each requiring a different account. This is not a case of being unsure about accounting treatment; rather, the same transaction text would produce entries with different accounts depending on business facts only the transaction initiator knows. This meets the definition of INCOMPLETE_INFORMATION.",
+        "decision": "INCOMPLETE_INFORMATION"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 516,
+        "output_tokens": 282,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 390,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 489,
+        "output_tokens": 317,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 811,
+        "output_tokens": 1474,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

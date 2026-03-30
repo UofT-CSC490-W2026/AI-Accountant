@@ -1,0 +1,584 @@
+{
+  "test_case_id": "int_hard_32a_grocery_entertainment",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "The transaction records a purchase of refreshments for client entertainment. The business purpose (client entertainment) maps to Entertainment Expense. The base amount is $1,200, with 10% sales tax of $120, totaling $1,320. Since this is a purchase, the sales tax is recoverable input tax (Tax Receivable, debit). Payment by corporate credit card creates a liability (Credit Card Payable, credit). Debits: Entertainment Expense $1,200 + Tax Receivable $120 = $1,320. Credits: Credit Card Payable $1,320. Entry balances.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Entertainment Expense",
+        "amount": 1200.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Tax Receivable",
+        "amount": 120.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Credit Card Payable",
+        "amount": 1320.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.04797,
+  "raw_cost_usd": 0.07505099999999999,
+  "total_latency_ms": 32278,
+  "total_input_tokens": 12457,
+  "total_output_tokens": 2512,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 546,
+      "output_tokens": 278,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2893,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.006512100000000001,
+      "raw_cost_usd": 0.012849,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "purpose of grocery purchase",
+            "resolution": "Explicitly stated in transaction: 'for client entertainment'"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Corporate credit card stated, but payment method doesn't affect entry structure (credit card liability vs cash)"
+          },
+          {
+            "aspect": "sales tax treatment",
+            "resolution": "Ontario HST at 13% is standard, but 10% stated in transaction. Using stated amount of $1,320 total. Tax treatment (recoverable vs expense) depends on entity's HST registration status."
+          },
+          {
+            "aspect": "HST input tax credit eligibility",
+            "resolution": "Entertainment expenses have restricted ITC eligibility (50% for meals and entertainment under Canadian tax rules), but this is a tax compliance matter, not a booking ambiguity. The entry records the expense and tax as incurred."
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 519,
+      "output_tokens": 357,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2035,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.007366800000000001,
+      "raw_cost_usd": 0.01146,
+      "output": {
+        "liability_increase_reason": "Corporate credit card payable increases by $1,320 (the total amount charged to the card)",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase; this is an expense transaction paid via credit card",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a purchase of items for client entertainment",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No asset decreases because payment was made by credit card (liability), not cash or other asset",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No owner withdrawals are involved in this transaction",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or reduced; this transaction records an expense, not a reduction of one",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 521,
+      "output_tokens": 432,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2067,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0085068,
+      "raw_cost_usd": 0.012681,
+      "output": {
+        "asset_increase_reason": "No asset increases. The tea, beverages, and refreshments are purchased for immediate client entertainment purposes, not for resale or long-term use, so they are expensed immediately rather than capitalized as inventory or other assets.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Two expense increases: (1) Client entertainment expense of $1,200 for the food and beverages, and (2) Sales tax expense of $120 (10% of $1,200). Both are period expenses incurred for business entertainment purposes.",
+        "expense_increase_count": 2,
+        "liability_decrease_reason": "No liability decreases. The corporate credit card creates a liability (accounts payable/credit card payable) on the credit side, not a decrease on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No direct equity decreases in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases. This is a purchase transaction, not a sales-related adjustment.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 841,
+      "output_tokens": 1445,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5462,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0255843,
+      "raw_cost_usd": 0.038061,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear. It states: (1) items purchased (tea, beverages, refreshments), (2) business purpose (client entertainment), (3) amount ($1,200 base + $120 tax = $1,320 total), (4) payment method (corporate credit card). The business purpose \"client entertainment\" unambiguously maps to entertainment expense under IFRS. No additional facts are needed to determine the entry structure.",
+        "debit_asset_increase": {
+          "reason": "The transaction involves a purchase paid by corporate credit card. The tax component ($120) is recoverable input tax, which is an asset increase (Tax Receivable). Count: 1 line for Tax Receivable.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Tax Receivable"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The transaction states the purchase is for client entertainment. This is an operating expense. The base amount of $1,200 is the entertainment expense. Count: 1 line for Entertainment Expense.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Entertainment Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity reduction in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Payment was made by corporate credit card, creating a liability (Credit Card Payable). The total amount charged is $1,320. Count: 1 line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Credit Card Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue earned in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being reduced. Payment is by credit card (liability increase), not cash.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "The transaction records a purchase of refreshments for client entertainment. The business purpose (client entertainment) maps to Entertainment Expense. The base amount is $1,200, with 10% sales tax of $120, totaling $1,320. Since this is a purchase, the sales tax is recoverable input tax (Tax Receivable, debit). Payment by corporate credit card creates a liability (Credit Card Payable, credit). Debits: Entertainment Expense $1,200 + Tax Receivable $120 = $1,320. Credits: Credit Card Payable $1,320. Entry balances.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Entertainment Expense",
+              "amount": 1200.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Tax Receivable",
+              "amount": 120.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Credit Card Payable",
+              "amount": 1320.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction provides all necessary information: business purpose (client entertainment), amounts ($1,200 base + $120 tax), and payment method (corporate credit card). The entry structure is unambiguous: debit Entertainment Expense for the base amount, debit Tax Receivable for recoverable input tax, and credit Credit Card Payable for the total. Total debits ($1,320) equal total credits ($1,320). The entry complies with IFRS double-entry principles.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "purpose of grocery purchase",
+            "resolution": "Explicitly stated in transaction: 'for client entertainment'"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Corporate credit card stated, but payment method doesn't affect entry structure (credit card liability vs cash)"
+          },
+          {
+            "aspect": "sales tax treatment",
+            "resolution": "Ontario HST at 13% is standard, but 10% stated in transaction. Using stated amount of $1,320 total. Tax treatment (recoverable vs expense) depends on entity's HST registration status."
+          },
+          {
+            "aspect": "HST input tax credit eligibility",
+            "resolution": "Entertainment expenses have restricted ITC eligibility (50% for meals and entertainment under Canadian tax rules), but this is a tax compliance matter, not a booking ambiguity. The entry records the expense and tax as incurred."
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No asset increases. The tea, beverages, and refreshments are purchased for immediate client entertainment purposes, not for resale or long-term use, so they are expensed immediately rather than capitalized as inventory or other assets.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Two expense increases: (1) Client entertainment expense of $1,200 for the food and beverages, and (2) Sales tax expense of $120 (10% of $1,200). Both are period expenses incurred for business entertainment purposes.",
+        "expense_increase_count": 2,
+        "liability_decrease_reason": "No liability decreases. The corporate credit card creates a liability (accounts payable/credit card payable) on the credit side, not a decrease on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No direct equity decreases in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases. This is a purchase transaction, not a sales-related adjustment.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Corporate credit card payable increases by $1,320 (the total amount charged to the card)",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase; this is an expense transaction paid via credit card",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a purchase of items for client entertainment",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No asset decreases because payment was made by credit card (liability), not cash or other asset",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No owner withdrawals are involved in this transaction",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or reduced; this transaction records an expense, not a reduction of one",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No asset increases. The tea, beverages, and refreshments are purchased for immediate client entertainment purposes, not for resale or long-term use, so they are expensed immediately rather than capitalized as inventory or other assets.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Two expense increases: (1) Client entertainment expense of $1,200 for the food and beverages, and (2) Sales tax expense of $120 (10% of $1,200). Both are period expenses incurred for business entertainment purposes.",
+        "expense_increase_count": 2,
+        "liability_decrease_reason": "No liability decreases. The corporate credit card creates a liability (accounts payable/credit card payable) on the credit side, not a decrease on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No direct equity decreases in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases. This is a purchase transaction, not a sales-related adjustment.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Corporate credit card payable increases by $1,320 (the total amount charged to the card)",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase; this is an expense transaction paid via credit card",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a purchase of items for client entertainment",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No asset decreases because payment was made by credit card (liability), not cash or other asset",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No owner withdrawals are involved in this transaction",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or reduced; this transaction records an expense, not a reduction of one",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear. It states: (1) items purchased (tea, beverages, refreshments), (2) business purpose (client entertainment), (3) amount ($1,200 base + $120 tax = $1,320 total), (4) payment method (corporate credit card). The business purpose \"client entertainment\" unambiguously maps to entertainment expense under IFRS. No additional facts are needed to determine the entry structure.",
+        "debit_asset_increase": {
+          "reason": "The transaction involves a purchase paid by corporate credit card. The tax component ($120) is recoverable input tax, which is an asset increase (Tax Receivable). Count: 1 line for Tax Receivable.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Tax Receivable"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The transaction states the purchase is for client entertainment. This is an operating expense. The base amount of $1,200 is the entertainment expense. Count: 1 line for Entertainment Expense.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Entertainment Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity reduction in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Payment was made by corporate credit card, creating a liability (Credit Card Payable). The total amount charged is $1,320. Count: 1 line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Credit Card Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue earned in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being reduced. Payment is by credit card (liability increase), not cash.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "The transaction records a purchase of refreshments for client entertainment. The business purpose (client entertainment) maps to Entertainment Expense. The base amount is $1,200, with 10% sales tax of $120, totaling $1,320. Since this is a purchase, the sales tax is recoverable input tax (Tax Receivable, debit). Payment by corporate credit card creates a liability (Credit Card Payable, credit). Debits: Entertainment Expense $1,200 + Tax Receivable $120 = $1,320. Credits: Credit Card Payable $1,320. Entry balances.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Entertainment Expense",
+              "amount": 1200.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Tax Receivable",
+              "amount": 120.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Credit Card Payable",
+              "amount": 1320.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction provides all necessary information: business purpose (client entertainment), amounts ($1,200 base + $120 tax), and payment method (corporate credit card). The entry structure is unambiguous: debit Entertainment Expense for the base amount, debit Tax Receivable for recoverable input tax, and credit Credit Card Payable for the total. Total debits ($1,320) equal total credits ($1,320). The entry complies with IFRS double-entry principles.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 546,
+        "output_tokens": 278,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 519,
+        "output_tokens": 357,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 432,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 841,
+        "output_tokens": 1445,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

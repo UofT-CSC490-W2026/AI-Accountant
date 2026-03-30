@@ -1,0 +1,379 @@
+{
+  "test_case_id": "int_22_compound_sale_with_tax",
+  "variant_name": "with_evaluation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Sale of 300 cases of snack products at $230 per case, partial payment received",
+    "rationale": "This is a sale transaction requiring recognition of revenue, cost of goods sold, sales tax payable, and mixed payment (cash and accounts receivable). Debit tuple (1,0,1,0,0,0) indicates 1 asset increase (cash received) and 1 expense increase (COGS). Credit tuple (1,0,1,1,0,0) indicates 1 liability increase (sales tax payable), 1 revenue increase (sales revenue), and 1 asset decrease (inventory). However, we need 2 asset increases on the debit side: Cash ($45,900) and Accounts Receivable ($30,000). The tuple counts don't perfectly match because this is a compound transaction with mixed payment terms. Following accounting standards: debit Cash $45,900, debit Accounts Receivable $30,000, debit Cost of Goods Sold $55,500 (300 \u00d7 $185), credit Sales Revenue $69,000, credit Sales Tax Payable $6,900 (10% of $69,000), credit Inventory $55,500. Total debits: $131,400. Total credits: $131,400.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 45900.0
+      },
+      {
+        "account_name": "Accounts Receivable",
+        "type": "debit",
+        "amount": 30000.0
+      },
+      {
+        "account_name": "Cost of Goods Sold",
+        "type": "debit",
+        "amount": 55500.0
+      },
+      {
+        "account_name": "Sales Revenue",
+        "type": "credit",
+        "amount": 69000.0
+      },
+      {
+        "account_name": "Sales Tax Payable",
+        "type": "credit",
+        "amount": 6900.0
+      },
+      {
+        "account_name": "Inventory",
+        "type": "credit",
+        "amount": 55500.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.037653,
+  "raw_cost_usd": 0.058362,
+  "total_latency_ms": 25757,
+  "total_input_tokens": 12359,
+  "total_output_tokens": 1419,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 556,
+      "output_tokens": 202,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1797,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0050703,
+      "raw_cost_usd": 0.008421,
+      "output": {
+        "reason": "Credit side analysis:\n1. Revenue increase: $69,000 sales revenue from selling snack products = revenue increase (1 line)\n2. Liability increase: $6,900 sales tax collected (10% \u00d7 $69,000) = sales tax payable, a liability increase (1 line)\n3. Asset decrease: $55,500 cost of goods sold (300 cases \u00d7 $185) = inventory leaving, an asset decrease (1 line)\n\nTotal: 1 revenue increase + 1 liability increase + 1 asset decrease = (1,0,1,1,0,0)",
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Credit side analysis:\n1. Revenue increase: $69,000 sales revenue from selling snack products = revenue increase (1 line)\n2. Liability increase: $6,900 sales tax collected (10% \u00d7 $69,000) = sales tax payable, a liability increase (1 line)\n3. Asset decrease: $55,500 cost of goods sold (300 cases \u00d7 $185) = inventory leaving, an asset decrease (1 line)\n\nTotal: 1 revenue increase + 1 liability increase + 1 asset decrease = (1,0,1,1,0,0)"
+    },
+    "debit_classifier": {
+      "input_tokens": 558,
+      "output_tokens": 375,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1820,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.007677600000000001,
+      "raw_cost_usd": 0.011085,
+      "output": {
+        "reason": "This is a sale transaction with three debit-side journal lines:\n1. Cash/Bank asset increase of $45,900 (asset increase)\n2. Accounts Receivable asset increase of $30,000 (asset increase) \n3. Cost of Goods Sold expense increase of $55,500 (300 cases \u00d7 $185 per case) (expense increase)\n\nThe debit side records: (a) cash received = 1 asset increase, (b) credit extended = 1 asset increase, and (c) COGS = 1 expense increase. Total: 2 asset increases + 1 expense increase = (2,0,1,0,0,0).\n\nWait - I need to reconsider. Cash and AR are both asset increases but they are economically distinct events (immediate payment vs deferred payment). However, they could be viewed as a single \"consideration received\" split across two asset accounts. Let me reconsider the guidance: \"Count each economically distinct event as a separate line\" vs \"Combine into a single line when components share the same account and same treatment.\"\n\nActually, cash received and AR are TWO separate asset accounts, so they should be counted as 2 separate lines. Final count: 2 asset increases (cash + AR) + 1 expense increase (COGS) = (2,0,1,0,0,0)",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This is a sale transaction with three debit-side journal lines:\n1. Cash/Bank asset increase of $45,900 (asset increase)\n2. Accounts Receivable asset increase of $30,000 (asset increase) \n3. Cost of Goods Sold expense increase of $55,500 (300 cases \u00d7 $185 per case) (expense increase)\n\nThe debit side records: (a) cash received = 1 asset increase, (b) credit extended = 1 asset increase, and (c) COGS = 1 expense increase. Total: 2 asset increases + 1 expense increase = (2,0,1,0,0,0).\n\nWait - I need to reconsider. Cash and AR are both asset increases but they are economically distinct events (immediate payment vs deferred payment). However, they could be viewed as a single \"consideration received\" split across two asset accounts. Let me reconsider the guidance: \"Count each economically distinct event as a separate line\" vs \"Combine into a single line when components share the same account and same treatment.\"\n\nActually, cash received and AR are TWO separate asset accounts, so they should be counted as 2 separate lines. Final count: 2 asset increases (cash + AR) + 1 expense increase (COGS) = (2,0,1,0,0,0)"
+    },
+    "entry_builder": {
+      "input_tokens": 794,
+      "output_tokens": 591,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3909,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0121815,
+      "raw_cost_usd": 0.020592,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Sale of 300 cases of snack products at $230 per case, partial payment received",
+        "rationale": "This is a sale transaction requiring recognition of revenue, cost of goods sold, sales tax payable, and mixed payment (cash and accounts receivable). Debit tuple (1,0,1,0,0,0) indicates 1 asset increase (cash received) and 1 expense increase (COGS). Credit tuple (1,0,1,1,0,0) indicates 1 liability increase (sales tax payable), 1 revenue increase (sales revenue), and 1 asset decrease (inventory). However, we need 2 asset increases on the debit side: Cash ($45,900) and Accounts Receivable ($30,000). The tuple counts don't perfectly match because this is a compound transaction with mixed payment terms. Following accounting standards: debit Cash $45,900, debit Accounts Receivable $30,000, debit Cost of Goods Sold $55,500 (300 \u00d7 $185), credit Sales Revenue $69,000, credit Sales Tax Payable $6,900 (10% of $69,000), credit Inventory $55,500. Total debits: $131,400. Total credits: $131,400.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 45900.0
+          },
+          {
+            "account_name": "Accounts Receivable",
+            "type": "debit",
+            "amount": 30000.0
+          },
+          {
+            "account_name": "Cost of Goods Sold",
+            "type": "debit",
+            "amount": 55500.0
+          },
+          {
+            "account_name": "Sales Revenue",
+            "type": "credit",
+            "amount": 69000.0
+          },
+          {
+            "account_name": "Sales Tax Payable",
+            "type": "credit",
+            "amount": 6900.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 55500.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2781,
+      "output_tokens": 251,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4833,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0127236,
+      "raw_cost_usd": 0.018264,
+      "output": {
+        "reason": "Entry correctly records inventory sale with mixed payment terms. Balance verified: debits $131,400 ($45,900 Cash + $30,000 AR + $55,500 COGS) = credits $131,400 ($69,000 Revenue + $6,900 Sales Tax Payable + $55,500 Inventory). Amounts match transaction: 300 cases \u00d7 $230 = $69,000 revenue, 300 cases \u00d7 $185 = $55,500 COGS, 10% \u00d7 $69,000 = $6,900 sales tax, $45,900 cash received, $30,000 remainder on credit ($75,900 - $45,900). Sales tax treatment correct per transaction text stating 10% rate. All accounts appropriate and directionally correct.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records inventory sale with mixed payment terms. Balance verified: debits $131,400 ($45,900 Cash + $30,000 AR + $55,500 COGS) = credits $131,400 ($69,000 Revenue + $6,900 Sales Tax Payable + $55,500 Inventory). Amounts match transaction: 300 cases \u00d7 $230 = $69,000 revenue, 300 cases \u00d7 $185 = $55,500 COGS, 10% \u00d7 $69,000 = $6,900 sales tax, $45,900 cash received, $30,000 remainder on credit ($75,900 - $45,900). Sales tax treatment correct per transaction text stating 10% rate. All accounts appropriate and directionally correct."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "This is a sale transaction with three debit-side journal lines:\n1. Cash/Bank asset increase of $45,900 (asset increase)\n2. Accounts Receivable asset increase of $30,000 (asset increase) \n3. Cost of Goods Sold expense increase of $55,500 (300 cases \u00d7 $185 per case) (expense increase)\n\nThe debit side records: (a) cash received = 1 asset increase, (b) credit extended = 1 asset increase, and (c) COGS = 1 expense increase. Total: 2 asset increases + 1 expense increase = (2,0,1,0,0,0).\n\nWait - I need to reconsider. Cash and AR are both asset increases but they are economically distinct events (immediate payment vs deferred payment). However, they could be viewed as a single \"consideration received\" split across two asset accounts. Let me reconsider the guidance: \"Count each economically distinct event as a separate line\" vs \"Combine into a single line when components share the same account and same treatment.\"\n\nActually, cash received and AR are TWO separate asset accounts, so they should be counted as 2 separate lines. Final count: 2 asset increases (cash + AR) + 1 expense increase (COGS) = (2,0,1,0,0,0)",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Credit side analysis:\n1. Revenue increase: $69,000 sales revenue from selling snack products = revenue increase (1 line)\n2. Liability increase: $6,900 sales tax collected (10% \u00d7 $69,000) = sales tax payable, a liability increase (1 line)\n3. Asset decrease: $55,500 cost of goods sold (300 cases \u00d7 $185) = inventory leaving, an asset decrease (1 line)\n\nTotal: 1 revenue increase + 1 liability increase + 1 asset decrease = (1,0,1,1,0,0)",
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "This is a sale transaction with three debit-side journal lines:\n1. Cash/Bank asset increase of $45,900 (asset increase)\n2. Accounts Receivable asset increase of $30,000 (asset increase) \n3. Cost of Goods Sold expense increase of $55,500 (300 cases \u00d7 $185 per case) (expense increase)\n\nThe debit side records: (a) cash received = 1 asset increase, (b) credit extended = 1 asset increase, and (c) COGS = 1 expense increase. Total: 2 asset increases + 1 expense increase = (2,0,1,0,0,0).\n\nWait - I need to reconsider. Cash and AR are both asset increases but they are economically distinct events (immediate payment vs deferred payment). However, they could be viewed as a single \"consideration received\" split across two asset accounts. Let me reconsider the guidance: \"Count each economically distinct event as a separate line\" vs \"Combine into a single line when components share the same account and same treatment.\"\n\nActually, cash received and AR are TWO separate asset accounts, so they should be counted as 2 separate lines. Final count: 2 asset increases (cash + AR) + 1 expense increase (COGS) = (2,0,1,0,0,0)",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Credit side analysis:\n1. Revenue increase: $69,000 sales revenue from selling snack products = revenue increase (1 line)\n2. Liability increase: $6,900 sales tax collected (10% \u00d7 $69,000) = sales tax payable, a liability increase (1 line)\n3. Asset decrease: $55,500 cost of goods sold (300 cases \u00d7 $185) = inventory leaving, an asset decrease (1 line)\n\nTotal: 1 revenue increase + 1 liability increase + 1 asset decrease = (1,0,1,1,0,0)",
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Sale of 300 cases of snack products at $230 per case, partial payment received",
+        "rationale": "This is a sale transaction requiring recognition of revenue, cost of goods sold, sales tax payable, and mixed payment (cash and accounts receivable). Debit tuple (1,0,1,0,0,0) indicates 1 asset increase (cash received) and 1 expense increase (COGS). Credit tuple (1,0,1,1,0,0) indicates 1 liability increase (sales tax payable), 1 revenue increase (sales revenue), and 1 asset decrease (inventory). However, we need 2 asset increases on the debit side: Cash ($45,900) and Accounts Receivable ($30,000). The tuple counts don't perfectly match because this is a compound transaction with mixed payment terms. Following accounting standards: debit Cash $45,900, debit Accounts Receivable $30,000, debit Cost of Goods Sold $55,500 (300 \u00d7 $185), credit Sales Revenue $69,000, credit Sales Tax Payable $6,900 (10% of $69,000), credit Inventory $55,500. Total debits: $131,400. Total credits: $131,400.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 45900.0
+          },
+          {
+            "account_name": "Accounts Receivable",
+            "type": "debit",
+            "amount": 30000.0
+          },
+          {
+            "account_name": "Cost of Goods Sold",
+            "type": "debit",
+            "amount": 55500.0
+          },
+          {
+            "account_name": "Sales Revenue",
+            "type": "credit",
+            "amount": 69000.0
+          },
+          {
+            "account_name": "Sales Tax Payable",
+            "type": "credit",
+            "amount": 6900.0
+          },
+          {
+            "account_name": "Inventory",
+            "type": "credit",
+            "amount": 55500.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry correctly records inventory sale with mixed payment terms. Balance verified: debits $131,400 ($45,900 Cash + $30,000 AR + $55,500 COGS) = credits $131,400 ($69,000 Revenue + $6,900 Sales Tax Payable + $55,500 Inventory). Amounts match transaction: 300 cases \u00d7 $230 = $69,000 revenue, 300 cases \u00d7 $185 = $55,500 COGS, 10% \u00d7 $69,000 = $6,900 sales tax, $45,900 cash received, $30,000 remainder on credit ($75,900 - $45,900). Sales tax treatment correct per transaction text stating 10% rate. All accounts appropriate and directionally correct.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 556,
+        "output_tokens": 202,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 558,
+        "output_tokens": 375,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 794,
+        "output_tokens": 591,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2781,
+        "output_tokens": 251,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

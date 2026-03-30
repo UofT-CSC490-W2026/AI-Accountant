@@ -1,0 +1,458 @@
+{
+  "test_case_id": "int_hard_01b_note_collateralized",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Collateralized borrowing: cash received (net proceeds after discount), interest expense recognized for discount charges, and liability recorded for bank loan. Note receivable remains on books since risks/rewards not transferred.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Cash",
+        "amount": 98333.33
+      },
+      {
+        "type": "debit",
+        "account_name": "Interest Expense",
+        "amount": 1666.67
+      },
+      {
+        "type": "credit",
+        "account_name": "Bank Loan Payable",
+        "amount": 100000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0572253,
+  "raw_cost_usd": 0.095325,
+  "total_latency_ms": 31337,
+  "total_input_tokens": 19510,
+  "total_output_tokens": 2453,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "unknown": {
+      "input_tokens": 4290,
+      "output_tokens": 1681,
+      "cache_read_tokens": 10450,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 14740,
+      "llm_calls": 5,
+      "actual_cost_usd": 0.04122,
+      "raw_cost_usd": 0.069435,
+      "output": null,
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 555,
+      "output_tokens": 414,
+      "cache_read_tokens": 1856,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2411,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0084318,
+      "raw_cost_usd": 0.013443,
+      "output": {
+        "asset_increase_reason": "Cash increases by the net proceeds received from the bank (face value minus discount charges for the remaining 40 days). This is one asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Interest/discount expense increases for the discount charges (15% annual rate applied to $100,000 for 40 days remaining). Since this is a collateralized borrowing, the discount is treated as a financing cost/expense, not a reduction of the note receivable.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being reduced. The bank advance creates a new liability (credit side), but does not decrease any existing liability.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are affected by this discounting transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected. The discount charge is a financing expense, not a revenue reduction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 554,
+      "output_tokens": 358,
+      "cache_read_tokens": 1805,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2359,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0075735,
+      "raw_cost_usd": 0.012447,
+      "output": {
+        "liability_increase_reason": "Bank loan liability created from collateralized borrowing arrangement (note pledged as security, not derecognized)",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity transactions; this is a borrowing transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue earned; this is a financing transaction, not an operating activity",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Notes receivable remains on books (collateralized borrowing means no derecognition); cash increases (debit side)",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividend or owner withdrawal transactions involved",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Discount charges are recognized as interest expense (debit side), not an expense decrease",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "non-interest-bearing note receivable at present value",
+            "why_llm_cannot_do_this": "IFRS 9 requires initial recognition at present value using market rate for similar instruments; system lacks the market discount rate to compute the present value and the corresponding interest income component",
+            "what_is_best_llm_can_do": "Record at face value without discounting to present value",
+            "skeptical": true
+          },
+          {
+            "aspect": "bank discount calculation on remaining term",
+            "why_llm_cannot_do_this": "Requires computing discount on 40 remaining days (90-50) at 15% annual rate applied to $100,000 face value, then calculating net proceeds; system lacks the computational formula for bank discount method (discount = face \u00d7 rate \u00d7 time)",
+            "what_is_best_llm_can_do": "Record a generic borrowing without calculating the specific discount amount and net proceeds",
+            "skeptical": true
+          },
+          {
+            "aspect": "collateralized borrowing treatment for discounted note",
+            "why_llm_cannot_do_this": "Under collateralized borrowing model, note receivable remains on books while liability is recorded for cash received; requires tracking the discount as interest expense over the 40-day period and managing the dual obligation structure until maturity",
+            "what_is_best_llm_can_do": "Derecognize the note receivable as if it were a sale (transfer model) rather than keeping it on books with a liability",
+            "skeptical": true
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "This is a financial transaction involving discounting a promissory note at a bank, treated as collateralized borrowing. Financial transactions (loans, notes receivable/payable, borrowing arrangements) are not taxable supplies. No tax is mentioned in the transaction text.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged. The transaction clearly states this is a collateralized borrowing, which resolves the typical \"sale vs borrowing\" ambiguity for discounted notes.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "Three flags raised, all marked skeptical. Reviewing each:\n\n1. \"Non-interest-bearing note at present value\": The complexity detector is overly cautious. The transaction states Ford RECEIVED the note as settlement of a trade receivable. This means the note was received at the point of settlement, replacing the receivable. The initial recognition issue is not relevant to THIS transaction - we're recording the discounting event 50 days later, not the initial receipt. The note is already on the books.\n\n2. \"Bank discount calculation\": The system CAN perform this calculation. Bank discount = Face value \u00d7 Rate \u00d7 (Remaining days/365). Here: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $100,000 - $1,643.84 = $98,356.16. This is standard arithmetic within LLM capabilities.\n\n3. \"Collateralized borrowing treatment\": The transaction explicitly states management determined this is collateralized borrowing. The accounting treatment is straightforward: note receivable stays on books, cash increases by net proceeds, liability recorded for the borrowing, and discount expense recognized. This is standard IFRS 9 treatment that the system can handle.\n\nAll three flags are overly cautious. The system has sufficient knowledge to build this entry correctly.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Reviewing debit and credit classifications:\n\nDEBIT side [1,0,1,0,0,0]:\n- Asset increase (1): Cash increases by net proceeds - CORRECT\n- Expense increase (1): Interest/discount expense for the discount charges - CORRECT\n\nCREDIT side [1,0,0,0,0,0]:\n- Liability increase (1): Bank loan/borrowing liability - CORRECT\n\nBoth classifications are correct. Under collateralized borrowing treatment, the note receivable remains on books (no derecognition), cash and expense are debited, and a liability is credited. The structure matches the economic substance of the transaction.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "No ambiguities were flagged. All three complexity flags are marked skeptical and upon review are overly cautious: (1) the initial recognition issue is not relevant to this discounting transaction, (2) the bank discount calculation is standard arithmetic the system can perform, and (3) collateralized borrowing treatment is explicitly stated and follows standard IFRS 9 principles. Both debit and credit classifications are correct - the entry structure properly reflects that the note stays on books while recording the borrowing, cash proceeds, and financing expense. All information needed to build the entry is present in the transaction text.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Collateralized borrowing: cash received (net proceeds after discount), interest expense recognized for discount charges, and liability recorded for bank loan. Note receivable remains on books since risks/rewards not transferred.",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Cash",
+            "amount": 98333.33
+          },
+          {
+            "type": "debit",
+            "account_name": "Interest Expense",
+            "amount": 1666.67
+          },
+          {
+            "type": "credit",
+            "account_name": "Bank Loan Payable",
+            "amount": 100000.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Cash increases by the net proceeds received from the bank (face value minus discount charges for the remaining 40 days). This is one asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Interest/discount expense increases for the discount charges (15% annual rate applied to $100,000 for 40 days remaining). Since this is a collateralized borrowing, the discount is treated as a financing cost/expense, not a reduction of the note receivable.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being reduced. The bank advance creates a new liability (credit side), but does not decrease any existing liability.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are affected by this discounting transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected. The discount charge is a financing expense, not a revenue reduction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Bank loan liability created from collateralized borrowing arrangement (note pledged as security, not derecognized)",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity transactions; this is a borrowing transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue earned; this is a financing transaction, not an operating activity",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Notes receivable remains on books (collateralized borrowing means no derecognition); cash increases (debit side)",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividend or owner withdrawal transactions involved",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Discount charges are recognized as interest expense (debit side), not an expense decrease",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Cash increases by the net proceeds received from the bank (face value minus discount charges for the remaining 40 days). This is one asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Interest/discount expense increases for the discount charges (15% annual rate applied to $100,000 for 40 days remaining). Since this is a collateralized borrowing, the discount is treated as a financing cost/expense, not a reduction of the note receivable.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being reduced. The bank advance creates a new liability (credit side), but does not decrease any existing liability.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are affected by this discounting transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected. The discount charge is a financing expense, not a revenue reduction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Bank loan liability created from collateralized borrowing arrangement (note pledged as security, not derecognized)",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity transactions; this is a borrowing transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue earned; this is a financing transaction, not an operating activity",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Notes receivable remains on books (collateralized borrowing means no derecognition); cash increases (debit side)",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividend or owner withdrawal transactions involved",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Discount charges are recognized as interest expense (debit side), not an expense decrease",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "reason": "Collateralized borrowing: cash received (net proceeds after discount), interest expense recognized for discount charges, and liability recorded for bank loan. Note receivable remains on books since risks/rewards not transferred.",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Cash",
+            "amount": 98333.33
+          },
+          {
+            "type": "debit",
+            "account_name": "Interest Expense",
+            "amount": 1666.67
+          },
+          {
+            "type": "credit",
+            "account_name": "Bank Loan Payable",
+            "amount": 100000.0
+          }
+        ]
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 597,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2257,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 555,
+        "output_tokens": 414,
+        "input_token_details": {
+          "cache_read": 1856,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 554,
+        "output_tokens": 358,
+        "input_token_details": {
+          "cache_read": 1805,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 583,
+        "output_tokens": 164,
+        "input_token_details": {
+          "cache_read": 1988,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 573,
+        "output_tokens": 415,
+        "input_token_details": {
+          "cache_read": 1650,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 1775,
+        "output_tokens": 864,
+        "input_token_details": {
+          "cache_read": 2494,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 762,
+        "output_tokens": 203,
+        "input_token_details": {
+          "cache_read": 2061,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "unknown": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use"
+    }
+  }
+}

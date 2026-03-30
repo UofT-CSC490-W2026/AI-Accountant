@@ -1,0 +1,531 @@
+{
+  "test_case_id": "basic_02_inventory_on_account",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Inventory purchase on credit: debit Inventory (asset increase) $300, credit Accounts Payable (liability increase) $300. No tax mentioned in the transaction, so no tax lines added. Total debits ($300) = total credits ($300).",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Inventory",
+        "amount": 300.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Accounts Payable",
+        "amount": 300.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.040437,
+  "raw_cost_usd": 0.067518,
+  "total_latency_ms": 24618,
+  "total_input_tokens": 12301,
+  "total_output_tokens": 2041,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 507,
+      "output_tokens": 60,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2854,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031251,
+      "raw_cost_usd": 0.009462,
+      "output": {
+        "resolved_ambiguities": [],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 482,
+      "output_tokens": 335,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2028,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0069348000000000005,
+      "raw_cost_usd": 0.011109,
+      "output": {
+        "asset_increase_reason": "Inventory is purchased and increases the Inventory asset account",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals in this transaction",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Inventory is a product cost capitalized as an asset, not expensed at purchase. It becomes COGS only when sold",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The purchase is on account, which creates a liability (Accounts Payable), not a decrease",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity transactions involved",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue transactions involved",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 480,
+      "output_tokens": 355,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1996,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0072198,
+      "raw_cost_usd": 0.011313,
+      "output": {
+        "liability_increase_reason": "Accounts payable increases because inventory was purchased on credit (on account)",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts are affected by this inventory purchase transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is recognized; this is a purchase transaction, not a sale",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease; cash is not paid (purchase is on account), and inventory increases on the debit side",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this inventory purchase",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease; inventory is a product cost capitalized as an asset, not expensed at purchase",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 802,
+      "output_tokens": 1291,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5423,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0231573,
+      "raw_cost_usd": 0.035634,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear. \"Purchase inventory $300 on account\" unambiguously means: (1) inventory (an asset) is acquired for $300, (2) payment is deferred (\"on account\"), creating an accounts payable liability. No business facts are missing\u2014the nature of the purchase (inventory), the amount ($300), and the payment terms (on account) are all stated.",
+        "debit_asset_increase": {
+          "reason": "Accept. Inventory is an asset, and purchasing inventory increases the asset account. The classifier correctly identified one asset increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "Accept. No dividend distribution in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. Inventory is a product cost (asset), not a period expense. Under IFRS, inventory purchases are capitalized until sold.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "Accept. This transaction creates a liability (accounts payable), it does not decrease one.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "Accept. No equity transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "Accept. No revenue involved in a purchase transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept. 'On account' means the purchase creates a liability (accounts payable). The classifier correctly identified one liability increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Accounts Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "Accept. No equity transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Accept. This is a purchase, not a sale. No revenue is recognized.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. No asset is being reduced\u2014inventory is being acquired, and payment is deferred (not paid in cash).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "Accept. No dividend transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "Accept. No expense decrease involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Inventory purchase on credit: debit Inventory (asset increase) $300, credit Accounts Payable (liability increase) $300. No tax mentioned in the transaction, so no tax lines added. Total debits ($300) = total credits ($300).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Inventory",
+              "amount": 300.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Accounts Payable",
+              "amount": 300.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is straightforward and complete. Purchasing inventory on account is a standard transaction: inventory (asset) increases by $300 (debit), and accounts payable (liability) increases by $300 (credit). The classifier tuples are correct (1 asset increase debit, 1 liability increase credit). No tax is mentioned, so no tax lines are required. The entry balances and follows IFRS standards for inventory recognition. No business facts are missing.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Inventory is purchased and increases the Inventory asset account",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals in this transaction",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Inventory is a product cost capitalized as an asset, not expensed at purchase. It becomes COGS only when sold",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The purchase is on account, which creates a liability (Accounts Payable), not a decrease",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity transactions involved",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue transactions involved",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Accounts payable increases because inventory was purchased on credit (on account)",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts are affected by this inventory purchase transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is recognized; this is a purchase transaction, not a sale",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease; cash is not paid (purchase is on account), and inventory increases on the debit side",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this inventory purchase",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease; inventory is a product cost capitalized as an asset, not expensed at purchase",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Inventory is purchased and increases the Inventory asset account",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals in this transaction",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Inventory is a product cost capitalized as an asset, not expensed at purchase. It becomes COGS only when sold",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The purchase is on account, which creates a liability (Accounts Payable), not a decrease",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity transactions involved",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue transactions involved",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Accounts payable increases because inventory was purchased on credit (on account)",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts are affected by this inventory purchase transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is recognized; this is a purchase transaction, not a sale",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease; cash is not paid (purchase is on account), and inventory increases on the debit side",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this inventory purchase",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease; inventory is a product cost capitalized as an asset, not expensed at purchase",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear. \"Purchase inventory $300 on account\" unambiguously means: (1) inventory (an asset) is acquired for $300, (2) payment is deferred (\"on account\"), creating an accounts payable liability. No business facts are missing\u2014the nature of the purchase (inventory), the amount ($300), and the payment terms (on account) are all stated.",
+        "debit_asset_increase": {
+          "reason": "Accept. Inventory is an asset, and purchasing inventory increases the asset account. The classifier correctly identified one asset increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "Accept. No dividend distribution in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. Inventory is a product cost (asset), not a period expense. Under IFRS, inventory purchases are capitalized until sold.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "Accept. This transaction creates a liability (accounts payable), it does not decrease one.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "Accept. No equity transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "Accept. No revenue involved in a purchase transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept. 'On account' means the purchase creates a liability (accounts payable). The classifier correctly identified one liability increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Accounts Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "Accept. No equity transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Accept. This is a purchase, not a sale. No revenue is recognized.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. No asset is being reduced\u2014inventory is being acquired, and payment is deferred (not paid in cash).",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "Accept. No dividend transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "Accept. No expense decrease involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Inventory purchase on credit: debit Inventory (asset increase) $300, credit Accounts Payable (liability increase) $300. No tax mentioned in the transaction, so no tax lines added. Total debits ($300) = total credits ($300).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Inventory",
+              "amount": 300.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Accounts Payable",
+              "amount": 300.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is straightforward and complete. Purchasing inventory on account is a standard transaction: inventory (asset) increases by $300 (debit), and accounts payable (liability) increases by $300 (credit). The classifier tuples are correct (1 asset increase debit, 1 liability increase credit). No tax is mentioned, so no tax lines are required. The entry balances and follows IFRS standards for inventory recognition. No business facts are missing.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 507,
+        "output_tokens": 60,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 482,
+        "output_tokens": 335,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 480,
+        "output_tokens": 355,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 802,
+        "output_tokens": 1291,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,435 @@
+{
+  "test_case_id": "hard_02_investment_classification",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    2,
+    0,
+    0
+  ],
+  "journal_entry": null,
+  "actual_cost_usd": 0.0662331,
+  "raw_cost_usd": 0.102648,
+  "total_latency_ms": 35951,
+  "total_input_tokens": 18326,
+  "total_output_tokens": 3178,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "unknown": {
+      "input_tokens": 3850,
+      "output_tokens": 2185,
+      "cache_read_tokens": 9408,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 13258,
+      "llm_calls": 4,
+      "actual_cost_usd": 0.0471474,
+      "raw_cost_usd": 0.072549,
+      "output": null,
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 494,
+      "output_tokens": 414,
+      "cache_read_tokens": 2014,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2508,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0082962,
+      "raw_cost_usd": 0.013734,
+      "output": {
+        "liability_increase_reason": "No liabilities are created or increased. Both payments are made immediately by cheque (cash).",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase. BlackRock is the acquirer recording an investment asset, not issuing equity.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned. This is an investment acquisition transaction, not a revenue-generating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases for two distinct payments: (1) $3,000,000 for the share acquisition and (2) $100,000 for the transaction fee. These are separate economic events with different business purposes\u2014one is the purchase price, the other is a transaction cost\u2014so they count as 2 lines.",
+        "asset_decrease_count": 2,
+        "dividend_decrease_reason": "No dividends or owner drawings are reversed or decreased.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased. The transaction fee is being incurred, not reversed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 495,
+      "output_tokens": 579,
+      "cache_read_tokens": 2065,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2560,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0107895,
+      "raw_cost_usd": 0.016365,
+      "output": {
+        "asset_increase_reason": "Two distinct asset increases: (1) Investment in Ford shares $3,000,000 is a financial asset (equity investment), and (2) Transaction fee $100,000 is an expense that increases an expense account. Wait - transaction fees on equity investments are capitalized to the cost of the investment per IFRS 9, so both amounts increase the Investment asset. However, they represent economically distinct components: the purchase price and the transaction cost. Since both increase the same Investment asset account and are part of the same acquisition, they should be combined into 1 line. Actually, re-reading: the shares ($3M) and the fee ($100K) are paid separately (shares acquired, fee paid by cheque), but under IFRS 9 transaction costs directly attributable to acquisition of a financial asset are added to initial cost. This is a single economic event (acquiring the investment) with one resulting asset account (Investment in Ford). Count = 1 line for the total investment cost.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends declared/paid by BlackRock in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The $100,000 transaction fee is capitalized to the investment cost under IFRS 9 (transaction costs directly attributable to acquiring a financial asset), not expensed. No other expenses in this transaction.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced; BlackRock is acquiring shares of Ford (an asset), not reducing its own equity.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are reduced or reversed in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "Does BlackRock have significant influence over Ford (e.g., board representation, participation in policy-making, material transactions, or technical dependency)?",
+    "What is management's business model and intent for holding this investment (trading, hold to collect cash flows, or strategic influence)?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "accounting classification of the investment",
+            "why_entry_depends_on_clarification": "FVTPL and FVOCI record at cost plus transaction costs initially as financial asset; equity method records as investment in associate with different subsequent measurement. The classification determines the account title and measurement basis.",
+            "why_ambiguity_not_resolved_by_given_info": "10% ownership is at the threshold where significant influence may or may not exist depending on board representation, participation in policy-making, material transactions, or other factors not stated. Management's business model (hold to collect vs. trading) also affects classification but is not specified.",
+            "clarification_question": "Does BlackRock have significant influence over Ford, and what is management's business model and intent for holding this investment?",
+            "options": [
+              "Financial asset at fair value through profit or loss (FVTPL)",
+              "Financial asset at fair value through other comprehensive income (FVOCI)",
+              "Investment in associate under equity method (IAS 28)"
+            ],
+            "resolved": false
+          },
+          {
+            "aspect": "treatment of transaction fee",
+            "why_entry_depends_on_clarification": "If classified as financial asset at FVTPL, transaction costs are expensed (IFRS 9). If classified as FVOCI or equity method investment, transaction costs are capitalized as part of the investment cost.",
+            "why_ambiguity_not_resolved_by_given_info": "Treatment depends on the investment classification, which depends on significant influence assessment not determinable from the transaction text.",
+            "clarification_question": "Does BlackRock have significant influence over Ford (same question as above)?",
+            "options": [
+              "Capitalize as part of investment cost",
+              "Expense immediately as transaction cost"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "equity investment acquisition",
+            "why_llm_cannot_do_this": "Requires determining accounting method based on level of influence: 10% ownership could be FVTPL, FVOCI, or equity method depending on whether significant influence exists (board seats, material transactions, technical dependency, etc.). System lacks facts about influence indicators beyond ownership percentage.",
+            "what_is_best_llm_can_do": "Default to FVTPL classification assuming no significant influence, capitalizing cost plus transaction fees to Investment in Associate/Financial Asset",
+            "skeptical": true
+          },
+          {
+            "aspect": "transaction fee capitalization vs expense",
+            "why_llm_cannot_do_this": "Treatment depends on classification: FVTPL investments expense transaction costs immediately (IFRS 9.5.1.1), while equity method investments capitalize them (IAS 28). System cannot determine correct treatment without knowing the accounting classification.",
+            "what_is_best_llm_can_do": "Capitalize transaction fees to investment cost (common but may be incorrect if FVTPL applies)",
+            "skeptical": true
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Transaction involves acquisition of equity shares ($3,000,000) and a transaction fee ($100,000). Equity transactions (purchase of shares) are not taxable supplies. Transaction fees related to financial instruments are also not subject to sales tax. No tax is mentioned in the transaction text.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "Two unresolved ambiguities: (1) investment classification (FVTPL vs FVOCI vs equity method) and (2) transaction fee treatment (capitalize vs expense). \n\nFor ambiguity 1: The classification determines the account name. FVTPL/FVOCI would use \"Financial Asset - Investment in Ford\" or similar, while equity method would use \"Investment in Associate - Ford\". These are materially different account names. The classification is not determinable from the transaction text alone - 10% ownership is at the threshold where significant influence may or may not exist depending on board representation, participation in policy-making, and other factors not stated.\n\nFor ambiguity 2: This depends on ambiguity 1. If FVTPL, the $100,000 fee is expensed (different account name: \"Transaction Costs\" expense vs capitalized to investment). If FVOCI or equity method, it's capitalized. This changes both the account name and the entry structure.\n\nBoth ambiguities materially affect the account names and amounts in different accounts. Both pass the test: (a) account name/amount differs depending on the answer, AND (b) answer is not determinable from text, conventions, or context.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "Does BlackRock have significant influence over Ford (e.g., board representation, participation in policy-making, material transactions, or technical dependency)?",
+          "What is management's business model and intent for holding this investment (trading, hold to collect cash flows, or strategic influence)?"
+        ],
+        "complexity_assessment": "Two skeptical flags: (1) equity investment classification and (2) transaction fee treatment. Both flags correctly identify that the system cannot determine the correct accounting treatment without knowing whether significant influence exists. The complexity detector is correct - this is not a case where the LLM can apply a reasonable default, because the different treatments produce structurally different entries with different account names. The flags are justified.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classifier: counts 2 asset increases (investment $3M + fee $100K as separate lines). This is incorrect reasoning. Under IFRS 9, transaction costs directly attributable to acquiring a financial asset are added to the initial cost - they form a single investment asset account at $3.1M total. The classifier's own reasoning acknowledges they should be combined but then counts 2. Should be 1 asset increase.\n\nCredit classifier: counts 2 asset decreases (cash $3M + cash $100K). The reasoning states these are \"separate economic events with different business purposes.\" This is incorrect. Both payments are part of the same economic event - acquiring the investment. They are paid by the same method (cheque/cash) and should be combined into a single cash decrease of $3.1M. Should be 1 asset decrease.\n\nHowever, there's a deeper issue: IF the investment is classified as FVTPL, the $100K fee must be expensed, not capitalized. In that case: Debit would be 1 asset increase ($3M investment) + 1 expense increase ($100K fee) = [1,0,1,0,0,0]. Credit would be 1 asset decrease ($3.1M cash) = [0,0,0,1,0,0]. \n\nIF classified as FVOCI or equity method, the $100K is capitalized: Debit would be 1 asset increase ($3.1M investment) = [1,0,0,0,0,0]. Credit would be 1 asset decrease ($3.1M cash) = [0,0,0,1,0,0].\n\nThe correct classification depends on the unresolved ambiguity. Cannot override without knowing the classification.",
+        "debit_approved": false,
+        "override_debit": null,
+        "credit_approved": false,
+        "override_credit": null,
+        "decision_rationale": "The investment classification (FVTPL vs FVOCI vs equity method) materially affects both the account names and the entry structure. At 10% ownership, significant influence may or may not exist depending on factors not stated in the transaction. This is not determinable from the text or conventions.\n\nIf FVTPL: Investment asset $3M + Transaction cost expense $100K + Cash decrease $3.1M\nIf FVOCI/equity method: Investment asset $3.1M + Cash decrease $3.1M\n\nThese are structurally different entries with different account names. The person who initiated the transaction can answer whether significant influence exists and what the business model is. This is genuinely missing information, not overcautious flagging.",
+        "decision": "missing_info"
+      }
+    ],
+    "output_entry_drafter": [],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "accounting classification of the investment",
+            "why_entry_depends_on_clarification": "FVTPL and FVOCI record at cost plus transaction costs initially as financial asset; equity method records as investment in associate with different subsequent measurement. The classification determines the account title and measurement basis.",
+            "why_ambiguity_not_resolved_by_given_info": "10% ownership is at the threshold where significant influence may or may not exist depending on board representation, participation in policy-making, material transactions, or other factors not stated. Management's business model (hold to collect vs. trading) also affects classification but is not specified.",
+            "clarification_question": "Does BlackRock have significant influence over Ford, and what is management's business model and intent for holding this investment?",
+            "options": [
+              "Financial asset at fair value through profit or loss (FVTPL)",
+              "Financial asset at fair value through other comprehensive income (FVOCI)",
+              "Investment in associate under equity method (IAS 28)"
+            ],
+            "resolved": false
+          },
+          {
+            "aspect": "treatment of transaction fee",
+            "why_entry_depends_on_clarification": "If classified as financial asset at FVTPL, transaction costs are expensed (IFRS 9). If classified as FVOCI or equity method investment, transaction costs are capitalized as part of the investment cost.",
+            "why_ambiguity_not_resolved_by_given_info": "Treatment depends on the investment classification, which depends on significant influence assessment not determinable from the transaction text.",
+            "clarification_question": "Does BlackRock have significant influence over Ford (same question as above)?",
+            "options": [
+              "Capitalize as part of investment cost",
+              "Expense immediately as transaction cost"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Two distinct asset increases: (1) Investment in Ford shares $3,000,000 is a financial asset (equity investment), and (2) Transaction fee $100,000 is an expense that increases an expense account. Wait - transaction fees on equity investments are capitalized to the cost of the investment per IFRS 9, so both amounts increase the Investment asset. However, they represent economically distinct components: the purchase price and the transaction cost. Since both increase the same Investment asset account and are part of the same acquisition, they should be combined into 1 line. Actually, re-reading: the shares ($3M) and the fee ($100K) are paid separately (shares acquired, fee paid by cheque), but under IFRS 9 transaction costs directly attributable to acquisition of a financial asset are added to initial cost. This is a single economic event (acquiring the investment) with one resulting asset account (Investment in Ford). Count = 1 line for the total investment cost.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends declared/paid by BlackRock in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The $100,000 transaction fee is capitalized to the investment cost under IFRS 9 (transaction costs directly attributable to acquiring a financial asset), not expensed. No other expenses in this transaction.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced; BlackRock is acquiring shares of Ford (an asset), not reducing its own equity.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are reduced or reversed in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased. Both payments are made immediately by cheque (cash).",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase. BlackRock is the acquirer recording an investment asset, not issuing equity.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned. This is an investment acquisition transaction, not a revenue-generating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases for two distinct payments: (1) $3,000,000 for the share acquisition and (2) $100,000 for the transaction fee. These are separate economic events with different business purposes\u2014one is the purchase price, the other is a transaction cost\u2014so they count as 2 lines.",
+        "asset_decrease_count": 2,
+        "dividend_decrease_reason": "No dividends or owner drawings are reversed or decreased.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased. The transaction fee is being incurred, not reversed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Two distinct asset increases: (1) Investment in Ford shares $3,000,000 is a financial asset (equity investment), and (2) Transaction fee $100,000 is an expense that increases an expense account. Wait - transaction fees on equity investments are capitalized to the cost of the investment per IFRS 9, so both amounts increase the Investment asset. However, they represent economically distinct components: the purchase price and the transaction cost. Since both increase the same Investment asset account and are part of the same acquisition, they should be combined into 1 line. Actually, re-reading: the shares ($3M) and the fee ($100K) are paid separately (shares acquired, fee paid by cheque), but under IFRS 9 transaction costs directly attributable to acquisition of a financial asset are added to initial cost. This is a single economic event (acquiring the investment) with one resulting asset account (Investment in Ford). Count = 1 line for the total investment cost.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends declared/paid by BlackRock in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The $100,000 transaction fee is capitalized to the investment cost under IFRS 9 (transaction costs directly attributable to acquiring a financial asset), not expensed. No other expenses in this transaction.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced; BlackRock is acquiring shares of Ford (an asset), not reducing its own equity.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are reduced or reversed in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased. Both payments are made immediately by cheque (cash).",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase. BlackRock is the acquirer recording an investment asset, not issuing equity.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned. This is an investment acquisition transaction, not a revenue-generating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases for two distinct payments: (1) $3,000,000 for the share acquisition and (2) $100,000 for the transaction fee. These are separate economic events with different business purposes\u2014one is the purchase price, the other is a transaction cost\u2014so they count as 2 lines.",
+        "asset_decrease_count": 2,
+        "dividend_decrease_reason": "No dividends or owner drawings are reversed or decreased.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased. The transaction fee is being incurred, not reversed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 0,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 523,
+        "output_tokens": 167,
+        "input_token_details": {
+          "cache_read": 2197,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 513,
+        "output_tokens": 308,
+        "input_token_details": {
+          "cache_read": 1859,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 494,
+        "output_tokens": 414,
+        "input_token_details": {
+          "cache_read": 2014,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 537,
+        "output_tokens": 476,
+        "input_token_details": {
+          "cache_read": 2466,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 495,
+        "output_tokens": 579,
+        "input_token_details": {
+          "cache_read": 2065,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 2277,
+        "output_tokens": 1234,
+        "input_token_details": {
+          "cache_read": 2886,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "unknown": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use"
+    }
+  }
+}

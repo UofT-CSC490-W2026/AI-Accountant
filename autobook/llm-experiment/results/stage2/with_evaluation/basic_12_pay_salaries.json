@@ -1,0 +1,486 @@
+{
+  "test_case_id": "basic_12_pay_salaries",
+  "variant_name": "with_evaluation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    3,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Payment of employee salaries",
+    "rationale": "Salaries are an operating expense. The debit tuple (0,0,1,0,0,0) correctly indicates one expense increase line. The credit tuple (3,0,0,1,0,0,0) suggests 3 liability increases and 1 asset decrease, but this contradicts the transaction text which states salaries were 'paid in cash' - meaning the liability has already been settled. The correct treatment is: debit Salaries Expense (expense increase) and credit Cash (asset decrease). Employee salaries in Canada are not subject to HST/GST, so no tax lines are required. Overriding the credit tuple to reflect the actual cash payment rather than a liability accrual.",
+    "lines": [
+      {
+        "account_name": "Salaries Expense",
+        "type": "debit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 100.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0538089,
+  "raw_cost_usd": 0.096828,
+  "total_latency_ms": 64866,
+  "total_input_tokens": 23251,
+  "total_output_tokens": 1805,
+  "total_llm_calls": 8,
+  "iteration_count": 2,
+  "final_decision": "STUCK",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 486,
+      "output_tokens": 104,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1748,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033966,
+      "raw_cost_usd": 0.006804,
+      "output": {
+        "reason": "Paying employee salaries represents an expense increase. Salaries are a period expense recognized when incurred. The debit increases Salaries Expense (or Wages Expense).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Paying employee salaries represents an expense increase. Salaries are a period expense recognized when incurred. The debit increases Salaries Expense (or Wages Expense)."
+    },
+    "credit_classifier": {
+      "input_tokens": 1068,
+      "output_tokens": 238,
+      "cache_read_tokens": 2482,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3550,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0075186,
+      "raw_cost_usd": 0.01422,
+      "output": {
+        "reason": "Paying employee salaries involves mandatory withholdings in Canada. Credit side includes: (1) Cash payment for net pay = asset decrease, (2) Income Tax Payable for withheld income tax = liability increase, (3) CPP Payable for withheld CPP = liability increase, (4) EI Payable for withheld EI = liability increase. Total: 1 asset decrease + 3 liability increases.",
+        "tuple": [
+          3,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Paying employee salaries involves mandatory withholdings in Canada. Credit side includes: (1) Cash payment for net pay = asset decrease, (2) Income Tax Payable for withheld income tax = liability increase, (3) CPP Payable for withheld CPP = liability increase, (4) EI Payable for withheld EI = liability increase. Total: 1 asset decrease + 3 liability increases."
+    },
+    "entry_builder": {
+      "input_tokens": 1444,
+      "output_tokens": 553,
+      "cache_read_tokens": 6230,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7674,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.014496000000000002,
+      "raw_cost_usd": 0.031317,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Payment of employee salaries",
+        "rationale": "Salaries are an operating expense. The debit tuple (0,0,1,0,0,0) correctly indicates one expense increase line. The credit tuple (3,0,0,1,0,0,0) suggests 3 liability increases and 1 asset decrease, but this contradicts the transaction text which states salaries were 'paid in cash' - meaning the liability has already been settled. The correct treatment is: debit Salaries Expense (expense increase) and credit Cash (asset decrease). Employee salaries in Canada are not subject to HST/GST, so no tax lines are required. Overriding the credit tuple to reflect the actual cash payment rather than a liability accrual.",
+        "lines": [
+          {
+            "account_name": "Salaries Expense",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3211,
+      "output_tokens": 373,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7315,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0164592,
+      "raw_cost_usd": 0.027540000000000002,
+      "output": {
+        "reason": "Transaction states 'Paid employee salaries of $100 in cash' which is ambiguous. It could mean: (1) $100 gross salary paid with withholdings creating payables for CPP, EI, and income tax (net cash < $100), or (2) $100 net cash paid representing already-withheld amounts. The entry records simple Dr Salaries Expense $100 / Cr Cash $100, which is valid only for interpretation (2). Under Canadian payroll requirements, interpretation (1) would require additional liability lines. Cannot determine which interpretation is correct from the transaction text alone.",
+        "decision": "STUCK",
+        "confidence": "SOMEWHAT_CONFIDENT"
+      },
+      "reason": "Transaction states 'Paid employee salaries of $100 in cash' which is ambiguous. It could mean: (1) $100 gross salary paid with withholdings creating payables for CPP, EI, and income tax (net cash < $100), or (2) $100 net cash paid representing already-withheld amounts. The entry records simple Dr Salaries Expense $100 / Cr Cash $100, which is valid only for interpretation (2). Under Canadian payroll requirements, interpretation (1) would require additional liability lines. Cannot determine which interpretation is correct from the transaction text alone."
+    },
+    "diagnostician": {
+      "input_tokens": 1109,
+      "output_tokens": 537,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2964,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0119385,
+      "raw_cost_usd": 0.016947,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    3,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    2
+  ],
+  "rejection_reason": "Entry records gross salary payment but omits mandatory payroll withholdings. When paying employee salaries, employers must withhold income tax, CPP, and EI contributions. The entry should debit Salaries Expense $100, credit Cash for net pay, and credit liability accounts (Income Tax Payable, CPP Payable, EI Payable) for withholdings. Recording the full $100 as cash payment ignores statutory withholding obligations.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Paying employee salaries represents an expense increase. Salaries are a period expense recognized when incurred. The debit increases Salaries Expense (or Wages Expense).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Paying employee salaries represents an expense increase. Salaries are a period expense recognized when incurred. The debit increases Salaries Expense (or Wages Expense).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Cash paid out = asset decrease (1 line)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Paying employee salaries involves mandatory withholdings in Canada. Credit side includes: (1) Cash payment for net pay = asset decrease, (2) Income Tax Payable for withheld income tax = liability increase, (3) CPP Payable for withheld CPP = liability increase, (4) EI Payable for withheld EI = liability increase. Total: 1 asset decrease + 3 liability increases.",
+        "tuple": [
+          3,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Paying employee salaries represents an expense increase. Salaries are a period expense recognized when incurred. The debit increases Salaries Expense (or Wages Expense).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Paying employee salaries represents an expense increase. Salaries are a period expense recognized when incurred. The debit increases Salaries Expense (or Wages Expense).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Cash paid out = asset decrease (1 line)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Paying employee salaries involves mandatory withholdings in Canada. Credit side includes: (1) Cash payment for net pay = asset decrease, (2) Income Tax Payable for withheld income tax = liability increase, (3) CPP Payable for withheld CPP = liability increase, (4) EI Payable for withheld EI = liability increase. Total: 1 asset decrease + 3 liability increases.",
+        "tuple": [
+          3,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Payment of employee salaries",
+        "rationale": "Salaries are an operating expense. Payment in cash reduces the Cash asset account. The debit tuple indicates one expense increase (c=1), and the credit tuple indicates one asset decrease (d=1), which aligns with the transaction. No tax is applicable as salary payments are not subject to HST/GST.",
+        "lines": [
+          {
+            "account_name": "Salaries Expense",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Payment of employee salaries",
+        "rationale": "Salaries are an operating expense. The debit tuple (0,0,1,0,0,0) correctly indicates one expense increase line. The credit tuple (3,0,0,1,0,0,0) suggests 3 liability increases and 1 asset decrease, but this contradicts the transaction text which states salaries were 'paid in cash' - meaning the liability has already been settled. The correct treatment is: debit Salaries Expense (expense increase) and credit Cash (asset decrease). Employee salaries in Canada are not subject to HST/GST, so no tax lines are required. Overriding the credit tuple to reflect the actual cash payment rather than a liability accrual.",
+        "lines": [
+          {
+            "account_name": "Salaries Expense",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry records gross salary payment but omits mandatory payroll withholdings. When paying employee salaries, employers must withhold income tax, CPP, and EI contributions. The entry should debit Salaries Expense $100, credit Cash for net pay, and credit liability accounts (Income Tax Payable, CPP Payable, EI Payable) for withholdings. Recording the full $100 as cash payment ignores statutory withholding obligations.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Transaction states 'Paid employee salaries of $100 in cash' which is ambiguous. It could mean: (1) $100 gross salary paid with withholdings creating payables for CPP, EI, and income tax (net cash < $100), or (2) $100 net cash paid representing already-withheld amounts. The entry records simple Dr Salaries Expense $100 / Cr Cash $100, which is valid only for interpretation (2). Under Canadian payroll requirements, interpretation (1) would require additional liability lines. Cannot determine which interpretation is correct from the transaction text alone.",
+        "decision": "STUCK",
+        "confidence": "SOMEWHAT_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected the entry because it records the full $100 salary payment as cash outflow without accounting for mandatory payroll withholdings (income tax, CPP, EI). In Canada, employers must withhold these amounts from employee gross pay and remit them to the government later.\n\nThe correct treatment should be:\n- Debit: Salaries Expense $100 (gross pay)\n- Credit: Cash (net pay after withholdings, less than $100)\n- Credit: Income Tax Payable (withholding amount)\n- Credit: CPP Payable (withholding amount)\n- Credit: EI Payable (withholding amount)\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier) correctly identified 1 expense increase (Salaries Expense)\n- Agent 2 (Credit Classifier) classified this as 1 asset decrease, which is incomplete. Payroll withholdings create liability increases (employer owes these amounts to the government). The credit side should have been: asset decrease (Cash for net pay) + liability increases (for withholdings).\n- Agent 3 confirmed Agent 1's classification (correct)\n- Agent 4 confirmed Agent 2's classification (inherited the error)\n- Agent 5 (Entry Builder) built the entry based on the tuples, which didn't account for the liability increases\n\nThe root cause is Agent 2 (Credit Classifier). It failed to recognize that paying employee salaries involves both an asset decrease (cash for net pay) and liability increases (withholdings payable). This is a bundled transaction that requires multiple credit lines across different directional categories.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 2,
+            "fix_context": "Paying employee salaries requires mandatory withholdings (income tax, CPP, EI). Credit side must include both asset decrease (Cash for net pay) and liability increases (Income Tax Payable, CPP Payable, EI Payable for withholdings). This is a bundled transaction, not a simple cash payment."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [
+      "Paying employee salaries requires mandatory withholdings (income tax, CPP, EI). Credit side must include both asset decrease (Cash for net pay) and liability increases (Income Tax Payable, CPP Payable, EI Payable for withholdings). This is a bundled transaction, not a simple cash payment."
+    ],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "STUCK",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 486,
+        "output_tokens": 104,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 484,
+        "output_tokens": 76,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 722,
+        "output_tokens": 232,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1198,
+        "output_tokens": 170,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1109,
+        "output_tokens": 537,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 584,
+        "output_tokens": 162,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 722,
+        "output_tokens": 321,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2013,
+        "output_tokens": 203,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

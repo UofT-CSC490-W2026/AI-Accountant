@@ -1,0 +1,452 @@
+{
+  "test_case_id": "basic_10_declare_dividend",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Board declared cash dividend payable in 30 days",
+    "rationale": "When a dividend is declared, the company incurs a legal obligation to pay shareholders. Under IFRS, this creates a liability (Dividends Payable) and reduces equity (Retained Earnings or Dividends Declared). The debit tuple (0,0,0,0,1,0) indicates one equity decrease line, and the credit tuple (1,0,0,0,0,0) indicates one liability increase line. This matches the standard treatment for dividend declaration: debit equity (Retained Earnings or Dividends account) and credit Dividends Payable. The actual cash payment will be recorded in 30 days when paid.",
+    "lines": [
+      {
+        "account_name": "Retained Earnings",
+        "type": "debit",
+        "amount": 500000.0
+      },
+      {
+        "account_name": "Dividends Payable",
+        "type": "credit",
+        "amount": 500000.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "dividend declaration vs. payment",
+        "action": "proceed",
+        "reason": "The transaction explicitly states 'declared' and 'payable in 30 days', which is unambiguous accounting terminology indicating this is the declaration date, not the payment date. Standard treatment is to record the liability now and the cash payment later."
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0422832,
+  "raw_cost_usd": 0.079176,
+  "total_latency_ms": 31808,
+  "total_input_tokens": 19367,
+  "total_output_tokens": 1405,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 518,
+      "output_tokens": 96,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2913,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037125,
+      "raw_cost_usd": 0.010179,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "dividend declaration vs. payment",
+            "resolved": true,
+            "resolution": "'declared' is a conventional term meaning the liability is recorded but not yet paid \u2014 standard treatment is to recognize Dividends Payable",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 110,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1732,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034953000000000002,
+      "raw_cost_usd": 0.006846,
+      "output": {
+        "reason": "When a dividend is declared, the company incurs a liability (Dividends Payable) to pay shareholders in the future. This creates a liability increase. The credit side records the obligation to pay = liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "When a dividend is declared, the company incurs a liability (Dividends Payable) to pay shareholders in the future. This creates a liability increase. The credit side records the obligation to pay = liability increase."
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 134,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1755,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038676,
+      "raw_cost_usd": 0.007275,
+      "output": {
+        "reason": "Board declared a cash dividend payable in 30 days. On declaration date, the debit side records: (1) Dividend increase = 1 line. The dividend account (retained earnings or dividends declared) is debited to record the distribution to owners. This is NOT an expense; dividends are distributions of equity.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Board declared a cash dividend payable in 30 days. On declaration date, the debit side records: (1) Dividend increase = 1 line. The dividend account (retained earnings or dividends declared) is debited to record the distribution to owners. This is NOT an expense; dividends are distributions of equity."
+    },
+    "credit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 227,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2415,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059142,
+      "raw_cost_usd": 0.01065,
+      "output": {
+        "reason": "The initial credit tuple is correct. When a board declares a cash dividend payable in the future, the company records: (1) Debit to Dividends (or Retained Earnings) - which increases the dividend account (debit tuple shows b=1, dividend increase), and (2) Credit to Dividends Payable - which is a liability increase (credit tuple shows a=1, liability increase). The dividend payable represents an obligation to pay cash in 30 days, which is correctly classified as a liability increase. The debit and credit sides tell a consistent story: the company is recognizing a distribution to shareholders (dividend increase on debit side) and creating a corresponding liability for the amount owed (liability increase on credit side). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. When a board declares a cash dividend payable in the future, the company records: (1) Debit to Dividends (or Retained Earnings) - which increases the dividend account (debit tuple shows b=1, dividend increase), and (2) Credit to Dividends Payable - which is a liability increase (credit tuple shows a=1, liability increase). The dividend payable represents an obligation to pay cash in 30 days, which is correctly classified as a liability increase. The debit and credit sides tell a consistent story: the company is recognizing a distribution to shareholders (dividend increase on debit side) and creating a corresponding liability for the amount owed (liability increase on credit side). No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 244,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2407,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0061668,
+      "raw_cost_usd": 0.010881,
+      "output": {
+        "reason": "The transaction is a dividend declaration, not a dividend payment. When the board declares a dividend payable in 30 days, this creates a liability (Dividends Payable) and reduces retained earnings (equity). The debit should be equity decrease (e=1), not dividend increase (b=1). The 'dividend increase' slot (b) is used when dividends are actually paid out (reducing the asset cash and the dividend/drawing account). At declaration, we debit Retained Earnings (equity decrease) and credit Dividends Payable (liability increase). The credit tuple showing liability increase (1,0,0,0,0,0) is consistent with this treatment. Corrected from (0,1,0,0,0,0) to (0,0,0,0,1,0).",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": "The transaction is a dividend declaration, not a dividend payment. When the board declares a dividend payable in 30 days, this creates a liability (Dividends Payable) and reduces retained earnings (equity). The debit should be equity decrease (e=1), not dividend increase (b=1). The 'dividend increase' slot (b) is used when dividends are actually paid out (reducing the asset cash and the dividend/drawing account). At declaration, we debit Retained Earnings (equity decrease) and credit Dividends Payable (liability increase). The credit tuple showing liability increase (1,0,0,0,0,0) is consistent with this treatment. Corrected from (0,1,0,0,0,0) to (0,0,0,0,1,0)."
+    },
+    "entry_builder": {
+      "input_tokens": 877,
+      "output_tokens": 426,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4091,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.009985200000000001,
+      "raw_cost_usd": 0.018663,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Board declared cash dividend payable in 30 days",
+        "rationale": "When a dividend is declared, the company incurs a legal obligation to pay shareholders. Under IFRS, this creates a liability (Dividends Payable) and reduces equity (Retained Earnings or Dividends Declared). The debit tuple (0,0,0,0,1,0) indicates one equity decrease line, and the credit tuple (1,0,0,0,0,0) indicates one liability increase line. This matches the standard treatment for dividend declaration: debit equity (Retained Earnings or Dividends account) and credit Dividends Payable. The actual cash payment will be recorded in 30 days when paid.",
+        "lines": [
+          {
+            "account_name": "Retained Earnings",
+            "type": "debit",
+            "amount": 500000.0
+          },
+          {
+            "account_name": "Dividends Payable",
+            "type": "credit",
+            "amount": 500000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "dividend declaration vs. payment",
+            "action": "proceed",
+            "reason": "The transaction explicitly states 'declared' and 'payable in 30 days', which is unambiguous accounting terminology indicating this is the declaration date, not the payment date. Standard treatment is to record the liability now and the cash payment later."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2002,
+      "output_tokens": 168,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4054,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0091416,
+      "raw_cost_usd": 0.014682,
+      "output": {
+        "reason": "Entry correctly records dividend declaration. Debit to Retained Earnings (equity decrease) $500,000 and credit to Dividends Payable (liability increase) $500,000. Balance verified. Amount matches transaction text. Dividend transactions are not taxable, so no tax lines required. Accounts and directionality correct per IFRS - declaration creates legal obligation (liability) and reduces equity. Cash payment will be recorded separately in 30 days.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records dividend declaration. Debit to Retained Earnings (equity decrease) $500,000 and credit to Dividends Payable (liability increase) $500,000. Balance verified. Amount matches transaction text. Dividend transactions are not taxable, so no tax lines required. Accounts and directionality correct per IFRS - declaration creates legal obligation (liability) and reduces equity. Cash payment will be recorded separately in 30 days."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "dividend declaration vs. payment",
+            "resolved": true,
+            "resolution": "'declared' is a conventional term meaning the liability is recorded but not yet paid \u2014 standard treatment is to recognize Dividends Payable",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Board declared a cash dividend payable in 30 days. On declaration date, the debit side records: (1) Dividend increase = 1 line. The dividend account (retained earnings or dividends declared) is debited to record the distribution to owners. This is NOT an expense; dividends are distributions of equity.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "When a dividend is declared, the company incurs a liability (Dividends Payable) to pay shareholders in the future. This creates a liability increase. The credit side records the obligation to pay = liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is a dividend declaration, not a dividend payment. When the board declares a dividend payable in 30 days, this creates a liability (Dividends Payable) and reduces retained earnings (equity). The debit should be equity decrease (e=1), not dividend increase (b=1). The 'dividend increase' slot (b) is used when dividends are actually paid out (reducing the asset cash and the dividend/drawing account). At declaration, we debit Retained Earnings (equity decrease) and credit Dividends Payable (liability increase). The credit tuple showing liability increase (1,0,0,0,0,0) is consistent with this treatment. Corrected from (0,1,0,0,0,0) to (0,0,0,0,1,0).",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. When a board declares a cash dividend payable in the future, the company records: (1) Debit to Dividends (or Retained Earnings) - which increases the dividend account (debit tuple shows b=1, dividend increase), and (2) Credit to Dividends Payable - which is a liability increase (credit tuple shows a=1, liability increase). The dividend payable represents an obligation to pay cash in 30 days, which is correctly classified as a liability increase. The debit and credit sides tell a consistent story: the company is recognizing a distribution to shareholders (dividend increase on debit side) and creating a corresponding liability for the amount owed (liability increase on credit side). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Board declared cash dividend payable in 30 days",
+        "rationale": "When a dividend is declared, the company incurs a legal obligation to pay shareholders. Under IFRS, this creates a liability (Dividends Payable) and reduces equity (Retained Earnings or Dividends Declared). The debit tuple (0,0,0,0,1,0) indicates one equity decrease line, and the credit tuple (1,0,0,0,0,0) indicates one liability increase line. This matches the standard treatment for dividend declaration: debit equity (Retained Earnings or Dividends account) and credit Dividends Payable. The actual cash payment will be recorded in 30 days when paid.",
+        "lines": [
+          {
+            "account_name": "Retained Earnings",
+            "type": "debit",
+            "amount": 500000.0
+          },
+          {
+            "account_name": "Dividends Payable",
+            "type": "credit",
+            "amount": 500000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "dividend declaration vs. payment",
+            "action": "proceed",
+            "reason": "The transaction explicitly states 'declared' and 'payable in 30 days', which is unambiguous accounting terminology indicating this is the declaration date, not the payment date. Standard treatment is to record the liability now and the cash payment later."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry correctly records dividend declaration. Debit to Retained Earnings (equity decrease) $500,000 and credit to Dividends Payable (liability increase) $500,000. Balance verified. Amount matches transaction text. Dividend transactions are not taxable, so no tax lines required. Accounts and directionality correct per IFRS - declaration creates legal obligation (liability) and reduces equity. Cash payment will be recorded separately in 30 days.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 96,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 110,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 134,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 227,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 244,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 877,
+        "output_tokens": 426,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2002,
+        "output_tokens": 168,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

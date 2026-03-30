@@ -1,0 +1,379 @@
+{
+  "test_case_id": "hard_02_investment_classification",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    2,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Acquisition of 10% equity stake in Ford Motor Company common shares",
+    "rationale": "Cannot determine correct journal entry without knowing the investment classification. Under IFRS 9 and IAS 28, the accounting treatment fundamentally differs based on whether this investment provides significant influence and management's classification election. If equity method applies (IAS 28), the investment goes to Investment in Associate and the $100,000 fee is capitalized for total cost of $3,100,000. If FVTPL (IFRS 9 default), investment goes to Financial Assets at FVTPL and the fee is expensed immediately. If FVOCI (IFRS 9 irrevocable election), investment goes to Financial Assets at FVOCI and the fee is capitalized. These produce structurally different entries with different accounts and amounts.",
+    "lines": [],
+    "disambiguator_responses": [
+      {
+        "aspect": "accounting classification of Ford shares",
+        "action": "incomplete",
+        "reason": "The debit/credit structure genuinely differs: equity method uses Investment in Associate with capitalized costs ($3,100,000 total); FVTPL uses Financial Assets at FVTPL ($3,000,000) plus separate expense line ($100,000); FVOCI uses Financial Assets at FVOCI ($3,100,000 capitalized). Different accounts and amounts depending on facts not stated in transaction."
+      },
+      {
+        "aspect": "treatment of $100,000 transaction fee",
+        "action": "incomplete",
+        "reason": "Treatment depends entirely on the classification above. Capitalized under equity method and FVOCI (single debit line for $3,100,000), expensed under FVTPL (separate expense debit for $100,000). Cannot proceed without resolving classification."
+      }
+    ],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "Does BlackRock's 10% stake in Ford provide significant influence (e.g., board representation, participation in policy-making decisions, material intercompany transactions, or exchange of managerial personnel)?",
+      "If there is no significant influence, has management made an irrevocable election to classify this equity investment at Fair Value Through Other Comprehensive Income (FVOCI), or will it be classified at Fair Value Through Profit or Loss (FVTPL, the default)?"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0339966,
+  "raw_cost_usd": 0.055899000000000004,
+  "total_latency_ms": 28432,
+  "total_input_tokens": 11073,
+  "total_output_tokens": 1512,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 535,
+      "output_tokens": 575,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2930,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0109485,
+      "raw_cost_usd": 0.017415,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "accounting classification of Ford shares",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "FVTPL (Fair Value Through Profit or Loss) - if held for trading or management elected",
+              "FVOCI (Fair Value Through Other Comprehensive Income) - if management elected for equity investment",
+              "Significant influence investment (equity method) - if 10% stake conveys significant influence"
+            ],
+            "clarification_question": "Does the 10% stake in Ford provide BlackRock with significant influence (board representation, participation in policy-making, material transactions, etc.)? If not, how does management intend to classify this equity investment under IFRS 9?",
+            "why_entry_differs": "Equity method requires Investment in Associate account with ongoing equity pickup; FVTPL records at fair value with gains/losses in P&L; FVOCI records at fair value with gains/losses in OCI. Transaction costs are capitalized under equity method, expensed under FVTPL, and capitalized under FVOCI.",
+            "why_not_resolved": "10% ownership can trigger significant influence assessment under IAS 28, but this depends on actual control indicators not stated in the transaction. If no significant influence, IFRS 9 requires management's irrevocable election between FVTPL (default) and FVOCI for equity investments, which is not stated."
+          },
+          {
+            "aspect": "treatment of $100,000 transaction fee",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Capitalize as part of investment cost",
+              "Expense immediately as transaction cost"
+            ],
+            "clarification_question": "This depends on the classification above - see previous question.",
+            "why_entry_differs": "If equity method or FVOCI: capitalize the fee, increasing investment basis to $3,100,000. If FVTPL: expense the $100,000 immediately to professional fees or transaction costs.",
+            "why_not_resolved": "Treatment of transaction costs depends on the investment classification, which is unresolved. Under IAS 28 (equity method) and IFRS 9 FVOCI, costs are capitalized. Under IFRS 9 FVTPL, costs are expensed."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 508,
+      "output_tokens": 134,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1749,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.003906300000000001,
+      "raw_cost_usd": 0.007257,
+      "output": {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease; (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both are asset decreases, so we count 2 lines in slot d.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease; (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both are asset decreases, so we count 2 lines in slot d."
+    },
+    "debit_classifier": {
+      "input_tokens": 510,
+      "output_tokens": 148,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1772,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0041286000000000005,
+      "raw_cost_usd": 0.007536,
+      "output": {
+        "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction fee capitalized as part of investment cost = additional financial asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are capitalized as part of the initial cost of the investment. Both debits increase asset accounts.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction fee capitalized as part of investment cost = additional financial asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are capitalized as part of the initial cost of the investment. Both debits increase asset accounts."
+    },
+    "entry_builder": {
+      "input_tokens": 1408,
+      "output_tokens": 655,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4622,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0150132,
+      "raw_cost_usd": 0.023691,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity stake in Ford Motor Company common shares",
+        "rationale": "Cannot determine correct journal entry without knowing the investment classification. Under IFRS 9 and IAS 28, the accounting treatment fundamentally differs based on whether this investment provides significant influence and management's classification election. If equity method applies (IAS 28), the investment goes to Investment in Associate and the $100,000 fee is capitalized for total cost of $3,100,000. If FVTPL (IFRS 9 default), investment goes to Financial Assets at FVTPL and the fee is expensed immediately. If FVOCI (IFRS 9 irrevocable election), investment goes to Financial Assets at FVOCI and the fee is capitalized. These produce structurally different entries with different accounts and amounts.",
+        "lines": [],
+        "disambiguator_responses": [
+          {
+            "aspect": "accounting classification of Ford shares",
+            "action": "incomplete",
+            "reason": "The debit/credit structure genuinely differs: equity method uses Investment in Associate with capitalized costs ($3,100,000 total); FVTPL uses Financial Assets at FVTPL ($3,000,000) plus separate expense line ($100,000); FVOCI uses Financial Assets at FVOCI ($3,100,000 capitalized). Different accounts and amounts depending on facts not stated in transaction."
+          },
+          {
+            "aspect": "treatment of $100,000 transaction fee",
+            "action": "incomplete",
+            "reason": "Treatment depends entirely on the classification above. Capitalized under equity method and FVOCI (single debit line for $3,100,000), expensed under FVTPL (separate expense debit for $100,000). Cannot proceed without resolving classification."
+          }
+        ],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Does BlackRock's 10% stake in Ford provide significant influence (e.g., board representation, participation in policy-making decisions, material intercompany transactions, or exchange of managerial personnel)?",
+          "If there is no significant influence, has management made an irrevocable election to classify this equity investment at Fair Value Through Other Comprehensive Income (FVOCI), or will it be classified at Fair Value Through Profit or Loss (FVTPL, the default)?"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "Does BlackRock's 10% stake in Ford provide significant influence (e.g., board representation, participation in policy-making decisions, material intercompany transactions, or exchange of managerial personnel)?",
+    "If there is no significant influence, has management made an irrevocable election to classify this equity investment at Fair Value Through Other Comprehensive Income (FVOCI), or will it be classified at Fair Value Through Profit or Loss (FVTPL, the default)?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "accounting classification of Ford shares",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "FVTPL (Fair Value Through Profit or Loss) - if held for trading or management elected",
+              "FVOCI (Fair Value Through Other Comprehensive Income) - if management elected for equity investment",
+              "Significant influence investment (equity method) - if 10% stake conveys significant influence"
+            ],
+            "clarification_question": "Does the 10% stake in Ford provide BlackRock with significant influence (board representation, participation in policy-making, material transactions, etc.)? If not, how does management intend to classify this equity investment under IFRS 9?",
+            "why_entry_differs": "Equity method requires Investment in Associate account with ongoing equity pickup; FVTPL records at fair value with gains/losses in P&L; FVOCI records at fair value with gains/losses in OCI. Transaction costs are capitalized under equity method, expensed under FVTPL, and capitalized under FVOCI.",
+            "why_not_resolved": "10% ownership can trigger significant influence assessment under IAS 28, but this depends on actual control indicators not stated in the transaction. If no significant influence, IFRS 9 requires management's irrevocable election between FVTPL (default) and FVOCI for equity investments, which is not stated."
+          },
+          {
+            "aspect": "treatment of $100,000 transaction fee",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Capitalize as part of investment cost",
+              "Expense immediately as transaction cost"
+            ],
+            "clarification_question": "This depends on the classification above - see previous question.",
+            "why_entry_differs": "If equity method or FVOCI: capitalize the fee, increasing investment basis to $3,100,000. If FVTPL: expense the $100,000 immediately to professional fees or transaction costs.",
+            "why_not_resolved": "Treatment of transaction costs depends on the investment classification, which is unresolved. Under IAS 28 (equity method) and IFRS 9 FVOCI, costs are capitalized. Under IFRS 9 FVTPL, costs are expensed."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction fee capitalized as part of investment cost = additional financial asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are capitalized as part of the initial cost of the investment. Both debits increase asset accounts.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease; (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both are asset decreases, so we count 2 lines in slot d.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction fee capitalized as part of investment cost = additional financial asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are capitalized as part of the initial cost of the investment. Both debits increase asset accounts.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease; (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both are asset decreases, so we count 2 lines in slot d.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity stake in Ford Motor Company common shares",
+        "rationale": "Cannot determine correct journal entry without knowing the investment classification. Under IFRS 9 and IAS 28, the accounting treatment fundamentally differs based on whether this investment provides significant influence and management's classification election. If equity method applies (IAS 28), the investment goes to Investment in Associate and the $100,000 fee is capitalized for total cost of $3,100,000. If FVTPL (IFRS 9 default), investment goes to Financial Assets at FVTPL and the fee is expensed immediately. If FVOCI (IFRS 9 irrevocable election), investment goes to Financial Assets at FVOCI and the fee is capitalized. These produce structurally different entries with different accounts and amounts.",
+        "lines": [],
+        "disambiguator_responses": [
+          {
+            "aspect": "accounting classification of Ford shares",
+            "action": "incomplete",
+            "reason": "The debit/credit structure genuinely differs: equity method uses Investment in Associate with capitalized costs ($3,100,000 total); FVTPL uses Financial Assets at FVTPL ($3,000,000) plus separate expense line ($100,000); FVOCI uses Financial Assets at FVOCI ($3,100,000 capitalized). Different accounts and amounts depending on facts not stated in transaction."
+          },
+          {
+            "aspect": "treatment of $100,000 transaction fee",
+            "action": "incomplete",
+            "reason": "Treatment depends entirely on the classification above. Capitalized under equity method and FVOCI (single debit line for $3,100,000), expensed under FVTPL (separate expense debit for $100,000). Cannot proceed without resolving classification."
+          }
+        ],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Does BlackRock's 10% stake in Ford provide significant influence (e.g., board representation, participation in policy-making decisions, material intercompany transactions, or exchange of managerial personnel)?",
+          "If there is no significant influence, has management made an irrevocable election to classify this equity investment at Fair Value Through Other Comprehensive Income (FVOCI), or will it be classified at Fair Value Through Profit or Loss (FVTPL, the default)?"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 535,
+        "output_tokens": 575,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 134,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 510,
+        "output_tokens": 148,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1408,
+        "output_tokens": 655,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,397 @@
+{
+  "test_case_id": "int_26b_payroll_remittance",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    4,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-01-31",
+    "description": "Remittance of January statutory deductions to government agencies",
+    "rationale": "Mondelez is remitting previously withheld statutory deductions. These amounts were accrued as liabilities when payroll was processed. The remittance reduces the liability accounts (debit) and reduces cash (credit). Pension contributions include both employee and employer portions that were payable. Health insurance premiums, EI premiums, and income tax withholdings were all withheld from employees and owed to government agencies. This is a remittance transaction, not an expense recognition event.",
+    "lines": [
+      {
+        "account_name": "Pension Payable",
+        "type": "debit",
+        "amount": 4000.0
+      },
+      {
+        "account_name": "Health Insurance Payable",
+        "type": "debit",
+        "amount": 6500.0
+      },
+      {
+        "account_name": "EI Payable",
+        "type": "debit",
+        "amount": 2100.0
+      },
+      {
+        "account_name": "Income Tax Payable",
+        "type": "debit",
+        "amount": 1450.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 14050.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0313944,
+  "raw_cost_usd": 0.056013,
+  "total_latency_ms": 24886,
+  "total_input_tokens": 12421,
+  "total_output_tokens": 1250,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 532,
+      "output_tokens": 178,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1773,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004638300000000001,
+      "raw_cost_usd": 0.007989,
+      "output": {
+        "reason": "The transaction involves remitting statutory deductions that were previously withheld/accrued. When Mondelez pays these amounts to government agencies, cash is leaving the business (asset decrease = 1 line). The offsetting debits would reduce the liability accounts for each type of payable (pension payable, health insurance payable, EI payable, income tax payable), but on the CREDIT side we only see the single cash outflow. All four payments are combined into one cash disbursement, representing one asset decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves remitting statutory deductions that were previously withheld/accrued. When Mondelez pays these amounts to government agencies, cash is leaving the business (asset decrease = 1 line). The offsetting debits would reduce the liability accounts for each type of payable (pension payable, health insurance payable, EI payable, income tax payable), but on the CREDIT side we only see the single cash outflow. All four payments are combined into one cash disbursement, representing one asset decrease."
+    },
+    "debit_classifier": {
+      "input_tokens": 534,
+      "output_tokens": 181,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1796,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0046956,
+      "raw_cost_usd": 0.008103,
+      "output": {
+        "reason": "Mondelez is remitting statutory deductions that were previously withheld from employees and accrued as employer obligations. Each remittance clears a liability:\n1. Pension contributions payable decrease (liability decrease)\n2. Health insurance premiums payable decrease (liability decrease)\n3. Employment insurance premiums payable decrease (liability decrease)\n4. Income tax withholdings payable decrease (liability decrease)\n\nAll four represent distinct government obligations being settled, so we count 4 liability decrease lines on the debit side.",
+        "tuple": [
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      },
+      "reason": "Mondelez is remitting statutory deductions that were previously withheld from employees and accrued as employer obligations. Each remittance clears a liability:\n1. Pension contributions payable decrease (liability decrease)\n2. Health insurance premiums payable decrease (liability decrease)\n3. Employment insurance premiums payable decrease (liability decrease)\n4. Income tax withholdings payable decrease (liability decrease)\n\nAll four represent distinct government obligations being settled, so we count 4 liability decrease lines on the debit side."
+    },
+    "debit_corrector": {
+      "input_tokens": 702,
+      "output_tokens": 214,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2448,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058398,
+      "raw_cost_usd": 0.010554,
+      "output": {
+        "reason": "The transaction describes remitting statutory deductions that were previously withheld/accrued. These amounts (pension $4,000, health insurance $6,500, employment insurance $2,100, and income tax withholdings $1,450) were liabilities on Mondelez's books representing obligations to government agencies. When remitted in cash, the company is clearing four separate liability accounts, which means 4 liability decreases (debits). The credit side showing 1 asset decrease (cash) appears incorrect - it should show 1 asset decrease for the total cash payment, but the debit side correctly identifies 4 distinct liability accounts being cleared. The initial debit tuple is correct.",
+        "tuple": [
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes remitting statutory deductions that were previously withheld/accrued. These amounts (pension $4,000, health insurance $6,500, employment insurance $2,100, and income tax withholdings $1,450) were liabilities on Mondelez's books representing obligations to government agencies. When remitted in cash, the company is clearing four separate liability accounts, which means 4 liability decreases (debits). The credit side showing 1 asset decrease (cash) appears incorrect - it should show 1 asset decrease for the total cash payment, but the debit side correctly identifies 4 distinct liability accounts being cleared. The initial debit tuple is correct."
+    },
+    "credit_corrector": {
+      "input_tokens": 702,
+      "output_tokens": 262,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2456,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0065622,
+      "raw_cost_usd": 0.011298,
+      "output": {
+        "reason": "The transaction describes remitting (paying) statutory deductions that were previously withheld/accrued. When Mondelez remits these amounts to government agencies:\n\nDebit side: The company is clearing four separate liability accounts (pension payable, health insurance payable, EI payable, income tax withholdings payable) - hence the debit tuple shows (0,0,0,4,0,0) = 4 liability decreases.\n\nCredit side: The company is paying cash, which decreases the cash asset account - hence (0,0,0,1,0,0) = 1 asset decrease.\n\nThe initial credit tuple is correct. The payment reduces cash (asset decrease). The debit tuple correctly shows 4 liability decreases because there are 4 distinct payable accounts being cleared. The sides tell a consistent story: paying off multiple liabilities with one cash payment.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes remitting (paying) statutory deductions that were previously withheld/accrued. When Mondelez remits these amounts to government agencies:\n\nDebit side: The company is clearing four separate liability accounts (pension payable, health insurance payable, EI payable, income tax withholdings payable) - hence the debit tuple shows (0,0,0,4,0,0) = 4 liability decreases.\n\nCredit side: The company is paying cash, which decreases the cash asset account - hence (0,0,0,1,0,0) = 1 asset decrease.\n\nThe initial credit tuple is correct. The payment reduces cash (asset decrease). The debit tuple correctly shows 4 liability decreases because there are 4 distinct payable accounts being cleared. The sides tell a consistent story: paying off multiple liabilities with one cash payment."
+    },
+    "entry_builder": {
+      "input_tokens": 833,
+      "output_tokens": 415,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3948,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0096585,
+      "raw_cost_usd": 0.018069,
+      "output": {
+        "date": "2026-01-31",
+        "description": "Remittance of January statutory deductions to government agencies",
+        "rationale": "Mondelez is remitting previously withheld statutory deductions. These amounts were accrued as liabilities when payroll was processed. The remittance reduces the liability accounts (debit) and reduces cash (credit). Pension contributions include both employee and employer portions that were payable. Health insurance premiums, EI premiums, and income tax withholdings were all withheld from employees and owed to government agencies. This is a remittance transaction, not an expense recognition event.",
+        "lines": [
+          {
+            "account_name": "Pension Payable",
+            "type": "debit",
+            "amount": 4000.0
+          },
+          {
+            "account_name": "Health Insurance Payable",
+            "type": "debit",
+            "amount": 6500.0
+          },
+          {
+            "account_name": "EI Payable",
+            "type": "debit",
+            "amount": 2100.0
+          },
+          {
+            "account_name": "Income Tax Payable",
+            "type": "debit",
+            "amount": 1450.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 14050.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Mondelez is remitting statutory deductions that were previously withheld from employees and accrued as employer obligations. Each remittance clears a liability:\n1. Pension contributions payable decrease (liability decrease)\n2. Health insurance premiums payable decrease (liability decrease)\n3. Employment insurance premiums payable decrease (liability decrease)\n4. Income tax withholdings payable decrease (liability decrease)\n\nAll four represent distinct government obligations being settled, so we count 4 liability decrease lines on the debit side.",
+        "tuple": [
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction involves remitting statutory deductions that were previously withheld/accrued. When Mondelez pays these amounts to government agencies, cash is leaving the business (asset decrease = 1 line). The offsetting debits would reduce the liability accounts for each type of payable (pension payable, health insurance payable, EI payable, income tax payable), but on the CREDIT side we only see the single cash outflow. All four payments are combined into one cash disbursement, representing one asset decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes remitting statutory deductions that were previously withheld/accrued. These amounts (pension $4,000, health insurance $6,500, employment insurance $2,100, and income tax withholdings $1,450) were liabilities on Mondelez's books representing obligations to government agencies. When remitted in cash, the company is clearing four separate liability accounts, which means 4 liability decreases (debits). The credit side showing 1 asset decrease (cash) appears incorrect - it should show 1 asset decrease for the total cash payment, but the debit side correctly identifies 4 distinct liability accounts being cleared. The initial debit tuple is correct.",
+        "tuple": [
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes remitting (paying) statutory deductions that were previously withheld/accrued. When Mondelez remits these amounts to government agencies:\n\nDebit side: The company is clearing four separate liability accounts (pension payable, health insurance payable, EI payable, income tax withholdings payable) - hence the debit tuple shows (0,0,0,4,0,0) = 4 liability decreases.\n\nCredit side: The company is paying cash, which decreases the cash asset account - hence (0,0,0,1,0,0) = 1 asset decrease.\n\nThe initial credit tuple is correct. The payment reduces cash (asset decrease). The debit tuple correctly shows 4 liability decreases because there are 4 distinct payable accounts being cleared. The sides tell a consistent story: paying off multiple liabilities with one cash payment.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-01-31",
+        "description": "Remittance of January statutory deductions to government agencies",
+        "rationale": "Mondelez is remitting previously withheld statutory deductions. These amounts were accrued as liabilities when payroll was processed. The remittance reduces the liability accounts (debit) and reduces cash (credit). Pension contributions include both employee and employer portions that were payable. Health insurance premiums, EI premiums, and income tax withholdings were all withheld from employees and owed to government agencies. This is a remittance transaction, not an expense recognition event.",
+        "lines": [
+          {
+            "account_name": "Pension Payable",
+            "type": "debit",
+            "amount": 4000.0
+          },
+          {
+            "account_name": "Health Insurance Payable",
+            "type": "debit",
+            "amount": 6500.0
+          },
+          {
+            "account_name": "EI Payable",
+            "type": "debit",
+            "amount": 2100.0
+          },
+          {
+            "account_name": "Income Tax Payable",
+            "type": "debit",
+            "amount": 1450.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 14050.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 532,
+        "output_tokens": 178,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 534,
+        "output_tokens": 181,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 702,
+        "output_tokens": 214,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 702,
+        "output_tokens": 262,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 833,
+        "output_tokens": 415,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

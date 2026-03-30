@@ -1,0 +1,47 @@
+======================================================================
+Test Case: hard_16_rent_treatment
+Variant:   with_disambiguation
+Decision:  INCOMPLETE_INFORMATION
+======================================================================
+
+Final Tuples:
+  Debit:  [1, 0, 0, 0, 0, 0]  ✗
+  Credit: [0, 0, 0, 1, 0, 0]  ✗
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (1):
+  [UNRESOLVED] timing of rent expense recognition
+    Options: ['Recognize as prepaid rent asset and amortize monthly over 12 months', 'Recognize right-of-use asset and lease liability under IFRS 16']
+    Question: Does Atlas Van Lines apply a policy election to expense short-term leases (12 months or less) immediately, recognize prepaid rent, or recognize a right-of-use asset under IFRS 16?
+    Why not resolved: IFRS 16 permits a recognition exemption for leases of 12 months or less, but this is an entity policy election. The transaction states exactly 12 months, which is at the threshold. Without knowing the entity's accounting policy election, the correct treatment cannot be determined.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [1, 0, 0, 0, 0, 0]
+Reason: Prepaid rent for 12 months = asset increase. The $24,000 payment represents future economic benefits (rent for future periods), so it is recorded as a prepaid expense asset, not an immediate expense. Under IFRS, prepayments are recognized as assets and expensed over time as the benefit is consumed.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 0, 1, 0, 0]
+Reason: Atlas Van Lines paid $24,000 by cheque for 12 months of rent. The payment reduces the cash asset account. Since this is a prepayment for future rent (12 months), it represents an asset exchange: cash (asset) decreases and prepaid rent (asset) increases. On the credit side, we only record the cash leaving = asset decrease (1 line).
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Disambiguator Responses:
+  [INCOMPLETE] timing of rent expense recognition
+    The lease term is exactly 12 months, which is at the threshold for IFRS 16's short-term lease exemption. The correct journal entry structure differs fundamentally based on the entity's policy election: immediate expense (debit Rent Expense, credit Cash), prepaid rent (debit Prepaid Rent, credit Cash), or IFRS 16 full treatment (debit Right-of-Use Asset, credit Lease Liability and Cash). This is a policy election that cannot be determined from the transaction text or general accounting conventions.
+Rationale: The transaction involves a 12-month lease payment of $24,000. Under IFRS 16, entities may elect a recognition exemption for short-term leases (12 months or less). This lease is exactly at the 12-month threshold. The three possible treatments are: (1) immediate expense recognition, (2) prepaid rent asset amortized monthly, or (3) right-of-use asset and lease liability under full IFRS 16. Each treatment produces structurally different journal entries with different accounts and subsequent measurement. The classifier tuples suggest prepaid rent treatment (asset increase + asset decrease), but without knowing the entity's policy election for short-term leases, the correct entry cannot be determined. This is a policy choice that affects the accounting treatment, not determinable from the transaction text alone.
+Entry:
+  (no lines)
+Decision: INCOMPLETE_INFORMATION
+Clarification Questions: ['Does your company apply the IFRS 16 recognition exemption to expense short-term leases (12 months or less) immediately, or do you capitalize them as prepaid rent or right-of-use assets?']
+
+======================================================================
+Final Journal Entry:
+  {'date': '2026-03-22', 'description': 'Prepayment of 12 months office rent to Atlas Van Lines', 'rationale': "The transaction involves a 12-month lease payment of $24,000. Under IFRS 16, entities may elect a recognition exemption for short-term leases (12 months or less). This lease is exactly at the 12-month threshold. The three possible treatments are: (1) immediate expense recognition, (2) prepaid rent asset amortized monthly, or (3) right-of-use asset and lease liability under full IFRS 16. Each treatment produces structurally different journal entries with different accounts and subsequent measurement. The classifier tuples suggest prepaid rent treatment (asset increase + asset decrease), but without knowing the entity's policy election for short-term leases, the correct entry cannot be determined. This is a policy choice that affects the accounting treatment, not determinable from the transaction text alone.", 'lines': [], 'disambiguator_responses': [{'aspect': 'timing of rent expense recognition', 'action': 'incomplete', 'reason': "The lease term is exactly 12 months, which is at the threshold for IFRS 16's short-term lease exemption. The correct journal entry structure differs fundamentally based on the entity's policy election: immediate expense (debit Rent Expense, credit Cash), prepaid rent (debit Prepaid Rent, credit Cash), or IFRS 16 full treatment (debit Right-of-Use Asset, credit Lease Liability and Cash). This is a policy election that cannot be determined from the transaction text or general accounting conventions."}], 'decision': 'INCOMPLETE_INFORMATION', 'clarification_questions': ['Does your company apply the IFRS 16 recognition exemption to expense short-term leases (12 months or less) immediately, or do you capitalize them as prepaid rent or right-of-use assets?'], 'stuck_reason': None}
+======================================================================

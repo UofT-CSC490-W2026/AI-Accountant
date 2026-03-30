@@ -226,7 +226,13 @@ async def _run_one(app, tc, config_dict: dict, variant_name: str,
             t_cw = sum((x.get("input_token_details") or {}).get("cache_creation", 0) for x in callback.llm_calls)
 
             acc.record(tc.id, metrics, t_in, t_out, t_cr, t_cw)
-            statuses[tc.id] = "✅ done"
+
+            has_parse_error = any(
+                isinstance(out, dict) and out.get("_parse_error")
+                for key in ("output_debit_classifier", "output_credit_classifier")
+                for out in (final_state.get(key) or [])
+            )
+            statuses[tc.id] = "⚠️ parse fallback" if has_parse_error else "✅ done"
             return metrics
 
         except Exception as e:
@@ -252,15 +258,10 @@ async def run_variant_async(variant_name: str, test_cases: list,
                             pricing: dict,
                             total_runs: int = 1) -> list[list[TestCaseMetrics]]:
     """Run test cases, returns list of result lists (one per run)."""
-    if variant_name == "single_agent":
-        from variants.single_agent.graph import app
-    else:
-        from services.agent.graph.graph import app
+    from services.agent.graph.graph_v3 import app
 
     from variants.variants import VARIANTS
     config_dict = VARIANTS.get(variant_name)
-    if config_dict is None and variant_name != "single_agent":
-        raise ValueError(f"Unknown variant: {variant_name}")
 
     acc = RunAccumulator(total_runs)
     all_results = []

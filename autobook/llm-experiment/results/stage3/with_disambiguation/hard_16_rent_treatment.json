@@ -1,0 +1,334 @@
+{
+  "test_case_id": "hard_16_rent_treatment",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Prepayment of 12 months office rent to Atlas Van Lines",
+    "rationale": "The transaction involves a 12-month lease payment of $24,000. Under IFRS 16, entities may elect a recognition exemption for short-term leases (12 months or less). This lease is exactly at the 12-month threshold. The three possible treatments are: (1) immediate expense recognition, (2) prepaid rent asset amortized monthly, or (3) right-of-use asset and lease liability under full IFRS 16. Each treatment produces structurally different journal entries with different accounts and subsequent measurement. The classifier tuples suggest prepaid rent treatment (asset increase + asset decrease), but without knowing the entity's policy election for short-term leases, the correct entry cannot be determined. This is a policy choice that affects the accounting treatment, not determinable from the transaction text alone.",
+    "lines": [],
+    "disambiguator_responses": [
+      {
+        "aspect": "timing of rent expense recognition",
+        "action": "incomplete",
+        "reason": "The lease term is exactly 12 months, which is at the threshold for IFRS 16's short-term lease exemption. The correct journal entry structure differs fundamentally based on the entity's policy election: immediate expense (debit Rent Expense, credit Cash), prepaid rent (debit Prepaid Rent, credit Cash), or IFRS 16 full treatment (debit Right-of-Use Asset, credit Lease Liability and Cash). This is a policy election that cannot be determined from the transaction text or general accounting conventions."
+      }
+    ],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "Does your company apply the IFRS 16 recognition exemption to expense short-term leases (12 months or less) immediately, or do you capitalize them as prepaid rent or right-of-use assets?"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.027177600000000003,
+  "raw_cost_usd": 0.04908,
+  "total_latency_ms": 25655,
+  "total_input_tokens": 10750,
+  "total_output_tokens": 1122,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 525,
+      "output_tokens": 299,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2920,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0067785,
+      "raw_cost_usd": 0.013245,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "timing of rent expense recognition",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Recognize as prepaid rent asset and amortize monthly over 12 months",
+              "Recognize right-of-use asset and lease liability under IFRS 16"
+            ],
+            "clarification_question": "Does Atlas Van Lines apply a policy election to expense short-term leases (12 months or less) immediately, recognize prepaid rent, or recognize a right-of-use asset under IFRS 16?",
+            "why_entry_differs": "Prepaid rent creates a current asset amortized to rent expense monthly; IFRS 16 treatment creates a right-of-use asset and lease liability with depreciation and interest components; immediate expense recognition affects only expense and cash",
+            "why_not_resolved": "IFRS 16 permits a recognition exemption for leases of 12 months or less, but this is an entity policy election. The transaction states exactly 12 months, which is at the threshold. Without knowing the entity's accounting policy election, the correct treatment cannot be determined."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 500,
+      "output_tokens": 135,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1762,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0039036,
+      "raw_cost_usd": 0.007311,
+      "output": {
+        "reason": "Prepaid rent for 12 months = asset increase. The $24,000 payment represents future economic benefits (rent for future periods), so it is recorded as a prepaid expense asset, not an immediate expense. Under IFRS, prepayments are recognized as assets and expensed over time as the benefit is consumed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Prepaid rent for 12 months = asset increase. The $24,000 payment represents future economic benefits (rent for future periods), so it is recorded as a prepaid expense asset, not an immediate expense. Under IFRS, prepayments are recognized as assets and expensed over time as the benefit is consumed."
+    },
+    "credit_classifier": {
+      "input_tokens": 498,
+      "output_tokens": 149,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1739,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0041013,
+      "raw_cost_usd": 0.007452,
+      "output": {
+        "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent. The payment reduces the cash asset account. Since this is a prepayment for future rent (12 months), it represents an asset exchange: cash (asset) decreases and prepaid rent (asset) increases. On the credit side, we only record the cash leaving = asset decrease (1 line).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent. The payment reduces the cash asset account. Since this is a prepayment for future rent (12 months), it represents an asset exchange: cash (asset) decreases and prepaid rent (asset) increases. On the credit side, we only record the cash leaving = asset decrease (1 line)."
+    },
+    "entry_builder": {
+      "input_tokens": 1115,
+      "output_tokens": 539,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4329,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.012394200000000001,
+      "raw_cost_usd": 0.021072,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Prepayment of 12 months office rent to Atlas Van Lines",
+        "rationale": "The transaction involves a 12-month lease payment of $24,000. Under IFRS 16, entities may elect a recognition exemption for short-term leases (12 months or less). This lease is exactly at the 12-month threshold. The three possible treatments are: (1) immediate expense recognition, (2) prepaid rent asset amortized monthly, or (3) right-of-use asset and lease liability under full IFRS 16. Each treatment produces structurally different journal entries with different accounts and subsequent measurement. The classifier tuples suggest prepaid rent treatment (asset increase + asset decrease), but without knowing the entity's policy election for short-term leases, the correct entry cannot be determined. This is a policy choice that affects the accounting treatment, not determinable from the transaction text alone.",
+        "lines": [],
+        "disambiguator_responses": [
+          {
+            "aspect": "timing of rent expense recognition",
+            "action": "incomplete",
+            "reason": "The lease term is exactly 12 months, which is at the threshold for IFRS 16's short-term lease exemption. The correct journal entry structure differs fundamentally based on the entity's policy election: immediate expense (debit Rent Expense, credit Cash), prepaid rent (debit Prepaid Rent, credit Cash), or IFRS 16 full treatment (debit Right-of-Use Asset, credit Lease Liability and Cash). This is a policy election that cannot be determined from the transaction text or general accounting conventions."
+          }
+        ],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Does your company apply the IFRS 16 recognition exemption to expense short-term leases (12 months or less) immediately, or do you capitalize them as prepaid rent or right-of-use assets?"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "Does your company apply the IFRS 16 recognition exemption to expense short-term leases (12 months or less) immediately, or do you capitalize them as prepaid rent or right-of-use assets?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "timing of rent expense recognition",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Recognize as prepaid rent asset and amortize monthly over 12 months",
+              "Recognize right-of-use asset and lease liability under IFRS 16"
+            ],
+            "clarification_question": "Does Atlas Van Lines apply a policy election to expense short-term leases (12 months or less) immediately, recognize prepaid rent, or recognize a right-of-use asset under IFRS 16?",
+            "why_entry_differs": "Prepaid rent creates a current asset amortized to rent expense monthly; IFRS 16 treatment creates a right-of-use asset and lease liability with depreciation and interest components; immediate expense recognition affects only expense and cash",
+            "why_not_resolved": "IFRS 16 permits a recognition exemption for leases of 12 months or less, but this is an entity policy election. The transaction states exactly 12 months, which is at the threshold. Without knowing the entity's accounting policy election, the correct treatment cannot be determined."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Prepaid rent for 12 months = asset increase. The $24,000 payment represents future economic benefits (rent for future periods), so it is recorded as a prepaid expense asset, not an immediate expense. Under IFRS, prepayments are recognized as assets and expensed over time as the benefit is consumed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent. The payment reduces the cash asset account. Since this is a prepayment for future rent (12 months), it represents an asset exchange: cash (asset) decreases and prepaid rent (asset) increases. On the credit side, we only record the cash leaving = asset decrease (1 line).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Prepaid rent for 12 months = asset increase. The $24,000 payment represents future economic benefits (rent for future periods), so it is recorded as a prepaid expense asset, not an immediate expense. Under IFRS, prepayments are recognized as assets and expensed over time as the benefit is consumed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent. The payment reduces the cash asset account. Since this is a prepayment for future rent (12 months), it represents an asset exchange: cash (asset) decreases and prepaid rent (asset) increases. On the credit side, we only record the cash leaving = asset decrease (1 line).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Prepayment of 12 months office rent to Atlas Van Lines",
+        "rationale": "The transaction involves a 12-month lease payment of $24,000. Under IFRS 16, entities may elect a recognition exemption for short-term leases (12 months or less). This lease is exactly at the 12-month threshold. The three possible treatments are: (1) immediate expense recognition, (2) prepaid rent asset amortized monthly, or (3) right-of-use asset and lease liability under full IFRS 16. Each treatment produces structurally different journal entries with different accounts and subsequent measurement. The classifier tuples suggest prepaid rent treatment (asset increase + asset decrease), but without knowing the entity's policy election for short-term leases, the correct entry cannot be determined. This is a policy choice that affects the accounting treatment, not determinable from the transaction text alone.",
+        "lines": [],
+        "disambiguator_responses": [
+          {
+            "aspect": "timing of rent expense recognition",
+            "action": "incomplete",
+            "reason": "The lease term is exactly 12 months, which is at the threshold for IFRS 16's short-term lease exemption. The correct journal entry structure differs fundamentally based on the entity's policy election: immediate expense (debit Rent Expense, credit Cash), prepaid rent (debit Prepaid Rent, credit Cash), or IFRS 16 full treatment (debit Right-of-Use Asset, credit Lease Liability and Cash). This is a policy election that cannot be determined from the transaction text or general accounting conventions."
+          }
+        ],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "Does your company apply the IFRS 16 recognition exemption to expense short-term leases (12 months or less) immediately, or do you capitalize them as prepaid rent or right-of-use assets?"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 525,
+        "output_tokens": 299,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 500,
+        "output_tokens": 135,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 498,
+        "output_tokens": 149,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1115,
+        "output_tokens": 539,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

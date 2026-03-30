@@ -1,0 +1,573 @@
+{
+  "test_case_id": "hard_02_investment_classification",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "BlackRock acquired equity securities (10% of Ford's common shares) for $3,000,000 with a $100,000 transaction fee. Under IFRS 9, transaction costs directly attributable to the acquisition of a financial asset measured at fair value through other comprehensive income or at amortized cost are capitalized as part of the initial cost. Since this is an equity investment in common shares (10% stake suggests significant influence may not apply, so likely FVOCI or FVPL), and transaction costs for FVPL are expensed while for FVOCI they are capitalized. Given the 10% stake and no indication of trading intent, the most appropriate treatment is to capitalize the transaction costs into the investment cost, totaling $3,100,000. Cash is reduced by the total amount paid.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Investment in Ford Common Shares",
+        "amount": 3100000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 3100000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.053208,
+  "raw_cost_usd": 0.080289,
+  "total_latency_ms": 40364,
+  "total_input_tokens": 12413,
+  "total_output_tokens": 2870,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 535,
+      "output_tokens": 518,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2882,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0100791,
+      "raw_cost_usd": 0.016416,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "treatment of transaction fee",
+            "resolution": "Transaction costs directly attributable to acquisition of financial assets are capitalized as part of the investment cost under IFRS 9, unless the asset is measured at fair value through profit or loss (FVTPL). Since the accounting treatment depends on management's classification election, this is a factual ambiguity that must be flagged."
+          },
+          {
+            "aspect": "payment method for shares and fee",
+            "resolution": "Both paid by cheque - credit to cash/bank account. Payment method does not change the entry structure."
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "investment classification and measurement basis",
+            "options": [
+              "Fair value through profit or loss (FVTPL) - transaction fee expensed immediately",
+              "Fair value through other comprehensive income (FVOCI) - transaction fee capitalized",
+              "Equity method (if significant influence exists) - transaction fee capitalized"
+            ],
+            "clarification_question": "How does BlackRock intend to classify this investment in Ford shares: as a trading investment (FVTPL), a strategic investment (FVOCI), or does the 10% stake provide significant influence requiring equity method accounting?",
+            "why_entry_differs": "If FVTPL: Investment recorded at $3,000,000 and $100,000 fee expensed. If FVOCI or equity method: Investment recorded at $3,100,000 with fee capitalized. The accounts debited and amounts differ materially.",
+            "why_not_resolved": "IFRS 9 requires management to elect the classification based on business model and contractual cash flow characteristics. A 10% stake could be passive (FVTPL or FVOCI) or provide significant influence (equity method) depending on board representation, participation in policy-making, or other factors not stated in the transaction. No convention provides a default for 10% ownership."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 508,
+      "output_tokens": 411,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2024,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081438,
+      "raw_cost_usd": 0.012237,
+      "output": {
+        "liability_increase_reason": "No liabilities are created or increased in this transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase; this is an asset acquisition by the investor, not a capital contribution.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned; this is an investment transaction, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash/bank account decreases by the total payment of $3,100,000 ($3,000,000 for shares + $100,000 transaction fee). Under IFRS, transaction costs directly attributable to the acquisition of a financial asset are capitalized to the investment cost, so both amounts reduce cash in a single credit line.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner drawings are reversed in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed. The transaction fee is capitalized to the investment cost under IFRS, not expensed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 510,
+      "output_tokens": 401,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2056,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0080088,
+      "raw_cost_usd": 0.012183,
+      "output": {
+        "asset_increase_reason": "Two distinct asset increases: (1) Investment in Ford shares (equity investment asset) for $3,000,000, and (2) Transaction costs of $100,000 which under IFRS are capitalized to the cost of the investment, creating a separate debit line for the fee component that increases the investment asset.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends declared in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Transaction fees are capitalized to the investment cost under IFRS, not expensed. No other expenses incurred.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased; this is an investment transaction, not a capital reduction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by this investment acquisition.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 830,
+      "output_tokens": 1540,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5451,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.026976299999999998,
+      "raw_cost_usd": 0.039453,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear. BlackRock is acquiring equity securities (10% of Ford's common shares) for $3,000,000 and incurring a transaction fee of $100,000. Under IFRS 9, transaction costs directly attributable to the acquisition of a financial asset are capitalized as part of the initial cost of the investment. The total investment cost is $3,100,000. No tax is mentioned, so no tax lines are needed. The payment method (cheque) indicates cash outflow. All business facts needed to construct the entry are present.",
+        "debit_asset_increase": {
+          "reason": "Accept. Two asset increases are correct: (1) Investment in Ford shares at cost including transaction fees ($3,100,000), and (2) none - actually this should be ONE line for the investment. Override needed - the transaction fee should be capitalized into the investment cost per IFRS 9, not recorded separately.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Investment in Ford Common Shares"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense. Transaction costs on financial asset acquisitions are capitalized per IFRS 9, not expensed.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue adjustment in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability being created in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. One asset decrease for cash paid by cheque totaling $3,100,000 ($3,000,000 purchase price + $100,000 transaction fee).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "BlackRock acquired equity securities (10% of Ford's common shares) for $3,000,000 with a $100,000 transaction fee. Under IFRS 9, transaction costs directly attributable to the acquisition of a financial asset measured at fair value through other comprehensive income or at amortized cost are capitalized as part of the initial cost. Since this is an equity investment in common shares (10% stake suggests significant influence may not apply, so likely FVOCI or FVPL), and transaction costs for FVPL are expensed while for FVOCI they are capitalized. Given the 10% stake and no indication of trading intent, the most appropriate treatment is to capitalize the transaction costs into the investment cost, totaling $3,100,000. Cash is reduced by the total amount paid.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Investment in Ford Common Shares",
+              "amount": 3100000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 3100000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is complete and unambiguous. BlackRock is acquiring equity securities with a clear purchase price and transaction fee. Under IFRS 9, the appropriate treatment depends on the classification of the financial asset. For equity investments not held for trading, transaction costs are typically capitalized (if designated at FVOCI) or expensed (if at FVPL). Given the 10% stake and absence of trading intent indicators, the most reasonable interpretation is that this is a strategic investment where transaction costs should be capitalized. The entry debits Investment in Ford Common Shares for $3,100,000 (purchase price + transaction costs) and credits Cash for the same amount. Total debits equal total credits. No tax is mentioned, so no tax lines are added. The entry is complete and complies with IFRS standards.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "treatment of transaction fee",
+            "resolution": "Transaction costs directly attributable to acquisition of financial assets are capitalized as part of the investment cost under IFRS 9, unless the asset is measured at fair value through profit or loss (FVTPL). Since the accounting treatment depends on management's classification election, this is a factual ambiguity that must be flagged."
+          },
+          {
+            "aspect": "payment method for shares and fee",
+            "resolution": "Both paid by cheque - credit to cash/bank account. Payment method does not change the entry structure."
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "investment classification and measurement basis",
+            "options": [
+              "Fair value through profit or loss (FVTPL) - transaction fee expensed immediately",
+              "Fair value through other comprehensive income (FVOCI) - transaction fee capitalized",
+              "Equity method (if significant influence exists) - transaction fee capitalized"
+            ],
+            "clarification_question": "How does BlackRock intend to classify this investment in Ford shares: as a trading investment (FVTPL), a strategic investment (FVOCI), or does the 10% stake provide significant influence requiring equity method accounting?",
+            "why_entry_differs": "If FVTPL: Investment recorded at $3,000,000 and $100,000 fee expensed. If FVOCI or equity method: Investment recorded at $3,100,000 with fee capitalized. The accounts debited and amounts differ materially.",
+            "why_not_resolved": "IFRS 9 requires management to elect the classification based on business model and contractual cash flow characteristics. A 10% stake could be passive (FVTPL or FVOCI) or provide significant influence (equity method) depending on board representation, participation in policy-making, or other factors not stated in the transaction. No convention provides a default for 10% ownership."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Two distinct asset increases: (1) Investment in Ford shares (equity investment asset) for $3,000,000, and (2) Transaction costs of $100,000 which under IFRS are capitalized to the cost of the investment, creating a separate debit line for the fee component that increases the investment asset.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends declared in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Transaction fees are capitalized to the investment cost under IFRS, not expensed. No other expenses incurred.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased; this is an investment transaction, not a capital reduction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by this investment acquisition.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased in this transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase; this is an asset acquisition by the investor, not a capital contribution.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned; this is an investment transaction, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash/bank account decreases by the total payment of $3,100,000 ($3,000,000 for shares + $100,000 transaction fee). Under IFRS, transaction costs directly attributable to the acquisition of a financial asset are capitalized to the investment cost, so both amounts reduce cash in a single credit line.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner drawings are reversed in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed. The transaction fee is capitalized to the investment cost under IFRS, not expensed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Two distinct asset increases: (1) Investment in Ford shares (equity investment asset) for $3,000,000, and (2) Transaction costs of $100,000 which under IFRS are capitalized to the cost of the investment, creating a separate debit line for the fee component that increases the investment asset.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends declared in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Transaction fees are capitalized to the investment cost under IFRS, not expensed. No other expenses incurred.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased; this is an investment transaction, not a capital reduction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by this investment acquisition.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased in this transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase; this is an asset acquisition by the investor, not a capital contribution.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned; this is an investment transaction, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash/bank account decreases by the total payment of $3,100,000 ($3,000,000 for shares + $100,000 transaction fee). Under IFRS, transaction costs directly attributable to the acquisition of a financial asset are capitalized to the investment cost, so both amounts reduce cash in a single credit line.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner drawings are reversed in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed. The transaction fee is capitalized to the investment cost under IFRS, not expensed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear. BlackRock is acquiring equity securities (10% of Ford's common shares) for $3,000,000 and incurring a transaction fee of $100,000. Under IFRS 9, transaction costs directly attributable to the acquisition of a financial asset are capitalized as part of the initial cost of the investment. The total investment cost is $3,100,000. No tax is mentioned, so no tax lines are needed. The payment method (cheque) indicates cash outflow. All business facts needed to construct the entry are present.",
+        "debit_asset_increase": {
+          "reason": "Accept. Two asset increases are correct: (1) Investment in Ford shares at cost including transaction fees ($3,100,000), and (2) none - actually this should be ONE line for the investment. Override needed - the transaction fee should be capitalized into the investment cost per IFRS 9, not recorded separately.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Investment in Ford Common Shares"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense. Transaction costs on financial asset acquisitions are capitalized per IFRS 9, not expensed.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue adjustment in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability being created in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. One asset decrease for cash paid by cheque totaling $3,100,000 ($3,000,000 purchase price + $100,000 transaction fee).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "BlackRock acquired equity securities (10% of Ford's common shares) for $3,000,000 with a $100,000 transaction fee. Under IFRS 9, transaction costs directly attributable to the acquisition of a financial asset measured at fair value through other comprehensive income or at amortized cost are capitalized as part of the initial cost. Since this is an equity investment in common shares (10% stake suggests significant influence may not apply, so likely FVOCI or FVPL), and transaction costs for FVPL are expensed while for FVOCI they are capitalized. Given the 10% stake and no indication of trading intent, the most appropriate treatment is to capitalize the transaction costs into the investment cost, totaling $3,100,000. Cash is reduced by the total amount paid.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Investment in Ford Common Shares",
+              "amount": 3100000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 3100000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is complete and unambiguous. BlackRock is acquiring equity securities with a clear purchase price and transaction fee. Under IFRS 9, the appropriate treatment depends on the classification of the financial asset. For equity investments not held for trading, transaction costs are typically capitalized (if designated at FVOCI) or expensed (if at FVPL). Given the 10% stake and absence of trading intent indicators, the most reasonable interpretation is that this is a strategic investment where transaction costs should be capitalized. The entry debits Investment in Ford Common Shares for $3,100,000 (purchase price + transaction costs) and credits Cash for the same amount. Total debits equal total credits. No tax is mentioned, so no tax lines are added. The entry is complete and complies with IFRS standards.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 535,
+        "output_tokens": 518,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 411,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 510,
+        "output_tokens": 401,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 830,
+        "output_tokens": 1540,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,429 @@
+{
+  "test_case_id": "int_hard_02b_investment_fvoci",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    2,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Acquisition of 10% equity interest in Ford common shares, FVOCI election",
+    "rationale": "Under IFRS 9, management has elected the FVOCI option for this strategic equity investment. The $3,000,000 purchase price and $100,000 transaction fee are both capitalized to the investment account, as transaction costs directly attributable to the acquisition of a financial asset measured at FVOCI are included in the initial measurement. The debit tuple (1,0,1,0,0,0) suggests one asset increase and one expense increase, but this is incorrect under IFRS 9 \u2014 transaction costs for FVOCI investments must be capitalized, not expensed. Therefore, I am overriding to record both amounts as a single asset increase. Two credits to Cash (or Bank) represent the two separate payments totaling $3,100,000.",
+    "lines": [
+      {
+        "account_name": "Investment in Equity Securities - FVOCI",
+        "type": "debit",
+        "amount": 3100000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 3000000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 100000.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0463722,
+  "raw_cost_usd": 0.083265,
+  "total_latency_ms": 34065,
+  "total_input_tokens": 19675,
+  "total_output_tokens": 1616,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 558,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2953,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0029175,
+      "raw_cost_usd": 0.009384,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 533,
+      "output_tokens": 175,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1795,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0046026,
+      "raw_cost_usd": 0.00801,
+      "output": {
+        "reason": "Under IFRS 9, the equity investment in Ford shares ($3,000,000) and the directly attributable transaction costs ($100,000) are both capitalized as part of the initial cost of the financial asset measured at FVOCI. This represents a single asset increase (Investment in equity securities at FVOCI) totaling $3,100,000. The transaction fee is not expensed but added to the carrying amount of the investment at initial recognition. Therefore: 1 line for asset increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IFRS 9, the equity investment in Ford shares ($3,000,000) and the directly attributable transaction costs ($100,000) are both capitalized as part of the initial cost of the financial asset measured at FVOCI. This represents a single asset increase (Investment in equity securities at FVOCI) totaling $3,100,000. The transaction fee is not expensed but added to the carrying amount of the investment at initial recognition. Therefore: 1 line for asset increase."
+    },
+    "credit_classifier": {
+      "input_tokens": 531,
+      "output_tokens": 168,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1772,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0044853,
+      "raw_cost_usd": 0.007836,
+      "output": {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share purchase = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Under IFRS 9, transaction costs for FVOCI equity investments are capitalized as part of the initial cost of the investment, but the credit side still reflects two separate cash outflows. Total: 2 asset decreases.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share purchase = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Under IFRS 9, transaction costs for FVOCI equity investments are capitalized as part of the initial cost of the investment, but the credit side still reflects two separate cash outflows. Total: 2 asset decreases."
+    },
+    "debit_corrector": {
+      "input_tokens": 701,
+      "output_tokens": 295,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2447,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0070518,
+      "raw_cost_usd": 0.011766,
+      "output": {
+        "reason": "The transaction involves two distinct economic events: (1) acquisition of a financial asset (equity investment) for $3,000,000, and (2) payment of a transaction fee of $100,000. Under IFRS 9, transaction costs directly attributable to the acquisition of a financial asset measured at FVOCI are capitalized as part of the initial cost of the investment. However, the transaction describes these as two separate line items (the investment acquisition and a separate transaction fee payment by cheque), suggesting they should be recorded as distinct components. The $3,000,000 investment is an asset increase (the FVOCI equity investment). The $100,000 transaction fee, when paid separately and described as such, is typically an expense increase (professional/transaction fees). The credit tuple showing 2 asset decreases (likely cash for both payments) is consistent with this interpretation. Corrected from (1,0,0,0,0,0) to (1,0,1,0,0,0) to reflect both the asset increase and the expense increase.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves two distinct economic events: (1) acquisition of a financial asset (equity investment) for $3,000,000, and (2) payment of a transaction fee of $100,000. Under IFRS 9, transaction costs directly attributable to the acquisition of a financial asset measured at FVOCI are capitalized as part of the initial cost of the investment. However, the transaction describes these as two separate line items (the investment acquisition and a separate transaction fee payment by cheque), suggesting they should be recorded as distinct components. The $3,000,000 investment is an asset increase (the FVOCI equity investment). The $100,000 transaction fee, when paid separately and described as such, is typically an expense increase (professional/transaction fees). The credit tuple showing 2 asset decreases (likely cash for both payments) is consistent with this interpretation. Corrected from (1,0,0,0,0,0) to (1,0,1,0,0,0) to reflect both the asset increase and the expense increase."
+    },
+    "credit_corrector": {
+      "input_tokens": 701,
+      "output_tokens": 333,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2455,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076242,
+      "raw_cost_usd": 0.01236,
+      "output": {
+        "reason": "The initial credit tuple is correct. BlackRock is acquiring an equity investment and paying for it, which involves two asset decreases: (1) cash paid for the shares ($3,000,000) and (2) cash paid for the transaction fee ($100,000). Both payments reduce cash (asset decrease). The credit side should show 2 asset decrease lines.\n\nThe debit tuple shows only 1 asset increase, which appears incomplete. Under IFRS 9, when acquiring a financial asset at FVOCI, the investment itself is recorded at cost including directly attributable transaction costs. The proper debit side should show: (1) Investment in equity securities increase (asset) for $3,100,000 total, and potentially (2) a separate line if transaction costs are tracked separately before capitalization. However, the debit tuple may be treating the entire acquisition cost as a single asset increase line (the investment account), which would be acceptable if transaction costs are capitalized into the investment cost as required by IFRS 9 for FVOCI equity investments.\n\nThe credit side correctly reflects 2 asset decreases (two separate cash payments), which is the appropriate classification regardless of how the debit side consolidates the investment account. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. BlackRock is acquiring an equity investment and paying for it, which involves two asset decreases: (1) cash paid for the shares ($3,000,000) and (2) cash paid for the transaction fee ($100,000). Both payments reduce cash (asset decrease). The credit side should show 2 asset decrease lines.\n\nThe debit tuple shows only 1 asset increase, which appears incomplete. Under IFRS 9, when acquiring a financial asset at FVOCI, the investment itself is recorded at cost including directly attributable transaction costs. The proper debit side should show: (1) Investment in equity securities increase (asset) for $3,100,000 total, and potentially (2) a separate line if transaction costs are tracked separately before capitalization. However, the debit tuple may be treating the entire acquisition cost as a single asset increase line (the investment account), which would be acceptable if transaction costs are capitalized into the investment cost as required by IFRS 9 for FVOCI equity investments.\n\nThe credit side correctly reflects 2 asset decreases (two separate cash payments), which is the appropriate classification regardless of how the debit side consolidates the investment account. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 790,
+      "output_tokens": 391,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4004,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.009199200000000001,
+      "raw_cost_usd": 0.017877,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity interest in Ford common shares, FVOCI election",
+        "rationale": "Under IFRS 9, management has elected the FVOCI option for this strategic equity investment. The $3,000,000 purchase price and $100,000 transaction fee are both capitalized to the investment account, as transaction costs directly attributable to the acquisition of a financial asset measured at FVOCI are included in the initial measurement. The debit tuple (1,0,1,0,0,0) suggests one asset increase and one expense increase, but this is incorrect under IFRS 9 \u2014 transaction costs for FVOCI investments must be capitalized, not expensed. Therefore, I am overriding to record both amounts as a single asset increase. Two credits to Cash (or Bank) represent the two separate payments totaling $3,100,000.",
+        "lines": [
+          {
+            "account_name": "Investment in Equity Securities - FVOCI",
+            "type": "debit",
+            "amount": 3100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2197,
+      "output_tokens": 219,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4249,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0104916,
+      "raw_cost_usd": 0.016032,
+      "output": {
+        "reason": "Entry correctly applies IFRS 9 treatment for FVOCI equity investments. Under IFRS 9.5.1.1 and B5.4.8, transaction costs directly attributable to acquisition of financial assets at FVOCI must be capitalized to the investment account. The entry properly capitalizes both the $3,000,000 purchase price and $100,000 transaction fee for total investment of $3,100,000. Balance verified: debit $3,100,000 = credits $3,100,000. Two separate cash credits appropriately reflect the two distinct payments. No tax applies to equity investment acquisitions. Accounts and amounts match transaction text exactly.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly applies IFRS 9 treatment for FVOCI equity investments. Under IFRS 9.5.1.1 and B5.4.8, transaction costs directly attributable to acquisition of financial assets at FVOCI must be capitalized to the investment account. The entry properly capitalizes both the $3,000,000 purchase price and $100,000 transaction fee for total investment of $3,100,000. Balance verified: debit $3,100,000 = credits $3,100,000. Two separate cash credits appropriately reflect the two distinct payments. No tax applies to equity investment acquisitions. Accounts and amounts match transaction text exactly."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Under IFRS 9, the equity investment in Ford shares ($3,000,000) and the directly attributable transaction costs ($100,000) are both capitalized as part of the initial cost of the financial asset measured at FVOCI. This represents a single asset increase (Investment in equity securities at FVOCI) totaling $3,100,000. The transaction fee is not expensed but added to the carrying amount of the investment at initial recognition. Therefore: 1 line for asset increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share purchase = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Under IFRS 9, transaction costs for FVOCI equity investments are capitalized as part of the initial cost of the investment, but the credit side still reflects two separate cash outflows. Total: 2 asset decreases.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves two distinct economic events: (1) acquisition of a financial asset (equity investment) for $3,000,000, and (2) payment of a transaction fee of $100,000. Under IFRS 9, transaction costs directly attributable to the acquisition of a financial asset measured at FVOCI are capitalized as part of the initial cost of the investment. However, the transaction describes these as two separate line items (the investment acquisition and a separate transaction fee payment by cheque), suggesting they should be recorded as distinct components. The $3,000,000 investment is an asset increase (the FVOCI equity investment). The $100,000 transaction fee, when paid separately and described as such, is typically an expense increase (professional/transaction fees). The credit tuple showing 2 asset decreases (likely cash for both payments) is consistent with this interpretation. Corrected from (1,0,0,0,0,0) to (1,0,1,0,0,0) to reflect both the asset increase and the expense increase.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. BlackRock is acquiring an equity investment and paying for it, which involves two asset decreases: (1) cash paid for the shares ($3,000,000) and (2) cash paid for the transaction fee ($100,000). Both payments reduce cash (asset decrease). The credit side should show 2 asset decrease lines.\n\nThe debit tuple shows only 1 asset increase, which appears incomplete. Under IFRS 9, when acquiring a financial asset at FVOCI, the investment itself is recorded at cost including directly attributable transaction costs. The proper debit side should show: (1) Investment in equity securities increase (asset) for $3,100,000 total, and potentially (2) a separate line if transaction costs are tracked separately before capitalization. However, the debit tuple may be treating the entire acquisition cost as a single asset increase line (the investment account), which would be acceptable if transaction costs are capitalized into the investment cost as required by IFRS 9 for FVOCI equity investments.\n\nThe credit side correctly reflects 2 asset decreases (two separate cash payments), which is the appropriate classification regardless of how the debit side consolidates the investment account. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity interest in Ford common shares, FVOCI election",
+        "rationale": "Under IFRS 9, management has elected the FVOCI option for this strategic equity investment. The $3,000,000 purchase price and $100,000 transaction fee are both capitalized to the investment account, as transaction costs directly attributable to the acquisition of a financial asset measured at FVOCI are included in the initial measurement. The debit tuple (1,0,1,0,0,0) suggests one asset increase and one expense increase, but this is incorrect under IFRS 9 \u2014 transaction costs for FVOCI investments must be capitalized, not expensed. Therefore, I am overriding to record both amounts as a single asset increase. Two credits to Cash (or Bank) represent the two separate payments totaling $3,100,000.",
+        "lines": [
+          {
+            "account_name": "Investment in Equity Securities - FVOCI",
+            "type": "debit",
+            "amount": 3100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry correctly applies IFRS 9 treatment for FVOCI equity investments. Under IFRS 9.5.1.1 and B5.4.8, transaction costs directly attributable to acquisition of financial assets at FVOCI must be capitalized to the investment account. The entry properly capitalizes both the $3,000,000 purchase price and $100,000 transaction fee for total investment of $3,100,000. Balance verified: debit $3,100,000 = credits $3,100,000. Two separate cash credits appropriately reflect the two distinct payments. No tax applies to equity investment acquisitions. Accounts and amounts match transaction text exactly.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 558,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 533,
+        "output_tokens": 175,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 531,
+        "output_tokens": 168,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 701,
+        "output_tokens": 295,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 701,
+        "output_tokens": 333,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 790,
+        "output_tokens": 391,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2197,
+        "output_tokens": 219,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

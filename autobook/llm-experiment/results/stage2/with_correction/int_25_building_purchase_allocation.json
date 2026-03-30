@@ -1,0 +1,382 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of land and building for warehouse, partial payment with deferred balance",
+    "rationale": "Under IFRS, land and building are acquired together for $9,000,000 and must be allocated based on their relative fair values ($8M land, $4M building = 2:1 ratio). Total FV = $12M, so land = $6M (8/12 \u00d7 $9M) and building = $3M (4/12 \u00d7 $9M). Building is subject to 10% sales tax ($300K), making total consideration $9.3M. Half the purchase price ($4.5M) is deferred as a liability. The balance paid is $4.8M ($4.5M base + $300K tax). Land is non-depreciable and recorded separately from the depreciable building asset. Sales tax on building is capitalized as part of building cost per IFRS (not recoverable input tax in this context).",
+    "lines": [
+      {
+        "account_name": "Land",
+        "type": "debit",
+        "amount": 6000000.0
+      },
+      {
+        "account_name": "Building",
+        "type": "debit",
+        "amount": 3300000.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 4500000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 4800000.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0392694,
+  "raw_cost_usd": 0.063888,
+  "total_latency_ms": 27462,
+  "total_input_tokens": 12626,
+  "total_output_tokens": 1734,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 575,
+      "output_tokens": 214,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1837,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005313600000000001,
+      "raw_cost_usd": 0.008721,
+      "output": {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. The sales tax on the building is capitalized to the building cost under IFRS. The payment method (partial cash, partial payable) affects only the credit side, not the debit classification.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. The sales tax on the building is capitalized to the building cost under IFRS. The payment method (partial cash, partial payable) affects only the credit side, not the debit classification."
+    },
+    "credit_classifier": {
+      "input_tokens": 573,
+      "output_tokens": 289,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1814,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0064263,
+      "raw_cost_usd": 0.009777,
+      "output": {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)"
+    },
+    "credit_corrector": {
+      "input_tokens": 743,
+      "output_tokens": 413,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2497,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0089502,
+      "raw_cost_usd": 0.013686,
+      "output": {
+        "reason": "The transaction involves purchasing land and building for $9,000,000 plus 10% sales tax on the building portion. \n\nBreaking down the economics:\n- Land fair value: $8,000,000\n- Building fair value: $4,000,000\n- Total fair value: $12,000,000\n- Purchase price allocated proportionally: Land gets $6,000,000 (8/12 \u00d7 $9M), Building gets $3,000,000 (4/12 \u00d7 $9M)\n- Sales tax on building: $300,000 (10% \u00d7 $3,000,000)\n- Total payment: $9,000,000 + $300,000 = $9,300,000\n\nPayment structure:\n- 50% of purchase price ($4,500,000) is deferred \u2192 liability increase\n- Balance of purchase price ($4,500,000) + sales tax ($300,000) = $4,800,000 paid by cheque \u2192 asset decrease (cash)\n\nThe initial credit tuple showed (2,0,0,1,0,0) = 2 liability increases + 1 asset decrease. However, there is only ONE liability being created (the deferred payment obligation for $4,500,000), not two separate liabilities. The sales tax is paid immediately by cheque, so it doesn't create a liability.\n\nCorrected to (1,0,0,1,0,0): 1 liability increase (deferred payment) + 1 asset decrease (cash payment including sales tax).",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing land and building for $9,000,000 plus 10% sales tax on the building portion. \n\nBreaking down the economics:\n- Land fair value: $8,000,000\n- Building fair value: $4,000,000\n- Total fair value: $12,000,000\n- Purchase price allocated proportionally: Land gets $6,000,000 (8/12 \u00d7 $9M), Building gets $3,000,000 (4/12 \u00d7 $9M)\n- Sales tax on building: $300,000 (10% \u00d7 $3,000,000)\n- Total payment: $9,000,000 + $300,000 = $9,300,000\n\nPayment structure:\n- 50% of purchase price ($4,500,000) is deferred \u2192 liability increase\n- Balance of purchase price ($4,500,000) + sales tax ($300,000) = $4,800,000 paid by cheque \u2192 asset decrease (cash)\n\nThe initial credit tuple showed (2,0,0,1,0,0) = 2 liability increases + 1 asset decrease. However, there is only ONE liability being created (the deferred payment obligation for $4,500,000), not two separate liabilities. The sales tax is paid immediately by cheque, so it doesn't create a liability.\n\nCorrected to (1,0,0,1,0,0): 1 liability increase (deferred payment) + 1 asset decrease (cash payment including sales tax)."
+    },
+    "debit_corrector": {
+      "input_tokens": 743,
+      "output_tokens": 360,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2489,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081528,
+      "raw_cost_usd": 0.012867,
+      "output": {
+        "reason": "The transaction involves three distinct economic events on the debit side:\n\n1. Land acquisition ($6,000,000 allocated based on fair value ratio 8M/12M) - Asset increase\n2. Building acquisition ($3,000,000 allocated based on fair value ratio 4M/12M) - Asset increase  \n3. Sales tax on building ($300,000 = 10% \u00d7 $3,000,000) - Expense increase\n\nUnder IFRS, sales tax on property acquisitions is typically not capitalizable when the entity can recover it or when it represents a period cost. The 10% sales tax is charged only on the building component and is paid immediately by cheque along with 50% of the purchase price.\n\nThe initial debit tuple (2,0,0,0,0,0) correctly identifies two asset increases (land and building) but misses the sales tax expense component. The credit tuple (2,0,0,1,0,0) showing 2 liability increases, 0 equity/revenue, and 1 asset decrease is consistent with: accounts payable for deferred payment, sales tax payable (or direct expense), and cash payment.\n\nCorrected to (2,0,1,0,0,0): two asset increases (land and building) plus one expense increase (sales tax on building).",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves three distinct economic events on the debit side:\n\n1. Land acquisition ($6,000,000 allocated based on fair value ratio 8M/12M) - Asset increase\n2. Building acquisition ($3,000,000 allocated based on fair value ratio 4M/12M) - Asset increase  \n3. Sales tax on building ($300,000 = 10% \u00d7 $3,000,000) - Expense increase\n\nUnder IFRS, sales tax on property acquisitions is typically not capitalizable when the entity can recover it or when it represents a period cost. The 10% sales tax is charged only on the building component and is paid immediately by cheque along with 50% of the purchase price.\n\nThe initial debit tuple (2,0,0,0,0,0) correctly identifies two asset increases (land and building) but misses the sales tax expense component. The credit tuple (2,0,0,1,0,0) showing 2 liability increases, 0 equity/revenue, and 1 asset decrease is consistent with: accounts payable for deferred payment, sales tax payable (or direct expense), and cash payment.\n\nCorrected to (2,0,1,0,0,0): two asset increases (land and building) plus one expense increase (sales tax on building)."
+    },
+    "entry_builder": {
+      "input_tokens": 874,
+      "output_tokens": 458,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3989,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0104265,
+      "raw_cost_usd": 0.018837,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of land and building for warehouse, partial payment with deferred balance",
+        "rationale": "Under IFRS, land and building are acquired together for $9,000,000 and must be allocated based on their relative fair values ($8M land, $4M building = 2:1 ratio). Total FV = $12M, so land = $6M (8/12 \u00d7 $9M) and building = $3M (4/12 \u00d7 $9M). Building is subject to 10% sales tax ($300K), making total consideration $9.3M. Half the purchase price ($4.5M) is deferred as a liability. The balance paid is $4.8M ($4.5M base + $300K tax). Land is non-depreciable and recorded separately from the depreciable building asset. Sales tax on building is capitalized as part of building cost per IFRS (not recoverable input tax in this context).",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3300000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4800000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. The sales tax on the building is capitalized to the building cost under IFRS. The payment method (partial cash, partial payable) affects only the credit side, not the debit classification.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves three distinct economic events on the debit side:\n\n1. Land acquisition ($6,000,000 allocated based on fair value ratio 8M/12M) - Asset increase\n2. Building acquisition ($3,000,000 allocated based on fair value ratio 4M/12M) - Asset increase  \n3. Sales tax on building ($300,000 = 10% \u00d7 $3,000,000) - Expense increase\n\nUnder IFRS, sales tax on property acquisitions is typically not capitalizable when the entity can recover it or when it represents a period cost. The 10% sales tax is charged only on the building component and is paid immediately by cheque along with 50% of the purchase price.\n\nThe initial debit tuple (2,0,0,0,0,0) correctly identifies two asset increases (land and building) but misses the sales tax expense component. The credit tuple (2,0,0,1,0,0) showing 2 liability increases, 0 equity/revenue, and 1 asset decrease is consistent with: accounts payable for deferred payment, sales tax payable (or direct expense), and cash payment.\n\nCorrected to (2,0,1,0,0,0): two asset increases (land and building) plus one expense increase (sales tax on building).",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves purchasing land and building for $9,000,000 plus 10% sales tax on the building portion. \n\nBreaking down the economics:\n- Land fair value: $8,000,000\n- Building fair value: $4,000,000\n- Total fair value: $12,000,000\n- Purchase price allocated proportionally: Land gets $6,000,000 (8/12 \u00d7 $9M), Building gets $3,000,000 (4/12 \u00d7 $9M)\n- Sales tax on building: $300,000 (10% \u00d7 $3,000,000)\n- Total payment: $9,000,000 + $300,000 = $9,300,000\n\nPayment structure:\n- 50% of purchase price ($4,500,000) is deferred \u2192 liability increase\n- Balance of purchase price ($4,500,000) + sales tax ($300,000) = $4,800,000 paid by cheque \u2192 asset decrease (cash)\n\nThe initial credit tuple showed (2,0,0,1,0,0) = 2 liability increases + 1 asset decrease. However, there is only ONE liability being created (the deferred payment obligation for $4,500,000), not two separate liabilities. The sales tax is paid immediately by cheque, so it doesn't create a liability.\n\nCorrected to (1,0,0,1,0,0): 1 liability increase (deferred payment) + 1 asset decrease (cash payment including sales tax).",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of land and building for warehouse, partial payment with deferred balance",
+        "rationale": "Under IFRS, land and building are acquired together for $9,000,000 and must be allocated based on their relative fair values ($8M land, $4M building = 2:1 ratio). Total FV = $12M, so land = $6M (8/12 \u00d7 $9M) and building = $3M (4/12 \u00d7 $9M). Building is subject to 10% sales tax ($300K), making total consideration $9.3M. Half the purchase price ($4.5M) is deferred as a liability. The balance paid is $4.8M ($4.5M base + $300K tax). Land is non-depreciable and recorded separately from the depreciable building asset. Sales tax on building is capitalized as part of building cost per IFRS (not recoverable input tax in this context).",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3300000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4800000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 575,
+        "output_tokens": 214,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 573,
+        "output_tokens": 289,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 743,
+        "output_tokens": 413,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 743,
+        "output_tokens": 360,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 874,
+        "output_tokens": 458,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

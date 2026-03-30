@@ -6,6 +6,10 @@ from typing import Any
 from langchain_core.callbacks import BaseCallbackHandler
 
 _KNOWN_NODES: set[str] = {
+    # V3 agents
+    "ambiguity_detector", "complexity_detector", "tax_specialist",
+    "decision_maker", "entry_drafter", "layer1_join",
+    # Legacy agents
     "disambiguator",
     "debit_classifier", "credit_classifier",
     "debit_corrector", "credit_corrector",

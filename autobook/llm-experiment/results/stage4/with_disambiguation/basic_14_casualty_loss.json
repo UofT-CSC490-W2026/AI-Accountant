@@ -1,0 +1,538 @@
+{
+  "test_case_id": "basic_14_casualty_loss",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Cannot construct final entry without knowing insurance status. If uninsured: debit Loss on Inventory - Casualty $2,000, credit Inventory $2,000. If insured: would need to record Insurance Receivable (debit, asset increase) and potentially a smaller loss or gain depending on coverage amount. The transaction text states '$2000 loss' which suggests net loss after any recovery, but this is ambiguous - it could mean the carrying value destroyed or the net unrecovered amount.",
+    "lines": []
+  },
+  "actual_cost_usd": 0.0458997,
+  "raw_cost_usd": 0.073275,
+  "total_latency_ms": 32211,
+  "total_input_tokens": 12430,
+  "total_output_tokens": 2399,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 512,
+      "output_tokens": 144,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2859,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0044001000000000005,
+      "raw_cost_usd": 0.010737,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "insurance coverage",
+            "resolution": "The term 'loss' in accounting convention implies uninsured. Insured events are typically described as 'insurance claims' or 'casualty with insurance recovery', not as 'loss'. The unqualified use of 'loss' indicates no insurance recovery is expected."
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 485,
+      "output_tokens": 339,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2001,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0069948,
+      "raw_cost_usd": 0.011088,
+      "output": {
+        "liability_increase_reason": "No liabilities are created or increased by the inventory loss.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase from this loss event.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from inventory destruction.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Inventory (an asset) is destroyed and must be written off, resulting in one asset decrease line crediting Inventory.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or decreased; the loss creates an expense on the debit side.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 487,
+      "output_tokens": 370,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2033,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0074748,
+      "raw_cost_usd": 0.011649,
+      "output": {
+        "asset_increase_reason": "No assets increase. Inventory is being destroyed/written off, which decreases the asset.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The typhoon loss is recognized as an expense (loss from casualty/disaster). This increases the expense account on the debit side.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No direct equity account decreases. The loss affects equity indirectly through the expense, but the debit entry is to the loss/expense account.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are involved in recording a casualty loss.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 807,
+      "output_tokens": 1546,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5537,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.02703,
+      "raw_cost_usd": 0.039801,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Insurance coverage",
+            "reason": "If the inventory was insured, the entry would include a receivable from the insurance company, reducing the net loss. If uninsured, the full loss is recognized as expense. The transaction text does not indicate whether insurance exists.",
+            "sufficient": false
+          },
+          {
+            "aspect": "Accounting policy for casualty losses",
+            "reason": "Under IFRS, casualty losses can be presented as: (1) a separate line item in profit or loss, (2) within cost of sales if inventory-related, or (3) as other operating expenses. The account selection depends on the entity's policy election and materiality assessment, which are not stated.",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "Was the destroyed inventory covered by insurance? If yes, what is the expected insurance recovery amount?"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. The classifier correctly identified zero asset increases.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier proposes 1 expense increase line for the inventory loss. This is correct if uninsured, but if insurance exists, we would need an insurance receivable (asset increase) instead of or in addition to a loss expense. Cannot confirm without knowing insurance status.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loss on Inventory - Casualty"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No direct equity decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability increase in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue increase in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier proposes 1 asset decrease line for the inventory write-off. This is correct - inventory (an asset) must be removed from the books at its carrying amount of $2,000.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot construct final entry without knowing insurance status. If uninsured: debit Loss on Inventory - Casualty $2,000, credit Inventory $2,000. If insured: would need to record Insurance Receivable (debit, asset increase) and potentially a smaller loss or gain depending on coverage amount. The transaction text states '$2000 loss' which suggests net loss after any recovery, but this is ambiguous - it could mean the carrying value destroyed or the net unrecovered amount.",
+          "lines": []
+        },
+        "decision_rationale": "The transaction describes inventory destroyed by a natural disaster. The classifier tuples (debit: expense increase, credit: asset decrease) are structurally correct for an uninsured casualty loss. However, a critical business fact is missing: whether the inventory was insured. If insurance exists, the entry structure changes fundamentally - we would record an Insurance Receivable (asset increase) rather than or in addition to a loss expense. The '$2000 loss' stated could mean: (1) the carrying value of destroyed inventory (gross loss), or (2) the net loss after expected insurance recovery. Without knowing the insurance status and any recovery amount, I cannot determine the correct accounts and amounts. This is not a matter of accounting judgment - it is a missing business fact that would produce structurally different entries.",
+        "decision": "INCOMPLETE_INFORMATION"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "insurance coverage",
+            "resolution": "The term 'loss' in accounting convention implies uninsured. Insured events are typically described as 'insurance claims' or 'casualty with insurance recovery', not as 'loss'. The unqualified use of 'loss' indicates no insurance recovery is expected."
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No assets increase. Inventory is being destroyed/written off, which decreases the asset.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The typhoon loss is recognized as an expense (loss from casualty/disaster). This increases the expense account on the debit side.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No direct equity account decreases. The loss affects equity indirectly through the expense, but the debit entry is to the loss/expense account.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are involved in recording a casualty loss.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased by the inventory loss.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase from this loss event.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from inventory destruction.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Inventory (an asset) is destroyed and must be written off, resulting in one asset decrease line crediting Inventory.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or decreased; the loss creates an expense on the debit side.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No assets increase. Inventory is being destroyed/written off, which decreases the asset.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "The typhoon loss is recognized as an expense (loss from casualty/disaster). This increases the expense account on the debit side.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No direct equity account decreases. The loss affects equity indirectly through the expense, but the debit entry is to the loss/expense account.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are involved in recording a casualty loss.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased by the inventory loss.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts increase from this loss event.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from inventory destruction.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Inventory (an asset) is destroyed and must be written off, resulting in one asset decrease line crediting Inventory.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or decreased; the loss creates an expense on the debit side.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Insurance coverage",
+            "reason": "If the inventory was insured, the entry would include a receivable from the insurance company, reducing the net loss. If uninsured, the full loss is recognized as expense. The transaction text does not indicate whether insurance exists.",
+            "sufficient": false
+          },
+          {
+            "aspect": "Accounting policy for casualty losses",
+            "reason": "Under IFRS, casualty losses can be presented as: (1) a separate line item in profit or loss, (2) within cost of sales if inventory-related, or (3) as other operating expenses. The account selection depends on the entity's policy election and materiality assessment, which are not stated.",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "Was the destroyed inventory covered by insurance? If yes, what is the expected insurance recovery amount?"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. The classifier correctly identified zero asset increases.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier proposes 1 expense increase line for the inventory loss. This is correct if uninsured, but if insurance exists, we would need an insurance receivable (asset increase) instead of or in addition to a loss expense. Cannot confirm without knowing insurance status.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loss on Inventory - Casualty"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No direct equity decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability increase in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue increase in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier proposes 1 asset decrease line for the inventory write-off. This is correct - inventory (an asset) must be removed from the books at its carrying amount of $2,000.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction. The classifier correctly identified zero.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot construct final entry without knowing insurance status. If uninsured: debit Loss on Inventory - Casualty $2,000, credit Inventory $2,000. If insured: would need to record Insurance Receivable (debit, asset increase) and potentially a smaller loss or gain depending on coverage amount. The transaction text states '$2000 loss' which suggests net loss after any recovery, but this is ambiguous - it could mean the carrying value destroyed or the net unrecovered amount.",
+          "lines": []
+        },
+        "decision_rationale": "The transaction describes inventory destroyed by a natural disaster. The classifier tuples (debit: expense increase, credit: asset decrease) are structurally correct for an uninsured casualty loss. However, a critical business fact is missing: whether the inventory was insured. If insurance exists, the entry structure changes fundamentally - we would record an Insurance Receivable (asset increase) rather than or in addition to a loss expense. The '$2000 loss' stated could mean: (1) the carrying value of destroyed inventory (gross loss), or (2) the net loss after expected insurance recovery. Without knowing the insurance status and any recovery amount, I cannot determine the correct accounts and amounts. This is not a matter of accounting judgment - it is a missing business fact that would produce structurally different entries.",
+        "decision": "INCOMPLETE_INFORMATION"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 512,
+        "output_tokens": 144,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 485,
+        "output_tokens": 339,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 487,
+        "output_tokens": 370,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 807,
+        "output_tokens": 1546,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

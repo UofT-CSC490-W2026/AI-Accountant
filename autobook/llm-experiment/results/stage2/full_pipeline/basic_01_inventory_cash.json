@@ -1,0 +1,620 @@
+{
+  "test_case_id": "basic_01_inventory_cash",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase inventory for cash",
+    "rationale": "Inventory purchase is taxable in Canada. The $100 paid is tax-inclusive. Assuming Ontario HST at 13%, the tax component is $100 / 1.13 \u00d7 0.13 = $11.50, and the net inventory cost is $100 / 1.13 = $88.50. HST paid is recoverable as HST Receivable (asset). Total cash paid is $100.",
+    "lines": [
+      {
+        "account_name": "Inventory",
+        "type": "debit",
+        "amount": 88.5
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 11.5
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 100.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.074466,
+  "raw_cost_usd": 0.135594,
+  "total_latency_ms": 47762,
+  "total_input_tokens": 33683,
+  "total_output_tokens": 2303,
+  "total_llm_calls": 11,
+  "iteration_count": 2,
+  "final_decision": "error",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 507,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2902,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0027645,
+      "raw_cost_usd": 0.009231,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 480,
+      "output_tokens": 80,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1721,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0030123000000000003,
+      "raw_cost_usd": 0.006363,
+      "output": {
+        "reason": "Cash leaving the business to purchase inventory = asset decrease (cash account credited)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Cash leaving the business to purchase inventory = asset decrease (cash account credited)"
+    },
+    "debit_classifier": {
+      "input_tokens": 482,
+      "output_tokens": 86,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1744,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031146,
+      "raw_cost_usd": 0.006522,
+      "output": {
+        "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold."
+    },
+    "debit_corrector": {
+      "input_tokens": 650,
+      "output_tokens": 146,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2396,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0046638,
+      "raw_cost_usd": 0.009378,
+      "output": {
+        "reason": "The transaction \"Purchase inventory for $100 cash\" involves two asset accounts: inventory (increasing) and cash (decreasing). The debit side should record the inventory increase, which is an asset increase (slot a). The credit side correctly shows asset decrease (cash, slot d). This is a classic asset-for-asset exchange. The initial debit tuple is correct - no correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Purchase inventory for $100 cash\" involves two asset accounts: inventory (increasing) and cash (decreasing). The debit side should record the inventory increase, which is an asset increase (slot a). The credit side correctly shows asset decrease (cash, slot d). This is a classic asset-for-asset exchange. The initial debit tuple is correct - no correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 650,
+      "output_tokens": 187,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2404,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0052812,
+      "raw_cost_usd": 0.010017,
+      "output": {
+        "reason": "The transaction \"Purchase inventory for $100 cash\" involves two assets: inventory (increasing) and cash (decreasing). The debit tuple shows (1,0,0,0,0,0) = one asset increase (inventory), which is correct. The credit side must show the asset decrease (cash). The initial credit tuple (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash outflow. The two sides tell a consistent story: inventory asset increases (debit) while cash asset decreases (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Purchase inventory for $100 cash\" involves two assets: inventory (increasing) and cash (decreasing). The debit tuple shows (1,0,0,0,0,0) = one asset increase (inventory), which is correct. The credit side must show the asset decrease (cash). The initial credit tuple (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash outflow. The two sides tell a consistent story: inventory asset increases (debit) while cash asset decreases (credit). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1579,
+      "output_tokens": 529,
+      "cache_read_tokens": 6428,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8007,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0146004,
+      "raw_cost_usd": 0.031956,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase inventory for cash",
+        "rationale": "Inventory purchase is taxable in Canada. The $100 paid is tax-inclusive. Assuming Ontario HST at 13%, the tax component is $100 / 1.13 \u00d7 0.13 = $11.50, and the net inventory cost is $100 / 1.13 = $88.50. HST paid is recoverable as HST Receivable (asset). Total cash paid is $100.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 88.5
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 11.5
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3462,
+      "output_tokens": 357,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7566,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0169722,
+      "raw_cost_usd": 0.028053,
+      "output": {
+        "reason": "Transaction states \"$100 cash\" without specifying whether this is tax-inclusive or tax-exclusive. The generator assumed tax-inclusive and back-calculated HST, but the plain reading of \"Purchase inventory for $100 cash\" means $100 is the inventory cost. When tax is not explicitly stated in the transaction text, the stated amount should be treated as the base amount, not tax-inclusive. The entry should record $100 Inventory debit, $13 HST Receivable debit (13% of $100), and $113 Cash credit.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Transaction states \"$100 cash\" without specifying whether this is tax-inclusive or tax-exclusive. The generator assumed tax-inclusive and back-calculated HST, but the plain reading of \"Purchase inventory for $100 cash\" means $100 is the inventory cost. When tax is not explicitly stated in the transaction text, the stated amount should be treated as the base amount, not tax-inclusive. The entry should record $100 Inventory debit, $13 HST Receivable debit (13% of $100), and $113 Cash credit."
+    },
+    "diagnostician": {
+      "input_tokens": 3233,
+      "output_tokens": 883,
+      "cache_read_tokens": 3710,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6943,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.024057000000000002,
+      "raw_cost_usd": 0.034074,
+      "output": {
+        "reasoning": "The Approver rejected because Agent 5 (Entry Builder) incorrectly assumed the $100 was tax-inclusive and back-calculated HST, when the transaction text \"Purchase inventory for $100 cash\" should be interpreted as $100 being the base inventory cost. The Approver is clear: when tax is not explicitly stated, the stated amount should be treated as the base amount, not tax-inclusive.\n\nTracing the error:\n- Agents 1-4 (classifiers and correctors) correctly identified the tuple structure: (1,0,0,0,0,0) for debit (asset increase) and (0,0,0,1,0,0) for credit (asset decrease). These tuples are correct.\n- Agent 5 in Iteration 0 correctly built a simple entry without tax assumptions.\n- Agent 5 in Iteration 1 made an incorrect assumption about tax treatment, deciding to treat $100 as tax-inclusive and back-calculate.\n\nThe root cause is Agent 5's tax interpretation logic. The tuples from upstream agents are correct. Agent 5 needs guidance on when to treat amounts as tax-inclusive vs tax-exclusive. According to the Approver, when tax is not explicitly mentioned in the transaction text, the stated amount is the base amount (tax-exclusive), and tax should be added on top.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "When tax is not explicitly stated in transaction text, treat the stated amount as the base amount (tax-exclusive), not tax-inclusive. For 'Purchase inventory for $100 cash', record $100 Inventory debit, $13 HST Receivable debit (13% of $100), and $113 Cash credit."
+          }
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Missing HST on taxable purchase. Inventory purchases are taxable transactions. The entry assumes $100 is the total paid but records no HST Receivable. If $100 is the pre-tax amount, HST must be added. If $100 is tax-inclusive, it must be split between inventory cost and HST Receivable. The transaction text does not specify tax treatment, but inventory purchases are taxable and require proper HST accounting.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Cash leaving the business to purchase inventory = asset decrease (cash account credited)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Cash leaving the business to purchase inventory = asset decrease (cash account credited)",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction \"Purchase inventory for $100 cash\" involves two asset accounts: inventory (increasing) and cash (decreasing). The debit side should record the inventory increase, which is an asset increase (slot a). The credit side correctly shows asset decrease (cash, slot d). This is a classic asset-for-asset exchange. The initial debit tuple is correct - no correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction \"Purchase inventory for $100 cash\" involves two asset accounts: inventory (increasing) and cash (decreasing). The debit side should record the inventory increase, which is an asset increase (slot a). The credit side correctly shows asset decrease (cash, slot d). This is a classic asset-for-asset exchange. The initial debit tuple is correct - no correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction \"Purchase inventory for $100 cash\" involves two assets: inventory (increasing) and cash (decreasing). The debit tuple shows (1,0,0,0,0,0) = one asset increase (inventory), which is correct. The credit side must show the asset decrease (cash). The initial credit tuple (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash outflow. The two sides tell a consistent story: inventory asset increases (debit) while cash asset decreases (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction \"Purchase inventory for $100 cash\" involves two assets: inventory (increasing) and cash (decreasing). The debit tuple shows (1,0,0,0,0,0) = one asset increase (inventory), which is correct. The credit side must show the asset decrease (cash). The initial credit tuple (0,0,0,1,0,0) = one asset decrease, which correctly represents the cash outflow. The two sides tell a consistent story: inventory asset increases (debit) while cash asset decreases (credit). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase inventory for cash",
+        "rationale": "Inventory is a current asset acquired for resale. Cash (asset) decreases. The debit tuple indicates 1 asset increase (inventory), and the credit tuple indicates 1 asset decrease (cash). No tax information provided, so assuming the $100 is the total amount paid. Under IFRS, inventory is initially measured at cost.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Purchase inventory for cash",
+        "rationale": "Inventory purchase is taxable in Canada. The $100 paid is tax-inclusive. Assuming Ontario HST at 13%, the tax component is $100 / 1.13 \u00d7 0.13 = $11.50, and the net inventory cost is $100 / 1.13 = $88.50. HST paid is recoverable as HST Receivable (asset). Total cash paid is $100.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 88.5
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 11.5
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Missing HST on taxable purchase. Inventory purchases are taxable transactions. The entry assumes $100 is the total paid but records no HST Receivable. If $100 is the pre-tax amount, HST must be added. If $100 is tax-inclusive, it must be split between inventory cost and HST Receivable. The transaction text does not specify tax treatment, but inventory purchases are taxable and require proper HST accounting.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Transaction states \"$100 cash\" without specifying whether this is tax-inclusive or tax-exclusive. The generator assumed tax-inclusive and back-calculated HST, but the plain reading of \"Purchase inventory for $100 cash\" means $100 is the inventory cost. When tax is not explicitly stated in the transaction text, the stated amount should be treated as the base amount, not tax-inclusive. The entry should record $100 Inventory debit, $13 HST Receivable debit (13% of $100), and $113 Cash credit.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because HST is missing on a taxable inventory purchase. Looking at the trace:\n\n- Agent 1 (Debit Classifier) correctly identified inventory as asset increase (1,0,0,0,0,0)\n- Agent 2 (Credit Classifier) correctly identified cash as asset decrease (0,0,0,1,0,0)\n- Agent 3 (Debit Corrector) validated the debit tuple correctly\n- Agent 4 (Credit Corrector) validated the credit tuple correctly\n- Agent 5 (Entry Builder) constructed the entry but explicitly stated \"No tax information provided, so assuming the $100 is the total amount paid\" and did not add HST lines\n\nThe tuples themselves are correct for the inventory and cash movements. However, Agent 5 failed to recognize that inventory purchases in Canada are taxable transactions requiring HST accounting. The Entry Builder is responsible for adding tax lines when transactions are taxable, regardless of whether tax is explicitly mentioned in the transaction description.\n\nRoot cause: Agent 5 (Entry Builder) failed to add mandatory HST lines for a taxable purchase transaction.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Inventory purchases are taxable transactions in Canada. The $100 paid is tax-inclusive. Split it: calculate HST component (100/1.13 * 0.13 for Ontario or appropriate rate), debit HST Receivable for tax amount, debit Inventory for net amount, and credit Cash for total $100."
+          }
+        ],
+        "stuck_reason": null
+      },
+      {
+        "reasoning": "The Approver rejected because Agent 5 (Entry Builder) incorrectly assumed the $100 was tax-inclusive and back-calculated HST, when the transaction text \"Purchase inventory for $100 cash\" should be interpreted as $100 being the base inventory cost. The Approver is clear: when tax is not explicitly stated, the stated amount should be treated as the base amount, not tax-inclusive.\n\nTracing the error:\n- Agents 1-4 (classifiers and correctors) correctly identified the tuple structure: (1,0,0,0,0,0) for debit (asset increase) and (0,0,0,1,0,0) for credit (asset decrease). These tuples are correct.\n- Agent 5 in Iteration 0 correctly built a simple entry without tax assumptions.\n- Agent 5 in Iteration 1 made an incorrect assumption about tax treatment, deciding to treat $100 as tax-inclusive and back-calculate.\n\nThe root cause is Agent 5's tax interpretation logic. The tuples from upstream agents are correct. Agent 5 needs guidance on when to treat amounts as tax-inclusive vs tax-exclusive. According to the Approver, when tax is not explicitly mentioned in the transaction text, the stated amount is the base amount (tax-exclusive), and tax should be added on top.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "When tax is not explicitly stated in transaction text, treat the stated amount as the base amount (tax-exclusive), not tax-inclusive. For 'Purchase inventory for $100 cash', record $100 Inventory debit, $13 HST Receivable debit (13% of $100), and $113 Cash credit."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Inventory purchases are taxable transactions in Canada. The $100 paid is tax-inclusive. Split it: calculate HST component (100/1.13 * 0.13 for Ontario or appropriate rate), debit HST Receivable for tax amount, debit Inventory for net amount, and credit Cash for total $100."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": null,
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 507,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 480,
+        "output_tokens": 80,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 482,
+        "output_tokens": 86,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 650,
+        "output_tokens": 146,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 650,
+        "output_tokens": 187,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 739,
+        "output_tokens": 234,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1358,
+        "output_tokens": 167,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1264,
+        "output_tokens": 418,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 840,
+        "output_tokens": 295,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2104,
+        "output_tokens": 190,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1969,
+        "output_tokens": 465,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

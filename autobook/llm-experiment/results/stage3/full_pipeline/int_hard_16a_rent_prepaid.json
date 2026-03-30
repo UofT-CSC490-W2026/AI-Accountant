@@ -1,0 +1,528 @@
+{
+  "test_case_id": "int_hard_16a_rent_prepaid",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-01-01",
+    "description": "Prepaid rent for 12 months of office space",
+    "rationale": "The fix context correctly identifies that commercial rent is taxable in Canada and requires HST/GST treatment. However, the transaction does not specify the province where the office space is located. Canadian tax rates vary significantly by province: AB/NT/NU/YT charge 5% GST only, ON charges 13% HST, BC/SK/MB charge 5% GST plus provincial sales tax, and Atlantic provinces charge 15% HST. The $24,000 payment must be decomposed into base rent and tax components, but this decomposition depends on the applicable tax rate. For example: if 13% HST applies, base rent = $24,000 \u00f7 1.13 = $21,238.94 and HST = $2,761.06; if 5% GST applies, base rent = $24,000 \u00f7 1.05 = $22,857.14 and GST = $1,142.86. Without knowing the province, I cannot determine the correct amounts for Prepaid Rent, HST/GST Receivable, and Cash accounts.",
+    "lines": [],
+    "disambiguator_responses": null,
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "In which Canadian province or territory is the leased office space located?"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0633489,
+  "raw_cost_usd": 0.113928,
+  "total_latency_ms": 46328,
+  "total_input_tokens": 26686,
+  "total_output_tokens": 2258,
+  "total_llm_calls": 9,
+  "iteration_count": 2,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 541,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2936,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0028665,
+      "raw_cost_usd": 0.009333,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 516,
+      "output_tokens": 125,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1778,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038016,
+      "raw_cost_usd": 0.007209,
+      "output": {
+        "reason": "The entity paid $24,000 for 12 months of rent in advance. Under the entity's accounting policy, this prepayment is recognized as a prepaid asset (prepaid rent). Debiting prepaid rent = asset increase. This is 1 debit line.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The entity paid $24,000 for 12 months of rent in advance. Under the entity's accounting policy, this prepayment is recognized as a prepaid asset (prepaid rent). Debiting prepaid rent = asset increase. This is 1 debit line."
+    },
+    "credit_classifier": {
+      "input_tokens": 514,
+      "output_tokens": 147,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1755,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0041193,
+      "raw_cost_usd": 0.00747,
+      "output": {
+        "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent in advance. Since the entity's policy is to recognize this as a prepaid asset (not an immediate expense), the debit side would be Prepaid Rent (asset increase). The credit side is the payment method: Cash/Bank account decreasing = asset decrease. This is a single credit line.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent in advance. Since the entity's policy is to recognize this as a prepaid asset (not an immediate expense), the debit side would be Prepaid Rent (asset increase). The credit side is the payment method: Cash/Bank account decreasing = asset decrease. This is a single credit line."
+    },
+    "debit_corrector": {
+      "input_tokens": 684,
+      "output_tokens": 187,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2430,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053808,
+      "raw_cost_usd": 0.010095,
+      "output": {
+        "reason": "The initial debit tuple is correct. The transaction involves paying $24,000 for 12 months of rent in advance, and the entity's explicit accounting policy is to recognize this as a prepaid asset. This is a prepaid expense (an asset account), not a period expense. The debit side correctly shows one asset increase (the prepaid rent asset). The credit tuple showing one asset decrease (cash paid by cheque) is consistent with this treatment. The economic substance is: debit Prepaid Rent (asset increase), credit Cash (asset decrease). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial debit tuple is correct. The transaction involves paying $24,000 for 12 months of rent in advance, and the entity's explicit accounting policy is to recognize this as a prepaid asset. This is a prepaid expense (an asset account), not a period expense. The debit side correctly shows one asset increase (the prepaid rent asset). The credit tuple showing one asset decrease (cash paid by cheque) is consistent with this treatment. The economic substance is: debit Prepaid Rent (asset increase), credit Cash (asset decrease). No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 684,
+      "output_tokens": 284,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2438,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0068382,
+      "raw_cost_usd": 0.011574,
+      "output": {
+        "reason": "The transaction describes Atlas Van Lines paying $24,000 by cheque for 12 months of rent, with the entity's policy to recognize it as a prepaid asset. This is a classic asset exchange transaction: cash (asset) decreases by $24,000, and prepaid rent (asset) increases by $24,000.\n\nThe debit tuple shows (1,0,0,0,0,0) = one asset increase line, which correctly represents the prepaid rent asset being created.\n\nThe credit tuple shows (0,0,0,1,0,0) = one asset decrease line, which correctly represents the cash/bank account being reduced by the cheque payment.\n\nBoth sides tell a consistent story: this is an asset-for-asset exchange with no impact on liabilities, equity, revenue, or expenses at the time of payment. The rent expense will be recognized later as the prepaid asset is amortized over the 12-month period.\n\nThe initial credit tuple is correct and requires no correction.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes Atlas Van Lines paying $24,000 by cheque for 12 months of rent, with the entity's policy to recognize it as a prepaid asset. This is a classic asset exchange transaction: cash (asset) decreases by $24,000, and prepaid rent (asset) increases by $24,000.\n\nThe debit tuple shows (1,0,0,0,0,0) = one asset increase line, which correctly represents the prepaid rent asset being created.\n\nThe credit tuple shows (0,0,0,1,0,0) = one asset decrease line, which correctly represents the cash/bank account being reduced by the cheque payment.\n\nBoth sides tell a consistent story: this is an asset-for-asset exchange with no impact on liabilities, equity, revenue, or expenses at the time of payment. The rent expense will be recognized later as the prepaid asset is amortized over the 12-month period.\n\nThe initial credit tuple is correct and requires no correction."
+    },
+    "entry_builder": {
+      "input_tokens": 1660,
+      "output_tokens": 683,
+      "cache_read_tokens": 6428,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8088,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0171534,
+      "raw_cost_usd": 0.034509,
+      "output": {
+        "date": "2026-01-01",
+        "description": "Prepaid rent for 12 months of office space",
+        "rationale": "The fix context correctly identifies that commercial rent is taxable in Canada and requires HST/GST treatment. However, the transaction does not specify the province where the office space is located. Canadian tax rates vary significantly by province: AB/NT/NU/YT charge 5% GST only, ON charges 13% HST, BC/SK/MB charge 5% GST plus provincial sales tax, and Atlantic provinces charge 15% HST. The $24,000 payment must be decomposed into base rent and tax components, but this decomposition depends on the applicable tax rate. For example: if 13% HST applies, base rent = $24,000 \u00f7 1.13 = $21,238.94 and HST = $2,761.06; if 5% GST applies, base rent = $24,000 \u00f7 1.05 = $22,857.14 and GST = $1,142.86. Without knowing the province, I cannot determine the correct amounts for Prepaid Rent, HST/GST Receivable, and Cash accounts.",
+        "lines": [],
+        "disambiguator_responses": null,
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "In which Canadian province or territory is the leased office space located?"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1728,
+      "output_tokens": 205,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3780,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0088746,
+      "raw_cost_usd": 0.014415,
+      "output": null,
+      "reason": null
+    },
+    "diagnostician": {
+      "input_tokens": 1626,
+      "output_tokens": 592,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3481,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0143145,
+      "raw_cost_usd": 0.019323,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Rent is a taxable service in Canada and should include HST/GST. The transaction states $24,000 was paid by cheque but does not specify whether this is tax-inclusive or tax-exclusive. The entry rationale incorrectly states \"rent payments are not subject to HST/GST when paid\" - this is false. Commercial rent is taxable. The entry must include HST Receivable (input tax credit) and the appropriate tax calculation. Without knowing the province, cannot determine if this is 5% GST, 13% HST, or 15% HST, but tax lines are required.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "The entity paid $24,000 for 12 months of rent in advance. Under the entity's accounting policy, this prepayment is recognized as a prepaid asset (prepaid rent). Debiting prepaid rent = asset increase. This is 1 debit line.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The entity paid $24,000 for 12 months of rent in advance. Under the entity's accounting policy, this prepayment is recognized as a prepaid asset (prepaid rent). Debiting prepaid rent = asset increase. This is 1 debit line.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent in advance. Since the entity's policy is to recognize this as a prepaid asset (not an immediate expense), the debit side would be Prepaid Rent (asset increase). The credit side is the payment method: Cash/Bank account decreasing = asset decrease. This is a single credit line.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Atlas Van Lines paid $24,000 by cheque for 12 months of rent in advance. Since the entity's policy is to recognize this as a prepaid asset (not an immediate expense), the debit side would be Prepaid Rent (asset increase). The credit side is the payment method: Cash/Bank account decreasing = asset decrease. This is a single credit line.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The initial debit tuple is correct. The transaction involves paying $24,000 for 12 months of rent in advance, and the entity's explicit accounting policy is to recognize this as a prepaid asset. This is a prepaid expense (an asset account), not a period expense. The debit side correctly shows one asset increase (the prepaid rent asset). The credit tuple showing one asset decrease (cash paid by cheque) is consistent with this treatment. The economic substance is: debit Prepaid Rent (asset increase), credit Cash (asset decrease). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The initial debit tuple is correct. The transaction involves paying $24,000 for 12 months of rent in advance, and the entity's explicit accounting policy is to recognize this as a prepaid asset. This is a prepaid expense (an asset account), not a period expense. The debit side correctly shows one asset increase (the prepaid rent asset). The credit tuple showing one asset decrease (cash paid by cheque) is consistent with this treatment. The economic substance is: debit Prepaid Rent (asset increase), credit Cash (asset decrease). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes Atlas Van Lines paying $24,000 by cheque for 12 months of rent, with the entity's policy to recognize it as a prepaid asset. This is a classic asset exchange transaction: cash (asset) decreases by $24,000, and prepaid rent (asset) increases by $24,000.\n\nThe debit tuple shows (1,0,0,0,0,0) = one asset increase line, which correctly represents the prepaid rent asset being created.\n\nThe credit tuple shows (0,0,0,1,0,0) = one asset decrease line, which correctly represents the cash/bank account being reduced by the cheque payment.\n\nBoth sides tell a consistent story: this is an asset-for-asset exchange with no impact on liabilities, equity, revenue, or expenses at the time of payment. The rent expense will be recognized later as the prepaid asset is amortized over the 12-month period.\n\nThe initial credit tuple is correct and requires no correction.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction describes Atlas Van Lines paying $24,000 by cheque for 12 months of rent, with the entity's policy to recognize it as a prepaid asset. This is a classic asset exchange transaction: cash (asset) decreases by $24,000, and prepaid rent (asset) increases by $24,000.\n\nThe debit tuple shows (1,0,0,0,0,0) = one asset increase line, which correctly represents the prepaid rent asset being created.\n\nThe credit tuple shows (0,0,0,1,0,0) = one asset decrease line, which correctly represents the cash/bank account being reduced by the cheque payment.\n\nBoth sides tell a consistent story: this is an asset-for-asset exchange with no impact on liabilities, equity, revenue, or expenses at the time of payment. The rent expense will be recognized later as the prepaid asset is amortized over the 12-month period.\n\nThe initial credit tuple is correct and requires no correction.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Prepayment of 12 months office rent to Atlas Van Lines",
+        "rationale": "The entity's stated accounting policy is to recognize the payment as a prepaid asset. The $24,000 payment for 12 months of rent is recorded as Prepaid Rent (asset increase) rather than immediate expense recognition. Cash is reduced by the cheque payment. This treatment defers expense recognition until the rental periods are consumed. No tax applies as rent payments are not subject to HST/GST when paid (the landlord collects and remits tax separately if applicable).",
+        "lines": [
+          {
+            "account_name": "Prepaid Rent",
+            "type": "debit",
+            "amount": 24000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 24000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-01-01",
+        "description": "Prepaid rent for 12 months of office space",
+        "rationale": "The fix context correctly identifies that commercial rent is taxable in Canada and requires HST/GST treatment. However, the transaction does not specify the province where the office space is located. Canadian tax rates vary significantly by province: AB/NT/NU/YT charge 5% GST only, ON charges 13% HST, BC/SK/MB charge 5% GST plus provincial sales tax, and Atlantic provinces charge 15% HST. The $24,000 payment must be decomposed into base rent and tax components, but this decomposition depends on the applicable tax rate. For example: if 13% HST applies, base rent = $24,000 \u00f7 1.13 = $21,238.94 and HST = $2,761.06; if 5% GST applies, base rent = $24,000 \u00f7 1.05 = $22,857.14 and GST = $1,142.86. Without knowing the province, I cannot determine the correct amounts for Prepaid Rent, HST/GST Receivable, and Cash accounts.",
+        "lines": [],
+        "disambiguator_responses": null,
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "In which Canadian province or territory is the leased office space located?"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Rent is a taxable service in Canada and should include HST/GST. The transaction states $24,000 was paid by cheque but does not specify whether this is tax-inclusive or tax-exclusive. The entry rationale incorrectly states \"rent payments are not subject to HST/GST when paid\" - this is false. Commercial rent is taxable. The entry must include HST Receivable (input tax credit) and the appropriate tax calculation. Without knowing the province, cannot determine if this is 5% GST, 13% HST, or 15% HST, but tax lines are required.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected the entry because it's missing HST/GST tax lines on a taxable service (commercial rent). The rejection states that \"rent payments are not subject to HST/GST when paid\" is false - commercial rent IS taxable in Canada.\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier): Classified the debit as (1,0,0,0,0,0) = one asset increase. This is correct for the prepaid rent itself, but doesn't account for the HST Receivable that should also be debited.\n- Agent 2 (Credit Classifier): Classified the credit as (0,0,0,1,0,0) = one asset decrease. This is correct for cash, but the tuple doesn't capture tax complexity.\n- Agents 3 & 4 (Correctors): Both validated the tuples as correct, not catching the missing tax treatment.\n- Agent 5 (Entry Builder): Built the entry with only two lines (Prepaid Rent debit, Cash credit) and explicitly stated in the rationale \"No tax applies as rent payments are not subject to HST/GST when paid\" - this is the factually incorrect statement that the Approver flagged.\n\nThe root cause is Agent 5 (Entry Builder). The tuples from the classifiers are technically correct for the base transaction (asset increase for prepaid rent, asset decrease for cash). However, Agent 5 is responsible for adding tax lines to taxable transactions, and it failed to do so. Worse, it explicitly rationalized the omission with false information about rent not being taxable.\n\nThis is fixable - Agent 5 needs to recognize that commercial rent is a taxable service in Canada and add the appropriate HST/GST Receivable debit line and increase the Cash credit by the tax amount.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Commercial rent is a taxable service in Canada. The entry must include HST/GST Receivable (input tax credit) as an additional debit line. Determine the province to apply correct rate (5% GST, 13% HST, or 15% HST), split the $24,000 payment between the base rent amount and the tax component, and increase the Cash credit accordingly."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Commercial rent is a taxable service in Canada. The entry must include HST/GST Receivable (input tax credit) as an additional debit line. Determine the province to apply correct rate (5% GST, 13% HST, or 15% HST), split the $24,000 payment between the base rent amount and the tax component, and increase the Cash credit accordingly."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 541,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 516,
+        "output_tokens": 125,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 514,
+        "output_tokens": 147,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 684,
+        "output_tokens": 187,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 684,
+        "output_tokens": 284,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 773,
+        "output_tokens": 280,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1728,
+        "output_tokens": 205,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1626,
+        "output_tokens": 592,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 887,
+        "output_tokens": 403,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

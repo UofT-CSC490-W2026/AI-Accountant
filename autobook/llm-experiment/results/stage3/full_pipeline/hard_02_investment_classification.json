@@ -1,0 +1,424 @@
+{
+  "test_case_id": "hard_02_investment_classification",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    2,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Acquisition of 10% Ford common shares",
+    "rationale": "Cannot determine correct entry without knowing classification intent",
+    "lines": [],
+    "disambiguator_responses": [
+      {
+        "aspect": "accounting classification of Ford shares",
+        "action": "incomplete",
+        "reason": "The classification fundamentally changes both the account used (Investment - FVTPL vs Investment - FVOCI vs Investment in Associate) and the treatment of the $100,000 transaction fee (capitalized vs expensed). Under IFRS 9, classification depends on: (1) management's business model for holding the asset, and (2) whether significant influence exists (triggering IAS 28 equity method). A 10% stake can indicate significant influence if accompanied by board representation or operational involvement, but could also be a passive investment. The transaction text provides no information about BlackRock's intent, board seats, or policy participation. These are business facts only the transaction initiator would know, and they produce structurally different entries."
+      }
+    ],
+    "decision": "INCOMPLETE_INFORMATION",
+    "clarification_questions": [
+      "What is BlackRock's intent for holding these Ford shares (trading, long-term strategic investment, or to exercise significant influence)?",
+      "Does the 10% ownership give BlackRock any board representation, participation in policy-making, or other indicators of significant influence over Ford's operations?"
+    ],
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0412626,
+  "raw_cost_usd": 0.072615,
+  "total_latency_ms": 27956,
+  "total_input_tokens": 15745,
+  "total_output_tokens": 1692,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 535,
+      "output_tokens": 423,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2930,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0086685,
+      "raw_cost_usd": 0.015135,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "accounting classification of Ford shares",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Financial asset at fair value through profit or loss (FVTPL)",
+              "Financial asset at fair value through other comprehensive income (FVOCI)",
+              "Investment in associate under equity method (if significant influence exists)"
+            ],
+            "clarification_question": "What is BlackRock's intent for holding these Ford shares, and does the 10% ownership give BlackRock significant influence over Ford's operations?",
+            "why_entry_differs": "FVTPL uses 'Investment - FVTPL' account; FVOCI uses 'Investment - FVOCI' account; equity method uses 'Investment in Associate' account. The classification affects subsequent measurement and where gains/losses are recognized.",
+            "why_not_resolved": "10% ownership could indicate significant influence (triggering equity method) or passive investment (FVTPL/FVOCI). IFRS 9 requires management to assess business model and contractual cash flow characteristics for classification. The transaction text does not indicate BlackRock's intent, whether board representation exists, or the entity's accounting policy election between FVTPL and FVOCI for equity investments."
+          },
+          {
+            "aspect": "treatment of transaction fee",
+            "resolved": true,
+            "resolution": "Under IFRS 9, transaction costs directly attributable to acquisition of a financial asset are capitalized as part of the initial cost, except for FVTPL where they are expensed. Since classification is unresolved, this follows from the classification decision - not a separate ambiguity.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 508,
+      "output_tokens": 134,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1749,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.003906300000000001,
+      "raw_cost_usd": 0.007257,
+      "output": {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease; (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both are asset decreases, so we count 2 lines in slot d.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease; (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both are asset decreases, so we count 2 lines in slot d."
+    },
+    "debit_classifier": {
+      "input_tokens": 510,
+      "output_tokens": 148,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1772,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0041286000000000005,
+      "raw_cost_usd": 0.007536,
+      "output": {
+        "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction fee capitalized as part of investment cost = additional financial asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are capitalized as part of the initial cost of the investment. Both debits increase asset accounts.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction fee capitalized as part of investment cost = additional financial asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are capitalized as part of the initial cost of the investment. Both debits increase asset accounts."
+    },
+    "debit_corrector": {
+      "input_tokens": 678,
+      "output_tokens": 256,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2424,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063978,
+      "raw_cost_usd": 0.011112,
+      "output": {
+        "reason": "The transaction involves two distinct economic events: (1) acquiring an investment in Ford shares for $3,000,000, and (2) paying a transaction fee of $100,000. The investment in Ford shares is a financial asset (investment) increase. The transaction fee is an expense - it is a cost incurred to complete the acquisition and should be expensed under IFRS, not capitalized as part of the investment cost (transaction costs on financial assets at FVTPL are expensed). The initial tuple (2,0,0,0,0,0) incorrectly treated both amounts as asset increases. Corrected to (1,0,1,0,0,0): one asset increase for the investment, one expense increase for the transaction fee. This is consistent with the credit tuple showing 2 asset decreases (cash paid for both the investment and the fee).",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves two distinct economic events: (1) acquiring an investment in Ford shares for $3,000,000, and (2) paying a transaction fee of $100,000. The investment in Ford shares is a financial asset (investment) increase. The transaction fee is an expense - it is a cost incurred to complete the acquisition and should be expensed under IFRS, not capitalized as part of the investment cost (transaction costs on financial assets at FVTPL are expensed). The initial tuple (2,0,0,0,0,0) incorrectly treated both amounts as asset increases. Corrected to (1,0,1,0,0,0): one asset increase for the investment, one expense increase for the transaction fee. This is consistent with the credit tuple showing 2 asset decreases (cash paid for both the investment and the fee)."
+    },
+    "credit_corrector": {
+      "input_tokens": 678,
+      "output_tokens": 311,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2432,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0072252,
+      "raw_cost_usd": 0.011961,
+      "output": {
+        "reason": "The initial credit tuple is correct. BlackRock is acquiring an investment in Ford shares, which means:\n\n1. Cash paid for shares ($3,000,000): This is an asset decrease (cash going out) - credit to cash\n2. Transaction fee paid ($100,000): This is also an asset decrease (cash going out) - credit to cash\n\nThe credit side correctly shows 2 asset decreases (d=2).\n\nThe debit side shows 2 asset increases (a=2), which is consistent:\n1. Investment in Ford shares increases by $3,000,000 (asset increase)\n2. The transaction fee of $100,000 would typically be capitalized as part of the investment cost under IFRS, making it part of the investment asset increase, OR it could be recorded separately as a financial asset or prepaid expense (asset increase)\n\nBoth sides tell a consistent story: BlackRock is exchanging cash (asset decrease) for investment securities and incurring transaction costs (asset increases). The credit tuple of (0,0,0,2,0,0) representing 2 asset decreases is correct.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. BlackRock is acquiring an investment in Ford shares, which means:\n\n1. Cash paid for shares ($3,000,000): This is an asset decrease (cash going out) - credit to cash\n2. Transaction fee paid ($100,000): This is also an asset decrease (cash going out) - credit to cash\n\nThe credit side correctly shows 2 asset decreases (d=2).\n\nThe debit side shows 2 asset increases (a=2), which is consistent:\n1. Investment in Ford shares increases by $3,000,000 (asset increase)\n2. The transaction fee of $100,000 would typically be capitalized as part of the investment cost under IFRS, making it part of the investment asset increase, OR it could be recorded separately as a financial asset or prepaid expense (asset increase)\n\nBoth sides tell a consistent story: BlackRock is exchanging cash (asset decrease) for investment securities and incurring transaction costs (asset increases). The credit tuple of (0,0,0,2,0,0) representing 2 asset decreases is correct."
+    },
+    "entry_builder": {
+      "input_tokens": 1224,
+      "output_tokens": 420,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4438,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0109362,
+      "raw_cost_usd": 0.019614,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% Ford common shares",
+        "rationale": "Cannot determine correct entry without knowing classification intent",
+        "lines": [],
+        "disambiguator_responses": [
+          {
+            "aspect": "accounting classification of Ford shares",
+            "action": "incomplete",
+            "reason": "The classification fundamentally changes both the account used (Investment - FVTPL vs Investment - FVOCI vs Investment in Associate) and the treatment of the $100,000 transaction fee (capitalized vs expensed). Under IFRS 9, classification depends on: (1) management's business model for holding the asset, and (2) whether significant influence exists (triggering IAS 28 equity method). A 10% stake can indicate significant influence if accompanied by board representation or operational involvement, but could also be a passive investment. The transaction text provides no information about BlackRock's intent, board seats, or policy participation. These are business facts only the transaction initiator would know, and they produce structurally different entries."
+          }
+        ],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "What is BlackRock's intent for holding these Ford shares (trading, long-term strategic investment, or to exercise significant influence)?",
+          "Does the 10% ownership give BlackRock any board representation, participation in policy-making, or other indicators of significant influence over Ford's operations?"
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "What is BlackRock's intent for holding these Ford shares (trading, long-term strategic investment, or to exercise significant influence)?",
+    "Does the 10% ownership give BlackRock any board representation, participation in policy-making, or other indicators of significant influence over Ford's operations?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "accounting classification of Ford shares",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Financial asset at fair value through profit or loss (FVTPL)",
+              "Financial asset at fair value through other comprehensive income (FVOCI)",
+              "Investment in associate under equity method (if significant influence exists)"
+            ],
+            "clarification_question": "What is BlackRock's intent for holding these Ford shares, and does the 10% ownership give BlackRock significant influence over Ford's operations?",
+            "why_entry_differs": "FVTPL uses 'Investment - FVTPL' account; FVOCI uses 'Investment - FVOCI' account; equity method uses 'Investment in Associate' account. The classification affects subsequent measurement and where gains/losses are recognized.",
+            "why_not_resolved": "10% ownership could indicate significant influence (triggering equity method) or passive investment (FVTPL/FVOCI). IFRS 9 requires management to assess business model and contractual cash flow characteristics for classification. The transaction text does not indicate BlackRock's intent, whether board representation exists, or the entity's accounting policy election between FVTPL and FVOCI for equity investments."
+          },
+          {
+            "aspect": "treatment of transaction fee",
+            "resolved": true,
+            "resolution": "Under IFRS 9, transaction costs directly attributable to acquisition of a financial asset are capitalized as part of the initial cost, except for FVTPL where they are expensed. Since classification is unresolved, this follows from the classification decision - not a separate ambiguity.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction fee capitalized as part of investment cost = additional financial asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are capitalized as part of the initial cost of the investment. Both debits increase asset accounts.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease; (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both are asset decreases, so we count 2 lines in slot d.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves two distinct economic events: (1) acquiring an investment in Ford shares for $3,000,000, and (2) paying a transaction fee of $100,000. The investment in Ford shares is a financial asset (investment) increase. The transaction fee is an expense - it is a cost incurred to complete the acquisition and should be expensed under IFRS, not capitalized as part of the investment cost (transaction costs on financial assets at FVTPL are expensed). The initial tuple (2,0,0,0,0,0) incorrectly treated both amounts as asset increases. Corrected to (1,0,1,0,0,0): one asset increase for the investment, one expense increase for the transaction fee. This is consistent with the credit tuple showing 2 asset decreases (cash paid for both the investment and the fee).",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. BlackRock is acquiring an investment in Ford shares, which means:\n\n1. Cash paid for shares ($3,000,000): This is an asset decrease (cash going out) - credit to cash\n2. Transaction fee paid ($100,000): This is also an asset decrease (cash going out) - credit to cash\n\nThe credit side correctly shows 2 asset decreases (d=2).\n\nThe debit side shows 2 asset increases (a=2), which is consistent:\n1. Investment in Ford shares increases by $3,000,000 (asset increase)\n2. The transaction fee of $100,000 would typically be capitalized as part of the investment cost under IFRS, making it part of the investment asset increase, OR it could be recorded separately as a financial asset or prepaid expense (asset increase)\n\nBoth sides tell a consistent story: BlackRock is exchanging cash (asset decrease) for investment securities and incurring transaction costs (asset increases). The credit tuple of (0,0,0,2,0,0) representing 2 asset decreases is correct.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% Ford common shares",
+        "rationale": "Cannot determine correct entry without knowing classification intent",
+        "lines": [],
+        "disambiguator_responses": [
+          {
+            "aspect": "accounting classification of Ford shares",
+            "action": "incomplete",
+            "reason": "The classification fundamentally changes both the account used (Investment - FVTPL vs Investment - FVOCI vs Investment in Associate) and the treatment of the $100,000 transaction fee (capitalized vs expensed). Under IFRS 9, classification depends on: (1) management's business model for holding the asset, and (2) whether significant influence exists (triggering IAS 28 equity method). A 10% stake can indicate significant influence if accompanied by board representation or operational involvement, but could also be a passive investment. The transaction text provides no information about BlackRock's intent, board seats, or policy participation. These are business facts only the transaction initiator would know, and they produce structurally different entries."
+          }
+        ],
+        "decision": "INCOMPLETE_INFORMATION",
+        "clarification_questions": [
+          "What is BlackRock's intent for holding these Ford shares (trading, long-term strategic investment, or to exercise significant influence)?",
+          "Does the 10% ownership give BlackRock any board representation, participation in policy-making, or other indicators of significant influence over Ford's operations?"
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 535,
+        "output_tokens": 423,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 134,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 510,
+        "output_tokens": 148,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 678,
+        "output_tokens": 256,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 678,
+        "output_tokens": 311,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1224,
+        "output_tokens": 420,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

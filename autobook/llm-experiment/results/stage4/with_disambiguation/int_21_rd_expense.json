@@ -1,0 +1,570 @@
+{
+  "test_case_id": "int_21_rd_expense",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Cannot construct entry without knowing whether materials are for research phase (expense immediately per IAS 38.54) or development phase meeting capitalization criteria (capitalize as intangible asset per IAS 38.57). The transaction text states 'research and development' but does not specify the phase or whether capitalization criteria are met.",
+    "lines": []
+  },
+  "actual_cost_usd": 0.0538107,
+  "raw_cost_usd": 0.081186,
+  "total_latency_ms": 39630,
+  "total_input_tokens": 12502,
+  "total_output_tokens": 2912,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 530,
+      "output_tokens": 523,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2877,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0101391,
+      "raw_cost_usd": 0.016476,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "Cheque payment is stated explicitly; this is a factual detail that doesn't create ambiguity\u2014both cash and cheque payments reduce the same cash account"
+          },
+          {
+            "aspect": "supplier identity",
+            "resolution": "Specific supplier name doesn't change the entry structure\u2014accounts payable or cash reduction applies regardless"
+          },
+          {
+            "aspect": "payment timing (immediate vs on account)",
+            "resolution": "'Paying $50,000 by cheque' indicates immediate payment, not on credit"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "accounting treatment of R&D materials",
+            "options": [
+              "Expense immediately as R&D expense under IAS 38 (research phase)",
+              "Capitalize as inventory/materials if development phase criteria met",
+              "Capitalize as part of intangible asset development cost if IFRS criteria satisfied"
+            ],
+            "clarification_question": "Is this purchase for the research phase (pre-technical feasibility) or the development phase (post-technical feasibility with intent to complete and use/sell)?",
+            "why_entry_differs": "Research phase materials must be expensed immediately to R&D expense. Development phase materials meeting IAS 38 criteria are capitalized as intangible asset development costs or inventory. This changes whether the debit is to expense (income statement impact) or asset (balance sheet)",
+            "why_not_resolved": "IAS 38 requires research costs to be expensed but allows development costs to be capitalized when specific criteria are met. The transaction states 'research and development' without clarifying which phase applies. The phrase 'raw materials' suggests potential inventory treatment, but 'for research and development' indicates R&D activity. Standard convention doesn't provide a default\u2014the correct treatment depends on the actual phase of the project and whether IAS 38 capitalization criteria are satisfied, which cannot be determined from the transaction text alone"
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 505,
+      "output_tokens": 409,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2051,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008113800000000001,
+      "raw_cost_usd": 0.012288,
+      "output": {
+        "asset_increase_reason": "No asset increases. Raw materials purchased for R&D are not capitalized to inventory under IFRS because R&D costs (especially research phase) are generally expensed as incurred, not treated as product costs.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "R&D expense increases. Under IFRS, research costs must be expensed as incurred. Raw materials purchased specifically for R&D of a new product are R&D expenses, not inventory or manufacturing costs, because they are consumed in the research/development process rather than in production for sale.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down. Payment is made by cheque directly to supplier.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts decrease in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue-related adjustments in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 503,
+      "output_tokens": 370,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2019,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0075138,
+      "raw_cost_usd": 0.011607,
+      "output": {
+        "liability_increase_reason": "No liabilities are created; payment is made immediately by cheque.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity contributions or increases occur in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a purchase transaction.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash/bank account decreases by $50,000 as payment is made by cheque.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense reversals or reductions occur. Under IFRS, R&D materials are expensed when purchased for research activities (IAS 38), so the debit side would record R&D expense, not a reduction.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 825,
+      "output_tokens": 1610,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5555,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.028044,
+      "raw_cost_usd": 0.040815,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "R&D materials treatment",
+            "reason": "Under IAS 38, research phase costs must be expensed, while development phase costs may be capitalized if they meet strict criteria (technical feasibility, intention to complete, ability to use/sell, probable future economic benefits, adequate resources, and ability to measure expenditure reliably). The transaction states 'research and development' but does not specify which phase these materials are for, nor whether development phase capitalization criteria are met. If this is research phase, the entry is Debit: Research Expense $50,000, Credit: Cash $50,000. If this is development phase meeting capitalization criteria, the entry is Debit: Development Asset (or Intangible Asset Under Development) $50,000, Credit: Cash $50,000. The debit/credit structure differs fundamentally (expense vs asset).",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "Are these raw materials for the research phase or the development phase of the new snack product?",
+          "If for the development phase, has the project met all IAS 38 capitalization criteria (technical feasibility established, intention and ability to complete and use/sell the product, demonstration of probable future economic benefits, availability of adequate resources, and ability to reliably measure expenditure)?"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "The classifier proposed 0 asset increases. However, if these materials are for the development phase and meet IAS 38 capitalization criteria, there should be 1 debit to an intangible asset account. Cannot determine without clarification.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier proposed 1 expense increase. If these materials are for the research phase (or development phase not meeting capitalization criteria), this would be correct - debit Research Expense or R&D Expense. However, if for capitalizable development, this should be 0. Cannot determine without clarification.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Research and Development Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability payment described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue reversal described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability incurred - payment was by cheque (immediate). Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Payment by cheque reduces cash/bank asset. Classifier correctly identified 1 asset decrease. Accept.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot construct entry without knowing whether materials are for research phase (expense immediately per IAS 38.54) or development phase meeting capitalization criteria (capitalize as intangible asset per IAS 38.57). The transaction text states 'research and development' but does not specify the phase or whether capitalization criteria are met.",
+          "lines": []
+        },
+        "decision_rationale": "Under IAS 38, research costs must be expensed when incurred, while development costs may be capitalized only if strict criteria are met. The transaction describes materials purchased for 'research and development of a new snack product' but does not specify: (1) whether this is research phase or development phase, and (2) if development, whether the IAS 38.57 capitalization criteria are satisfied. These are business facts that fundamentally change the journal entry structure: research phase requires Debit: Research Expense / Credit: Cash, while capitalizable development requires Debit: Intangible Asset Under Development / Credit: Cash. The classifier proposed expense treatment, which may be correct for research phase, but without confirmation of the phase and capitalization status, I cannot determine the correct entry. This is not a matter of accounting judgment - it requires factual information about the project stage and management's assessment of capitalization criteria.",
+        "decision": "INCOMPLETE_INFORMATION"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "Cheque payment is stated explicitly; this is a factual detail that doesn't create ambiguity\u2014both cash and cheque payments reduce the same cash account"
+          },
+          {
+            "aspect": "supplier identity",
+            "resolution": "Specific supplier name doesn't change the entry structure\u2014accounts payable or cash reduction applies regardless"
+          },
+          {
+            "aspect": "payment timing (immediate vs on account)",
+            "resolution": "'Paying $50,000 by cheque' indicates immediate payment, not on credit"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "accounting treatment of R&D materials",
+            "options": [
+              "Expense immediately as R&D expense under IAS 38 (research phase)",
+              "Capitalize as inventory/materials if development phase criteria met",
+              "Capitalize as part of intangible asset development cost if IFRS criteria satisfied"
+            ],
+            "clarification_question": "Is this purchase for the research phase (pre-technical feasibility) or the development phase (post-technical feasibility with intent to complete and use/sell)?",
+            "why_entry_differs": "Research phase materials must be expensed immediately to R&D expense. Development phase materials meeting IAS 38 criteria are capitalized as intangible asset development costs or inventory. This changes whether the debit is to expense (income statement impact) or asset (balance sheet)",
+            "why_not_resolved": "IAS 38 requires research costs to be expensed but allows development costs to be capitalized when specific criteria are met. The transaction states 'research and development' without clarifying which phase applies. The phrase 'raw materials' suggests potential inventory treatment, but 'for research and development' indicates R&D activity. Standard convention doesn't provide a default\u2014the correct treatment depends on the actual phase of the project and whether IAS 38 capitalization criteria are satisfied, which cannot be determined from the transaction text alone"
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No asset increases. Raw materials purchased for R&D are not capitalized to inventory under IFRS because R&D costs (especially research phase) are generally expensed as incurred, not treated as product costs.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "R&D expense increases. Under IFRS, research costs must be expensed as incurred. Raw materials purchased specifically for R&D of a new product are R&D expenses, not inventory or manufacturing costs, because they are consumed in the research/development process rather than in production for sale.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down. Payment is made by cheque directly to supplier.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts decrease in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue-related adjustments in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created; payment is made immediately by cheque.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity contributions or increases occur in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a purchase transaction.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash/bank account decreases by $50,000 as payment is made by cheque.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense reversals or reductions occur. Under IFRS, R&D materials are expensed when purchased for research activities (IAS 38), so the debit side would record R&D expense, not a reduction.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No asset increases. Raw materials purchased for R&D are not capitalized to inventory under IFRS because R&D costs (especially research phase) are generally expensed as incurred, not treated as product costs.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "R&D expense increases. Under IFRS, research costs must be expensed as incurred. Raw materials purchased specifically for R&D of a new product are R&D expenses, not inventory or manufacturing costs, because they are consumed in the research/development process rather than in production for sale.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down. Payment is made by cheque directly to supplier.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts decrease in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue-related adjustments in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created; payment is made immediately by cheque.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity contributions or increases occur in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a purchase transaction.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash/bank account decreases by $50,000 as payment is made by cheque.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense reversals or reductions occur. Under IFRS, R&D materials are expensed when purchased for research activities (IAS 38), so the debit side would record R&D expense, not a reduction.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "R&D materials treatment",
+            "reason": "Under IAS 38, research phase costs must be expensed, while development phase costs may be capitalized if they meet strict criteria (technical feasibility, intention to complete, ability to use/sell, probable future economic benefits, adequate resources, and ability to measure expenditure reliably). The transaction states 'research and development' but does not specify which phase these materials are for, nor whether development phase capitalization criteria are met. If this is research phase, the entry is Debit: Research Expense $50,000, Credit: Cash $50,000. If this is development phase meeting capitalization criteria, the entry is Debit: Development Asset (or Intangible Asset Under Development) $50,000, Credit: Cash $50,000. The debit/credit structure differs fundamentally (expense vs asset).",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "Are these raw materials for the research phase or the development phase of the new snack product?",
+          "If for the development phase, has the project met all IAS 38 capitalization criteria (technical feasibility established, intention and ability to complete and use/sell the product, demonstration of probable future economic benefits, availability of adequate resources, and ability to reliably measure expenditure)?"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "The classifier proposed 0 asset increases. However, if these materials are for the development phase and meet IAS 38 capitalization criteria, there should be 1 debit to an intangible asset account. Cannot determine without clarification.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier proposed 1 expense increase. If these materials are for the research phase (or development phase not meeting capitalization criteria), this would be correct - debit Research Expense or R&D Expense. However, if for capitalizable development, this should be 0. Cannot determine without clarification.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Research and Development Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability payment described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue reversal described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability incurred - payment was by cheque (immediate). Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Payment by cheque reduces cash/bank asset. Classifier correctly identified 1 asset decrease. Accept.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal described. Accept classifier count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot construct entry without knowing whether materials are for research phase (expense immediately per IAS 38.54) or development phase meeting capitalization criteria (capitalize as intangible asset per IAS 38.57). The transaction text states 'research and development' but does not specify the phase or whether capitalization criteria are met.",
+          "lines": []
+        },
+        "decision_rationale": "Under IAS 38, research costs must be expensed when incurred, while development costs may be capitalized only if strict criteria are met. The transaction describes materials purchased for 'research and development of a new snack product' but does not specify: (1) whether this is research phase or development phase, and (2) if development, whether the IAS 38.57 capitalization criteria are satisfied. These are business facts that fundamentally change the journal entry structure: research phase requires Debit: Research Expense / Credit: Cash, while capitalizable development requires Debit: Intangible Asset Under Development / Credit: Cash. The classifier proposed expense treatment, which may be correct for research phase, but without confirmation of the phase and capitalization status, I cannot determine the correct entry. This is not a matter of accounting judgment - it requires factual information about the project stage and management's assessment of capitalization criteria.",
+        "decision": "INCOMPLETE_INFORMATION"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 530,
+        "output_tokens": 523,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 505,
+        "output_tokens": 409,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 503,
+        "output_tokens": 370,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 825,
+        "output_tokens": 1610,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,563 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    2,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of land and building for warehouse, 50% paid by cheque with HST on building, 50% deferred",
+    "rationale": "The $9,000,000 purchase price is allocated between land and building based on relative fair values: land = $9M \u00d7 (8M/12M) = $6M, building = $9M \u00d7 (4M/12M) = $3M. Land is not subject to sales tax. Building attracts 10% HST = $300,000, which is recoverable as an input tax credit (HST Receivable). Payment structure: 50% of purchase price ($4,500,000) plus HST on building ($300,000) = $4,800,000 paid by cheque now. Remaining 50% of purchase price ($4,500,000) is deferred as accounts payable due in 6 months. Total debits: $6M land + $3M building + $300k HST = $9.3M. Total credits: $4.8M cash + $4.5M payable = $9.3M.",
+    "lines": [
+      {
+        "account_name": "Land",
+        "type": "debit",
+        "amount": 6000000.0
+      },
+      {
+        "account_name": "Building",
+        "type": "debit",
+        "amount": 3000000.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 300000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 4800000.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 4500000.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "allocation of $9,000,000 purchase price between land and building",
+        "action": "proceed",
+        "reason": "Fair values are explicitly stated in the transaction text, and IFRS requires allocation based on relative fair values. This is a determinable accounting calculation, not a missing business fact."
+      },
+      {
+        "aspect": "which portion of purchase price is paid now vs deferred",
+        "action": "proceed",
+        "reason": "Transaction text clearly states 50% due in 6 months and balance paid by cheque. Payment structure is unambiguous."
+      },
+      {
+        "aspect": "sales tax applicability",
+        "action": "proceed",
+        "reason": "Transaction explicitly states 10% sales tax on the building. Standard Canadian tax treatment exempts land from HST. No ambiguity."
+      },
+      {
+        "aspect": "calculation of sales tax amount",
+        "action": "proceed",
+        "reason": "HST applies to the allocated cost of the building ($3M), not its fair value. This is standard tax treatment - no business fact missing."
+      },
+      {
+        "aspect": "treatment of deferred payment",
+        "action": "proceed",
+        "reason": "No interest mentioned in transaction. Under IFRS, short-term payables (6 months) with no stated interest are recorded at face value. Standard accounting treatment applies."
+      },
+      {
+        "aspect": "HST recovery",
+        "action": "proceed",
+        "reason": "Commercial entity purchasing building for business use - HST is recoverable as input tax credit. This is standard tax treatment, not a missing business fact."
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.042435600000000004,
+  "raw_cost_usd": 0.064338,
+  "total_latency_ms": 37161,
+  "total_input_tokens": 11501,
+  "total_output_tokens": 1989,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 600,
+      "output_tokens": 505,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2995,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0100935,
+      "raw_cost_usd": 0.01656,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "resolved": true,
+            "resolution": "Fair values are explicitly provided ($8,000,000 land, $4,000,000 building). Standard accounting convention requires allocation based on relative fair values: land = $9M \u00d7 (8M/12M) = $6M, building = $9M \u00d7 (4M/12M) = $3M",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "which portion of purchase price is paid now vs deferred",
+            "resolved": true,
+            "resolution": "Text states 'balance plus 10% sales tax on the building was paid by cheque' \u2014 this means the amount paid now is 50% of purchase price ($4,500,000) plus sales tax on the building component",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "sales tax applicability",
+            "resolved": true,
+            "resolution": "Text explicitly states '10% sales tax on the building' \u2014 land is not subject to sales tax (standard tax treatment), only the building component attracts HST",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "calculation of sales tax amount",
+            "resolved": true,
+            "resolution": "Sales tax applies to the building's allocated cost ($3,000,000 based on fair value allocation), not the building's fair value. Tax = $3,000,000 \u00d7 10% = $300,000",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "treatment of deferred payment",
+            "resolved": true,
+            "resolution": "50% due in 6 months creates accounts payable of $4,500,000. No interest mentioned, so recorded at face value",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "HST recovery",
+            "resolved": true,
+            "resolution": "Corporation in Ontario \u2014 HST paid on building is recoverable as input tax credit (ITC), recorded as HST Recoverable asset, not capitalized to building cost",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 575,
+      "output_tokens": 247,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1837,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005808600000000001,
+      "raw_cost_usd": 0.009216,
+      "output": {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). The sales tax on the building ($300,000 = 10% \u00d7 3M) is capitalized to the building cost under IFRS, making it part of the building's acquisition cost. Land and building must be recorded in separate accounts because land is non-depreciable while buildings are depreciable assets. The payment method (partial cash, partial deferred) and the sales tax do not create additional debit lines\u2014they affect only the credit side.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). The sales tax on the building ($300,000 = 10% \u00d7 3M) is capitalized to the building cost under IFRS, making it part of the building's acquisition cost. Land and building must be recorded in separate accounts because land is non-depreciable while buildings are depreciable assets. The payment method (partial cash, partial deferred) and the sales tax do not create additional debit lines\u2014they affect only the credit side."
+    },
+    "credit_classifier": {
+      "input_tokens": 573,
+      "output_tokens": 289,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1814,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0064263,
+      "raw_cost_usd": 0.009777,
+      "output": {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)"
+    },
+    "entry_builder": {
+      "input_tokens": 1641,
+      "output_tokens": 948,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4855,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.020107200000000002,
+      "raw_cost_usd": 0.028785,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of land and building for warehouse, 50% paid by cheque with HST on building, 50% deferred",
+        "rationale": "The $9,000,000 purchase price is allocated between land and building based on relative fair values: land = $9M \u00d7 (8M/12M) = $6M, building = $9M \u00d7 (4M/12M) = $3M. Land is not subject to sales tax. Building attracts 10% HST = $300,000, which is recoverable as an input tax credit (HST Receivable). Payment structure: 50% of purchase price ($4,500,000) plus HST on building ($300,000) = $4,800,000 paid by cheque now. Remaining 50% of purchase price ($4,500,000) is deferred as accounts payable due in 6 months. Total debits: $6M land + $3M building + $300k HST = $9.3M. Total credits: $4.8M cash + $4.5M payable = $9.3M.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 300000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4800000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "action": "proceed",
+            "reason": "Fair values are explicitly stated in the transaction text, and IFRS requires allocation based on relative fair values. This is a determinable accounting calculation, not a missing business fact."
+          },
+          {
+            "aspect": "which portion of purchase price is paid now vs deferred",
+            "action": "proceed",
+            "reason": "Transaction text clearly states 50% due in 6 months and balance paid by cheque. Payment structure is unambiguous."
+          },
+          {
+            "aspect": "sales tax applicability",
+            "action": "proceed",
+            "reason": "Transaction explicitly states 10% sales tax on the building. Standard Canadian tax treatment exempts land from HST. No ambiguity."
+          },
+          {
+            "aspect": "calculation of sales tax amount",
+            "action": "proceed",
+            "reason": "HST applies to the allocated cost of the building ($3M), not its fair value. This is standard tax treatment - no business fact missing."
+          },
+          {
+            "aspect": "treatment of deferred payment",
+            "action": "proceed",
+            "reason": "No interest mentioned in transaction. Under IFRS, short-term payables (6 months) with no stated interest are recorded at face value. Standard accounting treatment applies."
+          },
+          {
+            "aspect": "HST recovery",
+            "action": "proceed",
+            "reason": "Commercial entity purchasing building for business use - HST is recoverable as input tax credit. This is standard tax treatment, not a missing business fact."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "resolved": true,
+            "resolution": "Fair values are explicitly provided ($8,000,000 land, $4,000,000 building). Standard accounting convention requires allocation based on relative fair values: land = $9M \u00d7 (8M/12M) = $6M, building = $9M \u00d7 (4M/12M) = $3M",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "which portion of purchase price is paid now vs deferred",
+            "resolved": true,
+            "resolution": "Text states 'balance plus 10% sales tax on the building was paid by cheque' \u2014 this means the amount paid now is 50% of purchase price ($4,500,000) plus sales tax on the building component",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "sales tax applicability",
+            "resolved": true,
+            "resolution": "Text explicitly states '10% sales tax on the building' \u2014 land is not subject to sales tax (standard tax treatment), only the building component attracts HST",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "calculation of sales tax amount",
+            "resolved": true,
+            "resolution": "Sales tax applies to the building's allocated cost ($3,000,000 based on fair value allocation), not the building's fair value. Tax = $3,000,000 \u00d7 10% = $300,000",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "treatment of deferred payment",
+            "resolved": true,
+            "resolution": "50% due in 6 months creates accounts payable of $4,500,000. No interest mentioned, so recorded at face value",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "HST recovery",
+            "resolved": true,
+            "resolution": "Corporation in Ontario \u2014 HST paid on building is recoverable as input tax credit (ITC), recorded as HST Recoverable asset, not capitalized to building cost",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). The sales tax on the building ($300,000 = 10% \u00d7 3M) is capitalized to the building cost under IFRS, making it part of the building's acquisition cost. Land and building must be recorded in separate accounts because land is non-depreciable while buildings are depreciable assets. The payment method (partial cash, partial deferred) and the sales tax do not create additional debit lines\u2014they affect only the credit side.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). The sales tax on the building ($300,000 = 10% \u00d7 3M) is capitalized to the building cost under IFRS, making it part of the building's acquisition cost. Land and building must be recorded in separate accounts because land is non-depreciable while buildings are depreciable assets. The payment method (partial cash, partial deferred) and the sales tax do not create additional debit lines\u2014they affect only the credit side.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of land and building for warehouse, 50% paid by cheque with HST on building, 50% deferred",
+        "rationale": "The $9,000,000 purchase price is allocated between land and building based on relative fair values: land = $9M \u00d7 (8M/12M) = $6M, building = $9M \u00d7 (4M/12M) = $3M. Land is not subject to sales tax. Building attracts 10% HST = $300,000, which is recoverable as an input tax credit (HST Receivable). Payment structure: 50% of purchase price ($4,500,000) plus HST on building ($300,000) = $4,800,000 paid by cheque now. Remaining 50% of purchase price ($4,500,000) is deferred as accounts payable due in 6 months. Total debits: $6M land + $3M building + $300k HST = $9.3M. Total credits: $4.8M cash + $4.5M payable = $9.3M.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 300000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4800000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "action": "proceed",
+            "reason": "Fair values are explicitly stated in the transaction text, and IFRS requires allocation based on relative fair values. This is a determinable accounting calculation, not a missing business fact."
+          },
+          {
+            "aspect": "which portion of purchase price is paid now vs deferred",
+            "action": "proceed",
+            "reason": "Transaction text clearly states 50% due in 6 months and balance paid by cheque. Payment structure is unambiguous."
+          },
+          {
+            "aspect": "sales tax applicability",
+            "action": "proceed",
+            "reason": "Transaction explicitly states 10% sales tax on the building. Standard Canadian tax treatment exempts land from HST. No ambiguity."
+          },
+          {
+            "aspect": "calculation of sales tax amount",
+            "action": "proceed",
+            "reason": "HST applies to the allocated cost of the building ($3M), not its fair value. This is standard tax treatment - no business fact missing."
+          },
+          {
+            "aspect": "treatment of deferred payment",
+            "action": "proceed",
+            "reason": "No interest mentioned in transaction. Under IFRS, short-term payables (6 months) with no stated interest are recorded at face value. Standard accounting treatment applies."
+          },
+          {
+            "aspect": "HST recovery",
+            "action": "proceed",
+            "reason": "Commercial entity purchasing building for business use - HST is recoverable as input tax credit. This is standard tax treatment, not a missing business fact."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 600,
+        "output_tokens": 505,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 575,
+        "output_tokens": 247,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 573,
+        "output_tokens": 289,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1641,
+        "output_tokens": 948,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

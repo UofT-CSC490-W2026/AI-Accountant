@@ -1,0 +1,698 @@
+{
+  "test_case_id": "int_26a_payroll_recognition",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    4,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Production worker wages ($25,000) are manufacturing costs and must be capitalized to Work in Process Inventory per IFRS. Administrative salaries ($20,000) are period costs expensed immediately. Four withholding liabilities are created for amounts deducted from gross pay: pension $2,000, health insurance $3,250, employment insurance $1,050, and income tax $1,450 (total $7,750). Net pay of $37,250 ($45,000 - $7,750) was paid from the chequing account. No tax lines are added as this is a payroll recognition entry, not a taxable sale or purchase.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Work in Process Inventory",
+        "amount": 25000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Administrative Salaries Expense",
+        "amount": 20000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Pension Contributions Payable",
+        "amount": 2000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Health Insurance Premiums Payable",
+        "amount": 3250.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Employment Insurance Premiums Payable",
+        "amount": 1050.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Income Tax Withholdings Payable",
+        "amount": 1450.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash - Chequing",
+        "amount": 37250.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0613137,
+  "raw_cost_usd": 0.088689,
+  "total_latency_ms": 44450,
+  "total_input_tokens": 12798,
+  "total_output_tokens": 3353,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 604,
+      "output_tokens": 411,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2951,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0086811,
+      "raw_cost_usd": 0.015018,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "allocation of statutory deductions between production and administrative employees",
+            "resolution": "The deductions are stated in aggregate for all employees. Since the entry requires debiting the gross wages/salaries to their respective accounts (Work in Process for production, Administrative Expense for office) and crediting the same liability accounts regardless of employee type, the allocation of deductions between employee groups does not change the journal entry structure or amounts."
+          },
+          {
+            "aspect": "employer portion of statutory contributions",
+            "resolution": "Transaction states 'employee-borne statutory deductions' explicitly, indicating these are employee withholdings only. Employer portions are not mentioned and are not part of this transaction. The entry records only what is described: gross wages/salaries, employee withholdings, and net payment."
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Transaction states 'transferred from the chequing account to employees' personal accounts' \u2014 this clearly identifies the bank account to be credited."
+          },
+          {
+            "aspect": "treatment of production worker wages",
+            "resolution": "Production worker wages are capitalized to Work in Process (inventory) as manufacturing overhead or direct labor, following standard cost accounting for manufacturing entities. This is the conventional treatment for production wages."
+          },
+          {
+            "aspect": "treatment of administrative salaries",
+            "resolution": "Administrative salaries are expensed to Administrative Salaries Expense (or similar period expense account), following standard accounting convention for non-production personnel costs."
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 579,
+      "output_tokens": 407,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2125,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008305799999999999,
+      "raw_cost_usd": 0.01248,
+      "output": {
+        "asset_increase_reason": "Work-in-process inventory (or manufacturing overhead) increases by $25,000 for production worker wages. Under IFRS, manufacturing labor costs are product costs that must be capitalized to inventory, not expensed immediately.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Administrative salaries of $20,000 are period costs (operating expenses) that are expensed immediately as they relate to general administration, not production.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction. The withholdings create liabilities (payable to government/insurers), and the net pay creates a liability (wages payable) before transfer.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by payroll recognition.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 577,
+      "output_tokens": 494,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2093,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0095958,
+      "raw_cost_usd": 0.013689,
+      "output": {
+        "liability_increase_reason": "Four distinct statutory withholding liabilities increase: (1) pension contributions payable $2,000, (2) health insurance premiums payable $3,250, (3) employment insurance premiums payable $1,050, and (4) income tax withholdings payable $1,450. These are amounts withheld from employees that the company must remit to authorities/providers.",
+        "liability_increase_count": 4,
+        "equity_increase_reason": "No equity accounts increase. This is a payroll expense and liability recognition transaction, not an owner investment.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. Payroll is an expense/cost recognition event, not a revenue-generating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash (chequing account) decreases by the net payroll amount ($45,000 gross wages less $7,750 total withholdings = $37,250) transferred to employees' personal accounts.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved. This transaction relates to employee compensation only.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease. The production wages are capitalized to inventory (work-in-process) and administrative salaries are recognized as period expenses - both are debits that increase their respective accounts, not credits that would decrease expenses.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 899,
+      "output_tokens": 2041,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5629,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.034731,
+      "raw_cost_usd": 0.047502,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Production worker wages capitalization",
+            "reason": "The transaction states production worker wages of $25,000. Under IFRS, manufacturing labor costs are product costs that should be capitalized to inventory (Work in Process or Finished Goods), not expensed immediately. However, the transaction does not specify whether these workers were engaged in production activities that should be capitalized or other activities. The debit tuple suggests one expense increase, but production wages should increase inventory (asset), not expense.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Withholding amounts allocation",
+            "reason": "Total gross pay is $45,000 ($25,000 + $20,000). Total withholdings are $7,750 ($2,000 + $3,250 + $1,050 + $1,450). Net pay should be $37,250. The transaction states this net amount was transferred, which is determinable from the text.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Employer portion of statutory contributions",
+            "reason": "The transaction only mentions employee-borne deductions. It does not mention employer portions of pension, health insurance, or employment insurance, which are typically also recorded when payroll is recognized. However, the transaction explicitly states only employee-borne deductions were involved, so we should record only what is stated.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Override the upstream count. Production worker wages should be capitalized to inventory as they are manufacturing costs under IFRS. This is one asset increase (Work in Process Inventory), not included in the upstream tuple which only counted 1 asset increase generically.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Work in Process Inventory"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this payroll transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Administrative salaries of $20,000 are period costs and should be expensed. This is one expense line. Accept upstream count of 1.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Administrative Salaries Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction. All withholdings create new liabilities. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Four separate withholding liabilities are created: pension contributions payable, health insurance premiums payable, employment insurance premiums payable, and income tax withholdings payable. Accept upstream count of 4.",
+          "action": "accept",
+          "count": 4,
+          "accounts": [
+            "Pension Contributions Payable",
+            "Health Insurance Premiums Payable",
+            "Employment Insurance Premiums Payable",
+            "Income Tax Withholdings Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue in this payroll transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Cash (chequing account) is reduced by the net pay amount of $37,250. Accept upstream count of 1.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash - Chequing"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Production worker wages ($25,000) are manufacturing costs and must be capitalized to Work in Process Inventory per IFRS. Administrative salaries ($20,000) are period costs expensed immediately. Four withholding liabilities are created for amounts deducted from gross pay: pension $2,000, health insurance $3,250, employment insurance $1,050, and income tax $1,450 (total $7,750). Net pay of $37,250 ($45,000 - $7,750) was paid from the chequing account. No tax lines are added as this is a payroll recognition entry, not a taxable sale or purchase.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Work in Process Inventory",
+              "amount": 25000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Administrative Salaries Expense",
+              "amount": 20000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Pension Contributions Payable",
+              "amount": 2000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Health Insurance Premiums Payable",
+              "amount": 3250.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Employment Insurance Premiums Payable",
+              "amount": 1050.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Income Tax Withholdings Payable",
+              "amount": 1450.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash - Chequing",
+              "amount": 37250.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction provides all necessary information to construct the entry. Production worker wages are properly capitalized to inventory as manufacturing costs under IFRS, while administrative salaries are expensed. All withholding amounts are explicitly stated and create separate liability accounts. The net pay calculation is determinable: $45,000 gross - $7,750 withholdings = $37,250 net. Total debits ($45,000) equal total credits ($45,000). The entry complies with IFRS standards for manufacturing cost capitalization and payroll accounting.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "allocation of statutory deductions between production and administrative employees",
+            "resolution": "The deductions are stated in aggregate for all employees. Since the entry requires debiting the gross wages/salaries to their respective accounts (Work in Process for production, Administrative Expense for office) and crediting the same liability accounts regardless of employee type, the allocation of deductions between employee groups does not change the journal entry structure or amounts."
+          },
+          {
+            "aspect": "employer portion of statutory contributions",
+            "resolution": "Transaction states 'employee-borne statutory deductions' explicitly, indicating these are employee withholdings only. Employer portions are not mentioned and are not part of this transaction. The entry records only what is described: gross wages/salaries, employee withholdings, and net payment."
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Transaction states 'transferred from the chequing account to employees' personal accounts' \u2014 this clearly identifies the bank account to be credited."
+          },
+          {
+            "aspect": "treatment of production worker wages",
+            "resolution": "Production worker wages are capitalized to Work in Process (inventory) as manufacturing overhead or direct labor, following standard cost accounting for manufacturing entities. This is the conventional treatment for production wages."
+          },
+          {
+            "aspect": "treatment of administrative salaries",
+            "resolution": "Administrative salaries are expensed to Administrative Salaries Expense (or similar period expense account), following standard accounting convention for non-production personnel costs."
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Work-in-process inventory (or manufacturing overhead) increases by $25,000 for production worker wages. Under IFRS, manufacturing labor costs are product costs that must be capitalized to inventory, not expensed immediately.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Administrative salaries of $20,000 are period costs (operating expenses) that are expensed immediately as they relate to general administration, not production.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction. The withholdings create liabilities (payable to government/insurers), and the net pay creates a liability (wages payable) before transfer.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by payroll recognition.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Four distinct statutory withholding liabilities increase: (1) pension contributions payable $2,000, (2) health insurance premiums payable $3,250, (3) employment insurance premiums payable $1,050, and (4) income tax withholdings payable $1,450. These are amounts withheld from employees that the company must remit to authorities/providers.",
+        "liability_increase_count": 4,
+        "equity_increase_reason": "No equity accounts increase. This is a payroll expense and liability recognition transaction, not an owner investment.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. Payroll is an expense/cost recognition event, not a revenue-generating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash (chequing account) decreases by the net payroll amount ($45,000 gross wages less $7,750 total withholdings = $37,250) transferred to employees' personal accounts.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved. This transaction relates to employee compensation only.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease. The production wages are capitalized to inventory (work-in-process) and administrative salaries are recognized as period expenses - both are debits that increase their respective accounts, not credits that would decrease expenses.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Work-in-process inventory (or manufacturing overhead) increases by $25,000 for production worker wages. Under IFRS, manufacturing labor costs are product costs that must be capitalized to inventory, not expensed immediately.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Administrative salaries of $20,000 are period costs (operating expenses) that are expensed immediately as they relate to general administration, not production.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction. The withholdings create liabilities (payable to government/insurers), and the net pay creates a liability (wages payable) before transfer.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by payroll recognition.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Four distinct statutory withholding liabilities increase: (1) pension contributions payable $2,000, (2) health insurance premiums payable $3,250, (3) employment insurance premiums payable $1,050, and (4) income tax withholdings payable $1,450. These are amounts withheld from employees that the company must remit to authorities/providers.",
+        "liability_increase_count": 4,
+        "equity_increase_reason": "No equity accounts increase. This is a payroll expense and liability recognition transaction, not an owner investment.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. Payroll is an expense/cost recognition event, not a revenue-generating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash (chequing account) decreases by the net payroll amount ($45,000 gross wages less $7,750 total withholdings = $37,250) transferred to employees' personal accounts.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved. This transaction relates to employee compensation only.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease. The production wages are capitalized to inventory (work-in-process) and administrative salaries are recognized as period expenses - both are debits that increase their respective accounts, not credits that would decrease expenses.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Production worker wages capitalization",
+            "reason": "The transaction states production worker wages of $25,000. Under IFRS, manufacturing labor costs are product costs that should be capitalized to inventory (Work in Process or Finished Goods), not expensed immediately. However, the transaction does not specify whether these workers were engaged in production activities that should be capitalized or other activities. The debit tuple suggests one expense increase, but production wages should increase inventory (asset), not expense.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Withholding amounts allocation",
+            "reason": "Total gross pay is $45,000 ($25,000 + $20,000). Total withholdings are $7,750 ($2,000 + $3,250 + $1,050 + $1,450). Net pay should be $37,250. The transaction states this net amount was transferred, which is determinable from the text.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Employer portion of statutory contributions",
+            "reason": "The transaction only mentions employee-borne deductions. It does not mention employer portions of pension, health insurance, or employment insurance, which are typically also recorded when payroll is recognized. However, the transaction explicitly states only employee-borne deductions were involved, so we should record only what is stated.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Override the upstream count. Production worker wages should be capitalized to inventory as they are manufacturing costs under IFRS. This is one asset increase (Work in Process Inventory), not included in the upstream tuple which only counted 1 asset increase generically.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Work in Process Inventory"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this payroll transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Administrative salaries of $20,000 are period costs and should be expensed. This is one expense line. Accept upstream count of 1.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Administrative Salaries Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction. All withholdings create new liabilities. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Four separate withholding liabilities are created: pension contributions payable, health insurance premiums payable, employment insurance premiums payable, and income tax withholdings payable. Accept upstream count of 4.",
+          "action": "accept",
+          "count": 4,
+          "accounts": [
+            "Pension Contributions Payable",
+            "Health Insurance Premiums Payable",
+            "Employment Insurance Premiums Payable",
+            "Income Tax Withholdings Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue in this payroll transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Cash (chequing account) is reduced by the net pay amount of $37,250. Accept upstream count of 1.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash - Chequing"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction. Accept upstream count of 0.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Production worker wages ($25,000) are manufacturing costs and must be capitalized to Work in Process Inventory per IFRS. Administrative salaries ($20,000) are period costs expensed immediately. Four withholding liabilities are created for amounts deducted from gross pay: pension $2,000, health insurance $3,250, employment insurance $1,050, and income tax $1,450 (total $7,750). Net pay of $37,250 ($45,000 - $7,750) was paid from the chequing account. No tax lines are added as this is a payroll recognition entry, not a taxable sale or purchase.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Work in Process Inventory",
+              "amount": 25000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Administrative Salaries Expense",
+              "amount": 20000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Pension Contributions Payable",
+              "amount": 2000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Health Insurance Premiums Payable",
+              "amount": 3250.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Employment Insurance Premiums Payable",
+              "amount": 1050.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Income Tax Withholdings Payable",
+              "amount": 1450.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash - Chequing",
+              "amount": 37250.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction provides all necessary information to construct the entry. Production worker wages are properly capitalized to inventory as manufacturing costs under IFRS, while administrative salaries are expensed. All withholding amounts are explicitly stated and create separate liability accounts. The net pay calculation is determinable: $45,000 gross - $7,750 withholdings = $37,250 net. Total debits ($45,000) equal total credits ($45,000). The entry complies with IFRS standards for manufacturing cost capitalization and payroll accounting.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 604,
+        "output_tokens": 411,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 579,
+        "output_tokens": 407,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 577,
+        "output_tokens": 494,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 899,
+        "output_tokens": 2041,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

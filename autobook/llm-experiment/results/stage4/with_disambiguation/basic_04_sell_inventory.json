@@ -1,0 +1,611 @@
+{
+  "test_case_id": "basic_04_sell_inventory",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "This is a standard inventory sale transaction under IFRS. When inventory is sold: (1) Cash increases by the sale price of $500 (debit asset increase), (2) Sales Revenue is recognized at $500 (credit revenue increase), (3) Cost of Goods Sold expense is recognized at the inventory cost of $300 (debit expense increase), and (4) Inventory asset decreases by its cost of $300 (credit asset decrease). No tax was mentioned in the transaction, so no tax lines are added. Total debits: $500 + $300 = $800. Total credits: $500 + $300 = $800. The entry balances.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Cash",
+        "amount": 500.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Cost of Goods Sold",
+        "amount": 300.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Sales Revenue",
+        "amount": 500.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Inventory",
+        "amount": 300.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.044591700000000005,
+  "raw_cost_usd": 0.071967,
+  "total_latency_ms": 27990,
+  "total_input_tokens": 12434,
+  "total_output_tokens": 2311,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 513,
+      "output_tokens": 155,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2860,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0045681,
+      "raw_cost_usd": 0.010905,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "'cash' explicitly stated in transaction description"
+          },
+          {
+            "aspect": "inventory cost basis",
+            "resolution": "$300 cost explicitly stated in transaction description"
+          },
+          {
+            "aspect": "sale price",
+            "resolution": "$500 sale price explicitly stated in transaction description"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 488,
+      "output_tokens": 325,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2034,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0068028,
+      "raw_cost_usd": 0.010977,
+      "output": {
+        "asset_increase_reason": "Cash increases by $500 from the sale",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals in this transaction",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Cost of Goods Sold (COGS) increases by $300 to recognize the cost of inventory sold",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are being reduced",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "Revenue is being recognized (credited), not decreased",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 486,
+      "output_tokens": 356,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2002,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0072528,
+      "raw_cost_usd": 0.011346,
+      "output": {
+        "liability_increase_reason": "No liabilities are created or increased in this transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are directly increased in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Sales revenue of $500 is recognized, which increases revenue (credited).",
+        "revenue_increase_count": 1,
+        "asset_decrease_reason": "Inventory with cost of $300 is removed from assets (credited) as it is sold.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner withdrawals are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased. The cost of goods sold is recorded on the debit side, not as an expense decrease on the credit side.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 808,
+      "output_tokens": 1475,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5538,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.025968,
+      "raw_cost_usd": 0.038739,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Transaction completeness",
+            "reason": "All necessary information is present: inventory cost ($300), sale price ($500), and payment method (cash). This is a standard inventory sale transaction.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Accept. Cash increases by $500 from the sale. This is one asset increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this sale of inventory.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. Cost of Goods Sold (COGS) is recognized as an expense when inventory is sold. The cost is $300.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cost of Goods Sold"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability is being created in this cash sale.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No direct equity increase in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Accept. Sales revenue of $500 is recognized when inventory is sold.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Sales Revenue"
+          ]
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Inventory (an asset) decreases by its cost of $300 when sold.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this sale.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "This is a standard inventory sale transaction under IFRS. When inventory is sold: (1) Cash increases by the sale price of $500 (debit asset increase), (2) Sales Revenue is recognized at $500 (credit revenue increase), (3) Cost of Goods Sold expense is recognized at the inventory cost of $300 (debit expense increase), and (4) Inventory asset decreases by its cost of $300 (credit asset decrease). No tax was mentioned in the transaction, so no tax lines are added. Total debits: $500 + $300 = $800. Total credits: $500 + $300 = $800. The entry balances.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Cash",
+              "amount": 500.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Cost of Goods Sold",
+              "amount": 300.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Sales Revenue",
+              "amount": 500.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Inventory",
+              "amount": 300.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is a straightforward inventory sale for cash. All necessary information is provided: the inventory cost ($300), the sale price ($500), and the payment method (cash). The classifier tuples correctly identify the four components: asset increase (cash), expense increase (COGS), revenue increase (sales), and asset decrease (inventory). The entry follows IFRS standards for revenue recognition (IFRS 15) and inventory accounting (IAS 2). No tax was mentioned, so no tax lines are required. The entry balances with total debits of $800 equaling total credits of $800. This is a complete and correct journal entry.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "'cash' explicitly stated in transaction description"
+          },
+          {
+            "aspect": "inventory cost basis",
+            "resolution": "$300 cost explicitly stated in transaction description"
+          },
+          {
+            "aspect": "sale price",
+            "resolution": "$500 sale price explicitly stated in transaction description"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Cash increases by $500 from the sale",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals in this transaction",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Cost of Goods Sold (COGS) increases by $300 to recognize the cost of inventory sold",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are being reduced",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "Revenue is being recognized (credited), not decreased",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased in this transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are directly increased in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Sales revenue of $500 is recognized, which increases revenue (credited).",
+        "revenue_increase_count": 1,
+        "asset_decrease_reason": "Inventory with cost of $300 is removed from assets (credited) as it is sold.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner withdrawals are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased. The cost of goods sold is recorded on the debit side, not as an expense decrease on the credit side.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Cash increases by $500 from the sale",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals in this transaction",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Cost of Goods Sold (COGS) increases by $300 to recognize the cost of inventory sold",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are being reduced",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "Revenue is being recognized (credited), not decreased",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased in this transaction.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are directly increased in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Sales revenue of $500 is recognized, which increases revenue (credited).",
+        "revenue_increase_count": 1,
+        "asset_decrease_reason": "Inventory with cost of $300 is removed from assets (credited) as it is sold.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner withdrawals are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased. The cost of goods sold is recorded on the debit side, not as an expense decrease on the credit side.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Transaction completeness",
+            "reason": "All necessary information is present: inventory cost ($300), sale price ($500), and payment method (cash). This is a standard inventory sale transaction.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Accept. Cash increases by $500 from the sale. This is one asset increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this sale of inventory.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. Cost of Goods Sold (COGS) is recognized as an expense when inventory is sold. The cost is $300.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cost of Goods Sold"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability is being created in this cash sale.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No direct equity increase in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Accept. Sales revenue of $500 is recognized when inventory is sold.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Sales Revenue"
+          ]
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Inventory (an asset) decreases by its cost of $300 when sold.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this sale.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "This is a standard inventory sale transaction under IFRS. When inventory is sold: (1) Cash increases by the sale price of $500 (debit asset increase), (2) Sales Revenue is recognized at $500 (credit revenue increase), (3) Cost of Goods Sold expense is recognized at the inventory cost of $300 (debit expense increase), and (4) Inventory asset decreases by its cost of $300 (credit asset decrease). No tax was mentioned in the transaction, so no tax lines are added. Total debits: $500 + $300 = $800. Total credits: $500 + $300 = $800. The entry balances.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Cash",
+              "amount": 500.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Cost of Goods Sold",
+              "amount": 300.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Sales Revenue",
+              "amount": 500.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Inventory",
+              "amount": 300.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is a straightforward inventory sale for cash. All necessary information is provided: the inventory cost ($300), the sale price ($500), and the payment method (cash). The classifier tuples correctly identify the four components: asset increase (cash), expense increase (COGS), revenue increase (sales), and asset decrease (inventory). The entry follows IFRS standards for revenue recognition (IFRS 15) and inventory accounting (IAS 2). No tax was mentioned, so no tax lines are required. The entry balances with total debits of $800 equaling total credits of $800. This is a complete and correct journal entry.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 513,
+        "output_tokens": 155,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 488,
+        "output_tokens": 325,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 486,
+        "output_tokens": 356,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 808,
+        "output_tokens": 1475,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

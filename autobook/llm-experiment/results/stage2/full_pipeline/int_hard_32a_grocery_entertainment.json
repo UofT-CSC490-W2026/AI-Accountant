@@ -1,0 +1,616 @@
+{
+  "test_case_id": "int_hard_32a_grocery_entertainment",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Client entertainment - tea, beverages, and refreshments",
+    "rationale": "Entertainment expenses are not eligible for input tax credit (ITC) recovery under Canadian tax rules. The full amount paid including sales tax ($1,320) is recorded as Entertainment Expense. The corporate credit card creates a liability (Credit Card Payable). No HST/GST Receivable is recorded because entertainment expenses have 0% ITC recovery.",
+    "lines": [
+      {
+        "account_name": "Entertainment Expense",
+        "type": "debit",
+        "amount": 1320.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 1320.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0908511,
+  "raw_cost_usd": 0.159828,
+  "total_latency_ms": 60342,
+  "total_input_tokens": 38476,
+  "total_output_tokens": 2960,
+  "total_llm_calls": 13,
+  "iteration_count": 2,
+  "final_decision": "APPROVED",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 546,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2941,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0028815,
+      "raw_cost_usd": 0.009348,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 519,
+      "output_tokens": 120,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1760,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037293,
+      "raw_cost_usd": 0.00708,
+      "output": {
+        "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes the tax to the government), and (2) Credit card payable = liability increase (the business owes the credit card company for the purchase). Both are liabilities increasing.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes the tax to the government), and (2) Credit card payable = liability increase (the business owes the credit card company for the purchase). Both are liabilities increasing."
+    },
+    "debit_classifier": {
+      "input_tokens": 1124,
+      "output_tokens": 289,
+      "cache_read_tokens": 2524,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3648,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.008464200000000002,
+      "raw_cost_usd": 0.015279000000000001,
+      "output": {
+        "reason": "Client entertainment expense = 1 expense increase of $1,320. Under Canadian tax rules, entertainment expenses have 0% ITC recovery, so the $120 sales tax is non-recoverable and must be included in the entertainment expense amount rather than treated as a separate recoverable input tax line.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Client entertainment expense = 1 expense increase of $1,320. Under Canadian tax rules, entertainment expenses have 0% ITC recovery, so the $120 sales tax is non-recoverable and must be included in the entertainment expense amount rather than treated as a separate recoverable input tax line."
+    },
+    "debit_corrector": {
+      "input_tokens": 1378,
+      "output_tokens": 478,
+      "cache_read_tokens": 3492,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4870,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0123516,
+      "raw_cost_usd": 0.02178,
+      "output": {
+        "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two distinct economic events: (1) Entertainment expense of $1,200 - an expense increase, and (2) Sales tax expense of $120 - also an expense increase. Both are period expenses under IFRS. The credit tuple showing 2 liability increases is consistent (credit card payable for both the base amount and tax). The initial debit tuple only counted 1 expense line when there should be 2 separate expense components (entertainment expense and tax expense). Corrected from (0,0,1,0,0,0) to (0,0,2,0,0,0).",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two distinct economic events: (1) Entertainment expense of $1,200 - an expense increase, and (2) Sales tax expense of $120 - also an expense increase. Both are period expenses under IFRS. The credit tuple showing 2 liability increases is consistent (credit card payable for both the base amount and tax). The initial debit tuple only counted 1 expense line when there should be 2 separate expense components (entertainment expense and tax expense). Corrected from (0,0,1,0,0,0) to (0,0,2,0,0,0)."
+    },
+    "credit_corrector": {
+      "input_tokens": 1378,
+      "output_tokens": 573,
+      "cache_read_tokens": 3508,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4886,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0137814,
+      "raw_cost_usd": 0.023253000000000003,
+      "output": {
+        "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two accounting effects: (1) an expense increase (client entertainment expense) and (2) a liability increase (credit card payable). \n\nThe debit side shows (0,0,1,0,0,0) = 1 expense increase, which correctly captures the entertainment expense of $1,320.\n\nThe credit side should reflect: 1 liability increase for the credit card payable of $1,320.\n\nThe initial credit tuple shows (2,0,0,0,0,0) = 2 liability increases, which is incorrect. There is only one liability being increased (the credit card payable). The transaction does not involve two separate liabilities or two separate accounting lines on the credit side.\n\nCorrected to (1,0,0,0,0,0) = 1 liability increase, representing the credit card payable.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two accounting effects: (1) an expense increase (client entertainment expense) and (2) a liability increase (credit card payable). \n\nThe debit side shows (0,0,1,0,0,0) = 1 expense increase, which correctly captures the entertainment expense of $1,320.\n\nThe credit side should reflect: 1 liability increase for the credit card payable of $1,320.\n\nThe initial credit tuple shows (2,0,0,0,0,0) = 2 liability increases, which is incorrect. There is only one liability being increased (the credit card payable). The transaction does not involve two separate liabilities or two separate accounting lines on the credit side.\n\nCorrected to (1,0,0,0,0,0) = 1 liability increase, representing the credit card payable."
+    },
+    "entry_builder": {
+      "input_tokens": 1624,
+      "output_tokens": 571,
+      "cache_read_tokens": 6428,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8052,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.015365400000000001,
+      "raw_cost_usd": 0.032721,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Client entertainment - tea, beverages, and refreshments",
+        "rationale": "Entertainment expenses are not eligible for input tax credit (ITC) recovery under Canadian tax rules. The full amount paid including sales tax ($1,320) is recorded as Entertainment Expense. The corporate credit card creates a liability (Credit Card Payable). No HST/GST Receivable is recorded because entertainment expenses have 0% ITC recovery.",
+        "lines": [
+          {
+            "account_name": "Entertainment Expense",
+            "type": "debit",
+            "amount": 1320.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4656,
+      "output_tokens": 286,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8760,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.019489199999999998,
+      "raw_cost_usd": 0.03057,
+      "output": {
+        "reason": "Entry correctly records client entertainment expense with 0% ITC recovery. Entertainment expenses are not eligible for input tax credits under Canadian tax rules, so the full $1,320 (including $120 sales tax) is properly recorded as Entertainment Expense. No HST Receivable line should exist. Balance verified: $1,320 debit = $1,320 credit. Accounts and amounts match transaction text.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records client entertainment expense with 0% ITC recovery. Entertainment expenses are not eligible for input tax credits under Canadian tax rules, so the full $1,320 (including $120 sales tax) is properly recorded as Entertainment Expense. No HST Receivable line should exist. Balance verified: $1,320 debit = $1,320 credit. Accounts and amounts match transaction text."
+    },
+    "diagnostician": {
+      "input_tokens": 1704,
+      "output_tokens": 608,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3559,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0147885,
+      "raw_cost_usd": 0.019797,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    1,
+    5
+  ],
+  "rejection_reason": "Entertainment has 0% ITC recovery under Canadian tax rules. No HST Receivable allowed. The full $1,320 should be Entertainment Expense. The entry incorrectly records $120 as HST Receivable when entertainment expenses cannot claim input tax credits.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Client entertainment purchases (tea, beverages, refreshments) represent an expense increase. The sales tax paid is also an expense (or recoverable asset if input tax credit applies, but typically for small purchases it's expensed). This creates 2 debit lines: (1) Entertainment/hospitality expense increase for $1,200, and (2) Sales tax expense increase for $120. Both are expense increases = 2 lines in slot c.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Client entertainment expense = 1 expense increase of $1,320. Under Canadian tax rules, entertainment expenses have 0% ITC recovery, so the $120 sales tax is non-recoverable and must be included in the entertainment expense amount rather than treated as a separate recoverable input tax line.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes the tax to the government), and (2) Credit card payable = liability increase (the business owes the credit card company for the purchase). Both are liabilities increasing.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes the tax to the government), and (2) Credit card payable = liability increase (the business owes the credit card company for the purchase). Both are liabilities increasing.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two economic effects: (1) an expense for entertainment/hospitality, and (2) a liability increase for the credit card payable. The initial debit tuple shows 2 expense increases, but there is only ONE expense here - the client entertainment expense of $1,320 (including sales tax, which is part of the cost). The credit tuple correctly shows 2 liability increases: one for the credit card payable ($1,320) and one for the sales tax payable that the company will remit to the government. However, on the debit side, we only have the single entertainment expense. The sales tax is not a separate debit line - it's included in the expense amount. Corrected from (0,0,2,0,0,0) to (0,0,1,0,0,0) to reflect one expense increase.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two distinct economic events: (1) Entertainment expense of $1,200 - an expense increase, and (2) Sales tax expense of $120 - also an expense increase. Both are period expenses under IFRS. The credit tuple showing 2 liability increases is consistent (credit card payable for both the base amount and tax). The initial debit tuple only counted 1 expense line when there should be 2 separate expense components (entertainment expense and tax expense). Corrected from (0,0,1,0,0,0) to (0,0,2,0,0,0).",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves purchasing items for client entertainment ($1,200) plus sales tax ($120), paid by corporate credit card. This creates two distinct economic events on the credit side:\n\n1. The $1,200 purchase creates an entertainment expense (debit)\n2. The $120 sales tax creates a sales tax expense (debit)\n3. Both are paid by corporate credit card, which increases the credit card liability\n\nThe debit tuple shows (0,0,2,0,0,0) = 2 expense increases, which correctly captures the entertainment expense and sales tax expense as separate line items.\n\nThe credit side should record ONE liability increase for the total credit card payable of $1,320. The initial credit tuple of (2,0,0,0,0,0) incorrectly splits the credit card liability into two lines, but since both components have the same account (credit card payable) and same treatment (liability increase), they should be combined into a single line.\n\nCorrected to (1,0,0,0,0,0) = one liability increase for the credit card payable.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two accounting effects: (1) an expense increase (client entertainment expense) and (2) a liability increase (credit card payable). \n\nThe debit side shows (0,0,1,0,0,0) = 1 expense increase, which correctly captures the entertainment expense of $1,320.\n\nThe credit side should reflect: 1 liability increase for the credit card payable of $1,320.\n\nThe initial credit tuple shows (2,0,0,0,0,0) = 2 liability increases, which is incorrect. There is only one liability being increased (the credit card payable). The transaction does not involve two separate liabilities or two separate accounting lines on the credit side.\n\nCorrected to (1,0,0,0,0,0) = 1 liability increase, representing the credit card payable.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2024-01-01",
+        "description": "Tea, beverages, and refreshments for client entertainment",
+        "rationale": "Client entertainment expenses are operating expenses under IFRS. The transaction text explicitly states the business purpose is client entertainment. The 10% sales tax paid is recoverable input tax (HST/GST Receivable). The corporate credit card creates a liability (Credit Card Payable). Debit tuple (0,0,1,0,0,0) indicates one expense line; credit tuple (1,0,0,0,0,0) indicates one liability increase. Tax lines are additional to tuple counts.",
+        "lines": [
+          {
+            "account_name": "Entertainment Expense",
+            "type": "debit",
+            "amount": 1200.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 120.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Client entertainment - tea, beverages, and refreshments",
+        "rationale": "Entertainment expenses are not eligible for input tax credit (ITC) recovery under Canadian tax rules. The full amount paid including sales tax ($1,320) is recorded as Entertainment Expense. The corporate credit card creates a liability (Credit Card Payable). No HST/GST Receivable is recorded because entertainment expenses have 0% ITC recovery.",
+        "lines": [
+          {
+            "account_name": "Entertainment Expense",
+            "type": "debit",
+            "amount": 1320.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entertainment has 0% ITC recovery under Canadian tax rules. No HST Receivable allowed. The full $1,320 should be Entertainment Expense. The entry incorrectly records $120 as HST Receivable when entertainment expenses cannot claim input tax credits.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Entry correctly records client entertainment expense with 0% ITC recovery. Entertainment expenses are not eligible for input tax credits under Canadian tax rules, so the full $1,320 (including $120 sales tax) is properly recorded as Entertainment Expense. No HST Receivable line should exist. Balance verified: $1,320 debit = $1,320 credit. Accounts and amounts match transaction text.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because entertainment expenses have 0% ITC (Input Tax Credit) recovery under Canadian tax rules, meaning no HST Receivable should be recorded. The full $1,320 should be Entertainment Expense.\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier) classified this as 2 expense increases: one for entertainment ($1,200) and one for sales tax ($120). This is incorrect because the sales tax on entertainment is NOT recoverable and should be part of the entertainment expense, not a separate recoverable asset.\n- Agent 3 (Debit Corrector) changed it to 1 expense increase, recognizing the sales tax should be included in the expense amount. This was actually moving in the right direction.\n- Agent 5 (Entry Builder) then added HST Receivable as a separate debit line, treating the tax as recoverable. This is the immediate error.\n\nHowever, the ROOT CAUSE is Agent 1's initial classification. Agent 1 should have recognized that entertainment expenses do not qualify for ITC recovery, and therefore the sales tax is part of the expense cost, not a recoverable asset. Agent 1 classified it as 2 expense increases when it should have been 1 expense increase for the full $1,320.\n\nAgent 5 added the HST Receivable line based on a general rule that sales tax is recoverable, but this rule doesn't apply to entertainment. Agent 5 needs guidance that entertainment expenses specifically have 0% ITC recovery.\n\nBoth Agent 1 and Agent 5 contributed to the error, but Agent 1 is the root cause for not recognizing the non-recoverable nature of entertainment tax, and Agent 5 needs to be told not to add HST Receivable for entertainment expenses.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 1,
+            "fix_context": "Entertainment expenses have 0% ITC recovery under Canadian tax rules. The $120 sales tax is NOT recoverable and must be included in the entertainment expense amount. This is 1 expense increase of $1,320, not 2 separate lines."
+          },
+          {
+            "agent": 5,
+            "fix_context": "Entertainment expenses have 0% ITC recovery. Do NOT add HST Receivable line for entertainment transactions. The full $1,320 (including tax) should be Entertainment Expense."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [
+      "Entertainment expenses have 0% ITC recovery under Canadian tax rules. The $120 sales tax is NOT recoverable and must be included in the entertainment expense amount. This is 1 expense increase of $1,320, not 2 separate lines."
+    ],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Entertainment expenses have 0% ITC recovery. Do NOT add HST Receivable line for entertainment transactions. The full $1,320 (including tax) should be Entertainment Expense."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 546,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 519,
+        "output_tokens": 120,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 161,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 265,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 306,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 778,
+        "output_tokens": 322,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1925,
+        "output_tokens": 128,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1704,
+        "output_tokens": 608,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 603,
+        "output_tokens": 128,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 213,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 267,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 846,
+        "output_tokens": 249,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2731,
+        "output_tokens": 158,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+======================================================================
+Test Case: int_26b_payroll_remittance
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [0, 0, 0, 4, 0, 0]  ✗
+  Credit: [0, 0, 0, 1, 0, 0]  ✓
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (0):
+  (none)
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 0, 4, 0, 0]
+Reason: Mondelez is remitting statutory deductions that were previously withheld from employees and accrued as employer obligations. Each remittance clears a liability:
+1. Pension contributions payable decrease (liability decrease)
+2. Health insurance premiums payable decrease (liability decrease)
+3. Employment insurance premiums payable decrease (liability decrease)
+4. Income tax withholdings payable decrease (liability decrease)
+
+All four represent distinct government obligations being settled, so we count 4 separate liability decrease lines on the debit side.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 0, 1, 0, 0]
+Reason: The transaction involves remitting statutory deductions that were previously withheld/accrued. When Mondelez pays these amounts to government agencies, cash is leaving the business (asset decrease = 1 line). The offsetting debits would reduce the liability accounts for each type of payable (pension payable, health insurance payable, EI payable, income tax payable), but we only classify the credit side. The single cash payment covers all four obligations, so we have one credit line: cash decrease = asset decrease.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Rationale: Mondelez is remitting previously withheld statutory deductions to government agencies. The debit tuple (0,0,0,4,0,0) indicates 4 liability decreases, which matches the 4 types of statutory deductions being remitted: pension contributions, health insurance premiums, employment insurance premiums, and income tax withholdings. These amounts were previously recorded as liabilities when payroll was processed (employer portions expensed and employee portions withheld). Now the company is paying these liabilities in cash. The credit tuple (0,0,0,1,0,0) indicates 1 asset decrease (Cash). This is a straightforward remittance transaction with no tax implications (government remittances are not subject to HST/GST).
+Entry:
+  debit  Pension Payable                               $      4,000.00
+  debit  Health Insurance Payable                      $      6,500.00
+  debit  Employment Insurance Payable                  $      2,100.00
+  debit  Income Tax Payable                            $      1,450.00
+  credit Cash                                          $     14,050.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Pension Payable                               $      4,000.00
+  debit  Health Insurance Payable                      $      6,500.00
+  debit  Employment Insurance Payable                  $      2,100.00
+  debit  Income Tax Payable                            $      1,450.00
+  credit Cash                                          $     14,050.00
+======================================================================

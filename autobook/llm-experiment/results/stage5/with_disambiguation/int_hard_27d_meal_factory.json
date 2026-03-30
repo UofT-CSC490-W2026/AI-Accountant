@@ -1,0 +1,557 @@
+{
+  "test_case_id": "int_hard_27d_meal_factory",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "The meal for factory production staff is manufacturing overhead, which is a product cost capitalized to inventory under IFRS. The corporate credit card creates a liability. No tax mentioned, so no tax lines added.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Manufacturing Overhead",
+        "amount": 125.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Credit Card Payable",
+        "amount": 125.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.043995,
+  "raw_cost_usd": 0.071076,
+  "total_latency_ms": 26245,
+  "total_input_tokens": 12397,
+  "total_output_tokens": 2259,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 531,
+      "output_tokens": 183,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2878,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005042100000000001,
+      "raw_cost_usd": 0.011379,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "Corporate credit card stated explicitly \u2014 resolves to credit card payable"
+          },
+          {
+            "aspect": "purpose of meal expense",
+            "resolution": "Explicitly stated as 'provided to factory production staff' and 'classified as manufacturing overhead' \u2014 resolves to manufacturing overhead cost"
+          },
+          {
+            "aspect": "cost classification",
+            "resolution": "Transaction explicitly states classification as manufacturing overhead, which determines the account treatment"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 506,
+      "output_tokens": 418,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2052,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0082518,
+      "raw_cost_usd": 0.012426,
+      "output": {
+        "asset_increase_reason": "Manufacturing overhead is a product cost that is capitalized to inventory (Work-in-Process or Finished Goods), which is an asset. The $125 meal cost for factory production staff increases the inventory asset account, not an expense account.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Manufacturing overhead is a product cost, not a period expense. Under IFRS, costs directly related to production are capitalized to inventory as an asset, not expensed immediately. The cost will become an expense (COGS) only when the inventory is sold.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The corporate credit card creates or increases a liability; it does not decrease one. The debit side does not affect liabilities.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by this manufacturing overhead transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 504,
+      "output_tokens": 348,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2020,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0071868,
+      "raw_cost_usd": 0.01128,
+      "output": {
+        "liability_increase_reason": "Corporate credit card payable increases by $125 for the meal purchase",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase; this is an expense transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from purchasing a meal",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease; payment is made via credit card (liability), not cash or other assets",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No owner withdrawals are involved in this transaction",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or decreased; the manufacturing overhead is being capitalized to inventory as a product cost, not expensed immediately",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 826,
+      "output_tokens": 1310,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5447,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0235143,
+      "raw_cost_usd": 0.035991,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear. The meal was provided to factory production staff and is explicitly classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that must be capitalized to inventory (Work in Process or Manufacturing Overhead), not expensed immediately. The corporate credit card creates a liability (Credit Card Payable). No additional business facts are needed.",
+        "debit_asset_increase": {
+          "reason": "Override the classifier. Manufacturing overhead is a product cost that must be capitalized to inventory under IFRS, not expensed. The debit increases the Manufacturing Overhead (or Work in Process) asset account. Count: 1 line for the meal cost.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Manufacturing Overhead"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Override the classifier. Although the classifier suggested 0 expense lines, this is correct because manufacturing overhead is capitalized to inventory, not expensed immediately under IFRS.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity is being decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue is being decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept the classifier. The corporate credit card creates a liability (Credit Card Payable). Count: 1 line for the amount charged.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Credit Card Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity is being increased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue is being recognized in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being decreased in this transaction. The credit card creates a liability, not a reduction of cash.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense is being decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "The meal for factory production staff is manufacturing overhead, which is a product cost capitalized to inventory under IFRS. The corporate credit card creates a liability. No tax mentioned, so no tax lines added.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Manufacturing Overhead",
+              "amount": 125.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Credit Card Payable",
+              "amount": 125.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction explicitly states the meal is for factory production staff and is classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that must be capitalized to inventory (Manufacturing Overhead account), not expensed immediately. The corporate credit card creates a liability (Credit Card Payable). The entry balances: $125 debit = $125 credit. No tax is mentioned in the transaction. All information needed to construct the entry is present. The classifier's initial tuple was corrected to reflect proper IFRS treatment of manufacturing costs.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "Corporate credit card stated explicitly \u2014 resolves to credit card payable"
+          },
+          {
+            "aspect": "purpose of meal expense",
+            "resolution": "Explicitly stated as 'provided to factory production staff' and 'classified as manufacturing overhead' \u2014 resolves to manufacturing overhead cost"
+          },
+          {
+            "aspect": "cost classification",
+            "resolution": "Transaction explicitly states classification as manufacturing overhead, which determines the account treatment"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Manufacturing overhead is a product cost that is capitalized to inventory (Work-in-Process or Finished Goods), which is an asset. The $125 meal cost for factory production staff increases the inventory asset account, not an expense account.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Manufacturing overhead is a product cost, not a period expense. Under IFRS, costs directly related to production are capitalized to inventory as an asset, not expensed immediately. The cost will become an expense (COGS) only when the inventory is sold.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The corporate credit card creates or increases a liability; it does not decrease one. The debit side does not affect liabilities.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by this manufacturing overhead transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Corporate credit card payable increases by $125 for the meal purchase",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase; this is an expense transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from purchasing a meal",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease; payment is made via credit card (liability), not cash or other assets",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No owner withdrawals are involved in this transaction",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or decreased; the manufacturing overhead is being capitalized to inventory as a product cost, not expensed immediately",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Manufacturing overhead is a product cost that is capitalized to inventory (Work-in-Process or Finished Goods), which is an asset. The $125 meal cost for factory production staff increases the inventory asset account, not an expense account.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Manufacturing overhead is a product cost, not a period expense. Under IFRS, costs directly related to production are capitalized to inventory as an asset, not expensed immediately. The cost will become an expense (COGS) only when the inventory is sold.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The corporate credit card creates or increases a liability; it does not decrease one. The debit side does not affect liabilities.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by this manufacturing overhead transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Corporate credit card payable increases by $125 for the meal purchase",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase; this is an expense transaction",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from purchasing a meal",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease; payment is made via credit card (liability), not cash or other assets",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No owner withdrawals are involved in this transaction",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or decreased; the manufacturing overhead is being capitalized to inventory as a product cost, not expensed immediately",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear. The meal was provided to factory production staff and is explicitly classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that must be capitalized to inventory (Work in Process or Manufacturing Overhead), not expensed immediately. The corporate credit card creates a liability (Credit Card Payable). No additional business facts are needed.",
+        "debit_asset_increase": {
+          "reason": "Override the classifier. Manufacturing overhead is a product cost that must be capitalized to inventory under IFRS, not expensed. The debit increases the Manufacturing Overhead (or Work in Process) asset account. Count: 1 line for the meal cost.",
+          "action": "override",
+          "count": 1,
+          "accounts": [
+            "Manufacturing Overhead"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Override the classifier. Although the classifier suggested 0 expense lines, this is correct because manufacturing overhead is capitalized to inventory, not expensed immediately under IFRS.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity is being decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue is being decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept the classifier. The corporate credit card creates a liability (Credit Card Payable). Count: 1 line for the amount charged.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Credit Card Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity is being increased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue is being recognized in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being decreased in this transaction. The credit card creates a liability, not a reduction of cash.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense is being decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "The meal for factory production staff is manufacturing overhead, which is a product cost capitalized to inventory under IFRS. The corporate credit card creates a liability. No tax mentioned, so no tax lines added.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Manufacturing Overhead",
+              "amount": 125.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Credit Card Payable",
+              "amount": 125.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction explicitly states the meal is for factory production staff and is classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that must be capitalized to inventory (Manufacturing Overhead account), not expensed immediately. The corporate credit card creates a liability (Credit Card Payable). The entry balances: $125 debit = $125 credit. No tax is mentioned in the transaction. All information needed to construct the entry is present. The classifier's initial tuple was corrected to reflect proper IFRS treatment of manufacturing costs.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 531,
+        "output_tokens": 183,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 506,
+        "output_tokens": 418,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 348,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 826,
+        "output_tokens": 1310,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

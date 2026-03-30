@@ -17,7 +17,7 @@ from services.agent.graph.state import PipelineState
 # ── 1. Preamble ──────────────────────────────────────────────────────────
 
 _PREAMBLE = """\
-You are a Canadian bookkeeper in an automated bookkeeping system. \
+You are a bookkeeper in an automated bookkeeping system. \
 All entries follow IFRS standards."""
 
 # ── 2. Role ──────────────────────────────────────────────────────────────
@@ -61,31 +61,32 @@ Double-entry rules:
 
 Dividends behave like expenses: increased by debit.
 
-Count each economically distinct event as a separate line. When face \
-value and present value differ, record both with a contra account. Use \
-separate accounts when items have different subsequent treatment. \
-Combine into a single line when components share the same account and \
-treatment. Classify by business purpose, not item description. \
-Non-depreciable items (land, permanent landscaping) must use distinct \
-accounts from depreciable items (improvements, structures).
+Classification principles:
+- Count each economically distinct event as a separate line.
+- When face value and present value differ, count the contra \
+account as its own line.
+- Combine into a single line when components share the same \
+account and same treatment.
+- Classify by business purpose, not item description.
+- Non-depreciable items must use distinct accounts from \
+depreciable items.
+- Contra accounts are classified as decreases of the related \
+account, not increases of a different account type.
+- Manufacturing costs are product costs capitalized to inventory, \
+not period expenses.
 
-Canadian tax regimes:
-- ON, NB, NL, NS, PE: HST (13-15%, single combined tax)
-- BC, SK, MB: GST (5%) + provincial sales tax (6-7%)
-- AB, NT, NU, YT: GST only (5%)
-- QC: GST (5%) + QST (9.975%)
-- Tax-exempt: basic groceries, prescription drugs, medical devices
-
-Tax line rules:
-- Purchases: HST/GST paid is recorded as HST Receivable (debit, asset)
-- Sales: HST/GST collected is recorded as HST Payable (credit, liability)
+Sales tax handling:
+- Purchases: recoverable input tax is recorded as a tax receivable (debit, asset)
+- Sales: collected output tax is recorded as a tax payable (credit, liability)
 - Tax amount = rate x base amount
-- Tax lines are ADDITIONAL and do not count toward tuple sums.
+- Tax lines are ADDITIONAL and do not count toward structure sums
+- Apply the tax rate and rules stated in the transaction text
+- If no tax is mentioned, do not add tax lines
 
 The transaction text is the source of truth. When it conflicts \
 with your knowledge:
 - Stated amounts: use exactly as written, do not decompose
-- Stated tax rates: use the stated rate, not provincial defaults
+- Stated tax rates: use the stated rate, not other defaults
 - Stated accounting policy: follow it, do not apply alternatives"""
 
 # ── 4. System Knowledge ─────────────────────────────────────────────────
@@ -138,12 +139,13 @@ If either is false, proceed with the default interpretation. \
 If your reasoning mentions multiple valid interpretations \
 (e.g., "depending on classification," "could be X or Y"), \
 that is a signal to output INCOMPLETE_INFORMATION — do not pick one.
-4. For each tuple slot with a non-zero count, create that many journal lines \
-with appropriate accounts.
+4. For each tuple slot with a non-zero count, create that many journal lines. \
+Derive account names from the transaction description — do not default to \
+generic accounting labels.
 5. Infer dollar amounts from the transaction text.
 6. If taxable (per user context province), add separate tax lines:
-   - Purchase: debit HST/GST Receivable, increase the credit by tax amount.
-   - Sale: credit HST/GST Payable, increase the debit by tax amount.
+   - Purchase: debit Tax Receivable, increase the credit by tax amount.
+   - Sale: credit Tax Payable, increase the debit by tax amount.
 7. Verify total debits = total credits before outputting."""
 
 # ── 6. Examples ──────────────────────────────────────────────────────────
@@ -197,12 +199,12 @@ Output: {"debit_tuple": [0,0,0,0,0,0], "credit_tuple": [0,0,0,0,0,0], \
 Transaction: "Pay monthly rent $2,000" (ON, taxable)
 Output: {"debit_tuple": [0,0,1,0,0,0], "credit_tuple": [0,0,0,1,0,0], \
 "journal_entry": {"date": "2026-03-24", "description": "Monthly rent payment", \
-"rationale": "Rent is operating expense, HST on commercial rent is recoverable", \
+"rationale": "Rent is operating expense, tax on commercial rent is recoverable", \
 "lines": [{"account_name": "Rent Expense", "type": "debit", "amount": 2000.00}, \
-{"account_name": "HST Receivable", "type": "debit", "amount": 260.00}, \
+{"account_name": "Tax Receivable", "type": "debit", "amount": 260.00}, \
 {"account_name": "Cash", "type": "credit", "amount": 2260.00}]}, \
 "decision": "APPROVED", "clarification_questions": null, "stuck_reason": null, \
-"reason": "Expense increase, HST 13% recoverable on commercial rent"}
+"reason": "Expense increase, 13% tax recoverable on commercial rent"}
 </example>"""
 
 # ── 7. Decision ──────────────────────────────────────────────────────────

@@ -1,0 +1,352 @@
+{
+  "test_case_id": "int_hard_27d_meal_factory",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Meal for factory production staff - manufacturing overhead",
+    "rationale": "The meal provided to factory production staff is a manufacturing overhead cost. Under IFRS, manufacturing overhead is accumulated in an inventory account (Work in Process or Manufacturing Overhead) rather than expensed immediately, as it forms part of the cost of inventory produced. The debit tuple (1,0,0,0,0,0) correctly indicates an asset increase (inventory/WIP), and the credit tuple (1,0,0,0,0,0) correctly indicates a liability increase (credit card payable). The transaction explicitly states this is manufacturing overhead, so we follow that classification. No tax is recoverable on meals under Canadian tax rules (meals are subject to input tax credit restrictions - only 50% of meal costs qualify for ITC, but the transaction does not specify tax separately, suggesting the $125 is the total amount paid).",
+    "lines": [
+      {
+        "account_name": "Manufacturing Overhead",
+        "type": "debit",
+        "amount": 125.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 125.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0278994,
+  "raw_cost_usd": 0.052517999999999995,
+  "total_latency_ms": 17444,
+  "total_input_tokens": 12281,
+  "total_output_tokens": 1045,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 504,
+      "output_tokens": 110,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1745,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035343,
+      "raw_cost_usd": 0.006885,
+      "output": {
+        "reason": "The credit card payment creates a liability increase (accounts payable/credit card payable). The meal expense itself is debited to manufacturing overhead, but on the credit side we only record the credit card obligation = liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The credit card payment creates a liability increase (accounts payable/credit card payable). The meal expense itself is debited to manufacturing overhead, but on the credit side we only record the credit card obligation = liability increase."
+    },
+    "debit_classifier": {
+      "input_tokens": 506,
+      "output_tokens": 138,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1768,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0039666,
+      "raw_cost_usd": 0.007374,
+      "output": {
+        "reason": "Manufacturing overhead meal = asset increase. Under IFRS, manufacturing overhead costs are capitalized as part of inventory (work-in-process or finished goods). The $125 meal cost for factory production staff is a manufacturing overhead cost that gets added to inventory value, not expensed immediately. This is an asset increase (inventory), not an expense increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Manufacturing overhead meal = asset increase. Under IFRS, manufacturing overhead costs are capitalized as part of inventory (work-in-process or finished goods). The $125 meal cost for factory production staff is a manufacturing overhead cost that gets added to inventory value, not expensed immediately. This is an asset increase (inventory), not an expense increase."
+    },
+    "credit_corrector": {
+      "input_tokens": 674,
+      "output_tokens": 198,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2428,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0055182,
+      "raw_cost_usd": 0.010254,
+      "output": {
+        "reason": "The transaction describes a meal purchase using a corporate credit card. This creates a liability (credit card payable) that Mondelez now owes. The credit side should record a liability increase (slot a). The debit side shows an asset increase (slot a), which represents the manufacturing overhead being capitalized into work-in-process inventory (an asset). This is correct under IFRS because manufacturing overhead is a product cost that gets absorbed into inventory, not expensed immediately. The two sides tell a consistent story: debit WIP inventory (asset increase), credit credit card payable (liability increase). The initial credit tuple is correct.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a meal purchase using a corporate credit card. This creates a liability (credit card payable) that Mondelez now owes. The credit side should record a liability increase (slot a). The debit side shows an asset increase (slot a), which represents the manufacturing overhead being capitalized into work-in-process inventory (an asset). This is correct under IFRS because manufacturing overhead is a product cost that gets absorbed into inventory, not expensed immediately. The two sides tell a consistent story: debit WIP inventory (asset increase), credit credit card payable (liability increase). The initial credit tuple is correct."
+    },
+    "debit_corrector": {
+      "input_tokens": 674,
+      "output_tokens": 232,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2420,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0060258,
+      "raw_cost_usd": 0.01074,
+      "output": {
+        "reason": "The transaction describes a meal purchased on corporate credit card for factory production staff, classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that becomes part of inventory (Work-in-Process or Finished Goods) until the goods are sold, at which point it becomes COGS. The debit should be to an asset account (Inventory/WIP), not to an expense account. The initial debit tuple correctly shows (1,0,0,0,0,0) = asset increase. The credit tuple showing (1,0,0,0,0,0) = liability increase is consistent, as the corporate credit card creates a liability (credit card payable). Both sides tell a consistent story: debit inventory asset, credit credit card liability. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a meal purchased on corporate credit card for factory production staff, classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that becomes part of inventory (Work-in-Process or Finished Goods) until the goods are sold, at which point it becomes COGS. The debit should be to an asset account (Inventory/WIP), not to an expense account. The initial debit tuple correctly shows (1,0,0,0,0,0) = asset increase. The credit tuple showing (1,0,0,0,0,0) = liability increase is consistent, as the corporate credit card creates a liability (credit card payable). Both sides tell a consistent story: debit inventory asset, credit credit card liability. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 805,
+      "output_tokens": 367,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3920,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0088545,
+      "raw_cost_usd": 0.017265,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Meal for factory production staff - manufacturing overhead",
+        "rationale": "The meal provided to factory production staff is a manufacturing overhead cost. Under IFRS, manufacturing overhead is accumulated in an inventory account (Work in Process or Manufacturing Overhead) rather than expensed immediately, as it forms part of the cost of inventory produced. The debit tuple (1,0,0,0,0,0) correctly indicates an asset increase (inventory/WIP), and the credit tuple (1,0,0,0,0,0) correctly indicates a liability increase (credit card payable). The transaction explicitly states this is manufacturing overhead, so we follow that classification. No tax is recoverable on meals under Canadian tax rules (meals are subject to input tax credit restrictions - only 50% of meal costs qualify for ITC, but the transaction does not specify tax separately, suggesting the $125 is the total amount paid).",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Manufacturing overhead meal = asset increase. Under IFRS, manufacturing overhead costs are capitalized as part of inventory (work-in-process or finished goods). The $125 meal cost for factory production staff is a manufacturing overhead cost that gets added to inventory value, not expensed immediately. This is an asset increase (inventory), not an expense increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit card payment creates a liability increase (accounts payable/credit card payable). The meal expense itself is debited to manufacturing overhead, but on the credit side we only record the credit card obligation = liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes a meal purchased on corporate credit card for factory production staff, classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that becomes part of inventory (Work-in-Process or Finished Goods) until the goods are sold, at which point it becomes COGS. The debit should be to an asset account (Inventory/WIP), not to an expense account. The initial debit tuple correctly shows (1,0,0,0,0,0) = asset increase. The credit tuple showing (1,0,0,0,0,0) = liability increase is consistent, as the corporate credit card creates a liability (credit card payable). Both sides tell a consistent story: debit inventory asset, credit credit card liability. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes a meal purchase using a corporate credit card. This creates a liability (credit card payable) that Mondelez now owes. The credit side should record a liability increase (slot a). The debit side shows an asset increase (slot a), which represents the manufacturing overhead being capitalized into work-in-process inventory (an asset). This is correct under IFRS because manufacturing overhead is a product cost that gets absorbed into inventory, not expensed immediately. The two sides tell a consistent story: debit WIP inventory (asset increase), credit credit card payable (liability increase). The initial credit tuple is correct.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Meal for factory production staff - manufacturing overhead",
+        "rationale": "The meal provided to factory production staff is a manufacturing overhead cost. Under IFRS, manufacturing overhead is accumulated in an inventory account (Work in Process or Manufacturing Overhead) rather than expensed immediately, as it forms part of the cost of inventory produced. The debit tuple (1,0,0,0,0,0) correctly indicates an asset increase (inventory/WIP), and the credit tuple (1,0,0,0,0,0) correctly indicates a liability increase (credit card payable). The transaction explicitly states this is manufacturing overhead, so we follow that classification. No tax is recoverable on meals under Canadian tax rules (meals are subject to input tax credit restrictions - only 50% of meal costs qualify for ITC, but the transaction does not specify tax separately, suggesting the $125 is the total amount paid).",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 110,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 506,
+        "output_tokens": 138,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 674,
+        "output_tokens": 198,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 674,
+        "output_tokens": 232,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 805,
+        "output_tokens": 367,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,584 @@
+{
+  "test_case_id": "int_23_split_electricity",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Factory electricity ($15,000) is manufacturing overhead and must be capitalized to Inventory as a product cost under IFRS. Office electricity ($5,500) is an administrative expense and recorded as a period cost. The total charge of $20,500 was paid using the corporate credit card, creating a liability. No tax was mentioned in the transaction, so no tax lines are added.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Inventory",
+        "amount": 15000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Utilities Expense - Office",
+        "amount": 5500.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Credit Card Payable",
+        "amount": 20500.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.045681,
+  "raw_cost_usd": 0.07276200000000001,
+  "total_latency_ms": 36932,
+  "total_input_tokens": 12389,
+  "total_output_tokens": 2373,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 529,
+      "output_tokens": 224,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2876,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0056511,
+      "raw_cost_usd": 0.011988,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "allocation of electricity charges between factory and office",
+            "resolution": "Transaction explicitly states $15,000 for factory and $5,500 for office \u2014 amounts are already allocated"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Corporate credit card stated \u2014 creates accounts payable to credit card company, not cash payment"
+          },
+          {
+            "aspect": "factory electricity treatment",
+            "resolution": "Factory electricity is manufacturing overhead \u2014 standard treatment is to allocate to production costs"
+          },
+          {
+            "aspect": "office electricity treatment",
+            "resolution": "Office electricity is administrative expense \u2014 standard treatment is period cost"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 504,
+      "output_tokens": 375,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2050,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076008000000000004,
+      "raw_cost_usd": 0.011775,
+      "output": {
+        "asset_increase_reason": "Factory electricity of $15,000 is a manufacturing overhead cost that must be capitalized to inventory (work-in-process) as a product cost under IFRS, representing an asset increase.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Office electricity of $5,500 is a period cost (administrative expense) that is expensed immediately, not capitalized to inventory.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "The credit card creates or increases a liability; no liability is being decreased on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are decreased in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 502,
+      "output_tokens": 374,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2018,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0075708,
+      "raw_cost_usd": 0.011664,
+      "output": {
+        "liability_increase_reason": "Corporate credit card payable increases by the total amount charged ($15,000 + $5,500 = $20,500). This is a liability increase.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase. This is an expense transaction paid via credit card.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. This is an expense transaction for electricity charges.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. Payment was made using a credit card (creating a liability), not from cash or other assets.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or decreased. This transaction records new expenses (factory and office electricity).",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 824,
+      "output_tokens": 1400,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5445,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0248583,
+      "raw_cost_usd": 0.037335,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear. Mondelez paid two distinct electricity charges: $15,000 for factory electricity and $5,500 for office electricity, using a corporate credit card. Factory electricity is a manufacturing overhead cost that should be capitalized to inventory (product cost), while office electricity is an administrative expense (period cost). The payment method (corporate credit card) creates a liability. No additional business facts are needed to determine the entry structure.",
+        "debit_asset_increase": {
+          "reason": "Factory electricity of $15,000 is a manufacturing overhead cost that must be capitalized to inventory under IFRS. This is a product cost, not a period expense. The classifier correctly identified one asset increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Office electricity of $5,500 is an administrative expense (period cost). The classifier correctly identified one expense increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Utilities Expense - Office"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being paid down; instead, a new liability is being created via credit card.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue adjustment in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Payment via corporate credit card creates a liability. The classifier correctly identified one liability increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Credit Card Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue earned in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being reduced; payment is via credit card, not cash.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Factory electricity ($15,000) is manufacturing overhead and must be capitalized to Inventory as a product cost under IFRS. Office electricity ($5,500) is an administrative expense and recorded as a period cost. The total charge of $20,500 was paid using the corporate credit card, creating a liability. No tax was mentioned in the transaction, so no tax lines are added.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Inventory",
+              "amount": 15000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Utilities Expense - Office",
+              "amount": 5500.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Credit Card Payable",
+              "amount": 20500.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction clearly states two distinct electricity charges with different business purposes: factory ($15,000) and office ($5,500). Under IFRS, factory electricity is a manufacturing overhead cost that must be capitalized to inventory (product cost), while office electricity is an administrative expense (period cost). The payment method (corporate credit card) creates a liability. The classifier tuples correctly identified the structure: one asset increase (inventory), one expense increase (office utilities), and one liability increase (credit card payable). Total debits ($20,500) equal total credits ($20,500). No tax was mentioned, so no tax lines are needed. All information necessary to construct the entry is present in the transaction text.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "allocation of electricity charges between factory and office",
+            "resolution": "Transaction explicitly states $15,000 for factory and $5,500 for office \u2014 amounts are already allocated"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Corporate credit card stated \u2014 creates accounts payable to credit card company, not cash payment"
+          },
+          {
+            "aspect": "factory electricity treatment",
+            "resolution": "Factory electricity is manufacturing overhead \u2014 standard treatment is to allocate to production costs"
+          },
+          {
+            "aspect": "office electricity treatment",
+            "resolution": "Office electricity is administrative expense \u2014 standard treatment is period cost"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Factory electricity of $15,000 is a manufacturing overhead cost that must be capitalized to inventory (work-in-process) as a product cost under IFRS, representing an asset increase.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Office electricity of $5,500 is a period cost (administrative expense) that is expensed immediately, not capitalized to inventory.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "The credit card creates or increases a liability; no liability is being decreased on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are decreased in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Corporate credit card payable increases by the total amount charged ($15,000 + $5,500 = $20,500). This is a liability increase.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase. This is an expense transaction paid via credit card.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. This is an expense transaction for electricity charges.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. Payment was made using a credit card (creating a liability), not from cash or other assets.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or decreased. This transaction records new expenses (factory and office electricity).",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Factory electricity of $15,000 is a manufacturing overhead cost that must be capitalized to inventory (work-in-process) as a product cost under IFRS, representing an asset increase.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Office electricity of $5,500 is a period cost (administrative expense) that is expensed immediately, not capitalized to inventory.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "The credit card creates or increases a liability; no liability is being decreased on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are decreased in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Corporate credit card payable increases by the total amount charged ($15,000 + $5,500 = $20,500). This is a liability increase.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase. This is an expense transaction paid via credit card.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. This is an expense transaction for electricity charges.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. Payment was made using a credit card (creating a liability), not from cash or other assets.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or decreased. This transaction records new expenses (factory and office electricity).",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear. Mondelez paid two distinct electricity charges: $15,000 for factory electricity and $5,500 for office electricity, using a corporate credit card. Factory electricity is a manufacturing overhead cost that should be capitalized to inventory (product cost), while office electricity is an administrative expense (period cost). The payment method (corporate credit card) creates a liability. No additional business facts are needed to determine the entry structure.",
+        "debit_asset_increase": {
+          "reason": "Factory electricity of $15,000 is a manufacturing overhead cost that must be capitalized to inventory under IFRS. This is a product cost, not a period expense. The classifier correctly identified one asset increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Office electricity of $5,500 is an administrative expense (period cost). The classifier correctly identified one expense increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Utilities Expense - Office"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being paid down; instead, a new liability is being created via credit card.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue adjustment in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Payment via corporate credit card creates a liability. The classifier correctly identified one liability increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Credit Card Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue earned in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being reduced; payment is via credit card, not cash.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Factory electricity ($15,000) is manufacturing overhead and must be capitalized to Inventory as a product cost under IFRS. Office electricity ($5,500) is an administrative expense and recorded as a period cost. The total charge of $20,500 was paid using the corporate credit card, creating a liability. No tax was mentioned in the transaction, so no tax lines are added.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Inventory",
+              "amount": 15000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Utilities Expense - Office",
+              "amount": 5500.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Credit Card Payable",
+              "amount": 20500.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction clearly states two distinct electricity charges with different business purposes: factory ($15,000) and office ($5,500). Under IFRS, factory electricity is a manufacturing overhead cost that must be capitalized to inventory (product cost), while office electricity is an administrative expense (period cost). The payment method (corporate credit card) creates a liability. The classifier tuples correctly identified the structure: one asset increase (inventory), one expense increase (office utilities), and one liability increase (credit card payable). Total debits ($20,500) equal total credits ($20,500). No tax was mentioned, so no tax lines are needed. All information necessary to construct the entry is present in the transaction text.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 529,
+        "output_tokens": 224,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 375,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 502,
+        "output_tokens": 374,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 824,
+        "output_tokens": 1400,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

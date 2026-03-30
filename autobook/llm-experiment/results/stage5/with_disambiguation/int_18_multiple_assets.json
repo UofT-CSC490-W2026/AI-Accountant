@@ -1,0 +1,626 @@
+{
+  "test_case_id": "int_18_multiple_assets",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    3,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Atlas Van Lines acquired three distinct capital assets. Office desks ($2,000) are recorded as Office Furniture, computers ($3,500) as Computer Equipment, and the crane-equipped truck ($250,000) as Vehicles. The desks and computers were paid in cash (total $5,500 cash outflow), while the truck was purchased on account, creating an Accounts Payable liability of $250,000. Each asset type is recorded separately to maintain proper asset classification and tracking. No tax was mentioned in the transaction, so no tax lines are added.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Office Furniture",
+        "amount": 2000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Computer Equipment",
+        "amount": 3500.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Vehicles",
+        "amount": 250000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 5500.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Accounts Payable",
+        "amount": 250000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.052554,
+  "raw_cost_usd": 0.07963500000000001,
+  "total_latency_ms": 35942,
+  "total_input_tokens": 12465,
+  "total_output_tokens": 2816,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 548,
+      "output_tokens": 334,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2895,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0073581,
+      "raw_cost_usd": 0.013695,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "capitalization vs. expense treatment for office desks",
+            "resolution": "Office desks at $2,000 are below typical capitalization thresholds and are administrative assets \u2014 standard practice is to expense or capitalize as furniture depending on entity policy, but the entry structure (debit asset or expense) is the same for both desks and computers as fixed assets given the context of a capital purchase transaction"
+          },
+          {
+            "aspect": "capitalization of computers",
+            "resolution": "Computers at $3,500 are clearly capital assets given the transaction describes purchases of multiple items as capital expenditures"
+          },
+          {
+            "aspect": "capitalization of crane-equipped truck",
+            "resolution": "Crane-equipped truck at $250,000 for moving operations is clearly a capital asset \u2014 specialized equipment for core business operations"
+          },
+          {
+            "aspect": "payment method for cash purchases",
+            "resolution": "Cash payment method stated \u2014 reduces cash/bank account"
+          },
+          {
+            "aspect": "payment method for truck purchase",
+            "resolution": "'On account' is conventional term for accounts payable \u2014 creates liability"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 521,
+      "output_tokens": 415,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2037,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0082428,
+      "raw_cost_usd": 0.012336,
+      "output": {
+        "liability_increase_reason": "The crane-equipped truck purchased on account creates an account payable (liability increase) for $250,000.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase. This is a purchase of assets, not an owner investment or retained earnings increase.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. This is an asset acquisition transaction, not a sale of goods or services.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases for the combined payment of office desks ($2,000) and computers ($3,500) totaling $5,500. Although these are two different items, they are paid from the same cash account in a single combined decrease.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this asset purchase transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are decreased. This is a capitalization of assets (desks, computers, truck), not an expense reversal or refund.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 523,
+      "output_tokens": 437,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2069,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0085878,
+      "raw_cost_usd": 0.012762,
+      "output": {
+        "asset_increase_reason": "Three distinct asset increases: (1) Office desks (furniture, non-depreciable or different depreciation class), (2) Computers (equipment with distinct depreciation), and (3) Crane-equipped truck (vehicle/specialized equipment). Each represents a different type of asset that would be recorded in separate accounts due to different depreciation rates, useful lives, and business purposes (office furniture vs. IT equipment vs. operating equipment).",
+        "asset_increase_count": 3,
+        "dividend_increase_reason": "No owner withdrawals or dividend distributions in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses incurred. All purchases are capital expenditures for long-term assets, not period expenses.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid off or reduced. The truck purchase creates a new liability (accounts payable), which is a credit-side effect.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue reversals, refunds, or contra-revenue items in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 843,
+      "output_tokens": 1630,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5464,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0283653,
+      "raw_cost_usd": 0.040842,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear. Atlas Van Lines purchased three distinct assets: office desks ($2,000), computers ($3,500), and a crane-equipped truck ($250,000). The payment methods are explicitly stated: desks and computers paid in cash (total $5,500), and the truck purchased on account (creating a liability). No business facts are missing that would change the entry structure. The nature of each asset is clear from the description, and the amounts and payment terms are explicitly provided.",
+        "debit_asset_increase": {
+          "reason": "Accept. Three distinct assets are being acquired: office desks, computers, and a crane-equipped truck. Each represents a separate asset increase. Office desks and computers are distinct asset types (furniture vs. equipment), and the truck is a vehicle asset. All three should be recorded as separate debit lines to properly track different asset categories.",
+          "action": "accept",
+          "count": 3,
+          "accounts": [
+            "Office Furniture",
+            "Computer Equipment",
+            "Vehicles"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this transaction. This is an asset purchase transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expenses are being recorded. All items purchased are capital assets that will be capitalized, not expensed immediately.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced. The truck purchase creates a new liability (accounts payable), it does not decrease one.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transactions are involved in this asset purchase.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue adjustments are involved in this asset purchase transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept. The crane-equipped truck purchased on account creates a liability (accounts payable) of $250,000. This is one liability increase.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Accounts Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity is being increased. This is an asset purchase transaction with no equity component.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue is being recognized. This is a purchase transaction, not a sale.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Cash is being paid for the desks and computers totaling $5,500. This represents one asset decrease (cash outflow).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transactions are involved in this asset purchase.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reductions are involved in this asset purchase transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Atlas Van Lines acquired three distinct capital assets. Office desks ($2,000) are recorded as Office Furniture, computers ($3,500) as Computer Equipment, and the crane-equipped truck ($250,000) as Vehicles. The desks and computers were paid in cash (total $5,500 cash outflow), while the truck was purchased on account, creating an Accounts Payable liability of $250,000. Each asset type is recorded separately to maintain proper asset classification and tracking. No tax was mentioned in the transaction, so no tax lines are added.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Office Furniture",
+              "amount": 2000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Computer Equipment",
+              "amount": 3500.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Vehicles",
+              "amount": 250000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 5500.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Accounts Payable",
+              "amount": 250000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is complete and unambiguous. Three distinct assets are being acquired with clearly stated amounts and payment terms. The classifier tuples correctly identified 3 asset increases (debits), 1 asset decrease for cash payment (credit), and 1 liability increase for the account purchase (credit). The entry balances: total debits = $255,500 (2,000 + 3,500 + 250,000) and total credits = $255,500 (5,500 + 250,000). All amounts are positive, and the entry follows IFRS standards for capitalizing long-lived assets. No tax was mentioned, so no tax lines are required. The entry is ready for approval.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "capitalization vs. expense treatment for office desks",
+            "resolution": "Office desks at $2,000 are below typical capitalization thresholds and are administrative assets \u2014 standard practice is to expense or capitalize as furniture depending on entity policy, but the entry structure (debit asset or expense) is the same for both desks and computers as fixed assets given the context of a capital purchase transaction"
+          },
+          {
+            "aspect": "capitalization of computers",
+            "resolution": "Computers at $3,500 are clearly capital assets given the transaction describes purchases of multiple items as capital expenditures"
+          },
+          {
+            "aspect": "capitalization of crane-equipped truck",
+            "resolution": "Crane-equipped truck at $250,000 for moving operations is clearly a capital asset \u2014 specialized equipment for core business operations"
+          },
+          {
+            "aspect": "payment method for cash purchases",
+            "resolution": "Cash payment method stated \u2014 reduces cash/bank account"
+          },
+          {
+            "aspect": "payment method for truck purchase",
+            "resolution": "'On account' is conventional term for accounts payable \u2014 creates liability"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Three distinct asset increases: (1) Office desks (furniture, non-depreciable or different depreciation class), (2) Computers (equipment with distinct depreciation), and (3) Crane-equipped truck (vehicle/specialized equipment). Each represents a different type of asset that would be recorded in separate accounts due to different depreciation rates, useful lives, and business purposes (office furniture vs. IT equipment vs. operating equipment).",
+        "asset_increase_count": 3,
+        "dividend_increase_reason": "No owner withdrawals or dividend distributions in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses incurred. All purchases are capital expenditures for long-term assets, not period expenses.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid off or reduced. The truck purchase creates a new liability (accounts payable), which is a credit-side effect.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue reversals, refunds, or contra-revenue items in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "The crane-equipped truck purchased on account creates an account payable (liability increase) for $250,000.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase. This is a purchase of assets, not an owner investment or retained earnings increase.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. This is an asset acquisition transaction, not a sale of goods or services.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases for the combined payment of office desks ($2,000) and computers ($3,500) totaling $5,500. Although these are two different items, they are paid from the same cash account in a single combined decrease.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this asset purchase transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are decreased. This is a capitalization of assets (desks, computers, truck), not an expense reversal or refund.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Three distinct asset increases: (1) Office desks (furniture, non-depreciable or different depreciation class), (2) Computers (equipment with distinct depreciation), and (3) Crane-equipped truck (vehicle/specialized equipment). Each represents a different type of asset that would be recorded in separate accounts due to different depreciation rates, useful lives, and business purposes (office furniture vs. IT equipment vs. operating equipment).",
+        "asset_increase_count": 3,
+        "dividend_increase_reason": "No owner withdrawals or dividend distributions in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses incurred. All purchases are capital expenditures for long-term assets, not period expenses.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid off or reduced. The truck purchase creates a new liability (accounts payable), which is a credit-side effect.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue reversals, refunds, or contra-revenue items in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "The crane-equipped truck purchased on account creates an account payable (liability increase) for $250,000.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase. This is a purchase of assets, not an owner investment or retained earnings increase.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. This is an asset acquisition transaction, not a sale of goods or services.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases for the combined payment of office desks ($2,000) and computers ($3,500) totaling $5,500. Although these are two different items, they are paid from the same cash account in a single combined decrease.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this asset purchase transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are decreased. This is a capitalization of assets (desks, computers, truck), not an expense reversal or refund.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear. Atlas Van Lines purchased three distinct assets: office desks ($2,000), computers ($3,500), and a crane-equipped truck ($250,000). The payment methods are explicitly stated: desks and computers paid in cash (total $5,500), and the truck purchased on account (creating a liability). No business facts are missing that would change the entry structure. The nature of each asset is clear from the description, and the amounts and payment terms are explicitly provided.",
+        "debit_asset_increase": {
+          "reason": "Accept. Three distinct assets are being acquired: office desks, computers, and a crane-equipped truck. Each represents a separate asset increase. Office desks and computers are distinct asset types (furniture vs. equipment), and the truck is a vehicle asset. All three should be recorded as separate debit lines to properly track different asset categories.",
+          "action": "accept",
+          "count": 3,
+          "accounts": [
+            "Office Furniture",
+            "Computer Equipment",
+            "Vehicles"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution in this transaction. This is an asset purchase transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expenses are being recorded. All items purchased are capital assets that will be capitalized, not expensed immediately.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced. The truck purchase creates a new liability (accounts payable), it does not decrease one.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transactions are involved in this asset purchase.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue adjustments are involved in this asset purchase transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept. The crane-equipped truck purchased on account creates a liability (accounts payable) of $250,000. This is one liability increase.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Accounts Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity is being increased. This is an asset purchase transaction with no equity component.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue is being recognized. This is a purchase transaction, not a sale.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Cash is being paid for the desks and computers totaling $5,500. This represents one asset decrease (cash outflow).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transactions are involved in this asset purchase.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reductions are involved in this asset purchase transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Atlas Van Lines acquired three distinct capital assets. Office desks ($2,000) are recorded as Office Furniture, computers ($3,500) as Computer Equipment, and the crane-equipped truck ($250,000) as Vehicles. The desks and computers were paid in cash (total $5,500 cash outflow), while the truck was purchased on account, creating an Accounts Payable liability of $250,000. Each asset type is recorded separately to maintain proper asset classification and tracking. No tax was mentioned in the transaction, so no tax lines are added.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Office Furniture",
+              "amount": 2000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Computer Equipment",
+              "amount": 3500.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Vehicles",
+              "amount": 250000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 5500.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Accounts Payable",
+              "amount": 250000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is complete and unambiguous. Three distinct assets are being acquired with clearly stated amounts and payment terms. The classifier tuples correctly identified 3 asset increases (debits), 1 asset decrease for cash payment (credit), and 1 liability increase for the account purchase (credit). The entry balances: total debits = $255,500 (2,000 + 3,500 + 250,000) and total credits = $255,500 (5,500 + 250,000). All amounts are positive, and the entry follows IFRS standards for capitalizing long-lived assets. No tax was mentioned, so no tax lines are required. The entry is ready for approval.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 548,
+        "output_tokens": 334,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 415,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 523,
+        "output_tokens": 437,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 843,
+        "output_tokens": 1630,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,639 @@
+{
+  "test_case_id": "int_22_compound_sale_with_tax",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "This is a sale of inventory with mixed payment terms. Revenue of $69,000 is recognized (300 cases \u00d7 $230). Sales tax of $6,900 (10% \u00d7 $69,000) is collected and recorded as a liability. Payment received: $45,900 to Chequing Account, $30,000 remains as Accounts Receivable ($75,900 total). Cost of Goods Sold of $55,500 (300 cases \u00d7 $185) is expensed, and Inventory is reduced by the same amount. Total debits: $45,900 + $30,000 + $55,500 = $131,400. Total credits: $6,900 + $69,000 + $55,500 = $131,400.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Chequing Account",
+        "amount": 45900.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Accounts Receivable",
+        "amount": 30000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Cost of Goods Sold",
+        "amount": 55500.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Sales Tax Payable",
+        "amount": 6900.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Sales Revenue",
+        "amount": 69000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Inventory",
+        "amount": 55500.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.053109,
+  "raw_cost_usd": 0.08019,
+  "total_latency_ms": 31941,
+  "total_input_tokens": 12605,
+  "total_output_tokens": 2825,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 583,
+      "output_tokens": 220,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2930,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005753100000000001,
+      "raw_cost_usd": 0.01209,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method for $45,900",
+            "resolution": "Transaction explicitly states 'via bank transfer to its chequing account' \u2014 no ambiguity"
+          },
+          {
+            "aspect": "credit terms for remainder",
+            "resolution": "'remainder on credit' is conventional terminology for accounts receivable \u2014 standard treatment"
+          },
+          {
+            "aspect": "inventory cost flow assumption",
+            "resolution": "Cost per case explicitly stated at $185 \u2014 no assumption needed"
+          },
+          {
+            "aspect": "sales tax collection obligation",
+            "resolution": "Transaction states sales tax was charged and collected \u2014 treatment is clear"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 556,
+      "output_tokens": 429,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2072,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008557799999999999,
+      "raw_cost_usd": 0.012651,
+      "output": {
+        "liability_increase_reason": "Sales tax payable increases by $6,900 (10% \u00d7 $69,000), representing the tax collected from the customer that must be remitted to the tax authority.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity increases. This is a normal revenue transaction, not a capital contribution or other equity event.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Sales revenue increases by $69,000 (300 cases \u00d7 $230), representing the revenue earned from selling snack products to the customer.",
+        "revenue_increase_count": 1,
+        "asset_decrease_reason": "Inventory decreases by $55,500 (300 cases \u00d7 $185 cost per case), representing the cost of goods sold as the inventory is transferred to the customer.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend/drawing decreases. This is a sales transaction, not a distribution to owners.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense decreases. The cost of goods sold is recorded as a debit to expense (COGS), not a credit decrease to expense.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 558,
+      "output_tokens": 453,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2104,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0089328,
+      "raw_cost_usd": 0.013107,
+      "output": {
+        "asset_increase_reason": "Two asset increases: (1) Cash/Chequing account increases by $45,900 from bank transfer, (2) Accounts Receivable increases by $30,000 ($75,900 - $45,900) for the credit portion. Both are distinct assets receiving value from the sale.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividend distributions in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Cost of Goods Sold increases by $55,500 (300 cases \u00d7 $185). This represents the expense of inventory sold, recognized at the time of sale under IFRS.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced. The sales tax collected increases a liability (credit side), and no existing liabilities are decreased.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased. This is a normal sales transaction that increases equity through revenue (credit side).",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases such as sales returns, allowances, or discounts. This is a straightforward sale generating revenue (credit side).",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 878,
+      "output_tokens": 1723,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5499,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0298653,
+      "raw_cost_usd": 0.042342,
+      "output": {
+        "incomplete_information_reasoning": "The transaction provides all necessary business facts: selling price ($230/case \u00d7 300 cases = $69,000), cost ($185/case \u00d7 300 cases = $55,500), sales tax rate (10%), payment split ($45,900 cash, $30,000 credit). This is a standard sale of inventory with COGS recognition, tax collection, and mixed payment terms. No business facts are missing.",
+        "debit_asset_increase": {
+          "reason": "Accept. Two asset increases: (1) Cash/Chequing Account for $45,900 received via bank transfer, (2) Accounts Receivable for $30,000 remaining balance on credit.",
+          "action": "accept",
+          "count": 2,
+          "accounts": [
+            "Chequing Account",
+            "Accounts Receivable"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend declared or paid in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. Cost of Goods Sold expense of $55,500 (300 cases \u00d7 $185 per case) must be recognized when inventory is sold.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cost of Goods Sold"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue is being reversed or reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept. Sales tax payable of $6,900 (10% \u00d7 $69,000) is collected on behalf of tax authority and represents a liability.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Sales Tax Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity is being increased directly in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Accept. Sales revenue of $69,000 (300 cases \u00d7 $230 per case) is recognized from the sale of snack products.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Sales Revenue"
+          ]
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Inventory decreases by $55,500 (300 cases \u00d7 $185 cost per case) as goods are sold and removed from inventory.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense is being reversed or reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "This is a sale of inventory with mixed payment terms. Revenue of $69,000 is recognized (300 cases \u00d7 $230). Sales tax of $6,900 (10% \u00d7 $69,000) is collected and recorded as a liability. Payment received: $45,900 to Chequing Account, $30,000 remains as Accounts Receivable ($75,900 total). Cost of Goods Sold of $55,500 (300 cases \u00d7 $185) is expensed, and Inventory is reduced by the same amount. Total debits: $45,900 + $30,000 + $55,500 = $131,400. Total credits: $6,900 + $69,000 + $55,500 = $131,400.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Chequing Account",
+              "amount": 45900.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Accounts Receivable",
+              "amount": 30000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Cost of Goods Sold",
+              "amount": 55500.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Sales Tax Payable",
+              "amount": 6900.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Sales Revenue",
+              "amount": 69000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Inventory",
+              "amount": 55500.0
+            }
+          ]
+        },
+        "decision_rationale": "All business facts are present in the transaction. The entry correctly records: (1) revenue recognition of $69,000, (2) sales tax collection of $6,900 as a liability, (3) mixed payment receipt ($45,900 cash + $30,000 receivable = $75,900 total), (4) COGS expense of $55,500, and (5) inventory reduction of $55,500. The tuple counts match: 3 debits (2 asset increases + 1 expense increase) and 3 credits (1 liability increase + 1 revenue increase + 1 asset decrease). Total debits ($131,400) equal total credits ($131,400). The entry complies with IFRS revenue recognition and inventory accounting standards.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method for $45,900",
+            "resolution": "Transaction explicitly states 'via bank transfer to its chequing account' \u2014 no ambiguity"
+          },
+          {
+            "aspect": "credit terms for remainder",
+            "resolution": "'remainder on credit' is conventional terminology for accounts receivable \u2014 standard treatment"
+          },
+          {
+            "aspect": "inventory cost flow assumption",
+            "resolution": "Cost per case explicitly stated at $185 \u2014 no assumption needed"
+          },
+          {
+            "aspect": "sales tax collection obligation",
+            "resolution": "Transaction states sales tax was charged and collected \u2014 treatment is clear"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Two asset increases: (1) Cash/Chequing account increases by $45,900 from bank transfer, (2) Accounts Receivable increases by $30,000 ($75,900 - $45,900) for the credit portion. Both are distinct assets receiving value from the sale.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividend distributions in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Cost of Goods Sold increases by $55,500 (300 cases \u00d7 $185). This represents the expense of inventory sold, recognized at the time of sale under IFRS.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced. The sales tax collected increases a liability (credit side), and no existing liabilities are decreased.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased. This is a normal sales transaction that increases equity through revenue (credit side).",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases such as sales returns, allowances, or discounts. This is a straightforward sale generating revenue (credit side).",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Sales tax payable increases by $6,900 (10% \u00d7 $69,000), representing the tax collected from the customer that must be remitted to the tax authority.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity increases. This is a normal revenue transaction, not a capital contribution or other equity event.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Sales revenue increases by $69,000 (300 cases \u00d7 $230), representing the revenue earned from selling snack products to the customer.",
+        "revenue_increase_count": 1,
+        "asset_decrease_reason": "Inventory decreases by $55,500 (300 cases \u00d7 $185 cost per case), representing the cost of goods sold as the inventory is transferred to the customer.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend/drawing decreases. This is a sales transaction, not a distribution to owners.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense decreases. The cost of goods sold is recorded as a debit to expense (COGS), not a credit decrease to expense.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Two asset increases: (1) Cash/Chequing account increases by $45,900 from bank transfer, (2) Accounts Receivable increases by $30,000 ($75,900 - $45,900) for the credit portion. Both are distinct assets receiving value from the sale.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividend distributions in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Cost of Goods Sold increases by $55,500 (300 cases \u00d7 $185). This represents the expense of inventory sold, recognized at the time of sale under IFRS.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced. The sales tax collected increases a liability (credit side), and no existing liabilities are decreased.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased. This is a normal sales transaction that increases equity through revenue (credit side).",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue decreases such as sales returns, allowances, or discounts. This is a straightforward sale generating revenue (credit side).",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Sales tax payable increases by $6,900 (10% \u00d7 $69,000), representing the tax collected from the customer that must be remitted to the tax authority.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity increases. This is a normal revenue transaction, not a capital contribution or other equity event.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Sales revenue increases by $69,000 (300 cases \u00d7 $230), representing the revenue earned from selling snack products to the customer.",
+        "revenue_increase_count": 1,
+        "asset_decrease_reason": "Inventory decreases by $55,500 (300 cases \u00d7 $185 cost per case), representing the cost of goods sold as the inventory is transferred to the customer.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend/drawing decreases. This is a sales transaction, not a distribution to owners.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense decreases. The cost of goods sold is recorded as a debit to expense (COGS), not a credit decrease to expense.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction provides all necessary business facts: selling price ($230/case \u00d7 300 cases = $69,000), cost ($185/case \u00d7 300 cases = $55,500), sales tax rate (10%), payment split ($45,900 cash, $30,000 credit). This is a standard sale of inventory with COGS recognition, tax collection, and mixed payment terms. No business facts are missing.",
+        "debit_asset_increase": {
+          "reason": "Accept. Two asset increases: (1) Cash/Chequing Account for $45,900 received via bank transfer, (2) Accounts Receivable for $30,000 remaining balance on credit.",
+          "action": "accept",
+          "count": 2,
+          "accounts": [
+            "Chequing Account",
+            "Accounts Receivable"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend declared or paid in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. Cost of Goods Sold expense of $55,500 (300 cases \u00d7 $185 per case) must be recognized when inventory is sold.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cost of Goods Sold"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue is being reversed or reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept. Sales tax payable of $6,900 (10% \u00d7 $69,000) is collected on behalf of tax authority and represents a liability.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Sales Tax Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity is being increased directly in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Accept. Sales revenue of $69,000 (300 cases \u00d7 $230 per case) is recognized from the sale of snack products.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Sales Revenue"
+          ]
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Inventory decreases by $55,500 (300 cases \u00d7 $185 cost per case) as goods are sold and removed from inventory.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Inventory"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense is being reversed or reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "This is a sale of inventory with mixed payment terms. Revenue of $69,000 is recognized (300 cases \u00d7 $230). Sales tax of $6,900 (10% \u00d7 $69,000) is collected and recorded as a liability. Payment received: $45,900 to Chequing Account, $30,000 remains as Accounts Receivable ($75,900 total). Cost of Goods Sold of $55,500 (300 cases \u00d7 $185) is expensed, and Inventory is reduced by the same amount. Total debits: $45,900 + $30,000 + $55,500 = $131,400. Total credits: $6,900 + $69,000 + $55,500 = $131,400.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Chequing Account",
+              "amount": 45900.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Accounts Receivable",
+              "amount": 30000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Cost of Goods Sold",
+              "amount": 55500.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Sales Tax Payable",
+              "amount": 6900.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Sales Revenue",
+              "amount": 69000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Inventory",
+              "amount": 55500.0
+            }
+          ]
+        },
+        "decision_rationale": "All business facts are present in the transaction. The entry correctly records: (1) revenue recognition of $69,000, (2) sales tax collection of $6,900 as a liability, (3) mixed payment receipt ($45,900 cash + $30,000 receivable = $75,900 total), (4) COGS expense of $55,500, and (5) inventory reduction of $55,500. The tuple counts match: 3 debits (2 asset increases + 1 expense increase) and 3 credits (1 liability increase + 1 revenue increase + 1 asset decrease). Total debits ($131,400) equal total credits ($131,400). The entry complies with IFRS revenue recognition and inventory accounting standards.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 583,
+        "output_tokens": 220,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 556,
+        "output_tokens": 429,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 558,
+        "output_tokens": 453,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 878,
+        "output_tokens": 1723,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

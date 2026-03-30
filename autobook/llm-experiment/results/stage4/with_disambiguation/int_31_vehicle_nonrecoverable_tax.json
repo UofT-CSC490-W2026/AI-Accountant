@@ -1,0 +1,603 @@
+{
+  "test_case_id": "int_31_vehicle_nonrecoverable_tax",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Under IFRS, when sales tax is non-recoverable, it must be capitalized as part of the asset cost (IAS 16). The vehicle base cost is $48,000 and non-recoverable sales tax is $4,800 (10% of $48,000), totaling $52,800. However, the classifier's tuple of 2 debit lines suggests separating these components. Upon reflection, the correct treatment is to combine them into a single Vehicle account since both the base cost and non-recoverable tax form the total cost of the asset. I will override the tuple count from 2 to 1 debit line, as they should be combined into a single asset account at total cost.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Vehicle",
+        "amount": 52800.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Dealer Financing Payable",
+        "amount": 52800.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0513777,
+  "raw_cost_usd": 0.078753,
+  "total_latency_ms": 33362,
+  "total_input_tokens": 12626,
+  "total_output_tokens": 2725,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 561,
+      "output_tokens": 242,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2908,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0060171,
+      "raw_cost_usd": 0.012354,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "nature of asset acquired",
+            "resolution": "Sedan for executive use is a vehicle asset, not inventory \u2014 general corporation context confirms this is a capital asset purchase"
+          },
+          {
+            "aspect": "sales tax treatment",
+            "resolution": "Transaction explicitly states '10% non-recoverable sales tax' \u2014 must be capitalized as part of asset cost"
+          },
+          {
+            "aspect": "financing arrangement",
+            "resolution": "'Financed through dealer payment plan' is a credit purchase \u2014 creates accounts payable/notes payable for $52,800"
+          },
+          {
+            "aspect": "payment timing",
+            "resolution": "'3-month dealer payment plan' indicates deferred payment, not immediate cash outlay"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 536,
+      "output_tokens": 418,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2082,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0083418,
+      "raw_cost_usd": 0.012516,
+      "output": {
+        "asset_increase_reason": "Two distinct assets increase: (1) Vehicle (sedan) at cost of $48,000 - a depreciable asset, and (2) Prepaid sales tax of $4,800 - a non-recoverable tax that must be capitalized separately as it is non-depreciable and economically distinct from the vehicle itself.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are recognized at purchase. The vehicle and tax are capitalized as assets. Future depreciation and tax amortization will be expensed over time.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced. The dealer financing creates a new liability (credit side), not a decrease.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this asset acquisition transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected in this purchase transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 534,
+      "output_tokens": 441,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2050,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008671799999999999,
+      "raw_cost_usd": 0.012765,
+      "output": {
+        "liability_increase_reason": "The entire purchase amount of $52,800 (vehicle cost plus non-recoverable sales tax) was financed through a 3-month dealer payment plan, creating a liability (accounts payable or notes payable to the dealer).",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase. This is a purchase transaction financed by debt, not an owner investment or retained earnings adjustment.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. This is an asset acquisition transaction, not a sale or service delivery.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. The purchase is fully financed through the dealer payment plan, so no cash or other assets are paid out at the time of acquisition.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are decreased. The vehicle (including the non-recoverable sales tax as part of its cost under IFRS) is capitalized as a fixed asset, not expensed. There is no expense reversal or refund.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 856,
+      "output_tokens": 1624,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5586,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.028347,
+      "raw_cost_usd": 0.041118,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Sales tax treatment",
+            "reason": "Transaction states the sales tax is non-recoverable. This is clearly specified, so no ambiguity exists.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Asset classification",
+            "reason": "The sedan is for executive commuting and business use. Under IFRS, this is a depreciable asset (vehicle) regardless of mixed personal/business use. The accounting treatment is clear.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Financing terms",
+            "reason": "The transaction clearly states the total amount of $52,800 was financed through a 3-month dealer payment plan, creating a liability.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Accept the upstream count of 2. The transaction involves: (1) Vehicle asset at $48,000 base cost, and (2) Non-recoverable sales tax of $4,800 that must be capitalized to the vehicle cost under IFRS since it is not recoverable. Total vehicle cost = $52,800.",
+          "action": "accept",
+          "count": 2,
+          "accounts": [
+            "Vehicle",
+            "Vehicle"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense is recognized. The vehicle is a capital asset, not an immediate expense.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being paid down in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept the upstream count of 1. The entire amount of $52,800 is financed through a dealer payment plan, creating a single liability (Dealer Financing Payable or similar).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Dealer Financing Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being reduced in this transaction. The purchase is fully financed.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS, when sales tax is non-recoverable, it must be capitalized as part of the asset cost (IAS 16). The vehicle base cost is $48,000 and non-recoverable sales tax is $4,800 (10% of $48,000), totaling $52,800. However, the classifier's tuple of 2 debit lines suggests separating these components. Upon reflection, the correct treatment is to combine them into a single Vehicle account since both the base cost and non-recoverable tax form the total cost of the asset. I will override the tuple count from 2 to 1 debit line, as they should be combined into a single asset account at total cost.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Vehicle",
+              "amount": 52800.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Dealer Financing Payable",
+              "amount": 52800.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is clear and complete. Target purchased a vehicle for $48,000 plus 10% non-recoverable sales tax ($4,800), totaling $52,800, financed through a dealer payment plan. Under IFRS IAS 16, non-recoverable taxes are capitalized as part of the asset cost. The entry debits Vehicle for the total cost of $52,800 and credits Dealer Financing Payable for the same amount. Total debits ($52,800) equal total credits ($52,800). All information needed to construct the entry is present in the transaction text. Note: I overrode the classifier's suggestion of 2 debit lines because non-recoverable tax and base cost should be combined into a single Vehicle account per IFRS standards.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "nature of asset acquired",
+            "resolution": "Sedan for executive use is a vehicle asset, not inventory \u2014 general corporation context confirms this is a capital asset purchase"
+          },
+          {
+            "aspect": "sales tax treatment",
+            "resolution": "Transaction explicitly states '10% non-recoverable sales tax' \u2014 must be capitalized as part of asset cost"
+          },
+          {
+            "aspect": "financing arrangement",
+            "resolution": "'Financed through dealer payment plan' is a credit purchase \u2014 creates accounts payable/notes payable for $52,800"
+          },
+          {
+            "aspect": "payment timing",
+            "resolution": "'3-month dealer payment plan' indicates deferred payment, not immediate cash outlay"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Two distinct assets increase: (1) Vehicle (sedan) at cost of $48,000 - a depreciable asset, and (2) Prepaid sales tax of $4,800 - a non-recoverable tax that must be capitalized separately as it is non-depreciable and economically distinct from the vehicle itself.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are recognized at purchase. The vehicle and tax are capitalized as assets. Future depreciation and tax amortization will be expensed over time.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced. The dealer financing creates a new liability (credit side), not a decrease.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this asset acquisition transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected in this purchase transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "The entire purchase amount of $52,800 (vehicle cost plus non-recoverable sales tax) was financed through a 3-month dealer payment plan, creating a liability (accounts payable or notes payable to the dealer).",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase. This is a purchase transaction financed by debt, not an owner investment or retained earnings adjustment.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. This is an asset acquisition transaction, not a sale or service delivery.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. The purchase is fully financed through the dealer payment plan, so no cash or other assets are paid out at the time of acquisition.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are decreased. The vehicle (including the non-recoverable sales tax as part of its cost under IFRS) is capitalized as a fixed asset, not expensed. There is no expense reversal or refund.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Two distinct assets increase: (1) Vehicle (sedan) at cost of $48,000 - a depreciable asset, and (2) Prepaid sales tax of $4,800 - a non-recoverable tax that must be capitalized separately as it is non-depreciable and economically distinct from the vehicle itself.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are recognized at purchase. The vehicle and tax are capitalized as assets. Future depreciation and tax amortization will be expensed over time.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced. The dealer financing creates a new liability (credit side), not a decrease.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this asset acquisition transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected in this purchase transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "The entire purchase amount of $52,800 (vehicle cost plus non-recoverable sales tax) was financed through a 3-month dealer payment plan, creating a liability (accounts payable or notes payable to the dealer).",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts increase. This is a purchase transaction financed by debt, not an owner investment or retained earnings adjustment.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated. This is an asset acquisition transaction, not a sale or service delivery.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. The purchase is fully financed through the dealer payment plan, so no cash or other assets are paid out at the time of acquisition.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are decreased. The vehicle (including the non-recoverable sales tax as part of its cost under IFRS) is capitalized as a fixed asset, not expensed. There is no expense reversal or refund.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Sales tax treatment",
+            "reason": "Transaction states the sales tax is non-recoverable. This is clearly specified, so no ambiguity exists.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Asset classification",
+            "reason": "The sedan is for executive commuting and business use. Under IFRS, this is a depreciable asset (vehicle) regardless of mixed personal/business use. The accounting treatment is clear.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Financing terms",
+            "reason": "The transaction clearly states the total amount of $52,800 was financed through a 3-month dealer payment plan, creating a liability.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Accept the upstream count of 2. The transaction involves: (1) Vehicle asset at $48,000 base cost, and (2) Non-recoverable sales tax of $4,800 that must be capitalized to the vehicle cost under IFRS since it is not recoverable. Total vehicle cost = $52,800.",
+          "action": "accept",
+          "count": 2,
+          "accounts": [
+            "Vehicle",
+            "Vehicle"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense is recognized. The vehicle is a capital asset, not an immediate expense.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being paid down in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept the upstream count of 1. The entire amount of $52,800 is financed through a dealer payment plan, creating a single liability (Dealer Financing Payable or similar).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Dealer Financing Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being reduced in this transaction. The purchase is fully financed.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS, when sales tax is non-recoverable, it must be capitalized as part of the asset cost (IAS 16). The vehicle base cost is $48,000 and non-recoverable sales tax is $4,800 (10% of $48,000), totaling $52,800. However, the classifier's tuple of 2 debit lines suggests separating these components. Upon reflection, the correct treatment is to combine them into a single Vehicle account since both the base cost and non-recoverable tax form the total cost of the asset. I will override the tuple count from 2 to 1 debit line, as they should be combined into a single asset account at total cost.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Vehicle",
+              "amount": 52800.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Dealer Financing Payable",
+              "amount": 52800.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is clear and complete. Target purchased a vehicle for $48,000 plus 10% non-recoverable sales tax ($4,800), totaling $52,800, financed through a dealer payment plan. Under IFRS IAS 16, non-recoverable taxes are capitalized as part of the asset cost. The entry debits Vehicle for the total cost of $52,800 and credits Dealer Financing Payable for the same amount. Total debits ($52,800) equal total credits ($52,800). All information needed to construct the entry is present in the transaction text. Note: I overrode the classifier's suggestion of 2 debit lines because non-recoverable tax and base cost should be combined into a single Vehicle account per IFRS standards.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 561,
+        "output_tokens": 242,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 536,
+        "output_tokens": 418,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 534,
+        "output_tokens": 441,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 856,
+        "output_tokens": 1624,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

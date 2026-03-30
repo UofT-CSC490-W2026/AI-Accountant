@@ -33,13 +33,18 @@ def extract_common_result(state: dict, callback: PerNodeUsageCallback,
     """Extract standardized result from final state."""
     i = state["iteration"]
 
-    debit_out = state.get("output_debit_corrector", [])
-    credit_out = state.get("output_credit_corrector", [])
-    debit_tuple = tuple(debit_out[i]["tuple"]) if i < len(debit_out) and debit_out[i] else None
-    credit_tuple = tuple(credit_out[i]["tuple"]) if i < len(credit_out) and credit_out[i] else None
+    from services.agent.utils.parsers.json_output import extract_debit_tuple, extract_credit_tuple
 
-    entry_out = state.get("output_entry_builder", [])
-    journal_entry = entry_out[i] if i < len(entry_out) else None
+    debit_out = state.get("output_debit_classifier", [])
+    credit_out = state.get("output_credit_classifier", [])
+    debit_raw = debit_out[i] if i < len(debit_out) and debit_out[i] else None
+    credit_raw = credit_out[i] if i < len(credit_out) and credit_out[i] else None
+    debit_tuple = tuple(extract_debit_tuple(debit_raw)) if debit_raw else None
+    credit_tuple = tuple(extract_credit_tuple(credit_raw)) if credit_raw else None
+
+    entry_out = state.get("output_entry_drafter", [])
+    raw_entry = entry_out[i] if i < len(entry_out) else None
+    journal_entry = raw_entry
 
     t_input = sum(total_input_tokens(c) for c in callback.llm_calls)
     t_output = sum(c.get("output_tokens", 0) for c in callback.llm_calls)

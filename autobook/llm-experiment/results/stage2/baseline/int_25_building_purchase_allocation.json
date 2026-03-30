@@ -1,0 +1,331 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "baseline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    2,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of land and building for warehouse, partial payment with balance due in 6 months",
+    "rationale": "The $9,000,000 purchase price is allocated between land ($6,000,000) and building ($3,000,000) based on their relative fair values (8M:4M = 2:1 ratio per IFRS). Land is non-depreciable and recorded separately from the building. Sales tax of 10% applies only to the building component ($300,000). Total consideration is $9,300,000. Half of the purchase price ($4,500,000) is due in 6 months and recorded as a liability (Note Payable). The remaining $4,500,000 plus the $300,000 sales tax ($4,800,000 total) was paid by cheque. Sales tax on building purchases is typically recoverable as HST/GST Receivable in Canada.",
+    "lines": [
+      {
+        "account_name": "Land",
+        "type": "debit",
+        "amount": 6000000.0
+      },
+      {
+        "account_name": "Building",
+        "type": "debit",
+        "amount": 3000000.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 300000.0
+      },
+      {
+        "account_name": "Note Payable",
+        "type": "credit",
+        "amount": 4500000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 4800000.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.022526400000000002,
+  "raw_cost_usd": 0.037695,
+  "total_latency_ms": 14832,
+  "total_input_tokens": 7640,
+  "total_output_tokens": 985,
+  "total_llm_calls": 3,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 575,
+      "output_tokens": 208,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1837,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0052236,
+      "raw_cost_usd": 0.008631,
+      "output": {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). The sales tax on the building is capitalized to the building cost under IFRS when not recoverable. Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. Total = 2 debit lines, both asset increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). The sales tax on the building is capitalized to the building cost under IFRS when not recoverable. Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. Total = 2 debit lines, both asset increases."
+    },
+    "credit_classifier": {
+      "input_tokens": 573,
+      "output_tokens": 289,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1814,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0064263,
+      "raw_cost_usd": 0.009777,
+      "output": {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)"
+    },
+    "entry_builder": {
+      "input_tokens": 874,
+      "output_tokens": 488,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3989,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0108765,
+      "raw_cost_usd": 0.019287,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of land and building for warehouse, partial payment with balance due in 6 months",
+        "rationale": "The $9,000,000 purchase price is allocated between land ($6,000,000) and building ($3,000,000) based on their relative fair values (8M:4M = 2:1 ratio per IFRS). Land is non-depreciable and recorded separately from the building. Sales tax of 10% applies only to the building component ($300,000). Total consideration is $9,300,000. Half of the purchase price ($4,500,000) is due in 6 months and recorded as a liability (Note Payable). The remaining $4,500,000 plus the $300,000 sales tax ($4,800,000 total) was paid by cheque. Sales tax on building purchases is typically recoverable as HST/GST Receivable in Canada.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 300000.0
+          },
+          {
+            "account_name": "Note Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4800000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). The sales tax on the building is capitalized to the building cost under IFRS when not recoverable. Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. Total = 2 debit lines, both asset increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). The sales tax on the building is capitalized to the building cost under IFRS when not recoverable. Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. Total = 2 debit lines, both asset increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cash paid = $4,800,000. This is an asset decrease.\n2. Accounts payable or liability increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the $300,000 sales tax on the building (the tax is collected but not yet remitted to the government). This is a liability increase.\n\nTotal: 2 liability increases (deferred payment + sales tax payable) + 1 asset decrease (cash/bank)",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of land and building for warehouse, partial payment with balance due in 6 months",
+        "rationale": "The $9,000,000 purchase price is allocated between land ($6,000,000) and building ($3,000,000) based on their relative fair values (8M:4M = 2:1 ratio per IFRS). Land is non-depreciable and recorded separately from the building. Sales tax of 10% applies only to the building component ($300,000). Total consideration is $9,300,000. Half of the purchase price ($4,500,000) is due in 6 months and recorded as a liability (Note Payable). The remaining $4,500,000 plus the $300,000 sales tax ($4,800,000 total) was paid by cheque. Sales tax on building purchases is typically recoverable as HST/GST Receivable in Canada.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 300000.0
+          },
+          {
+            "account_name": "Note Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4800000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 575,
+        "output_tokens": 208,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 573,
+        "output_tokens": 289,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 874,
+        "output_tokens": 488,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

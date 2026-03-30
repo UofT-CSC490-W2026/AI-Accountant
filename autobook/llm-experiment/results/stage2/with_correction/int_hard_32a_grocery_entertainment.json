@@ -1,0 +1,367 @@
+{
+  "test_case_id": "int_hard_32a_grocery_entertainment",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Tea, beverages, and refreshments for client entertainment",
+    "rationale": "Client entertainment expenses are operating expenses under IFRS. The purchase was made on corporate credit card, creating a liability (Credit Card Payable). The total amount paid is $1,320 ($1,200 base + $120 tax). The 10% sales tax is recorded separately as HST/GST Receivable since it is recoverable input tax on a business expense. The debit tuple (0,0,1,0,0,0) indicates one expense increase, and credit tuple (1,0,0,0,0,0) indicates one liability increase, which aligns with this transaction structure before tax lines are added.",
+    "lines": [
+      {
+        "account_name": "Entertainment Expense",
+        "type": "debit",
+        "amount": 1200.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 120.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 1320.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.030734400000000002,
+  "raw_cost_usd": 0.055353,
+  "total_latency_ms": 28478,
+  "total_input_tokens": 12356,
+  "total_output_tokens": 1219,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 519,
+      "output_tokens": 123,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1760,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037743000000000004,
+      "raw_cost_usd": 0.007125,
+      "output": {
+        "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes $120 tax to the government), (2) Credit card payable = liability increase (the business owes $1,320 to the credit card company). Both are liability increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes $120 tax to the government), (2) Credit card payable = liability increase (the business owes $1,320 to the credit card company). Both are liability increases."
+    },
+    "debit_classifier": {
+      "input_tokens": 521,
+      "output_tokens": 161,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1783,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0043566,
+      "raw_cost_usd": 0.007764,
+      "output": {
+        "reason": "Client entertainment purchases (tea, beverages, refreshments) represent an expense increase. The sales tax paid is also an expense (or recoverable asset if input tax credit applies, but typically for small amounts it's expensed). This creates 2 debit lines: (1) Entertainment/hospitality expense increase for $1,200, and (2) Sales tax expense increase for $120. Both are expense increases = 2 lines in slot c.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Client entertainment purchases (tea, beverages, refreshments) represent an expense increase. The sales tax paid is also an expense (or recoverable asset if input tax credit applies, but typically for small amounts it's expensed). This creates 2 debit lines: (1) Entertainment/hospitality expense increase for $1,200, and (2) Sales tax expense increase for $120. Both are expense increases = 2 lines in slot c."
+    },
+    "credit_corrector": {
+      "input_tokens": 689,
+      "output_tokens": 308,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2443,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0072131999999999995,
+      "raw_cost_usd": 0.011949,
+      "output": {
+        "reason": "The transaction involves purchasing items for client entertainment ($1,200) plus sales tax ($120), paid by corporate credit card. This creates two distinct economic events on the credit side:\n\n1. The $1,200 purchase creates an entertainment expense (debit)\n2. The $120 sales tax creates a sales tax expense (debit)\n3. Both are paid by corporate credit card, which increases the credit card liability\n\nThe debit tuple shows (0,0,2,0,0,0) = 2 expense increases, which correctly captures the entertainment expense and sales tax expense as separate line items.\n\nThe credit side should record ONE liability increase for the total credit card payable of $1,320. The initial credit tuple of (2,0,0,0,0,0) incorrectly splits the credit card liability into two lines, but since both components have the same account (credit card payable) and same treatment (liability increase), they should be combined into a single line.\n\nCorrected to (1,0,0,0,0,0) = 1 liability increase for the credit card payable.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing items for client entertainment ($1,200) plus sales tax ($120), paid by corporate credit card. This creates two distinct economic events on the credit side:\n\n1. The $1,200 purchase creates an entertainment expense (debit)\n2. The $120 sales tax creates a sales tax expense (debit)\n3. Both are paid by corporate credit card, which increases the credit card liability\n\nThe debit tuple shows (0,0,2,0,0,0) = 2 expense increases, which correctly captures the entertainment expense and sales tax expense as separate line items.\n\nThe credit side should record ONE liability increase for the total credit card payable of $1,320. The initial credit tuple of (2,0,0,0,0,0) incorrectly splits the credit card liability into two lines, but since both components have the same account (credit card payable) and same treatment (liability increase), they should be combined into a single line.\n\nCorrected to (1,0,0,0,0,0) = 1 liability increase for the credit card payable."
+    },
+    "debit_corrector": {
+      "input_tokens": 689,
+      "output_tokens": 258,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2435,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0064608,
+      "raw_cost_usd": 0.011175,
+      "output": {
+        "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two economic effects: (1) an expense increase for entertainment/hospitality expense, and (2) a liability increase for the credit card payable. The initial debit tuple shows 2 expense increases, but there is only ONE expense being recorded - the client entertainment expense of $1,320 (including sales tax, which is part of the cost). The credit tuple correctly shows 2 liability increases: one for the credit card payable and one for the sales tax payable to the government. However, on the debit side, we only have the single entertainment expense. The sales tax is not a separate debit line; it's included in the total expense amount. Corrected from (0,0,2,0,0,0) to (0,0,1,0,0,0) - one expense increase only.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two economic effects: (1) an expense increase for entertainment/hospitality expense, and (2) a liability increase for the credit card payable. The initial debit tuple shows 2 expense increases, but there is only ONE expense being recorded - the client entertainment expense of $1,320 (including sales tax, which is part of the cost). The credit tuple correctly shows 2 liability increases: one for the credit card payable and one for the sales tax payable to the government. However, on the debit side, we only have the single entertainment expense. The sales tax is not a separate debit line; it's included in the total expense amount. Corrected from (0,0,2,0,0,0) to (0,0,1,0,0,0) - one expense increase only."
+    },
+    "entry_builder": {
+      "input_tokens": 820,
+      "output_tokens": 369,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3935,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0089295,
+      "raw_cost_usd": 0.01734,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Tea, beverages, and refreshments for client entertainment",
+        "rationale": "Client entertainment expenses are operating expenses under IFRS. The purchase was made on corporate credit card, creating a liability (Credit Card Payable). The total amount paid is $1,320 ($1,200 base + $120 tax). The 10% sales tax is recorded separately as HST/GST Receivable since it is recoverable input tax on a business expense. The debit tuple (0,0,1,0,0,0) indicates one expense increase, and credit tuple (1,0,0,0,0,0) indicates one liability increase, which aligns with this transaction structure before tax lines are added.",
+        "lines": [
+          {
+            "account_name": "Entertainment Expense",
+            "type": "debit",
+            "amount": 1200.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 120.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Client entertainment purchases (tea, beverages, refreshments) represent an expense increase. The sales tax paid is also an expense (or recoverable asset if input tax credit applies, but typically for small amounts it's expensed). This creates 2 debit lines: (1) Entertainment/hospitality expense increase for $1,200, and (2) Sales tax expense increase for $120. Both are expense increases = 2 lines in slot c.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Sales tax payable = liability increase (the business owes $120 tax to the government), (2) Credit card payable = liability increase (the business owes $1,320 to the credit card company). Both are liability increases.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves purchasing items for client entertainment paid by corporate credit card. This creates two economic effects: (1) an expense increase for entertainment/hospitality expense, and (2) a liability increase for the credit card payable. The initial debit tuple shows 2 expense increases, but there is only ONE expense being recorded - the client entertainment expense of $1,320 (including sales tax, which is part of the cost). The credit tuple correctly shows 2 liability increases: one for the credit card payable and one for the sales tax payable to the government. However, on the debit side, we only have the single entertainment expense. The sales tax is not a separate debit line; it's included in the total expense amount. Corrected from (0,0,2,0,0,0) to (0,0,1,0,0,0) - one expense increase only.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves purchasing items for client entertainment ($1,200) plus sales tax ($120), paid by corporate credit card. This creates two distinct economic events on the credit side:\n\n1. The $1,200 purchase creates an entertainment expense (debit)\n2. The $120 sales tax creates a sales tax expense (debit)\n3. Both are paid by corporate credit card, which increases the credit card liability\n\nThe debit tuple shows (0,0,2,0,0,0) = 2 expense increases, which correctly captures the entertainment expense and sales tax expense as separate line items.\n\nThe credit side should record ONE liability increase for the total credit card payable of $1,320. The initial credit tuple of (2,0,0,0,0,0) incorrectly splits the credit card liability into two lines, but since both components have the same account (credit card payable) and same treatment (liability increase), they should be combined into a single line.\n\nCorrected to (1,0,0,0,0,0) = 1 liability increase for the credit card payable.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Tea, beverages, and refreshments for client entertainment",
+        "rationale": "Client entertainment expenses are operating expenses under IFRS. The purchase was made on corporate credit card, creating a liability (Credit Card Payable). The total amount paid is $1,320 ($1,200 base + $120 tax). The 10% sales tax is recorded separately as HST/GST Receivable since it is recoverable input tax on a business expense. The debit tuple (0,0,1,0,0,0) indicates one expense increase, and credit tuple (1,0,0,0,0,0) indicates one liability increase, which aligns with this transaction structure before tax lines are added.",
+        "lines": [
+          {
+            "account_name": "Entertainment Expense",
+            "type": "debit",
+            "amount": 1200.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 120.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 1320.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 519,
+        "output_tokens": 123,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 521,
+        "output_tokens": 161,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 308,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 689,
+        "output_tokens": 258,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 820,
+        "output_tokens": 369,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

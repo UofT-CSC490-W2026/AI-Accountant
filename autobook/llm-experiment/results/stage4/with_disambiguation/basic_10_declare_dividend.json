@@ -1,0 +1,557 @@
+{
+  "test_case_id": "basic_10_declare_dividend",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Under IFRS, when the board declares a cash dividend, a legal obligation is created. This requires: (1) Debit Retained Earnings to reduce equity by the dividend amount, and (2) Credit Dividends Payable to recognize the liability. The amount is stated as $500,000. No tax applies to dividend declarations. The entry will be settled when cash is paid in 30 days.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Retained Earnings",
+        "amount": 500000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Dividends Payable",
+        "amount": 500000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0459567,
+  "raw_cost_usd": 0.07333200000000001,
+  "total_latency_ms": 28572,
+  "total_input_tokens": 12454,
+  "total_output_tokens": 2398,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 518,
+      "output_tokens": 138,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2865,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0043281000000000005,
+      "raw_cost_usd": 0.010665,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "dividend status (declared vs. distributed)",
+            "resolution": "Transaction explicitly states 'declared' and 'payable in 30 days' \u2014 this is a dividend declaration, not payment. Standard convention: 'declared' creates liability (Dividends Payable), not cash outflow"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 380,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2007,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076278000000000006,
+      "raw_cost_usd": 0.011721,
+      "output": {
+        "liability_increase_reason": "Dividends Payable liability is created when the board declares the dividend, representing the obligation to pay shareholders in 30 days.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity increases; the declaration reduces retained earnings (equity), not increases it.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Dividend declarations are distributions to owners, not revenue-generating activities.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash has not yet been paid; the dividend is only declared and payable in 30 days, so no asset decrease occurs at declaration.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "The dividend account is debited (increased) at declaration, not credited (decreased).",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Dividends are not expenses under IFRS; they are distributions of equity to owners.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 419,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2039,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008227799999999999,
+      "raw_cost_usd": 0.012402,
+      "output": {
+        "asset_increase_reason": "No assets increase. Cash will decrease later when paid, but at declaration no asset changes occur.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "Dividends are not increased at declaration. Under IFRS, dividend declaration creates a liability (dividends payable) but does not affect retained earnings until payment or when legally binding. The debit is to equity, not dividends.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Dividends are not expenses under IFRS. They are distributions of equity to owners.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liability decreases. A liability (dividends payable) is created on the credit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "Retained earnings (equity) decreases by $500,000 when the dividend is declared. This is the debit side of the entry: Dr. Retained Earnings, Cr. Dividends Payable.",
+        "equity_decrease_count": 1,
+        "revenue_decrease_reason": "No revenue accounts are affected by dividend declarations.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 813,
+      "output_tokens": 1461,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5543,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.025773,
+      "raw_cost_usd": 0.038544,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Dividend declaration completeness",
+            "reason": "Transaction states board declared a cash dividend. Under IFRS, declaration creates a legal obligation and liability. All necessary information is present: amount ($500,000), type (cash), and timing (payable in 30 days).",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. Dividend declaration does not involve receiving or acquiring assets.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "Override the classifier. Under IFRS, dividends are not recorded as a separate 'dividend' account increase. Instead, dividend declarations reduce equity directly. The debit should be to Retained Earnings (equity decrease), not a dividend account.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense in this transaction. Dividends are distributions of equity, not expenses under IFRS.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability decrease. The transaction creates a liability, it does not reduce one.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "Accept and implement. Dividend declaration reduces retained earnings (equity). This is the correct debit side of the entry.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Retained Earnings"
+          ]
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease. Dividends do not affect revenue accounts.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept and implement. When board declares a dividend, a legal obligation is created. This is recorded as Dividends Payable (liability increase).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Dividends Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase. Dividend declaration reduces equity, not increases it.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue increase. Dividends are not revenue.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset decrease at declaration. Assets will decrease when the dividend is paid in 30 days, but not at declaration.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease. Under IFRS, dividends reduce equity directly, not through a separate dividend account that would then be decreased.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease. Dividends are not expenses under IFRS.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS, when the board declares a cash dividend, a legal obligation is created. This requires: (1) Debit Retained Earnings to reduce equity by the dividend amount, and (2) Credit Dividends Payable to recognize the liability. The amount is stated as $500,000. No tax applies to dividend declarations. The entry will be settled when cash is paid in 30 days.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Retained Earnings",
+              "amount": 500000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Dividends Payable",
+              "amount": 500000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is a straightforward dividend declaration. Under IFRS, declaration creates a legal obligation that must be recognized immediately. All necessary information is present: the amount ($500,000), the type (cash), and the timing (payable in 30 days). The entry debits Retained Earnings (equity decrease) and credits Dividends Payable (liability increase). Total debits ($500,000) equal total credits ($500,000). No tax applies to dividend declarations. The entry is complete and correct.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "dividend status (declared vs. distributed)",
+            "resolution": "Transaction explicitly states 'declared' and 'payable in 30 days' \u2014 this is a dividend declaration, not payment. Standard convention: 'declared' creates liability (Dividends Payable), not cash outflow"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No assets increase. Cash will decrease later when paid, but at declaration no asset changes occur.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "Dividends are not increased at declaration. Under IFRS, dividend declaration creates a liability (dividends payable) but does not affect retained earnings until payment or when legally binding. The debit is to equity, not dividends.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Dividends are not expenses under IFRS. They are distributions of equity to owners.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liability decreases. A liability (dividends payable) is created on the credit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "Retained earnings (equity) decreases by $500,000 when the dividend is declared. This is the debit side of the entry: Dr. Retained Earnings, Cr. Dividends Payable.",
+        "equity_decrease_count": 1,
+        "revenue_decrease_reason": "No revenue accounts are affected by dividend declarations.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Dividends Payable liability is created when the board declares the dividend, representing the obligation to pay shareholders in 30 days.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity increases; the declaration reduces retained earnings (equity), not increases it.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Dividend declarations are distributions to owners, not revenue-generating activities.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash has not yet been paid; the dividend is only declared and payable in 30 days, so no asset decrease occurs at declaration.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "The dividend account is debited (increased) at declaration, not credited (decreased).",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Dividends are not expenses under IFRS; they are distributions of equity to owners.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No assets increase. Cash will decrease later when paid, but at declaration no asset changes occur.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "Dividends are not increased at declaration. Under IFRS, dividend declaration creates a liability (dividends payable) but does not affect retained earnings until payment or when legally binding. The debit is to equity, not dividends.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Dividends are not expenses under IFRS. They are distributions of equity to owners.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liability decreases. A liability (dividends payable) is created on the credit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "Retained earnings (equity) decreases by $500,000 when the dividend is declared. This is the debit side of the entry: Dr. Retained Earnings, Cr. Dividends Payable.",
+        "equity_decrease_count": 1,
+        "revenue_decrease_reason": "No revenue accounts are affected by dividend declarations.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Dividends Payable liability is created when the board declares the dividend, representing the obligation to pay shareholders in 30 days.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity increases; the declaration reduces retained earnings (equity), not increases it.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Dividend declarations are distributions to owners, not revenue-generating activities.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash has not yet been paid; the dividend is only declared and payable in 30 days, so no asset decrease occurs at declaration.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "The dividend account is debited (increased) at declaration, not credited (decreased).",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Dividends are not expenses under IFRS; they are distributions of equity to owners.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Dividend declaration completeness",
+            "reason": "Transaction states board declared a cash dividend. Under IFRS, declaration creates a legal obligation and liability. All necessary information is present: amount ($500,000), type (cash), and timing (payable in 30 days).",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. Dividend declaration does not involve receiving or acquiring assets.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "Override the classifier. Under IFRS, dividends are not recorded as a separate 'dividend' account increase. Instead, dividend declarations reduce equity directly. The debit should be to Retained Earnings (equity decrease), not a dividend account.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense in this transaction. Dividends are distributions of equity, not expenses under IFRS.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability decrease. The transaction creates a liability, it does not reduce one.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "Accept and implement. Dividend declaration reduces retained earnings (equity). This is the correct debit side of the entry.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Retained Earnings"
+          ]
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease. Dividends do not affect revenue accounts.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept and implement. When board declares a dividend, a legal obligation is created. This is recorded as Dividends Payable (liability increase).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Dividends Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase. Dividend declaration reduces equity, not increases it.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue increase. Dividends are not revenue.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset decrease at declaration. Assets will decrease when the dividend is paid in 30 days, but not at declaration.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease. Under IFRS, dividends reduce equity directly, not through a separate dividend account that would then be decreased.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease. Dividends are not expenses under IFRS.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS, when the board declares a cash dividend, a legal obligation is created. This requires: (1) Debit Retained Earnings to reduce equity by the dividend amount, and (2) Credit Dividends Payable to recognize the liability. The amount is stated as $500,000. No tax applies to dividend declarations. The entry will be settled when cash is paid in 30 days.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Retained Earnings",
+              "amount": 500000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Dividends Payable",
+              "amount": 500000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is a straightforward dividend declaration. Under IFRS, declaration creates a legal obligation that must be recognized immediately. All necessary information is present: the amount ($500,000), the type (cash), and the timing (payable in 30 days). The entry debits Retained Earnings (equity decrease) and credits Dividends Payable (liability increase). Total debits ($500,000) equal total credits ($500,000). No tax applies to dividend declarations. The entry is complete and correct.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 138,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 380,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 419,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 813,
+        "output_tokens": 1461,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}
