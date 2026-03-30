@@ -68,6 +68,7 @@ CMD ["services.normalizer.aws.handler"]
 FROM autobook-accounting AS autobook-precedent
 
 COPY backend/services/precedent/ backend/services/precedent/
+COPY backend/services/precedent_v2/ backend/services/precedent_v2/
 ENTRYPOINT ["python", "-m", "awslambdaric"]
 CMD ["services.precedent.aws.handler"]
 

@@ -3,7 +3,7 @@ import logging
 
 from queues import sqs
 from queues.pubsub import pub
-from services.precedent.service import execute
+from services.precedent_v2.service import execute
 from services.shared.parse_status import record_batch_result_sync, set_status_sync
 from services.shared.routing import next_stage, should_post
 
