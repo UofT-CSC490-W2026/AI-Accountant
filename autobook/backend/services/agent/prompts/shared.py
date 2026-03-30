@@ -45,15 +45,21 @@ capitalized into the related PP&E asset's carrying amount \
 (IAS 16.16(c)), not as a separate asset line.
 - Manufacturing costs are product costs capitalized to inventory, \
 not period expenses.
-- Payroll remittance with employer matching: employee withholdings \
-(previously recorded as liability) are a liability decrease; \
-employer matching contributions are a new expense, not part of \
-the prior liability.
+- Payroll remittance with employer matching: the total cash paid \
+is split — employee withholdings (already on the books as a \
+liability) are a liability decrease, and employer matching \
+(not previously recorded) is a new expense. The two portions \
+do not overlap. Example: remit $4,000 pension = $2,000 employee \
+withholding (Dr liability) + $2,000 employer match (Dr expense), \
+Cr Cash $4,000 total.
 - Advertising and promotional expenditure shall be recognized as \
 an expense when incurred — never capitalize (IAS 38.69).
 - Materials purchased for R&D use are expensed when acquired \
 (IAS 38.126). Only capitalize if purchased for general inventory \
 with no stated R&D purpose.
+- Investment transaction costs (IFRS 9): FVTPL — expense \
+immediately; FVOCI and equity method — capitalize into the \
+investment's carrying amount.
 - Buyer-side tax: recoverable tax on purchases is an asset \
 (Input Tax Credit Receivable / Current tax assets), not a liability. \
 Only the seller records tax payable.
@@ -73,6 +79,10 @@ Conventional terms:
 - "deposit received" — liability (unearned), not revenue
 - "discounted at the bank" — ambiguous between derecognition \
 and collateralized borrowing
+- Rent/lease payments covering 12 months or less — ambiguous \
+between prepaid asset and immediate expense under IFRS 16.5 \
+short-term lease exemption. Treatment depends on entity's \
+policy election, not determinable from transaction text alone.
 
 Tax categories:
 - Taxable: purchases/sales of goods or services, rent, utilities, \
@@ -120,7 +130,8 @@ Insurance expense, Communication expense, Transportation expense, \
 Warehousing expense, Occupancy expense, Interest expense, \
 Income tax expense, Property tax expense, Payroll tax expense, \
 Research and development expense, Entertainment expense, \
-Donations expense, Royalty expense, Casualty loss, Penalties and fines
+Meeting expense, Donations expense, Royalty expense, Casualty loss, \
+Penalties and fines
 - Dividends: Dividends declared
 
 Source of truth:

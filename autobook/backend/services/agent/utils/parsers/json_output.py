@@ -97,7 +97,7 @@ EXPENSE_CATEGORIES = Literal[
     "Occupancy expense", "Interest expense", "Income tax expense",
     "Property tax expense", "Payroll tax expense",
     "Research and development expense", "Entertainment expense",
-    "Donations expense", "Royalty expense", "Casualty loss",
+    "Meeting expense", "Donations expense", "Royalty expense", "Casualty loss",
     "Penalties and fines",
 ]
 

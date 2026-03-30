@@ -72,6 +72,10 @@ means the ambiguity is material.)
 accounting conventions, or user context?
    If BOTH true, this is genuinely missing information. \
 If either is false, the ambiguity detector was overly cautious — proceed.
+   Special case: if the transaction text states management's \
+determination, policy election, or intent (e.g., "management \
+has determined", "classified as", "elected to"), the ambiguity \
+is resolved by the text itself — proceed.
 
 2. Review each skeptical flag from the complexity detector. \
 For each: is the system truly unable to handle this?
