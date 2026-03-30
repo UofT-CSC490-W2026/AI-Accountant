@@ -1,7 +1,7 @@
 # Intermediate Level — Accounting Transaction Examples (IFRS)
 
 | No. | Company | Transaction Description | Debit Nature | Credit Nature | Debit | Credit | IFRS Ref |
-|-----|---------|------------------------|-------------|--------------|-------|--------|----------|
+|-----|---------|----------------------------------------------------------------|-------------|--------------|-------|--------|----------|
 | 3 | Clorox | Clorox purchased machinery from Ford for $700,000 on account for factory expansion. Clorox also paid by cheque $30,000 in freight, $20,000 in installation, and $50,000 in testing and commissioning costs. | Increase in assets | {Increase in liabilities, Decrease in assets} | {PP&E — Machinery: $800,000} | {Trade payables: $700,000, Cash: $100,000} | IAS 16 |
 | 4 | Clorox | Clorox originally purchased machinery for $800,000, intending to use it for 10 years. In year 5, Clorox spent $200,000 in cash on a major overhaul, which extended the remaining useful life by an additional 2 years. | Increase in assets | Decrease in assets | {PP&E — Machinery: $200,000} | {Cash: $200,000} | IAS 16 |
 | 5 | Clorox | Clorox issued bonds with a face value of $3,000,000, a 3-year term, and a coupon rate of 10% with interest payable annually on December 31. The bonds were issued at a discount to reflect the market interest rate of 15%, and the proceeds were received in cash. | {Increase in assets, Decrease in liabilities (contra)} | Increase in liabilities | {Cash: $2,657,510, Discount on bonds payable: $342,490} | {Bonds payable: $3,000,000} | IFRS 9 |

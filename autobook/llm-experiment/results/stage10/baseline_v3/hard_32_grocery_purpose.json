@@ -1,0 +1,485 @@
+{
+  "test_case_id": "hard_32_grocery_purpose",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": null,
+  "actual_cost_usd": 0.045574500000000004,
+  "raw_cost_usd": 0.100911,
+  "total_latency_ms": 25879,
+  "total_input_tokens": 24617,
+  "total_output_tokens": 1804,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 502,
+      "output_tokens": 79,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4269,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038211,
+      "raw_cost_usd": 0.013992,
+      "output": {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Corporate credit card payment for groceries and sales tax",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 503,
+      "output_tokens": 215,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4468,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059235,
+      "raw_cost_usd": 0.016629,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Recoverable sales tax on purchase (input tax credit)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Tea, beverages, and refreshments purchased for office use",
+            "category": "Entertainment expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 517,
+      "output_tokens": 221,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3195,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0056694,
+      "raw_cost_usd": 0.0129,
+      "output": {
+        "flags": [
+          {
+            "aspect": "classification of tea, beverages, and refreshments",
+            "why_llm_cannot_do_this": "Cannot determine business purpose from item description alone. Could be: (1) office supplies for staff consumption (expense), (2) inventory for resale (asset), (3) raw materials for manufacturing (inventory), or (4) samples for marketing (advertising expense). Classification principle requires business purpose, not item description.",
+            "what_is_best_llm_can_do": "Default to office supplies expense or make arbitrary classification without business context",
+            "skeptical": true
+          },
+          {
+            "aspect": "sales tax treatment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "credit card payment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "ambiguity_detector": {
+      "input_tokens": 541,
+      "output_tokens": 230,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3826,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0060585,
+      "raw_cost_usd": 0.014928,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of tea, beverages, and refreshments purchase",
+            "why_entry_depends_on_clarification": "Office consumption = prepaid expense or supplies expense; client entertainment = entertainment expense; resale = inventory asset; event catering = event expense or cost of sales",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states items purchased but not the business purpose. 'General' business type and grocery store source do not narrow the purpose. No convention exists for categorizing beverage purchases.",
+            "clarification_question": "What was the business purpose of purchasing these tea, beverages, and refreshments?",
+            "options": [
+              "Office supplies for employee consumption",
+              "Client entertainment/hospitality",
+              "Resale inventory",
+              "Event catering"
+            ],
+            "resolved": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "tax_specialist": {
+      "input_tokens": 527,
+      "output_tokens": 226,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3543,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058758000000000005,
+      "raw_cost_usd": 0.014019,
+      "output": {
+        "reasoning": "Text explicitly states \"plus 10% sales tax\" on $1,200 purchase of tea, beverages, and refreshments. This is a taxable purchase of goods. The tax amount is stated as $120 ($1,320 total - $1,200 base). As a corporate purchase, the sales tax is recoverable as an input tax credit.",
+        "tax_mentioned": true,
+        "taxable": true,
+        "add_tax_lines": true,
+        "tax_rate": 0.1,
+        "tax_amount": 120.0,
+        "treatment": "recoverable"
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1532,
+      "output_tokens": 833,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5316,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0182262,
+      "raw_cost_usd": 0.028443,
+      "output": {
+        "ambiguity_assessment": "The ambiguity detector flagged \"business purpose of tea, beverages, and refreshments purchase\" with 4 options: office supplies, client entertainment, resale inventory, or event catering. Each option maps to a different account name (Prepaid expenses/Supplies expense vs Entertainment expense vs Inventories vs Event expense/Cost of sales). The transaction text states only \"purchased tea, beverages, and refreshments from a grocery store\" with no indication of purpose. This is not determinable from the text, accounting conventions, or context. The person who initiated the transaction would know the purpose. Both tests pass: (1) account name differs materially, and (2) not determinable from given information. This is genuinely missing information.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "What was the business purpose of purchasing these tea, beverages, and refreshments? (e.g., office supplies for employee consumption, client entertainment/hospitality, resale inventory, event catering)"
+        ],
+        "complexity_assessment": "The complexity detector flagged \"classification of tea, beverages, and refreshments\" as skeptical, noting the system cannot determine business purpose from item description alone. This is correct \u2014 the system lacks the business context needed to classify correctly. However, this is not an llm_stuck issue (lack of accounting knowledge), but rather a missing_info issue (lack of business facts). The system knows how to handle each scenario once the purpose is known.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "The debit classifier categorized the $1,200 as \"Entertainment expense\" with reason \"Tea, beverages, and refreshments purchased for office use\". This is an arbitrary default classification without factual basis. The transaction text does not state \"office use\" or \"entertainment\". The classifier made an assumption. The credit classifier correctly identified the corporate credit card payment as a liability increase (not cash decrease \u2014 corporate credit cards create a payable). However, the credit classifier incorrectly categorized it as \"Cash and cash equivalents\" decrease, when it should be a liability increase (Trade payables or Accrued liabilities). The debit classification's category is wrong due to missing information. The credit classification's direction and category are both wrong.",
+        "debit_approved": false,
+        "override_debit": null,
+        "credit_approved": false,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity is material: different business purposes map to different account names (Entertainment expense vs Supplies expense vs Inventories vs Event expense). The transaction text provides no indication of purpose. This is not determinable from conventions or context. Additionally, the credit classifier misclassified the corporate credit card payment as a cash decrease when it should be a liability increase. However, the primary blocker is the missing business purpose, which prevents correct account selection on the debit side. The credit card treatment error is secondary and would be corrected once the purpose is known. Decision: missing_info.",
+        "decision": "missing_info"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "What was the business purpose of purchasing these tea, beverages, and refreshments? (e.g., office supplies for employee consumption, client entertainment/hospitality, resale inventory, event catering)"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of tea, beverages, and refreshments purchase",
+            "why_entry_depends_on_clarification": "Office consumption = prepaid expense or supplies expense; client entertainment = entertainment expense; resale = inventory asset; event catering = event expense or cost of sales",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states items purchased but not the business purpose. 'General' business type and grocery store source do not narrow the purpose. No convention exists for categorizing beverage purchases.",
+            "clarification_question": "What was the business purpose of purchasing these tea, beverages, and refreshments?",
+            "options": [
+              "Office supplies for employee consumption",
+              "Client entertainment/hospitality",
+              "Resale inventory",
+              "Event catering"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "classification of tea, beverages, and refreshments",
+            "why_llm_cannot_do_this": "Cannot determine business purpose from item description alone. Could be: (1) office supplies for staff consumption (expense), (2) inventory for resale (asset), (3) raw materials for manufacturing (inventory), or (4) samples for marketing (advertising expense). Classification principle requires business purpose, not item description.",
+            "what_is_best_llm_can_do": "Default to office supplies expense or make arbitrary classification without business context",
+            "skeptical": true
+          },
+          {
+            "aspect": "sales tax treatment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "credit card payment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Text explicitly states \"plus 10% sales tax\" on $1,200 purchase of tea, beverages, and refreshments. This is a taxable purchase of goods. The tax amount is stated as $120 ($1,320 total - $1,200 base). As a corporate purchase, the sales tax is recoverable as an input tax credit.",
+        "tax_mentioned": true,
+        "taxable": true,
+        "add_tax_lines": true,
+        "tax_rate": 0.1,
+        "tax_amount": 120.0,
+        "treatment": "recoverable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "The ambiguity detector flagged \"business purpose of tea, beverages, and refreshments purchase\" with 4 options: office supplies, client entertainment, resale inventory, or event catering. Each option maps to a different account name (Prepaid expenses/Supplies expense vs Entertainment expense vs Inventories vs Event expense/Cost of sales). The transaction text states only \"purchased tea, beverages, and refreshments from a grocery store\" with no indication of purpose. This is not determinable from the text, accounting conventions, or context. The person who initiated the transaction would know the purpose. Both tests pass: (1) account name differs materially, and (2) not determinable from given information. This is genuinely missing information.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "What was the business purpose of purchasing these tea, beverages, and refreshments? (e.g., office supplies for employee consumption, client entertainment/hospitality, resale inventory, event catering)"
+        ],
+        "complexity_assessment": "The complexity detector flagged \"classification of tea, beverages, and refreshments\" as skeptical, noting the system cannot determine business purpose from item description alone. This is correct \u2014 the system lacks the business context needed to classify correctly. However, this is not an llm_stuck issue (lack of accounting knowledge), but rather a missing_info issue (lack of business facts). The system knows how to handle each scenario once the purpose is known.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "The debit classifier categorized the $1,200 as \"Entertainment expense\" with reason \"Tea, beverages, and refreshments purchased for office use\". This is an arbitrary default classification without factual basis. The transaction text does not state \"office use\" or \"entertainment\". The classifier made an assumption. The credit classifier correctly identified the corporate credit card payment as a liability increase (not cash decrease \u2014 corporate credit cards create a payable). However, the credit classifier incorrectly categorized it as \"Cash and cash equivalents\" decrease, when it should be a liability increase (Trade payables or Accrued liabilities). The debit classification's category is wrong due to missing information. The credit classification's direction and category are both wrong.",
+        "debit_approved": false,
+        "override_debit": null,
+        "credit_approved": false,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity is material: different business purposes map to different account names (Entertainment expense vs Supplies expense vs Inventories vs Event expense). The transaction text provides no indication of purpose. This is not determinable from conventions or context. Additionally, the credit classifier misclassified the corporate credit card payment as a cash decrease when it should be a liability increase. However, the primary blocker is the missing business purpose, which prevents correct account selection on the debit side. The credit card treatment error is secondary and would be corrected once the purpose is known. Decision: missing_info.",
+        "decision": "missing_info"
+      }
+    ],
+    "output_entry_drafter": [],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of tea, beverages, and refreshments purchase",
+            "why_entry_depends_on_clarification": "Office consumption = prepaid expense or supplies expense; client entertainment = entertainment expense; resale = inventory asset; event catering = event expense or cost of sales",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states items purchased but not the business purpose. 'General' business type and grocery store source do not narrow the purpose. No convention exists for categorizing beverage purchases.",
+            "clarification_question": "What was the business purpose of purchasing these tea, beverages, and refreshments?",
+            "options": [
+              "Office supplies for employee consumption",
+              "Client entertainment/hospitality",
+              "Resale inventory",
+              "Event catering"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Recoverable sales tax on purchase (input tax credit)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Tea, beverages, and refreshments purchased for office use",
+            "category": "Entertainment expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Corporate credit card payment for groceries and sales tax",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 0,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 502,
+        "output_tokens": 79,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 503,
+        "output_tokens": 215,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 517,
+        "output_tokens": 221,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 541,
+        "output_tokens": 230,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 527,
+        "output_tokens": 226,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1532,
+        "output_tokens": 833,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "ambiguity_detector": "tool_use",
+      "tax_specialist": "tool_use",
+      "decision_maker": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,502 @@
+{
+  "test_case_id": "int_hard_27b_meal_meeting",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Meal expense for employee working meeting charged to corporate credit card",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Meeting Expense",
+        "amount": 125.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Credit Card Payable",
+        "amount": 125.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0527484,
+  "raw_cost_usd": 0.127155,
+  "total_latency_ms": 38398,
+  "total_input_tokens": 32975,
+  "total_output_tokens": 1882,
+  "total_llm_calls": 8,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "ambiguity_detector": {
+      "input_tokens": 528,
+      "output_tokens": 35,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3813,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0030945,
+      "raw_cost_usd": 0.011964,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 489,
+      "output_tokens": 160,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4256,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049971,
+      "raw_cost_usd": 0.015168,
+      "output": {
+        "liability_increase": [
+          {
+            "reason": "Corporate credit card liability for meal expense",
+            "category": "Accrued liabilities",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "tax_specialist": {
+      "input_tokens": 514,
+      "output_tokens": 145,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3530,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0046218000000000006,
+      "raw_cost_usd": 0.012765,
+      "output": {
+        "reasoning": "Meals are taxable supplies, but the transaction text does not mention any tax amount or rate. The $125 appears to be the total amount paid with no tax breakdown provided.",
+        "tax_mentioned": false,
+        "taxable": true,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 490,
+      "output_tokens": 156,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4455,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049995,
+      "raw_cost_usd": 0.015705,
+      "output": {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Meal expense for employee working meeting",
+            "category": "Meeting expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 504,
+      "output_tokens": 324,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3182,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.007175399999999999,
+      "raw_cost_usd": 0.014406,
+      "output": {
+        "flags": [
+          {
+            "aspect": "meal expense classification",
+            "why_llm_cannot_do_this": "Cannot determine whether this is a deductible business meal (50% limitation under ITA) or fully deductible employee meal. Treatment depends on facts: was it during overtime, at remote location, for what business purpose? Tax classification requires judgment beyond transaction text.",
+            "what_is_best_llm_can_do": "Classify as general Entertainment expense without applying tax deductibility limitations",
+            "skeptical": true
+          },
+          {
+            "aspect": "HST recovery on meals",
+            "why_llm_cannot_do_this": "HST input tax credit on meals subject to 50% limitation under ETA s.236 for meals/entertainment. System would need to determine if this qualifies for the limitation or an exception (e.g., meals provided to all employees at special events). Cannot reliably determine from 'working meeting among employees'.",
+            "what_is_best_llm_can_do": "Record full HST as recoverable tax asset without applying 50% limitation",
+            "skeptical": true
+          },
+          {
+            "aspect": "credit card liability recording",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1285,
+      "output_tokens": 781,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5069,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0167052,
+      "raw_cost_usd": 0.026922,
+      "output": {
+        "ambiguity_assessment": "No ambiguities flagged by upstream detector. Transaction is clear: meal for working meeting among employees.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "Two skeptical flags raised:\n\n1. \"Meal expense classification\" - Complexity detector worries about 50% tax deductibility limitation under ITA. However, this is a TAX REPORTING concern, not a BOOKKEEPING concern. The journal entry records the full expense amount regardless of future tax deductibility. The 50% limitation is applied during tax return preparation, not in the general ledger. The account name (Meeting expense) and amount ($125) do not change based on tax deductibility. System can handle this.\n\n2. \"HST recovery on meals\" - Complexity detector worries about 50% HST input tax credit limitation under ETA s.236. However, the tax specialist correctly determined that no tax is mentioned in the transaction text ($125 is stated as total paid with no tax breakdown). Per source of truth rules: \"If no tax is mentioned in the transaction, do not add tax lines.\" This flag is moot - there are no tax lines to worry about. System can handle this.\n\nBoth flags confuse tax compliance with bookkeeping. The entry structure, account names, and amounts are determinable from the transaction text.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classifier: Correctly identified one expense increase line for \"Meeting expense\" - the transaction explicitly states \"working meeting among employees\", which maps directly to the Meeting expense category in the IFRS taxonomy. Reason is valid, category is correct, count is correct.\n\nCredit classifier: Correctly identified one liability increase for corporate credit card as \"Accrued liabilities\". When a corporate credit card is used, the company owes the credit card company - this is a liability. Reason is valid, category is correct, count is correct.\n\nBoth classifications are accurate and require no override.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "No ambiguities were flagged. The two complexity flags relate to tax compliance (50% deductibility limitation and HST recovery limitation), not bookkeeping structure. Tax deductibility limitations are applied during tax return preparation, not in the general ledger entry. Additionally, no tax is mentioned in the transaction, so HST concerns are moot. The debit and credit classifications are both correct: Meeting expense (debit) and Accrued liabilities for credit card (credit). The account names, amounts, and structure are all determinable from the transaction text. The system can build this entry.",
+        "decision": "proceed"
+      },
+      "reason": null
+    },
+    "entry_drafter": {
+      "input_tokens": 1607,
+      "output_tokens": 281,
+      "cache_read_tokens": 7063,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8670,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.011154899999999999,
+      "raw_cost_usd": 0.030225000000000002,
+      "output": {
+        "reason": "Meal expense for employee working meeting charged to corporate credit card",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Meeting Expense",
+            "amount": 125.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Credit Card Payable",
+            "amount": 125.0
+          }
+        ]
+      },
+      "reason": "Meal expense for employee working meeting charged to corporate credit card"
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "meal expense classification",
+            "why_llm_cannot_do_this": "Cannot determine whether this is a deductible business meal (50% limitation under ITA) or fully deductible employee meal. Treatment depends on facts: was it during overtime, at remote location, for what business purpose? Tax classification requires judgment beyond transaction text.",
+            "what_is_best_llm_can_do": "Classify as general Entertainment expense without applying tax deductibility limitations",
+            "skeptical": true
+          },
+          {
+            "aspect": "HST recovery on meals",
+            "why_llm_cannot_do_this": "HST input tax credit on meals subject to 50% limitation under ETA s.236 for meals/entertainment. System would need to determine if this qualifies for the limitation or an exception (e.g., meals provided to all employees at special events). Cannot reliably determine from 'working meeting among employees'.",
+            "what_is_best_llm_can_do": "Record full HST as recoverable tax asset without applying 50% limitation",
+            "skeptical": true
+          },
+          {
+            "aspect": "credit card liability recording",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Meals are taxable supplies, but the transaction text does not mention any tax amount or rate. The $125 appears to be the total amount paid with no tax breakdown provided.",
+        "tax_mentioned": false,
+        "taxable": true,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged by upstream detector. Transaction is clear: meal for working meeting among employees.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "Two skeptical flags raised:\n\n1. \"Meal expense classification\" - Complexity detector worries about 50% tax deductibility limitation under ITA. However, this is a TAX REPORTING concern, not a BOOKKEEPING concern. The journal entry records the full expense amount regardless of future tax deductibility. The 50% limitation is applied during tax return preparation, not in the general ledger. The account name (Meeting expense) and amount ($125) do not change based on tax deductibility. System can handle this.\n\n2. \"HST recovery on meals\" - Complexity detector worries about 50% HST input tax credit limitation under ETA s.236. However, the tax specialist correctly determined that no tax is mentioned in the transaction text ($125 is stated as total paid with no tax breakdown). Per source of truth rules: \"If no tax is mentioned in the transaction, do not add tax lines.\" This flag is moot - there are no tax lines to worry about. System can handle this.\n\nBoth flags confuse tax compliance with bookkeeping. The entry structure, account names, and amounts are determinable from the transaction text.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classifier: Correctly identified one expense increase line for \"Meeting expense\" - the transaction explicitly states \"working meeting among employees\", which maps directly to the Meeting expense category in the IFRS taxonomy. Reason is valid, category is correct, count is correct.\n\nCredit classifier: Correctly identified one liability increase for corporate credit card as \"Accrued liabilities\". When a corporate credit card is used, the company owes the credit card company - this is a liability. Reason is valid, category is correct, count is correct.\n\nBoth classifications are accurate and require no override.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "No ambiguities were flagged. The two complexity flags relate to tax compliance (50% deductibility limitation and HST recovery limitation), not bookkeeping structure. Tax deductibility limitations are applied during tax return preparation, not in the general ledger entry. Additionally, no tax is mentioned in the transaction, so HST concerns are moot. The debit and credit classifications are both correct: Meeting expense (debit) and Accrued liabilities for credit card (credit). The account names, amounts, and structure are all determinable from the transaction text. The system can build this entry.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Meal expense for employee working meeting charged to corporate credit card",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Meeting Expense",
+            "amount": 125.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Credit Card Payable",
+            "amount": 125.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Meal expense for employee working meeting",
+            "category": "Meeting expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [
+          {
+            "reason": "Corporate credit card liability for meal expense",
+            "category": "Accrued liabilities",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 528,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 489,
+        "output_tokens": 160,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 514,
+        "output_tokens": 145,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 490,
+        "output_tokens": 156,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 324,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1285,
+        "output_tokens": 781,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 738,
+        "output_tokens": 145,
+        "input_token_details": {
+          "cache_read": 3559,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 869,
+        "output_tokens": 136,
+        "input_token_details": {
+          "cache_read": 3504,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "ambiguity_detector": "tool_use",
+      "credit_classifier": "tool_use",
+      "tax_specialist": "tool_use",
+      "debit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "decision_maker": "tool_use",
+      "entry_drafter": "tool_use"
+    }
+  }
+}

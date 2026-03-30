@@ -55,4 +55,7 @@ VARIANTS: dict[str, dict | None] = {
 
     # Single agent V3: all V3 knowledge in one LLM call
     "single_agent_v3": None,
+
+    # V3 Simple: classifiers + tax + drafter only (no detection/decision layer)
+    "v3_simple": None,
 }
