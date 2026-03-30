@@ -7,12 +7,6 @@ from __future__ import annotations
 import logging
 import uuid
 
-from qdrant_client.models import PointStruct
-
-from vectordb.client import get_qdrant_client
-from vectordb.collections import TRANSACTION_EXAMPLES, CORRECTION_EXAMPLES
-from vectordb.embeddings import embed_text
-
 logger = logging.getLogger(__name__)
 
 
@@ -27,6 +21,11 @@ def index_positive_example(message: dict) -> None:
         return
 
     try:
+        from qdrant_client.models import PointStruct
+        from vectordb.client import get_qdrant_client
+        from vectordb.collections import TRANSACTION_EXAMPLES
+        from vectordb.embeddings import embed_text
+
         vector = embed_text(text, input_type="search_document")
         point = PointStruct(
             id=str(uuid.uuid4()),
@@ -57,6 +56,11 @@ def index_correction_example(message: dict) -> None:
         return
 
     try:
+        from qdrant_client.models import PointStruct
+        from vectordb.client import get_qdrant_client
+        from vectordb.collections import CORRECTION_EXAMPLES
+        from vectordb.embeddings import embed_text
+
         vector = embed_text(error_description, input_type="search_document")
         point = PointStruct(
             id=str(uuid.uuid4()),
