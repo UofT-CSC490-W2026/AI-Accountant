@@ -35,6 +35,30 @@ _lc_tools.tool = lambda f: f
 _lc_aws = sys.modules.setdefault("langchain_aws", ModuleType("langchain_aws"))
 _lc_aws.ChatBedrockConverse = MagicMock()
 
+# Stub qdrant_client (needed by vectordb imports in node modules)
+if "qdrant_client" not in sys.modules:
+    try:
+        import qdrant_client  # noqa: F401
+    except ImportError:
+        _qc = ModuleType("qdrant_client")
+        _qc.QdrantClient = MagicMock()
+        _qc_models = ModuleType("qdrant_client.models")
+        _qc_models.Distance = MagicMock()
+        _qc_models.VectorParams = MagicMock()
+        _qc_models.PointStruct = MagicMock()
+        _qc.models = _qc_models
+        sys.modules["qdrant_client"] = _qc
+        sys.modules["qdrant_client.models"] = _qc_models
+
+# Stub boto3 (needed by vectordb.embeddings)
+if "boto3" not in sys.modules:
+    try:
+        import boto3  # noqa: F401
+    except ImportError:
+        _boto3 = ModuleType("boto3")
+        _boto3.client = MagicMock(return_value=MagicMock())
+        sys.modules["boto3"] = _boto3
+
 # Stub langgraph — graph_v3 uses StateGraph at module level
 _lg = sys.modules.setdefault("langgraph", ModuleType("langgraph"))
 _lg_graph = sys.modules.setdefault("langgraph.graph", ModuleType("langgraph.graph"))
