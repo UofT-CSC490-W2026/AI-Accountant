@@ -49,4 +49,10 @@ VARIANTS: dict[str, dict | None] = {
     # V3: New architecture — specialized agents, 2-layer routing
     # Uses graph_v3.py (separate graph, no ablation flags)
     "baseline_v3": None,
+
+    # Naive: single agent, zero domain knowledge baseline
+    "naive_agent": None,
+
+    # Single agent V3: all V3 knowledge in one LLM call
+    "single_agent_v3": None,
 }

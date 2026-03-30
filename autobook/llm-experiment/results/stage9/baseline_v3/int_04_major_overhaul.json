@@ -1,0 +1,504 @@
+{
+  "test_case_id": "int_04_major_overhaul",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Major overhaul expenditure of $200,000 extends machinery's useful life, capitalized to machinery asset per IAS 16.12-14; paid in cash",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Machinery",
+        "amount": 200000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash and cash equivalents",
+        "amount": 200000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0481737,
+  "raw_cost_usd": 0.112971,
+  "total_latency_ms": 26449,
+  "total_input_tokens": 29027,
+  "total_output_tokens": 1726,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "ambiguity_detector": {
+      "input_tokens": 563,
+      "output_tokens": 35,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3848,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031995,
+      "raw_cost_usd": 0.012069,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "tax_specialist": {
+      "input_tokens": 549,
+      "output_tokens": 156,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3565,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0048918,
+      "raw_cost_usd": 0.013035,
+      "output": {
+        "reasoning": "The transaction describes a capital expenditure on machinery overhaul that extends useful life. This is a subsequent capitalized cost to PP&E, not a purchase of taxable supplies or services. No tax is mentioned in the transaction text.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 525,
+      "output_tokens": 176,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4490,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0054045,
+      "raw_cost_usd": 0.01611,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Major overhaul expenditure that extends useful life, capitalized to machinery",
+            "category": "Machinery",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 524,
+      "output_tokens": 175,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4291,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053271,
+      "raw_cost_usd": 0.015498,
+      "output": {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for major overhaul that extends useful life",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 539,
+      "output_tokens": 383,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3217,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081654,
+      "raw_cost_usd": 0.015396,
+      "output": {
+        "flags": [
+          {
+            "aspect": "major overhaul capitalization",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "accumulated depreciation at year 5",
+            "why_llm_cannot_do_this": "Transaction does not state the accumulated depreciation balance or residual value at year 5. System cannot compute the carrying amount to which the $200,000 overhaul should be added without knowing the depreciation method (straight-line vs. diminishing balance) and residual value assumptions from the original purchase.",
+            "what_is_best_llm_can_do": "Record Dr Machinery $200,000, Cr Cash $200,000 without adjusting the depreciation schedule or computing new carrying amount",
+            "skeptical": true
+          },
+          {
+            "aspect": "revised depreciation schedule",
+            "why_llm_cannot_do_this": "Requires computing new depreciable amount (carrying amount + $200,000 - residual value) over revised remaining life (5 + 2 = 7 years). System lacks the original depreciation method, residual value, and accumulated depreciation to calculate the new periodic charge.",
+            "what_is_best_llm_can_do": "Capitalize the overhaul but cannot produce the correct revised depreciation expense for subsequent periods",
+            "skeptical": true
+          },
+          {
+            "aspect": "HST on overhaul expenditure",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1433,
+      "output_tokens": 640,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5217,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.015034200000000001,
+      "raw_cost_usd": 0.025251,
+      "output": {
+        "ambiguity_assessment": "No ambiguities flagged. The transaction clearly describes a major overhaul that extends useful life, which under IAS 16.12-14 must be capitalized to the asset.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "Two skeptical flags raised: (1) accumulated depreciation at year 5, and (2) revised depreciation schedule. \n\nAssessment: Both flags relate to *future* depreciation calculations, not the *current* journal entry. The transaction asks us to record the overhaul expenditure in year 5. The entry is simply Dr Machinery $200,000, Cr Cash $200,000. This entry is correct and complete regardless of the accumulated depreciation balance or future depreciation schedule.\n\nThe complexity detector is correct that the system cannot compute the *revised depreciation expense for subsequent periods* without knowing the original method, residual value, and accumulated depreciation. However, that is a separate accounting event (future period depreciation entries), not this transaction.\n\nThe current transaction entry does not require any of that information. The account names (Machinery, Cash) and amounts ($200,000) are fully determined by the transaction text. The system CAN handle this correctly.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classification: \"Major overhaul expenditure that extends useful life, capitalized to machinery\" \u2192 Machinery asset increase. Correct per IAS 16.12-14. Count 1 is correct.\n\nCredit classification: \"Cash payment for major overhaul\" \u2192 Cash and cash equivalents decrease. Correct. Count 1 is correct.\n\nBoth classifications are valid and use the correct categories.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The complexity flags relate to future depreciation calculations, not the current journal entry. The transaction requires recording the $200,000 overhaul expenditure, which is a straightforward capitalization: Dr Machinery $200,000, Cr Cash $200,000. This entry is complete and correct. The account names and amounts are fully determined by the transaction text. The system does not need to compute accumulated depreciation or revised depreciation schedules to record this entry. The classifications are correct.",
+        "decision": "proceed"
+      },
+      "reason": null
+    },
+    "entry_drafter": {
+      "input_tokens": 895,
+      "output_tokens": 161,
+      "cache_read_tokens": 3504,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4399,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0061512,
+      "raw_cost_usd": 0.015612,
+      "output": {
+        "reason": "Major overhaul expenditure of $200,000 extends machinery's useful life, capitalized to machinery asset per IAS 16.12-14; paid in cash",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Machinery",
+            "amount": 200000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash and cash equivalents",
+            "amount": 200000.0
+          }
+        ]
+      },
+      "reason": "Major overhaul expenditure of $200,000 extends machinery's useful life, capitalized to machinery asset per IAS 16.12-14; paid in cash"
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "major overhaul capitalization",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "accumulated depreciation at year 5",
+            "why_llm_cannot_do_this": "Transaction does not state the accumulated depreciation balance or residual value at year 5. System cannot compute the carrying amount to which the $200,000 overhaul should be added without knowing the depreciation method (straight-line vs. diminishing balance) and residual value assumptions from the original purchase.",
+            "what_is_best_llm_can_do": "Record Dr Machinery $200,000, Cr Cash $200,000 without adjusting the depreciation schedule or computing new carrying amount",
+            "skeptical": true
+          },
+          {
+            "aspect": "revised depreciation schedule",
+            "why_llm_cannot_do_this": "Requires computing new depreciable amount (carrying amount + $200,000 - residual value) over revised remaining life (5 + 2 = 7 years). System lacks the original depreciation method, residual value, and accumulated depreciation to calculate the new periodic charge.",
+            "what_is_best_llm_can_do": "Capitalize the overhaul but cannot produce the correct revised depreciation expense for subsequent periods",
+            "skeptical": true
+          },
+          {
+            "aspect": "HST on overhaul expenditure",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "The transaction describes a capital expenditure on machinery overhaul that extends useful life. This is a subsequent capitalized cost to PP&E, not a purchase of taxable supplies or services. No tax is mentioned in the transaction text.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged. The transaction clearly describes a major overhaul that extends useful life, which under IAS 16.12-14 must be capitalized to the asset.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "Two skeptical flags raised: (1) accumulated depreciation at year 5, and (2) revised depreciation schedule. \n\nAssessment: Both flags relate to *future* depreciation calculations, not the *current* journal entry. The transaction asks us to record the overhaul expenditure in year 5. The entry is simply Dr Machinery $200,000, Cr Cash $200,000. This entry is correct and complete regardless of the accumulated depreciation balance or future depreciation schedule.\n\nThe complexity detector is correct that the system cannot compute the *revised depreciation expense for subsequent periods* without knowing the original method, residual value, and accumulated depreciation. However, that is a separate accounting event (future period depreciation entries), not this transaction.\n\nThe current transaction entry does not require any of that information. The account names (Machinery, Cash) and amounts ($200,000) are fully determined by the transaction text. The system CAN handle this correctly.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classification: \"Major overhaul expenditure that extends useful life, capitalized to machinery\" \u2192 Machinery asset increase. Correct per IAS 16.12-14. Count 1 is correct.\n\nCredit classification: \"Cash payment for major overhaul\" \u2192 Cash and cash equivalents decrease. Correct. Count 1 is correct.\n\nBoth classifications are valid and use the correct categories.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The complexity flags relate to future depreciation calculations, not the current journal entry. The transaction requires recording the $200,000 overhaul expenditure, which is a straightforward capitalization: Dr Machinery $200,000, Cr Cash $200,000. This entry is complete and correct. The account names and amounts are fully determined by the transaction text. The system does not need to compute accumulated depreciation or revised depreciation schedules to record this entry. The classifications are correct.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Major overhaul expenditure of $200,000 extends machinery's useful life, capitalized to machinery asset per IAS 16.12-14; paid in cash",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Machinery",
+            "amount": 200000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash and cash equivalents",
+            "amount": 200000.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Major overhaul expenditure that extends useful life, capitalized to machinery",
+            "category": "Machinery",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for major overhaul that extends useful life",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 563,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 549,
+        "output_tokens": 156,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 525,
+        "output_tokens": 176,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 524,
+        "output_tokens": 175,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 539,
+        "output_tokens": 383,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1433,
+        "output_tokens": 640,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 895,
+        "output_tokens": 161,
+        "input_token_details": {
+          "cache_read": 3504,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "ambiguity_detector": "tool_use",
+      "tax_specialist": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "decision_maker": "tool_use",
+      "entry_drafter": "tool_use"
+    }
+  }
+}

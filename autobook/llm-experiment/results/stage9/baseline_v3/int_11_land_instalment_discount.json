@@ -1,0 +1,552 @@
+{
+  "test_case_id": "int_11_land_instalment_discount",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Land acquired for factory construction at present value of 6 annual instalments of $10,000,000 discounted at 6% market rate. Building to be demolished is included in land cost per IAS 16.16(b) as a cost of preparing the site for intended use.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Land",
+        "amount": 49173243.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Long-term Borrowings",
+        "amount": 49173243.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.060647400000000004,
+  "raw_cost_usd": 0.135054,
+  "total_latency_ms": 39032,
+  "total_input_tokens": 33793,
+  "total_output_tokens": 2245,
+  "total_llm_calls": 8,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "ambiguity_detector": {
+      "input_tokens": 591,
+      "output_tokens": 35,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3876,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032835,
+      "raw_cost_usd": 0.012153,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 552,
+      "output_tokens": 190,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4319,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005636100000000001,
+      "raw_cost_usd": 0.015807,
+      "output": {
+        "liability_increase": [
+          {
+            "reason": "Present value of 6 annual instalments of $10,000,000 at 6% market rate for land acquisition",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "tax_specialist": {
+      "input_tokens": 577,
+      "output_tokens": 176,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3593,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0052758,
+      "raw_cost_usd": 0.013419,
+      "output": {
+        "reasoning": "Transaction describes acquisition of land and building for $60,000,000 paid in instalments. No tax is mentioned in the transaction text. Land purchases are typically not subject to sales tax (HST/GST does not apply to resale of used real property). Since tax is not mentioned, no tax lines should be added.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 553,
+      "output_tokens": 253,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4518,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0066435,
+      "raw_cost_usd": 0.017349,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Land and demolition costs capitalized at present value of purchase price instalments (PV of 6 annual payments of $10M at 6%)",
+            "category": "Land",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [
+          {
+            "reason": "Discount on long-term payable \u2014 contra-liability representing difference between face value ($60M) and present value of instalments",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 567,
+      "output_tokens": 307,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3245,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.007109399999999999,
+      "raw_cost_usd": 0.01434,
+      "output": {
+        "flags": [
+          {
+            "aspect": "present value calculation for deferred payment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "allocation of purchase price between land and building",
+            "why_llm_cannot_do_this": "The transaction states a single $60M purchase price but does not provide the fair values or allocation between land and building. IAS 16 requires assets acquired together to be measured separately at their individual fair values. The system cannot determine what portion of the $60M relates to the building (to be expensed as demolition cost) versus the land (to be capitalized).",
+            "what_is_best_llm_can_do": "Capitalize entire present value to Land, treating the building as having zero separate value, or expense the entire amount as demolition cost",
+            "skeptical": true
+          },
+          {
+            "aspect": "demolition cost treatment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "long-term liability recognition",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "imputed interest on instalment payments",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1571,
+      "output_tokens": 840,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5355,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0184482,
+      "raw_cost_usd": 0.028665,
+      "output": {
+        "ambiguity_assessment": "No ambiguities flagged by upstream detector. Transaction is clear: land + building purchased for factory construction, building to be demolished immediately, deferred payment structure with market rate provided.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The skeptical flag on \"allocation of purchase price between land and building\" misunderstands the accounting treatment. Under IAS 16.16(c) and IAS 16.22, when an asset is acquired for demolition to prepare a site for its intended use, the demolition costs are capitalized to the land. The transaction explicitly states the building will be demolished immediately for factory construction\u2014this means the entire purchase price (at present value) is properly capitalized to Land. No separate allocation is needed because the building has no separate utility; it is an obstacle to be removed. The system CAN handle this correctly by capitalizing the entire PV to Land, which is exactly what the classifier did. The other flagged aspects (PV calculation, demolition treatment, liability recognition, imputed interest) are all standard IFRS applications within system capability.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit side: The classifier correctly identifies (1) Land increase at PV for the asset acquisition including demolition costs, and (2) a contra-liability (discount) representing the difference between face value and PV. However, the contra-liability classification is INCORRECT. The discount on a long-term payable is classified as a LIABILITY DECREASE on the debit side, but the reason states it's the \"difference between face value and present value\"\u2014this is conceptually wrong. Under IFRS, we record the liability at its present value directly. The correct structure is: Dr Land (PV), Cr Long-term borrowings (PV). There is no separate discount contra account at initial recognition. The debit side should have only 1 line (Land increase), not 2.\n\nCredit side: Correctly identifies liability increase at present value. The category and count are correct.\n\nOverride needed: Remove the spurious contra-liability line from debit side.",
+        "debit_approved": false,
+        "override_debit": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The skeptical complexity flag misunderstands the accounting treatment for demolition costs\u2014when a building is acquired for immediate demolition to prepare land for its intended use, the entire purchase price is capitalized to Land (IAS 16.16(c), 16.22). No allocation is required. The debit classifier incorrectly included a contra-liability line; at initial recognition, the liability is recorded directly at PV with no separate discount account. After correcting the debit classification to show only Land increase, the entry is straightforward: Dr Land (PV), Cr Long-term borrowings (PV). All calculations are within system capability.",
+        "decision": "proceed"
+      },
+      "reason": null
+    },
+    "entry_drafter": {
+      "input_tokens": 1824,
+      "output_tokens": 444,
+      "cache_read_tokens": 7063,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8887,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0142509,
+      "raw_cost_usd": 0.033321,
+      "output": {
+        "reason": "Land acquired for factory construction at present value of 6 annual instalments of $10,000,000 discounted at 6% market rate. Building to be demolished is included in land cost per IAS 16.16(b) as a cost of preparing the site for intended use.",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Land",
+            "amount": 49173243.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Long-term Borrowings",
+            "amount": 49173243.0
+          }
+        ]
+      },
+      "reason": "Land acquired for factory construction at present value of 6 annual instalments of $10,000,000 discounted at 6% market rate. Building to be demolished is included in land cost per IAS 16.16(b) as a cost of preparing the site for intended use."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "present value calculation for deferred payment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "allocation of purchase price between land and building",
+            "why_llm_cannot_do_this": "The transaction states a single $60M purchase price but does not provide the fair values or allocation between land and building. IAS 16 requires assets acquired together to be measured separately at their individual fair values. The system cannot determine what portion of the $60M relates to the building (to be expensed as demolition cost) versus the land (to be capitalized).",
+            "what_is_best_llm_can_do": "Capitalize entire present value to Land, treating the building as having zero separate value, or expense the entire amount as demolition cost",
+            "skeptical": true
+          },
+          {
+            "aspect": "demolition cost treatment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "long-term liability recognition",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "imputed interest on instalment payments",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Transaction describes acquisition of land and building for $60,000,000 paid in instalments. No tax is mentioned in the transaction text. Land purchases are typically not subject to sales tax (HST/GST does not apply to resale of used real property). Since tax is not mentioned, no tax lines should be added.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged by upstream detector. Transaction is clear: land + building purchased for factory construction, building to be demolished immediately, deferred payment structure with market rate provided.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The skeptical flag on \"allocation of purchase price between land and building\" misunderstands the accounting treatment. Under IAS 16.16(c) and IAS 16.22, when an asset is acquired for demolition to prepare a site for its intended use, the demolition costs are capitalized to the land. The transaction explicitly states the building will be demolished immediately for factory construction\u2014this means the entire purchase price (at present value) is properly capitalized to Land. No separate allocation is needed because the building has no separate utility; it is an obstacle to be removed. The system CAN handle this correctly by capitalizing the entire PV to Land, which is exactly what the classifier did. The other flagged aspects (PV calculation, demolition treatment, liability recognition, imputed interest) are all standard IFRS applications within system capability.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit side: The classifier correctly identifies (1) Land increase at PV for the asset acquisition including demolition costs, and (2) a contra-liability (discount) representing the difference between face value and PV. However, the contra-liability classification is INCORRECT. The discount on a long-term payable is classified as a LIABILITY DECREASE on the debit side, but the reason states it's the \"difference between face value and present value\"\u2014this is conceptually wrong. Under IFRS, we record the liability at its present value directly. The correct structure is: Dr Land (PV), Cr Long-term borrowings (PV). There is no separate discount contra account at initial recognition. The debit side should have only 1 line (Land increase), not 2.\n\nCredit side: Correctly identifies liability increase at present value. The category and count are correct.\n\nOverride needed: Remove the spurious contra-liability line from debit side.",
+        "debit_approved": false,
+        "override_debit": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The skeptical complexity flag misunderstands the accounting treatment for demolition costs\u2014when a building is acquired for immediate demolition to prepare land for its intended use, the entire purchase price is capitalized to Land (IAS 16.16(c), 16.22). No allocation is required. The debit classifier incorrectly included a contra-liability line; at initial recognition, the liability is recorded directly at PV with no separate discount account. After correcting the debit classification to show only Land increase, the entry is straightforward: Dr Land (PV), Cr Long-term borrowings (PV). All calculations are within system capability.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Land acquired for factory construction at present value of 6 annual instalments of $10,000,000 discounted at 6% market rate. Building to be demolished is included in land cost per IAS 16.16(b) as a cost of preparing the site for intended use.",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Land",
+            "amount": 49173243.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Long-term Borrowings",
+            "amount": 49173243.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Land and demolition costs capitalized at present value of purchase price instalments (PV of 6 annual payments of $10M at 6%)",
+            "category": "Land",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [
+          {
+            "reason": "Discount on long-term payable \u2014 contra-liability representing difference between face value ($60M) and present value of instalments",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [
+          {
+            "reason": "Present value of 6 annual instalments of $10,000,000 at 6% market rate for land acquisition",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 591,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 552,
+        "output_tokens": 190,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 577,
+        "output_tokens": 176,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 553,
+        "output_tokens": 253,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 567,
+        "output_tokens": 307,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1571,
+        "output_tokens": 840,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 837,
+        "output_tokens": 256,
+        "input_token_details": {
+          "cache_read": 3559,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 987,
+        "output_tokens": 188,
+        "input_token_details": {
+          "cache_read": 3504,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "ambiguity_detector": "tool_use",
+      "credit_classifier": "tool_use",
+      "tax_specialist": "tool_use",
+      "debit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "decision_maker": "tool_use",
+      "entry_drafter": "tool_use"
+    }
+  }
+}

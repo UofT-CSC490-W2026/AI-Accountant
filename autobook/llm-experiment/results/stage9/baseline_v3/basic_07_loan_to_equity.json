@@ -1,0 +1,419 @@
+{
+  "test_case_id": "basic_07_loan_to_equity",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": null,
+  "actual_cost_usd": 0.0792375,
+  "raw_cost_usd": 0.093249,
+  "total_latency_ms": 28019,
+  "total_input_tokens": 24188,
+  "total_output_tokens": 1379,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 482,
+      "output_tokens": 79,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 3965,
+      "total_input_tokens": 4447,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.026421,
+      "raw_cost_usd": 0.014526,
+      "output": {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [
+          {
+            "reason": "Extinguishment of bank loan converted to equity",
+            "category": "Short-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "tax_specialist": {
+      "input_tokens": 506,
+      "output_tokens": 161,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3522,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004837800000000001,
+      "raw_cost_usd": 0.012981,
+      "output": {
+        "reasoning": "Conversion of debt to equity is not a taxable supply. No goods or services are being purchased or sold. This is a financing transaction involving the extinguishment of a liability and issuance of equity instruments. Tax is not mentioned in the transaction text.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "ambiguity_detector": {
+      "input_tokens": 520,
+      "output_tokens": 35,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 3285,
+      "total_input_tokens": 3805,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.021795,
+      "raw_cost_usd": 0.01194,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 481,
+      "output_tokens": 153,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4248,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0048681,
+      "raw_cost_usd": 0.015039,
+      "output": {
+        "liability_increase": [],
+        "equity_increase": [
+          {
+            "reason": "Conversion of loan to common shares at book value",
+            "category": "Issued capital",
+            "count": 1
+          }
+        ],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 496,
+      "output_tokens": 232,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3174,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0057713999999999994,
+      "raw_cost_usd": 0.013002,
+      "output": {
+        "flags": [
+          {
+            "aspect": "debt-to-equity conversion",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "share valuation for conversion",
+            "why_llm_cannot_do_this": "The transaction states $200 loan converted for 400 shares but does not specify the par/stated value per share. IFRS requires allocation between Issued capital (at par/stated value) and Share premium (excess). Without knowing the par value or entity's policy on stated capital, the system cannot correctly split the $200 between these two equity components.",
+            "what_is_best_llm_can_do": "Record full $200 to Issued capital assuming no par value or assuming par equals issue price ($0.50/share), which may not reflect the entity's actual capital structure policy",
+            "skeptical": true
+          }
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1208,
+      "output_tokens": 719,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4992,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.015544200000000001,
+      "raw_cost_usd": 0.025761,
+      "output": {
+        "ambiguity_assessment": "No ambiguities flagged by upstream detector. Transaction is clear: debt-to-equity conversion at book value.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "What is the par value or stated value per common share for this entity?",
+          "If no par value, what is the entity's policy for allocating proceeds between Issued capital and Share premium on share issuance?"
+        ],
+        "complexity_assessment": "The complexity flag on share valuation is valid. IFRS requires allocation between Issued capital (at par/stated value) and Share premium (excess over par). The transaction provides total conversion amount ($200) and number of shares (400), but without knowing the par value or entity's stated capital policy, the system cannot determine how much goes to Issued capital vs Share premium. This is not a calculation complexity\u2014it's missing entity-specific policy information.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classification is correct: liability decrease (Short-term borrowings) for $200. Credit classification shows one line to Issued capital. However, this is incomplete\u2014the entry may require TWO credit lines (Issued capital at par + Share premium for excess) depending on the par value. The classifier's single-line treatment assumes par equals issue price, which may not be correct. But since we don't know the par value, we cannot determine the correct split. The classification structure is reasonable given the information available, but the account allocation cannot be finalized without the missing policy information.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The complexity detector correctly identified that the transaction lacks entity-specific information needed to allocate the $200 conversion amount between Issued capital and Share premium. Under IFRS, if shares have a par value, that amount goes to Issued capital and any excess to Share premium. If no-par shares, the entity's policy determines the stated capital amount. The transaction text provides neither par value nor policy. This is not an LLM knowledge gap\u2014it's missing business facts that would change the account names and amounts in the entry (one line vs two lines, different account names). The person who authorized the conversion would know the entity's capital structure policy. This meets both tests for missing_info: (1) account names/amounts differ depending on the answer, and (2) not determinable from text or conventions.",
+        "decision": "missing_info"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "debt-to-equity conversion",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "share valuation for conversion",
+            "why_llm_cannot_do_this": "The transaction states $200 loan converted for 400 shares but does not specify the par/stated value per share. IFRS requires allocation between Issued capital (at par/stated value) and Share premium (excess). Without knowing the par value or entity's policy on stated capital, the system cannot correctly split the $200 between these two equity components.",
+            "what_is_best_llm_can_do": "Record full $200 to Issued capital assuming no par value or assuming par equals issue price ($0.50/share), which may not reflect the entity's actual capital structure policy",
+            "skeptical": true
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Conversion of debt to equity is not a taxable supply. No goods or services are being purchased or sold. This is a financing transaction involving the extinguishment of a liability and issuance of equity instruments. Tax is not mentioned in the transaction text.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged by upstream detector. Transaction is clear: debt-to-equity conversion at book value.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "What is the par value or stated value per common share for this entity?",
+          "If no par value, what is the entity's policy for allocating proceeds between Issued capital and Share premium on share issuance?"
+        ],
+        "complexity_assessment": "The complexity flag on share valuation is valid. IFRS requires allocation between Issued capital (at par/stated value) and Share premium (excess over par). The transaction provides total conversion amount ($200) and number of shares (400), but without knowing the par value or entity's stated capital policy, the system cannot determine how much goes to Issued capital vs Share premium. This is not a calculation complexity\u2014it's missing entity-specific policy information.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classification is correct: liability decrease (Short-term borrowings) for $200. Credit classification shows one line to Issued capital. However, this is incomplete\u2014the entry may require TWO credit lines (Issued capital at par + Share premium for excess) depending on the par value. The classifier's single-line treatment assumes par equals issue price, which may not be correct. But since we don't know the par value, we cannot determine the correct split. The classification structure is reasonable given the information available, but the account allocation cannot be finalized without the missing policy information.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The complexity detector correctly identified that the transaction lacks entity-specific information needed to allocate the $200 conversion amount between Issued capital and Share premium. Under IFRS, if shares have a par value, that amount goes to Issued capital and any excess to Share premium. If no-par shares, the entity's policy determines the stated capital amount. The transaction text provides neither par value nor policy. This is not an LLM knowledge gap\u2014it's missing business facts that would change the account names and amounts in the entry (one line vs two lines, different account names). The person who authorized the conversion would know the entity's capital structure policy. This meets both tests for missing_info: (1) account names/amounts differ depending on the answer, and (2) not determinable from text or conventions.",
+        "decision": "missing_info"
+      }
+    ],
+    "output_entry_drafter": [],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [
+          {
+            "reason": "Extinguishment of bank loan converted to equity",
+            "category": "Short-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [],
+        "equity_increase": [
+          {
+            "reason": "Conversion of loan to common shares at book value",
+            "category": "Issued capital",
+            "count": 1
+          }
+        ],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 0,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 482,
+        "output_tokens": 79,
+        "input_token_details": {
+          "cache_read": 0,
+          "cache_creation": 3965
+        }
+      },
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 506,
+        "output_tokens": 161,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 520,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 0,
+          "cache_creation": 3285
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 481,
+        "output_tokens": 153,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 496,
+        "output_tokens": 232,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1208,
+        "output_tokens": 719,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "tax_specialist": "tool_use",
+      "ambiguity_detector": "tool_use",
+      "credit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "decision_maker": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,717 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    3,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    2,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Land and building acquired with fair value allocation; 50% deferred, 50% plus building tax paid by cheque; recoverable input tax on building",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Land",
+        "amount": 6000000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Buildings",
+        "amount": 3000000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Tax assets",
+        "amount": 300000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Accounts Payable",
+        "amount": 4500000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 4800000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0770064,
+  "raw_cost_usd": 0.151413,
+  "total_latency_ms": 62697,
+  "total_input_tokens": 35171,
+  "total_output_tokens": 3060,
+  "total_llm_calls": 8,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "tax_specialist": {
+      "input_tokens": 588,
+      "output_tokens": 286,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3604,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0069588,
+      "raw_cost_usd": 0.015102,
+      "output": {
+        "reasoning": "Text explicitly states \"10% sales tax on the building\" paid with the balance. Land is not taxable (exempt supply in Canada). Building purchase is taxable. Tax applies only to the building component. Fair value allocation: building = $4,000,000 of $12,000,000 total fair value = 1/3 of purchase price. Building portion = $9,000,000 \u00d7 (4/12) = $3,000,000. Tax = $3,000,000 \u00d7 10% = $300,000. This is a purchase transaction, so tax is recoverable (Input Tax Credit).",
+        "tax_mentioned": true,
+        "taxable": true,
+        "add_tax_lines": true,
+        "tax_rate": 0.1,
+        "tax_amount": 300000.0,
+        "treatment": "recoverable"
+      },
+      "reason": null
+    },
+    "ambiguity_detector": {
+      "input_tokens": 602,
+      "output_tokens": 364,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3887,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0082515,
+      "raw_cost_usd": 0.017121,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "which portion of the purchase price is paid now vs. deferred",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "sales tax application",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "whether the building component includes any site improvements or only the structure",
+            "why_entry_depends_on_clarification": "Site improvements are depreciable PP&E requiring a separate account from both Land (non-depreciable) and Buildings; if included in the stated building value, a three-way allocation is needed rather than the two-way allocation stated",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states 'land and a building' with fair values given for each component, but does not specify whether typical warehouse site improvements are included in the building value or should be separately classified",
+            "clarification_question": "Does the building component include any site improvements (such as parking lots, fencing, lighting, or paved areas), or is it only the building structure itself?",
+            "options": [
+              "Building component is the structure only",
+              "Building component includes depreciable site improvements (parking, fencing, lighting, etc.)"
+            ],
+            "resolved": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 564,
+      "output_tokens": 284,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4529,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0071415,
+      "raw_cost_usd": 0.017847,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Land component allocated based on relative fair value ($8M / $12M \u00d7 $9M = $6M)",
+            "category": "Land",
+            "count": 1
+          },
+          {
+            "reason": "Building component allocated based on relative fair value ($4M / $12M \u00d7 $9M = $3M)",
+            "category": "Buildings",
+            "count": 1
+          },
+          {
+            "reason": "Sales tax on building component is recoverable input tax ($3M \u00d7 10% = $300K)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 578,
+      "output_tokens": 393,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3256,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0084324,
+      "raw_cost_usd": 0.015663,
+      "output": {
+        "flags": [
+          {
+            "aspect": "allocation of lump-sum purchase price between land and building",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "deferred payment liability at present value",
+            "why_llm_cannot_do_this": "IFRS requires non-current payables to be measured at present value (IAS 2.18, IFRS 9), but no discount rate is provided. The system cannot determine the appropriate market rate for a 6-month vendor financing arrangement.",
+            "what_is_best_llm_can_do": "Record the deferred portion at face value ($4,500,000) without discounting, or apply an arbitrary discount rate",
+            "skeptical": true
+          },
+          {
+            "aspect": "sales tax allocation and timing",
+            "why_llm_cannot_do_this": "The transaction states 10% sales tax applies only to the building portion and was paid on 'the balance'. Unclear whether tax applies to the full building value ($4M allocated) or only the portion paid now. Also unclear if the deferred 50% includes a building portion that would trigger additional tax liability.",
+            "what_is_best_llm_can_do": "Apply 10% tax to the entire allocated building value ($4M \u00d7 10% = $400K) and record as paid, ignoring the timing complexity",
+            "skeptical": true
+          },
+          {
+            "aspect": "split payment with partial deferral",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 563,
+      "output_tokens": 206,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4330,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059091000000000005,
+      "raw_cost_usd": 0.01608,
+      "output": {
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for 50% of purchase price ($4,500,000) plus sales tax on building portion ($300,000)",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "liability_increase": [
+          {
+            "reason": "Deferred payment obligation for remaining 50% of purchase price due in 6 months",
+            "category": "Trade payables",
+            "count": 1
+          },
+          {
+            "reason": "Sales tax payable on building component (recoverable input tax)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "_parse_error": "1 validation error for CreditClassifierOutput\nliability_increase.1.category\n  Input should be 'Trade payables', 'Accrued liabilities', 'Employee benefits payable', 'Warranty provisions', 'Legal and restructuring provisions', 'Tax liabilities', 'Short-term borrowings', 'Current lease liabilities', 'Deferred income', 'Contract liabilities', 'Dividends payable', 'Long-term borrowings', 'Non-current lease liabilities', 'Pension obligations', 'Decommissioning provisions' or 'Deferred tax liabilities' [type=literal_error, input_value='Tax assets', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 2478,
+      "output_tokens": 989,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6262,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0234042,
+      "raw_cost_usd": 0.033621,
+      "output": {
+        "ambiguity_assessment": "The unresolved ambiguity about site improvements is overly cautious. The transaction explicitly states \"land and a building\" with fair values provided for exactly two components ($8M land, $4M building). No site improvements are mentioned. The fair values given are for the two stated components only. If site improvements existed as a material separate component, they would have been mentioned and valued separately. The building fair value of $4M represents the building as acquired. This ambiguity does not prevent building the entry\u2014we use the two components as stated.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "Flag 1 (present value discounting): The complexity detector is correct that IFRS 9 requires non-current payables at present value, but a 6-month payable is current, not non-current. Short-term payables with no stated interest can be recorded at face value under IFRS 9.B5.1.2A (short-term trade payables with no stated interest rate). This flag is overly cautious\u2014the system can handle this.\n\nFlag 2 (sales tax allocation and timing): The transaction states \"the balance plus 10% sales tax on the building was paid by cheque.\" This clearly means: (1) 50% of the $9M purchase price = $4.5M is deferred, (2) the other 50% = $4.5M plus sales tax on the building was paid now. The building component is $3M (allocated), so tax = $300K. Total paid = $4.5M + $300K = $4.8M. The deferred $4.5M is simply the remaining 50% of the purchase price. This is straightforward\u2014no complexity barrier.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit side: Correct. Land $6M, Building $3M (proper relative fair value allocation), Tax assets $300K (recoverable HST on building).\n\nCredit side: Has a parse error\u2014second liability line incorrectly uses \"Tax assets\" category instead of a liability category. The intent is clear but the category is wrong. The correct structure should be:\n- Cash decrease: $4,800,000 ($4.5M purchase + $300K tax paid)\n- Trade payables increase: $4,500,000 (deferred 50%)\n\nThe credit classifier incorrectly split the cash payment ($4.5M) from the tax payment ($300K) and created an erroneous \"sales tax payable\" liability line. The tax was PAID (stated in transaction), so it should be part of the cash decrease, not a separate liability. The recoverable tax is already correctly captured on the debit side as Tax assets.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": false,
+        "override_credit": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "decision_rationale": "The ambiguity about site improvements is resolved by the transaction text itself\u2014only two components are stated and valued. The complexity flags are overly cautious: (1) 6-month payable is current and can be recorded at face value, (2) the payment structure is clear from the text. The debit classification is correct. The credit classification has a structural error (wrong category for tax, and incorrect split of the cash payment). Correcting to: 1 asset decrease line (Cash $4.8M) and 1 liability increase line (Trade payables $4.5M). All information needed for the entry is present.",
+        "decision": "proceed"
+      },
+      "reason": null
+    },
+    "entry_drafter": {
+      "input_tokens": 2240,
+      "output_tokens": 538,
+      "cache_read_tokens": 7063,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 9303,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0169089,
+      "raw_cost_usd": 0.035979,
+      "output": {
+        "reason": "Land and building acquired with fair value allocation; 50% deferred, 50% plus building tax paid by cheque; recoverable input tax on building",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Land",
+            "amount": 6000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Buildings",
+            "amount": 3000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Tax assets",
+            "amount": 300000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Accounts Payable",
+            "amount": 4500000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash",
+            "amount": 4800000.0
+          }
+        ]
+      },
+      "reason": "Land and building acquired with fair value allocation; 50% deferred, 50% plus building tax paid by cheque; recoverable input tax on building"
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "which portion of the purchase price is paid now vs. deferred",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "sales tax application",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "whether the building component includes any site improvements or only the structure",
+            "why_entry_depends_on_clarification": "Site improvements are depreciable PP&E requiring a separate account from both Land (non-depreciable) and Buildings; if included in the stated building value, a three-way allocation is needed rather than the two-way allocation stated",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states 'land and a building' with fair values given for each component, but does not specify whether typical warehouse site improvements are included in the building value or should be separately classified",
+            "clarification_question": "Does the building component include any site improvements (such as parking lots, fencing, lighting, or paved areas), or is it only the building structure itself?",
+            "options": [
+              "Building component is the structure only",
+              "Building component includes depreciable site improvements (parking, fencing, lighting, etc.)"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "allocation of lump-sum purchase price between land and building",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "deferred payment liability at present value",
+            "why_llm_cannot_do_this": "IFRS requires non-current payables to be measured at present value (IAS 2.18, IFRS 9), but no discount rate is provided. The system cannot determine the appropriate market rate for a 6-month vendor financing arrangement.",
+            "what_is_best_llm_can_do": "Record the deferred portion at face value ($4,500,000) without discounting, or apply an arbitrary discount rate",
+            "skeptical": true
+          },
+          {
+            "aspect": "sales tax allocation and timing",
+            "why_llm_cannot_do_this": "The transaction states 10% sales tax applies only to the building portion and was paid on 'the balance'. Unclear whether tax applies to the full building value ($4M allocated) or only the portion paid now. Also unclear if the deferred 50% includes a building portion that would trigger additional tax liability.",
+            "what_is_best_llm_can_do": "Apply 10% tax to the entire allocated building value ($4M \u00d7 10% = $400K) and record as paid, ignoring the timing complexity",
+            "skeptical": true
+          },
+          {
+            "aspect": "split payment with partial deferral",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Text explicitly states \"10% sales tax on the building\" paid with the balance. Land is not taxable (exempt supply in Canada). Building purchase is taxable. Tax applies only to the building component. Fair value allocation: building = $4,000,000 of $12,000,000 total fair value = 1/3 of purchase price. Building portion = $9,000,000 \u00d7 (4/12) = $3,000,000. Tax = $3,000,000 \u00d7 10% = $300,000. This is a purchase transaction, so tax is recoverable (Input Tax Credit).",
+        "tax_mentioned": true,
+        "taxable": true,
+        "add_tax_lines": true,
+        "tax_rate": 0.1,
+        "tax_amount": 300000.0,
+        "treatment": "recoverable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "The unresolved ambiguity about site improvements is overly cautious. The transaction explicitly states \"land and a building\" with fair values provided for exactly two components ($8M land, $4M building). No site improvements are mentioned. The fair values given are for the two stated components only. If site improvements existed as a material separate component, they would have been mentioned and valued separately. The building fair value of $4M represents the building as acquired. This ambiguity does not prevent building the entry\u2014we use the two components as stated.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "Flag 1 (present value discounting): The complexity detector is correct that IFRS 9 requires non-current payables at present value, but a 6-month payable is current, not non-current. Short-term payables with no stated interest can be recorded at face value under IFRS 9.B5.1.2A (short-term trade payables with no stated interest rate). This flag is overly cautious\u2014the system can handle this.\n\nFlag 2 (sales tax allocation and timing): The transaction states \"the balance plus 10% sales tax on the building was paid by cheque.\" This clearly means: (1) 50% of the $9M purchase price = $4.5M is deferred, (2) the other 50% = $4.5M plus sales tax on the building was paid now. The building component is $3M (allocated), so tax = $300K. Total paid = $4.5M + $300K = $4.8M. The deferred $4.5M is simply the remaining 50% of the purchase price. This is straightforward\u2014no complexity barrier.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit side: Correct. Land $6M, Building $3M (proper relative fair value allocation), Tax assets $300K (recoverable HST on building).\n\nCredit side: Has a parse error\u2014second liability line incorrectly uses \"Tax assets\" category instead of a liability category. The intent is clear but the category is wrong. The correct structure should be:\n- Cash decrease: $4,800,000 ($4.5M purchase + $300K tax paid)\n- Trade payables increase: $4,500,000 (deferred 50%)\n\nThe credit classifier incorrectly split the cash payment ($4.5M) from the tax payment ($300K) and created an erroneous \"sales tax payable\" liability line. The tax was PAID (stated in transaction), so it should be part of the cash decrease, not a separate liability. The recoverable tax is already correctly captured on the debit side as Tax assets.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": false,
+        "override_credit": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "decision_rationale": "The ambiguity about site improvements is resolved by the transaction text itself\u2014only two components are stated and valued. The complexity flags are overly cautious: (1) 6-month payable is current and can be recorded at face value, (2) the payment structure is clear from the text. The debit classification is correct. The credit classification has a structural error (wrong category for tax, and incorrect split of the cash payment). Correcting to: 1 asset decrease line (Cash $4.8M) and 1 liability increase line (Trade payables $4.5M). All information needed for the entry is present.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Land and building acquired with fair value allocation; 50% deferred, 50% plus building tax paid by cheque; recoverable input tax on building",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Land",
+            "amount": 6000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Buildings",
+            "amount": 3000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Tax assets",
+            "amount": 300000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Accounts Payable",
+            "amount": 4500000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash",
+            "amount": 4800000.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "which portion of the purchase price is paid now vs. deferred",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "sales tax application",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "whether the building component includes any site improvements or only the structure",
+            "why_entry_depends_on_clarification": "Site improvements are depreciable PP&E requiring a separate account from both Land (non-depreciable) and Buildings; if included in the stated building value, a three-way allocation is needed rather than the two-way allocation stated",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states 'land and a building' with fair values given for each component, but does not specify whether typical warehouse site improvements are included in the building value or should be separately classified",
+            "clarification_question": "Does the building component include any site improvements (such as parking lots, fencing, lighting, or paved areas), or is it only the building structure itself?",
+            "options": [
+              "Building component is the structure only",
+              "Building component includes depreciable site improvements (parking, fencing, lighting, etc.)"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Land component allocated based on relative fair value ($8M / $12M \u00d7 $9M = $6M)",
+            "category": "Land",
+            "count": 1
+          },
+          {
+            "reason": "Building component allocated based on relative fair value ($4M / $12M \u00d7 $9M = $3M)",
+            "category": "Buildings",
+            "count": 1
+          },
+          {
+            "reason": "Sales tax on building component is recoverable input tax ($3M \u00d7 10% = $300K)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for 50% of purchase price ($4,500,000) plus sales tax on building portion ($300,000)",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "liability_increase": [
+          {
+            "reason": "Deferred payment obligation for remaining 50% of purchase price due in 6 months",
+            "category": "Trade payables",
+            "count": 1
+          },
+          {
+            "reason": "Sales tax payable on building component (recoverable input tax)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "_parse_error": "1 validation error for CreditClassifierOutput\nliability_increase.1.category\n  Input should be 'Trade payables', 'Accrued liabilities', 'Employee benefits payable', 'Warranty provisions', 'Legal and restructuring provisions', 'Tax liabilities', 'Short-term borrowings', 'Current lease liabilities', 'Deferred income', 'Contract liabilities', 'Dividends payable', 'Long-term borrowings', 'Non-current lease liabilities', 'Pension obligations', 'Decommissioning provisions' or 'Deferred tax liabilities' [type=literal_error, input_value='Tax assets', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 588,
+        "output_tokens": 286,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 602,
+        "output_tokens": 364,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 564,
+        "output_tokens": 284,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 578,
+        "output_tokens": 393,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 563,
+        "output_tokens": 206,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 2478,
+        "output_tokens": 989,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 1039,
+        "output_tokens": 273,
+        "input_token_details": {
+          "cache_read": 3559,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 1201,
+        "output_tokens": 265,
+        "input_token_details": {
+          "cache_read": 3504,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "tax_specialist": "tool_use",
+      "ambiguity_detector": "tool_use",
+      "debit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "credit_classifier": "tool_use",
+      "decision_maker": "tool_use",
+      "entry_drafter": "tool_use"
+    }
+  }
+}

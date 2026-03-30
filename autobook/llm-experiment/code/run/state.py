@@ -39,10 +39,16 @@ def extract_common_result(state: dict, callback: PerNodeUsageCallback,
     credit_out = state.get("output_credit_classifier", [])
     debit_raw = debit_out[i] if i < len(debit_out) and debit_out[i] else None
     credit_raw = credit_out[i] if i < len(credit_out) and credit_out[i] else None
-    debit_tuple = tuple(extract_debit_tuple(debit_raw)) if debit_raw else None
-    credit_tuple = tuple(extract_credit_tuple(credit_raw)) if credit_raw else None
+    if debit_raw and "tuple" in debit_raw:
+        debit_tuple = tuple(debit_raw["tuple"])
+    else:
+        debit_tuple = tuple(extract_debit_tuple(debit_raw)) if debit_raw else None
+    if credit_raw and "tuple" in credit_raw:
+        credit_tuple = tuple(credit_raw["tuple"])
+    else:
+        credit_tuple = tuple(extract_credit_tuple(credit_raw)) if credit_raw else None
 
-    entry_out = state.get("output_entry_drafter", [])
+    entry_out = state.get("output_entry_drafter") or state.get("output_entry_builder") or []
     raw_entry = entry_out[i] if i < len(entry_out) else None
     journal_entry = raw_entry
 

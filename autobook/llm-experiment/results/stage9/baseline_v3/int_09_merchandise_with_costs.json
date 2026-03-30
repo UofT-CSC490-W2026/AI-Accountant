@@ -1,0 +1,595 @@
+{
+  "test_case_id": "int_09_merchandise_with_costs",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    4,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Merchandise purchase on account with capitalizable freight-in and insurance costs, plus period expenses for post-acquisition storage and outbound delivery",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Inventories \u2014 merchandise",
+        "amount": 1150000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Warehousing expense",
+        "amount": 20000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Transportation expense",
+        "amount": 50000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Trade payables",
+        "amount": 1000000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash and cash equivalents",
+        "amount": 220000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0538017,
+  "raw_cost_usd": 0.118599,
+  "total_latency_ms": 40214,
+  "total_input_tokens": 29393,
+  "total_output_tokens": 2028,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 527,
+      "output_tokens": 224,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4294,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0060711,
+      "raw_cost_usd": 0.016242,
+      "output": {
+        "liability_increase": [
+          {
+            "reason": "Merchandise purchased on account from supplier",
+            "category": "Trade payables",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash paid for freight to warehouse, shipping insurance, post-acquisition warehouse storage, and outbound delivery freight",
+            "category": "Cash and cash equivalents",
+            "count": 4
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 542,
+      "output_tokens": 287,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3220,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0067344,
+      "raw_cost_usd": 0.013965,
+      "output": {
+        "flags": [
+          {
+            "aspect": "merchandise purchase on account",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "freight-in to warehouse (inbound freight)",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "shipping insurance (inbound)",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "post-acquisition warehouse storage cost classification",
+            "why_llm_cannot_do_this": "IAS 2.15-16 requires judgment on whether storage is 'necessary in the production process' (capitalize) vs. abnormal/unnecessary (expense). Post-acquisition storage is typically expensed unless it's part of normal production staging, but the transaction lacks sufficient context about whether this is normal necessary storage or excess storage.",
+            "what_is_best_llm_can_do": "Expense the storage cost as period expense (most common treatment for post-acquisition storage)",
+            "skeptical": true
+          },
+          {
+            "aspect": "outbound delivery freight to customers",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "ambiguity_detector": {
+      "input_tokens": 566,
+      "output_tokens": 35,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3851,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032085,
+      "raw_cost_usd": 0.012078,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 528,
+      "output_tokens": 289,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4493,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0071085,
+      "raw_cost_usd": 0.017814,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Merchandise purchased on account plus freight-in and shipping insurance (necessary costs to bring inventory to its present location and condition)",
+            "category": "Inventories \u2014 merchandise",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Post-acquisition warehouse storage costs (period expense, not capitalizable to inventory)",
+            "category": "Warehousing expense",
+            "count": 1
+          },
+          {
+            "reason": "Outbound delivery freight to customers (period expense, not capitalizable to inventory)",
+            "category": "Transportation expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "tax_specialist": {
+      "input_tokens": 552,
+      "output_tokens": 180,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3568,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0052608,
+      "raw_cost_usd": 0.013404,
+      "output": {
+        "reasoning": "The transaction describes multiple purchases (merchandise, freight, insurance, storage, delivery) but does not mention tax anywhere in the text. While these are generally taxable supplies in Ontario, the source text contains no explicit reference to tax, tax rates, or tax amounts. Per instructions, when tax is not mentioned, do not add tax lines regardless of taxability.",
+        "tax_mentioned": false,
+        "taxable": true,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1596,
+      "output_tokens": 631,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5380,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.015388200000000001,
+      "raw_cost_usd": 0.025605,
+      "output": {
+        "ambiguity_assessment": "No ambiguities flagged by upstream detector. All transaction elements are clear.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The complexity detector flagged post-acquisition warehouse storage as requiring judgment under IAS 2.15-16. However, the transaction text explicitly states \"post-acquisition warehouse storage\" \u2014 this is standard period expense treatment. The descriptor \"post-acquisition\" distinguishes it from production-necessary storage. The system correctly identified this as warehousing expense. The skeptical flag is overly cautious; the system can handle this with standard IFRS knowledge. The best-LLM-can-do treatment (expense as period cost) is correct.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit side: (1) Merchandise inventory increase combining purchase price + freight-in + shipping insurance is correct per IAS 2.10-11 (costs to bring inventory to present location and condition). (2) Post-acquisition warehouse storage as warehousing expense is correct per IAS 2.16 (abnormal/unnecessary storage is expensed). (3) Outbound delivery freight as transportation expense is correct (selling cost, not inventory cost). Credit side: (1) Trade payables for the on-account purchase is correct. (2) Four separate cash payments (freight $120k, insurance $30k, storage $20k, delivery $50k) correctly counted as 4 lines \u2014 each is an economically distinct cash outflow. All classifications are valid and categories are correct.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The complexity detector raised a skeptical flag about post-acquisition warehouse storage classification, but the transaction text itself resolves this: \"post-acquisition warehouse storage\" is standard terminology for period expense under IAS 2.16 (storage costs not necessary in the production process are expensed). The system correctly classified it as warehousing expense. All other elements are straightforward: merchandise purchase on account with capitalizable inbound costs (freight and insurance) and two period expenses (storage and outbound delivery). No ambiguities, no missing facts, no knowledge gaps. The entry can be built correctly.",
+        "decision": "proceed"
+      },
+      "reason": null
+    },
+    "entry_drafter": {
+      "input_tokens": 1083,
+      "output_tokens": 382,
+      "cache_read_tokens": 3504,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4587,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.010030200000000001,
+      "raw_cost_usd": 0.019491,
+      "output": {
+        "reason": "Merchandise purchase on account with capitalizable freight-in and insurance costs, plus period expenses for post-acquisition storage and outbound delivery",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Inventories \u2014 merchandise",
+            "amount": 1150000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Warehousing expense",
+            "amount": 20000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Transportation expense",
+            "amount": 50000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Trade payables",
+            "amount": 1000000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash and cash equivalents",
+            "amount": 220000.0
+          }
+        ]
+      },
+      "reason": "Merchandise purchase on account with capitalizable freight-in and insurance costs, plus period expenses for post-acquisition storage and outbound delivery"
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "merchandise purchase on account",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "freight-in to warehouse (inbound freight)",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "shipping insurance (inbound)",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "post-acquisition warehouse storage cost classification",
+            "why_llm_cannot_do_this": "IAS 2.15-16 requires judgment on whether storage is 'necessary in the production process' (capitalize) vs. abnormal/unnecessary (expense). Post-acquisition storage is typically expensed unless it's part of normal production staging, but the transaction lacks sufficient context about whether this is normal necessary storage or excess storage.",
+            "what_is_best_llm_can_do": "Expense the storage cost as period expense (most common treatment for post-acquisition storage)",
+            "skeptical": true
+          },
+          {
+            "aspect": "outbound delivery freight to customers",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "The transaction describes multiple purchases (merchandise, freight, insurance, storage, delivery) but does not mention tax anywhere in the text. While these are generally taxable supplies in Ontario, the source text contains no explicit reference to tax, tax rates, or tax amounts. Per instructions, when tax is not mentioned, do not add tax lines regardless of taxability.",
+        "tax_mentioned": false,
+        "taxable": true,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged by upstream detector. All transaction elements are clear.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The complexity detector flagged post-acquisition warehouse storage as requiring judgment under IAS 2.15-16. However, the transaction text explicitly states \"post-acquisition warehouse storage\" \u2014 this is standard period expense treatment. The descriptor \"post-acquisition\" distinguishes it from production-necessary storage. The system correctly identified this as warehousing expense. The skeptical flag is overly cautious; the system can handle this with standard IFRS knowledge. The best-LLM-can-do treatment (expense as period cost) is correct.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit side: (1) Merchandise inventory increase combining purchase price + freight-in + shipping insurance is correct per IAS 2.10-11 (costs to bring inventory to present location and condition). (2) Post-acquisition warehouse storage as warehousing expense is correct per IAS 2.16 (abnormal/unnecessary storage is expensed). (3) Outbound delivery freight as transportation expense is correct (selling cost, not inventory cost). Credit side: (1) Trade payables for the on-account purchase is correct. (2) Four separate cash payments (freight $120k, insurance $30k, storage $20k, delivery $50k) correctly counted as 4 lines \u2014 each is an economically distinct cash outflow. All classifications are valid and categories are correct.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The complexity detector raised a skeptical flag about post-acquisition warehouse storage classification, but the transaction text itself resolves this: \"post-acquisition warehouse storage\" is standard terminology for period expense under IAS 2.16 (storage costs not necessary in the production process are expensed). The system correctly classified it as warehousing expense. All other elements are straightforward: merchandise purchase on account with capitalizable inbound costs (freight and insurance) and two period expenses (storage and outbound delivery). No ambiguities, no missing facts, no knowledge gaps. The entry can be built correctly.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Merchandise purchase on account with capitalizable freight-in and insurance costs, plus period expenses for post-acquisition storage and outbound delivery",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Inventories \u2014 merchandise",
+            "amount": 1150000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Warehousing expense",
+            "amount": 20000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Transportation expense",
+            "amount": 50000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Trade payables",
+            "amount": 1000000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash and cash equivalents",
+            "amount": 220000.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Merchandise purchased on account plus freight-in and shipping insurance (necessary costs to bring inventory to its present location and condition)",
+            "category": "Inventories \u2014 merchandise",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Post-acquisition warehouse storage costs (period expense, not capitalizable to inventory)",
+            "category": "Warehousing expense",
+            "count": 1
+          },
+          {
+            "reason": "Outbound delivery freight to customers (period expense, not capitalizable to inventory)",
+            "category": "Transportation expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [
+          {
+            "reason": "Merchandise purchased on account from supplier",
+            "category": "Trade payables",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash paid for freight to warehouse, shipping insurance, post-acquisition warehouse storage, and outbound delivery freight",
+            "category": "Cash and cash equivalents",
+            "count": 4
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          4,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 527,
+        "output_tokens": 224,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 542,
+        "output_tokens": 287,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 566,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 528,
+        "output_tokens": 289,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 552,
+        "output_tokens": 180,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1596,
+        "output_tokens": 631,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 1083,
+        "output_tokens": 382,
+        "input_token_details": {
+          "cache_read": 3504,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "ambiguity_detector": "tool_use",
+      "debit_classifier": "tool_use",
+      "tax_specialist": "tool_use",
+      "decision_maker": "tool_use",
+      "entry_drafter": "tool_use"
+    }
+  }
+}
