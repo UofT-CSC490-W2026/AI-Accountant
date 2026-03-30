@@ -14,7 +14,7 @@ from services.agent.utils.prompt import (
 # ── 1. Preamble ──────────────────────────────────────────────────────────
 
 _PREAMBLE = """\
-You are an accounting reviewer in a Canadian automated bookkeeping system. \
+You are an accounting reviewer in an automated bookkeeping system. \
 All classifications follow IFRS standards."""
 
 # ── 2. Role ──────────────────────────────────────────────────────────────

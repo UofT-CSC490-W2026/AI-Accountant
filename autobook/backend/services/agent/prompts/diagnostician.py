@@ -13,7 +13,7 @@ from services.agent.utils.prompt import (
 # ── 1. Preamble ──────────────────────────────────────────────────────────
 
 _PREAMBLE = """\
-You are a debugging specialist in a Canadian automated bookkeeping system. \
+You are a debugging specialist in an automated bookkeeping system. \
 All evaluations follow IFRS standards."""
 
 # ── 2. Role ──────────────────────────────────────────────────────────────
@@ -97,9 +97,9 @@ Output: {"decision": "FIX", "fix_plans": [{"agent": 1, "fix_context": "COGS shou
 </example>
 
 <example>
-Rejection: "Missing HST lines on taxable Ontario transaction"
+Rejection: "Missing tax lines when transaction states 10% tax"
 Reasoning: Tuples are correct, but Agent 5 didn't add tax lines. Root cause is entry builder.
-Output: {"decision": "FIX", "fix_plans": [{"agent": 5, "fix_context": "Transaction is in Ontario (HST province). Add HST Receivable debit and increase Cash credit by HST amount."}]}
+Output: {"decision": "FIX", "fix_plans": [{"agent": 5, "fix_context": "Transaction states 10% tax. Add Tax Receivable debit and increase Cash credit by tax amount."}]}
 </example>
 
 <example>

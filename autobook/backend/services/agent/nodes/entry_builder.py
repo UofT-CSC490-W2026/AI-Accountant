@@ -1,9 +1,9 @@
 """Agent 5 — Entry Builder node.
 
-Constructs complete journal entry from refined tuples + tool results.
+Constructs complete journal entry from classified structure + tool results.
 When it's the terminal decision-maker (no approver), also outputs the
-pipeline decision: CONFIDENT, INCOMPLETE_INFORMATION, or STUCK.
-Output: EntryBuilderOutput {"date", "description", "rationale", "lines", ...}
+pipeline decision: APPROVED, INCOMPLETE_INFORMATION, or STUCK.
+Output: EntryBuilderOutput with structured reviews, entry, and decision.
 """
 from langchain_core.runnables import RunnableConfig
 
@@ -18,7 +18,7 @@ from accounting_engine.tools import coa_lookup, tax_rules_lookup, vendor_history
 
 
 def entry_builder_node(state: PipelineState, config: RunnableConfig) -> dict:
-    """Build complete journal entry from tuples, tools, and transaction text."""
+    """Build complete journal entry from structure, tools, and transaction text."""
     # ── Iteration + history ───────────────────────────────────────
     i = state["iteration"]
     history = list(state.get("output_entry_builder", []))
@@ -54,10 +54,6 @@ def entry_builder_node(state: PipelineState, config: RunnableConfig) -> dict:
         "evaluation_active": configurable.get("evaluation_active", True),
     }
 
-    # ── Disambiguator opinions (if disambiguator ran) ─────────────
-    disambiguator_opinions = state.get("output_disambiguator", [])
-    has_disambiguator = pipeline_config.get("disambiguator_active", True)
-
     # ── Build prompt + call LLM ───────────────────────────────────
     messages = build_prompt(
         state, rag_examples,
@@ -79,12 +75,7 @@ def entry_builder_node(state: PipelineState, config: RunnableConfig) -> dict:
         "status_entry_builder": COMPLETE,
     }
 
-    # Enforce INCOMPLETE_INFORMATION if any disambiguator response says "incomplete"
-    responses = output.get("disambiguator_responses") or []
-    if any(r["action"] == "incomplete" for r in responses):
-        output["decision"] = "INCOMPLETE_INFORMATION"
-
-    # Always propagate INCOMPLETE_INFORMATION (entry builder detects missing facts when D=off)
+    # Always propagate INCOMPLETE_INFORMATION
     if output.get("decision") == "INCOMPLETE_INFORMATION":
         update["decision"] = output["decision"]
         if output.get("clarification_questions"):

@@ -1,174 +1,105 @@
-"""Prompt builder for Agent 2 — Credit Classifier.
+"""Prompt builder for Credit Classifier.
 
-Classifies how many credit-side journal lines fall into each of the 6
-directional categories. Output: JSON with tuple and reason.
+Classifies credit-side journal lines into 6 directional slots.
+Each line gets a reason and an IFRS taxonomy category.
+Output: CreditClassifierOutput with list[ClassifiedLine] per slot.
 """
 from services.agent.graph.state import PipelineState
+from services.agent.prompts.shared import SHARED_INSTRUCTION
 from services.agent.utils.prompt import (
     CACHE_POINT, build_transaction,
     build_fix_context, build_rag_examples,
     build_context_section, build_input_section, to_bedrock_messages,
 )
 
-# ── 1. Preamble ──────────────────────────────────────────────────────────
-
-_PREAMBLE = """\
-You are an accounting classifier in a Canadian automated bookkeeping system. \
-All classifications follow IFRS standards."""
-
-# ── 2. Role ──────────────────────────────────────────────────────────────
+# ── Role ─────────────────────────────────────────────────────────────────
 
 _ROLE = """
 ## Role
 
-Given a transaction description, classify the CREDIT side only. Count how many \
-credit-side journal lines fall into each of the 6 directional categories.
+Given a transaction description, classify the CREDIT side only. For each \
+credit-side journal line, identify which directional slot it belongs to and \
+assign an IFRS taxonomy category from the list in Domain Knowledge.
+
+Same category = combine into one line. Different category = separate lines.
 
 You do NOT:
 - Classify the debit side (separate agent handles that)
-- Assign account names or dollar amounts
+- Assign specific account names or dollar amounts (entry drafter does that)
 - Check arithmetic balance"""
 
-# ── 3. Domain Knowledge ──────────────────────────────────────────────────
-
-_DOMAIN = """
-## Domain Knowledge (IFRS)
-
-Debiting an account means:
-- Asset: increases its balance
-- Dividend: increases its balance
-- Expense: increases its balance
-- Liability: decreases its balance
-- Equity: decreases its balance
-- Revenue: decreases its balance
-
-Crediting an account means:
-- Liability: increases its balance
-- Equity: increases its balance
-- Revenue: increases its balance
-- Asset: decreases its balance
-- Dividend: decreases its balance
-- Expense: decreases its balance
-
-Every transaction has debit lines and credit lines. Total debits = total \
-credits in dollar amounts. Dividends (owner withdrawals) behave like \
-expenses: decreased by credit.
-
-Count each economically distinct event as a separate line — if a single \
-payment clears an obligation and incurs a new expense, count both. When \
-face value and present value differ, count the contra account as its own \
-line. Combine into a single line when components share the same account \
-and same treatment. Classify by business purpose, not item description. \
-Non-depreciable items (land, permanent landscaping) must use distinct \
-accounts from depreciable items (improvements, structures)."""
-
-# ── 4. System Knowledge ──────────────────────────────────────────────────
-
-_SYSTEM = """
-## System Knowledge
-
-The pipeline represents each journal entry side as a 6-slot tuple (a,b,c,d,e,f). \
-Each slot counts the number of lines of that type. Values are LINE COUNTS, \
-not dollar amounts.
-
-Credit Tuple:
-- a: Liability increase
-- b: Equity increase
-- c: Revenue increase
-- d: Asset decrease
-- e: Dividend decrease
-- f: Expense decrease"""
-
-# ── 5. Procedure ─────────────────────────────────────────────────────────
+# ── Procedure ────────────────────────────────────────────────────────────
 
 _PROCEDURE = """
 ## Procedure
 
 1. Read the transaction description.
 2. Identify each credit-side journal line implied by the transaction.
-3. For each credit line, determine which directional category it falls into.
-4. Count the lines per category and output the 6-tuple."""
+3. For each line, determine the directional slot (liability_increase, \
+asset_decrease, etc.) and pick the IFRS taxonomy category.
+4. If two items share the same category, combine into one line. \
+If they have different categories, keep them separate.
+5. For each line, state the reason (why it exists) and the category."""
 
-# ── 6. Examples ──────────────────────────────────────────────────────────
+# ── Examples ─────────────────────────────────────────────────────────────
 
 _EXAMPLES = """
 ## Examples
 
 <example>
 Transaction: "Pay monthly rent $2,000"
-Output: {"tuple": [0,0,0,1,0,0], "reason": "Cash leaving = asset decrease"}
+asset_decrease: [("Cash payment for rent", "Cash and cash equivalents")]
 </example>
 
 <example>
 Transaction: "Owner invests $50,000 into business"
-Output: {"tuple": [0,1,0,0,0,0], "reason": "Owner capital = equity increase"}
-</example>
-
-<example>
-Transaction: "Take out $25,000 bank loan"
-Output: {"tuple": [1,0,0,0,0,0], "reason": "Loan = liability increase"}
-</example>
-
-<example>
-Transaction: "Receive $1,000 payment from client for services"
-Output: {"tuple": [0,0,1,0,0,0], "reason": "Service revenue = revenue increase"}
+equity_increase: [("Owner capital contribution", "Issued capital")]
 </example>
 
 <example>
 Transaction: "Purchase equipment $20,000 cash plus $30,000 loan"
-Output: {"tuple": [1,0,0,1,0,0], "reason": "Cash leaving + loan = asset decrease + liability increase"}
+liability_increase: [("New loan for equipment", "Long-term borrowings")]
+asset_decrease: [("Cash payment for equipment", "Cash and cash equivalents")]
 </example>
 
 <example>
-Transaction: "Receive refund $300 for returned office supplies"
-Output: {"tuple": [0,0,0,0,0,1], "reason": "Supplies expense reversed = expense decrease"}
+Transaction: "Sell products $5,000 on account, cost $3,000"
+revenue_increase: [("Product sale", "Revenue from sale of goods")]
+asset_decrease: [("Inventory shipped to customer", "Inventories — merchandise")]
 </example>"""
 
-# ── 7. Input Format ─────────────────────────────────────────────────────
-
-_INPUT_FORMAT = """
-## Input Format
-
-You will receive these blocks in the user message:
-
-1. <transaction> — The raw transaction description to classify.
-2. <fix_context> (optional) — If present, a previous review rejected this \
-classification. Contains guidance on what to fix.
-3. <examples> (optional) — Similar past transactions retrieved for reference."""
-
-# ── 8. Task Reminder (appended to end of HumanMessage) ─────────────────
+# ── Task Reminder ────────────────────────────────────────────────────────
 
 _TASK_REMINDER = """
 ## Task
 
-Classify the credit side of the given transaction. Apply IFRS standards and \
-output the 6-slot credit tuple with a brief reason. Consider any fix context \
-or reference examples if provided."""
+Classify the credit side. For each line, provide the reason and \
+IFRS taxonomy category. Same category = combine. Different = separate."""
 
-SYSTEM_INSTRUCTION = "\n".join([
-    _PREAMBLE, _ROLE, _DOMAIN, _SYSTEM, _PROCEDURE, _EXAMPLES, _INPUT_FORMAT,
-])
+AGENT_INSTRUCTION = "\n".join([_ROLE, _PROCEDURE, _EXAMPLES, ])
+
+# Legacy — for warmup compatibility
+SYSTEM_INSTRUCTION = "\n".join([SHARED_INSTRUCTION, AGENT_INSTRUCTION])
 
 
 def build_prompt(state: PipelineState, rag_examples: list[dict],
                  fix_context: str | None = None) -> dict:
-    """Build the credit classifier prompt with cache breakpoints."""
-    # ── § Context (optional reference material) ───────────────────
+    """Build the credit classifier prompt."""
     fix = build_fix_context(fix_context=fix_context)
     rag = build_rag_examples(rag_examples=rag_examples,
-                             label="similar past transactions with correct credit tuples",
+                             label="similar past transactions with correct credit structures",
                              fields=["transaction", "credit_tuple"])
     context = build_context_section(fix, rag)
 
-    # ── § Input (what to classify) ────────────────────────────────
     transaction = build_transaction(state=state)
     input_section = build_input_section(transaction)
 
-    # ── § Task (last thing before model generates) ────────────────
     task = [{"text": _TASK_REMINDER}]
 
-    # ── Join ──────────────────────────────────────────────────────
-    system_blocks = [{"text": SYSTEM_INSTRUCTION}, CACHE_POINT]
+    system_blocks = [
+        {"text": SHARED_INSTRUCTION}, CACHE_POINT,
+        {"text": AGENT_INSTRUCTION}, CACHE_POINT,
+    ]
     message_blocks = context + input_section + task
 
     return to_bedrock_messages(system_blocks, message_blocks)
