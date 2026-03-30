@@ -110,14 +110,28 @@ export function StatementsPage() {
                     <thead>
                       <tr>
                         <th>Line Item</th>
-                        <th>Amount</th>
+                        {selectedType === "trial_balance" ? (
+                          <>
+                            <th>Debit</th>
+                            <th>Credit</th>
+                          </>
+                        ) : (
+                          <th>Amount</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
                       {section.rows.map((row) => (
                         <tr key={row.label}>
                           <td>{row.label}</td>
-                          <td>${row.amount.toFixed(2)}</td>
+                          {selectedType === "trial_balance" ? (
+                            <>
+                              <td>{row.debit ? `$${row.debit.toFixed(2)}` : " "}</td>
+                              <td>{row.credit ? `$${row.credit.toFixed(2)}` : " "}</td>
+                            </>
+                          ) : (
+                            <td>${row.amount.toFixed(2)}</td>
+                          )}
                         </tr>
                       ))}
                     </tbody>

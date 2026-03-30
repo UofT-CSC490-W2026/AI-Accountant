@@ -22,14 +22,39 @@ ACCOUNTS = [
 ]
 
 BALANCES = [
-    {"account_code": "1000", "account_name": "Cash", "account_type": "asset", "balance": Decimal("-3000")},
-    {"account_code": "1500", "account_name": "Equipment", "account_type": "asset", "balance": Decimal("5000")},
-    {"account_code": "4000", "account_name": "Service Revenue", "account_type": "revenue", "balance": Decimal("3000")},
-    {"account_code": "5000", "account_name": "Rent Expense", "account_type": "expense", "balance": Decimal("1000")},
+    {
+        "account_code": "1000",
+        "account_name": "Cash",
+        "account_type": "asset",
+        "debit_total": Decimal("0"),
+        "credit_total": Decimal("3000"),
+        "balance": Decimal("-3000"),
+    },
+    {
+        "account_code": "1500",
+        "account_name": "Equipment",
+        "account_type": "asset",
+        "debit_total": Decimal("5000"),
+        "credit_total": Decimal("0"),
+        "balance": Decimal("5000"),
+    },
+    {
+        "account_code": "4000",
+        "account_name": "Service Revenue",
+        "account_type": "revenue",
+        "debit_total": Decimal("0"),
+        "credit_total": Decimal("3000"),
+        "balance": Decimal("3000"),
+    },
+    {
+        "account_code": "5000",
+        "account_name": "Rent Expense",
+        "account_type": "expense",
+        "debit_total": Decimal("1000"),
+        "credit_total": Decimal("0"),
+        "balance": Decimal("1000"),
+    },
 ]
-
-SUMMARY = {"total_debits": Decimal("9000"), "total_credits": Decimal("9000")}
-
 
 @patch("reporting.statements.JournalEntryDAO.compute_balances", return_value=BALANCES)
 @patch("reporting.statements.ChartOfAccountsDAO.list_by_user", return_value=ACCOUNTS)
@@ -97,25 +122,25 @@ def test_income_statement_empty(mock_coa, mock_balances):
     assert result["totals"]["total_revenue"] == 0.0
 
 
-@patch("reporting.statements.JournalEntryDAO.compute_summary", return_value=SUMMARY)
 @patch("reporting.statements.JournalEntryDAO.compute_balances", return_value=BALANCES)
 @patch("reporting.statements.ChartOfAccountsDAO.list_by_user", return_value=ACCOUNTS)
-def test_trial_balance_columns(mock_coa, mock_balances, mock_summary):
+def test_trial_balance_columns(mock_coa, mock_balances):
     result = build_trial_balance(MagicMock(), "user-1", "2026-03-23")
     rows = result["sections"][0]["rows"]
     assert len(rows) == 4
     for row in rows:
         assert "label" in row
         assert "amount" in row
+        assert "debit" in row
+        assert "credit" in row
 
 
-@patch("reporting.statements.JournalEntryDAO.compute_summary", return_value=SUMMARY)
 @patch("reporting.statements.JournalEntryDAO.compute_balances", return_value=BALANCES)
 @patch("reporting.statements.ChartOfAccountsDAO.list_by_user", return_value=ACCOUNTS)
-def test_trial_balance_balanced(mock_coa, mock_balances, mock_summary):
+def test_trial_balance_balanced(mock_coa, mock_balances):
     result = build_trial_balance(MagicMock(), "user-1", "2026-03-23")
     assert result["totals"]["total_debits"] == result["totals"]["total_credits"]
-    assert result["totals"]["total_debits"] == 9000.0
+    assert result["totals"]["total_debits"] == 6000.0
 
 
 def test_trial_balance_negative_liability_balance():
@@ -124,12 +149,24 @@ def test_trial_balance_negative_liability_balance():
         _make_account("1000", "Cash", "asset"),
     ]
     balances = [
-        {"account_code": "2000", "account_name": "Accounts Payable", "account_type": "liability", "balance": Decimal("-500")},
-        {"account_code": "1000", "account_name": "Cash", "account_type": "asset", "balance": Decimal("-500")},
+        {
+            "account_code": "2000",
+            "account_name": "Accounts Payable",
+            "account_type": "liability",
+            "debit_total": Decimal("500"),
+            "credit_total": Decimal("0"),
+            "balance": Decimal("-500"),
+        },
+        {
+            "account_code": "1000",
+            "account_name": "Cash",
+            "account_type": "asset",
+            "debit_total": Decimal("0"),
+            "credit_total": Decimal("500"),
+            "balance": Decimal("-500"),
+        },
     ]
-    summary = {"total_debits": Decimal("500"), "total_credits": Decimal("500")}
-    with patch("reporting.statements.JournalEntryDAO.compute_summary", return_value=summary), \
-         patch("reporting.statements.JournalEntryDAO.compute_balances", return_value=balances), \
+    with patch("reporting.statements.JournalEntryDAO.compute_balances", return_value=balances), \
          patch("reporting.statements.ChartOfAccountsDAO.list_by_user", return_value=accounts):
         result = build_trial_balance(MagicMock(), "user-1", "2026-03-23")
     assert result["totals"]["total_debits"] == 500.0
@@ -146,15 +183,38 @@ def test_balance_sheet_uses_same_posted_balance_filters_as_ledger():
     }
 
 
-@patch("reporting.statements.JournalEntryDAO.compute_summary", return_value=SUMMARY)
 @patch("reporting.statements.JournalEntryDAO.compute_balances", return_value=BALANCES)
 @patch("reporting.statements.ChartOfAccountsDAO.list_by_user", return_value=[])
 def test_trial_balance_falls_back_to_balance_metadata_when_chart_rows_are_missing(
     mock_coa,
     mock_balances,
-    mock_summary,
 ):
     result = build_trial_balance(MagicMock(), "user-1", "2026-03-23")
     rows = result["sections"][0]["rows"]
     assert any(row["label"] == "1500 Equipment" and row["amount"] == 5000.0 for row in rows)
     assert any(row["label"] == "1000 Cash" and row["amount"] == 3000.0 for row in rows)
+
+
+@patch("reporting.statements.JournalEntryDAO.compute_balances", return_value=[
+    {
+        "account_code": "1000",
+        "account_name": "Cash",
+        "account_type": "asset",
+        "debit_total": Decimal("500"),
+        "credit_total": Decimal("500"),
+        "balance": Decimal("0"),
+    }
+])
+@patch("reporting.statements.ChartOfAccountsDAO.list_by_user", return_value=[])
+def test_trial_balance_keeps_rows_when_activity_nets_to_zero(mock_coa, mock_balances):
+    result = build_trial_balance(MagicMock(), "user-1", "2026-03-23")
+    rows = result["sections"][0]["rows"]
+    assert rows == [
+        {
+            "label": "1000 Cash",
+            "debit": 500.0,
+            "credit": 500.0,
+            "amount": 500.0,
+        }
+    ]
+    assert result["totals"] == {"total_debits": 500.0, "total_credits": 500.0}

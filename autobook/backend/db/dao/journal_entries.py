@@ -180,6 +180,9 @@ class JournalEntryDAO:
             stmt = stmt.where(JournalEntry.status == filters["status"])
         grouped: dict[str, dict[str, object]] = {}
         for account_code, account_name, line_type, total in db.execute(stmt):
+            normalized_line_type = str(line_type or "").strip().lower()
+            if normalized_line_type not in {"debit", "credit"}:
+                continue
             account = account_lookup.get(account_code)
             bucket = grouped.setdefault(
                 account_code,
@@ -191,13 +194,14 @@ class JournalEntryDAO:
                     "credit_total": Decimal("0"),
                 },
             )
-            bucket[f"{line_type}_total"] = _to_decimal(total or 0)
+            bucket[f"{normalized_line_type}_total"] = _to_decimal(total or 0)
 
         balances: list[dict[str, object]] = []
         for account in grouped.values():
-            debit_total = account["debit_total"]
-            credit_total = account["credit_total"]
-            if account["account_type"] in {"asset", "expense"}:
+            debit_total = _to_decimal(account["debit_total"])
+            credit_total = _to_decimal(account["credit_total"])
+            account_type = str(account["account_type"]).strip().lower()
+            if account_type in {"asset", "expense"}:
                 balance = debit_total - credit_total
             else:
                 balance = credit_total - debit_total
@@ -205,7 +209,9 @@ class JournalEntryDAO:
                 {
                     "account_code": account["account_code"],
                     "account_name": account["account_name"],
-                    "account_type": account["account_type"],
+                    "account_type": account_type,
+                    "debit_total": debit_total,
+                    "credit_total": credit_total,
                     "balance": balance,
                 }
             )
@@ -233,6 +239,9 @@ class JournalEntryDAO:
             stmt = stmt.where(JournalEntry.status == filters["status"])
         totals = {"total_debits": Decimal("0"), "total_credits": Decimal("0")}
         for line_type, amount in db.execute(stmt):
-            key = "total_debits" if line_type == "debit" else "total_credits"
+            normalized_line_type = str(line_type or "").strip().lower()
+            if normalized_line_type not in {"debit", "credit"}:
+                continue
+            key = "total_debits" if normalized_line_type == "debit" else "total_credits"
             totals[key] = _to_decimal(amount or 0)
         return totals

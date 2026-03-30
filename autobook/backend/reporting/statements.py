@@ -15,6 +15,8 @@ class AccountSnapshot:
     account_code: str
     account_name: str
     account_type: str
+    debit_total: Decimal
+    credit_total: Decimal
     balance: Decimal
 
 
@@ -59,6 +61,8 @@ def _build_account_snapshots(db: Session, user_id, as_of: date) -> list[AccountS
                     if account is not None
                     else str((balance_item or {}).get("account_type") or "expense")
                 ),
+                debit_total=_to_decimal((balance_item or {}).get("debit_total", Decimal("0"))),
+                credit_total=_to_decimal((balance_item or {}).get("credit_total", Decimal("0"))),
                 balance=_to_decimal((balance_item or {}).get("balance", Decimal("0"))),
             )
         )
@@ -140,20 +144,20 @@ def build_income_statement(db: Session, user_id, as_of: str | None) -> dict:
 def build_trial_balance(db: Session, user_id, as_of: str | None) -> dict:
     snapshot_date = _parse_as_of(as_of)
     snapshots = _build_account_snapshots(db, user_id, snapshot_date)
-    summary = JournalEntryDAO.compute_summary(
-        db,
-        user_id,
-        filters={"date_to": snapshot_date, "status": "posted"},
-    )
 
     rows = []
+    total_debits = Decimal("0")
+    total_credits = Decimal("0")
 
     for snapshot in sorted(snapshots, key=lambda item: item.account_code):
-        if snapshot.balance == 0:
+        if snapshot.debit_total == 0 and snapshot.credit_total == 0:
             continue
         debit = Decimal("0")
         credit = Decimal("0")
-        if snapshot.account_type in {"asset", "expense"}:
+        if snapshot.balance == 0:
+            debit = snapshot.debit_total
+            credit = snapshot.credit_total
+        elif snapshot.account_type in {"asset", "expense"}:
             if snapshot.balance >= 0:
                 debit = snapshot.balance
             else:
@@ -166,16 +170,20 @@ def build_trial_balance(db: Session, user_id, as_of: str | None) -> dict:
         rows.append(
             {
                 "label": f"{snapshot.account_code} {snapshot.account_name}",
+                "debit": _to_float(debit),
+                "credit": _to_float(credit),
                 "amount": _to_float(debit if debit != 0 else credit),
             }
         )
+        total_debits += debit
+        total_credits += credit
 
     return {
         "statement_type": "trial_balance",
         "period": {"as_of": snapshot_date.isoformat()},
         "sections": [{"title": "Trial Balance", "rows": rows}],
         "totals": {
-            "total_debits": _to_float(_to_decimal(summary.get("total_debits"))),
-            "total_credits": _to_float(_to_decimal(summary.get("total_credits"))),
+            "total_debits": _to_float(total_debits),
+            "total_credits": _to_float(total_credits),
         },
     }

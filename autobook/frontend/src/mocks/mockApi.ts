@@ -232,9 +232,12 @@ function buildTrialBalanceFromLedger(entries: LedgerEntry[]): StatementsResponse
     .filter((balance) => balance.balance !== 0)
     .map((balance) => ({
       label: `${balance.account_code} ${balance.account_name}`,
+      debit: balance.balance > 0 ? Math.abs(balance.balance) : 0,
+      credit: balance.balance < 0 ? Math.abs(balance.balance) : 0,
       amount: Math.abs(balance.balance),
     }));
-  const summary = computeLedgerSummary(entries);
+  const totalDebits = rows.reduce((total, row) => total + (row.debit ?? 0), 0);
+  const totalCredits = rows.reduce((total, row) => total + (row.credit ?? 0), 0);
 
   return {
     statement_type: "trial_balance",
@@ -243,8 +246,8 @@ function buildTrialBalanceFromLedger(entries: LedgerEntry[]): StatementsResponse
     },
     sections: [{ title: "Trial Balance", rows }],
     totals: {
-      total_debits: summary.total_debits,
-      total_credits: summary.total_credits,
+      total_debits: totalDebits,
+      total_credits: totalCredits,
     },
   };
 }

@@ -171,6 +171,8 @@ export type StatementSection = {
   rows: Array<{
     label: string;
     amount: number;
+    debit?: number;
+    credit?: number;
   }>;
 };
 
