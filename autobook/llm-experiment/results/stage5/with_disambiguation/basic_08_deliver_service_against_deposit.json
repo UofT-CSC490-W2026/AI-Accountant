@@ -1,0 +1,549 @@
+{
+  "test_case_id": "basic_08_deliver_service_against_deposit",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "When the customer initially paid the $100 deposit, it was recorded as a liability (Customer Deposits) because the service had not yet been performed. Now that the service has been delivered, the revenue recognition criteria under IFRS 15 are met. We debit Customer Deposits to eliminate the liability and credit Service Revenue to recognize the earned revenue. No tax lines are added as no tax rules were provided and the transaction text does not mention tax. Total debits ($100) equal total credits ($100).",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Customer Deposits",
+        "amount": 100.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Service Revenue",
+        "amount": 100.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.043356,
+  "raw_cost_usd": 0.070437,
+  "total_latency_ms": 30977,
+  "total_input_tokens": 12309,
+  "total_output_tokens": 2234,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 509,
+      "output_tokens": 155,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2856,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0045561,
+      "raw_cost_usd": 0.010893,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "nature of transaction",
+            "resolution": "Transaction describes revenue recognition event: converting unearned revenue (customer deposit liability) to earned revenue upon service delivery"
+          },
+          {
+            "aspect": "amount of service delivered",
+            "resolution": "Text states 'against $100 customer deposit' \u2014 the service delivered corresponds to the full $100 deposit amount"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 482,
+      "output_tokens": 341,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1998,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0070158,
+      "raw_cost_usd": 0.011109,
+      "output": {
+        "liability_increase_reason": "No new liabilities are created. The existing customer deposit liability is being eliminated (debited) as the service is delivered.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are affected by this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Service revenue is recognized (credited) when the service is delivered, earning the previously deferred revenue from the customer deposit.",
+        "revenue_increase_count": 1,
+        "asset_decrease_reason": "No assets are leaving the business in this transaction.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividend or owner withdrawal accounts are involved.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense accounts are reversed or decreased.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 484,
+      "output_tokens": 338,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2030,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0069858,
+      "raw_cost_usd": 0.01116,
+      "output": {
+        "asset_increase_reason": "No assets increase. The cash was received earlier when the deposit was made.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are incurred. This is a revenue recognition event.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "Customer deposit (unearned revenue/deferred revenue) is a liability that decreases when the service is delivered and revenue is earned.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity accounts decrease in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "Revenue increases (credit side), not decreases.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 804,
+      "output_tokens": 1400,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5425,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0247983,
+      "raw_cost_usd": 0.037275,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear. A customer previously paid $100 as a deposit (creating a liability - Unearned Revenue or Customer Deposits). Now the service has been delivered, so we must: (1) eliminate the liability by debiting it, and (2) recognize the revenue by crediting it. The amount is stated ($100), the business event is unambiguous (service delivery against a pre-existing deposit), and no policy elections or additional facts are needed to determine the entry structure.",
+        "debit_asset_increase": {
+          "reason": "No asset is increasing in this transaction. The deposit was already received in cash previously when the liability was created. This transaction only converts the liability to revenue.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend is being declared or paid in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense is being incurred. This is a revenue recognition event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "The customer deposit (a liability) is being eliminated as the service obligation is fulfilled. One line debiting Customer Deposits or Unearned Revenue for $100.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Customer Deposits"
+          ]
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "Revenue is being recognized (increased), not decreased.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "The liability is being eliminated, not increased. The debit side handles the liability decrease.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No direct equity increase. Revenue will flow to equity through retained earnings at period end, but this transaction records revenue, not equity.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Service has been delivered, so revenue is now earned and must be recognized. One line crediting Service Revenue for $100.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Service Revenue"
+          ]
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being reduced. The cash was already received when the deposit was initially recorded.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend activity in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense is being reversed or reduced.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "When the customer initially paid the $100 deposit, it was recorded as a liability (Customer Deposits) because the service had not yet been performed. Now that the service has been delivered, the revenue recognition criteria under IFRS 15 are met. We debit Customer Deposits to eliminate the liability and credit Service Revenue to recognize the earned revenue. No tax lines are added as no tax rules were provided and the transaction text does not mention tax. Total debits ($100) equal total credits ($100).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Customer Deposits",
+              "amount": 100.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Service Revenue",
+              "amount": 100.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction describes a straightforward revenue recognition event. A customer previously paid $100 as a deposit (creating a liability). Now the service has been delivered, triggering revenue recognition under IFRS 15. The classifier tuples correctly identify this as a liability decrease (debit) and revenue increase (credit). The amount is explicit ($100), the business event is unambiguous, and no additional facts are needed. The entry balances (debits = credits = $100) and follows IFRS standards. No tax was mentioned, so no tax lines are added.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "nature of transaction",
+            "resolution": "Transaction describes revenue recognition event: converting unearned revenue (customer deposit liability) to earned revenue upon service delivery"
+          },
+          {
+            "aspect": "amount of service delivered",
+            "resolution": "Text states 'against $100 customer deposit' \u2014 the service delivered corresponds to the full $100 deposit amount"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No assets increase. The cash was received earlier when the deposit was made.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are incurred. This is a revenue recognition event.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "Customer deposit (unearned revenue/deferred revenue) is a liability that decreases when the service is delivered and revenue is earned.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity accounts decrease in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "Revenue increases (credit side), not decreases.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No new liabilities are created. The existing customer deposit liability is being eliminated (debited) as the service is delivered.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are affected by this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Service revenue is recognized (credited) when the service is delivered, earning the previously deferred revenue from the customer deposit.",
+        "revenue_increase_count": 1,
+        "asset_decrease_reason": "No assets are leaving the business in this transaction.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividend or owner withdrawal accounts are involved.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense accounts are reversed or decreased.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No assets increase. The cash was received earlier when the deposit was made.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are incurred. This is a revenue recognition event.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "Customer deposit (unearned revenue/deferred revenue) is a liability that decreases when the service is delivered and revenue is earned.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity accounts decrease in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "Revenue increases (credit side), not decreases.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No new liabilities are created. The existing customer deposit liability is being eliminated (debited) as the service is delivered.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are affected by this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "Service revenue is recognized (credited) when the service is delivered, earning the previously deferred revenue from the customer deposit.",
+        "revenue_increase_count": 1,
+        "asset_decrease_reason": "No assets are leaving the business in this transaction.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividend or owner withdrawal accounts are involved.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense accounts are reversed or decreased.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear. A customer previously paid $100 as a deposit (creating a liability - Unearned Revenue or Customer Deposits). Now the service has been delivered, so we must: (1) eliminate the liability by debiting it, and (2) recognize the revenue by crediting it. The amount is stated ($100), the business event is unambiguous (service delivery against a pre-existing deposit), and no policy elections or additional facts are needed to determine the entry structure.",
+        "debit_asset_increase": {
+          "reason": "No asset is increasing in this transaction. The deposit was already received in cash previously when the liability was created. This transaction only converts the liability to revenue.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend is being declared or paid in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense is being incurred. This is a revenue recognition event.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "The customer deposit (a liability) is being eliminated as the service obligation is fulfilled. One line debiting Customer Deposits or Unearned Revenue for $100.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Customer Deposits"
+          ]
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "Revenue is being recognized (increased), not decreased.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "The liability is being eliminated, not increased. The debit side handles the liability decrease.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No direct equity increase. Revenue will flow to equity through retained earnings at period end, but this transaction records revenue, not equity.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Service has been delivered, so revenue is now earned and must be recognized. One line crediting Service Revenue for $100.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Service Revenue"
+          ]
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset is being reduced. The cash was already received when the deposit was initially recorded.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend activity in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense is being reversed or reduced.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "When the customer initially paid the $100 deposit, it was recorded as a liability (Customer Deposits) because the service had not yet been performed. Now that the service has been delivered, the revenue recognition criteria under IFRS 15 are met. We debit Customer Deposits to eliminate the liability and credit Service Revenue to recognize the earned revenue. No tax lines are added as no tax rules were provided and the transaction text does not mention tax. Total debits ($100) equal total credits ($100).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Customer Deposits",
+              "amount": 100.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Service Revenue",
+              "amount": 100.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction describes a straightforward revenue recognition event. A customer previously paid $100 as a deposit (creating a liability). Now the service has been delivered, triggering revenue recognition under IFRS 15. The classifier tuples correctly identify this as a liability decrease (debit) and revenue increase (credit). The amount is explicit ($100), the business event is unambiguous, and no additional facts are needed. The entry balances (debits = credits = $100) and follows IFRS standards. No tax was mentioned, so no tax lines are added.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 509,
+        "output_tokens": 155,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 482,
+        "output_tokens": 341,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 484,
+        "output_tokens": 338,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 804,
+        "output_tokens": 1400,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

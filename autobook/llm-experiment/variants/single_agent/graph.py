@@ -1,6 +1,6 @@
 """Single agent variant graph — one LLM call does everything.
 
-Classifies debit/credit tuples AND builds journal entry in one shot.
+Classifies debit/credit structure AND builds journal entry in one shot.
 Maps output to PipelineState format for compatible metric collection.
 """
 from typing import Literal
@@ -8,32 +8,65 @@ from typing import Literal
 from langgraph.graph import StateGraph, END
 from langgraph.types import RetryPolicy
 from langchain_core.runnables import RunnableConfig
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from services.agent.graph.state import PipelineState, COMPLETE
 from services.agent.utils.llm import get_llm
+from services.agent.utils.parsers.json_output import DEBIT_SLOTS, CREDIT_SLOTS
 
 
 # ── Pydantic output schema ───────────────────────────────────────────────
 
 class JournalLine(BaseModel):
-    account_name: str
     type: Literal["debit", "credit"]
+    account_name: str
     amount: float
 
 
 class JournalEntry(BaseModel):
-    date: str
-    description: str
-    rationale: str
+    reason: str = Field(description="Why these specific accounts were chosen and how amounts were determined from the transaction text")
     lines: list[JournalLine]
 
 
+_SLOT_DESC = "What items belong in this slot and why this count"
+
+
 class SingleAgentOutput(BaseModel):
-    reason: str
-    debit_tuple: tuple[int, int, int, int, int, int]
-    credit_tuple: tuple[int, int, int, int, int, int]
+    # 1. Reasoning
+    reason: str = Field(description="Overall reasoning about the transaction")
+
+    # 2. Debit structure (6 slots, flattened)
+    debit_asset_increase_reason: str = Field(description=_SLOT_DESC)
+    debit_asset_increase_count: int
+    debit_dividend_increase_reason: str = Field(description=_SLOT_DESC)
+    debit_dividend_increase_count: int
+    debit_expense_increase_reason: str = Field(description=_SLOT_DESC)
+    debit_expense_increase_count: int
+    debit_liability_decrease_reason: str = Field(description=_SLOT_DESC)
+    debit_liability_decrease_count: int
+    debit_equity_decrease_reason: str = Field(description=_SLOT_DESC)
+    debit_equity_decrease_count: int
+    debit_revenue_decrease_reason: str = Field(description=_SLOT_DESC)
+    debit_revenue_decrease_count: int
+
+    # 3. Credit structure (6 slots, flattened)
+    credit_liability_increase_reason: str = Field(description=_SLOT_DESC)
+    credit_liability_increase_count: int
+    credit_equity_increase_reason: str = Field(description=_SLOT_DESC)
+    credit_equity_increase_count: int
+    credit_revenue_increase_reason: str = Field(description=_SLOT_DESC)
+    credit_revenue_increase_count: int
+    credit_asset_decrease_reason: str = Field(description=_SLOT_DESC)
+    credit_asset_decrease_count: int
+    credit_dividend_decrease_reason: str = Field(description=_SLOT_DESC)
+    credit_dividend_decrease_count: int
+    credit_expense_decrease_reason: str = Field(description=_SLOT_DESC)
+    credit_expense_decrease_count: int
+
+    # 4. Entry
     journal_entry: JournalEntry | None
+
+    # 5. Decision
     decision: Literal["APPROVED", "INCOMPLETE_INFORMATION", "STUCK"]
     clarification_questions: list[str] | None = None
     stuck_reason: str | None = None
@@ -53,13 +86,17 @@ def single_agent_node(state: PipelineState, config: RunnableConfig) -> dict:
     result = structured_llm.invoke(messages)
     output = result.model_dump()
 
+    # ── Extract tuples from flattened slots ──────────────────────
+    debit_tuple = [output[f"debit_{s}_count"] for s in DEBIT_SLOTS]
+    credit_tuple = [output[f"credit_{s}_count"] for s in CREDIT_SLOTS]
+
     # ── Map to PipelineState format ───────────────────────────────
     debit_history = list(state.get("output_debit_classifier", []))
     credit_history = list(state.get("output_credit_classifier", []))
     entry_history = list(state.get("output_entry_builder", []))
 
-    debit_history.append({"tuple": list(output["debit_tuple"]), "reason": output["reason"]})
-    credit_history.append({"tuple": list(output["credit_tuple"]), "reason": output["reason"]})
+    debit_history.append({"tuple": debit_tuple, "reason": output["reason"]})
+    credit_history.append({"tuple": credit_tuple, "reason": output["reason"]})
     entry_history.append(output.get("journal_entry"))
 
     update = {

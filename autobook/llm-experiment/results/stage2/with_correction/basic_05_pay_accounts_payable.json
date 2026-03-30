@@ -1,0 +1,352 @@
+{
+  "test_case_id": "basic_05_pay_accounts_payable",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Payment to settle accounts payable",
+    "rationale": "Settling accounts payable reduces the liability (debit Accounts Payable) and decreases cash (credit Cash). The debit tuple (0,0,0,1,0,0) correctly indicates one liability decrease line, and the credit tuple (1,0,0,1,0,0) indicates one asset decrease line (the 'a' slot for liability increase is an error in the credit tuple - we override to follow the transaction text). No tax applies to debt settlement payments.",
+    "lines": [
+      {
+        "account_name": "Accounts Payable",
+        "type": "debit",
+        "amount": 50.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 50.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.030269400000000002,
+  "raw_cost_usd": 0.054888,
+  "total_latency_ms": 20235,
+  "total_input_tokens": 12196,
+  "total_output_tokens": 1220,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 489,
+      "output_tokens": 84,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1751,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031056,
+      "raw_cost_usd": 0.006513,
+      "output": {
+        "reason": "Settling accounts payable = liability decrease. The debit reduces the accounts payable balance.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Settling accounts payable = liability decrease. The debit reduces the accounts payable balance."
+    },
+    "credit_classifier": {
+      "input_tokens": 487,
+      "output_tokens": 142,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1728,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0039633,
+      "raw_cost_usd": 0.007314,
+      "output": {
+        "reason": "Settling accounts payable by cheque involves two credit-side effects: (1) Cash/bank account decreases (asset decrease) when the cheque is issued, and (2) Accounts payable decreases (liability decrease = debit side, not credit side). On the credit side, we only have the cash leaving the business, which is an asset decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Settling accounts payable by cheque involves two credit-side effects: (1) Cash/bank account decreases (asset decrease) when the cheque is issued, and (2) Accounts payable decreases (liability decrease = debit side, not credit side). On the credit side, we only have the cash leaving the business, which is an asset decrease."
+    },
+    "debit_corrector": {
+      "input_tokens": 657,
+      "output_tokens": 179,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2403,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051798,
+      "raw_cost_usd": 0.009894,
+      "output": {
+        "reason": "The transaction is settling accounts payable with a cheque. This involves two effects: (1) decreasing the liability (accounts payable) and (2) decreasing the asset (cash/bank). The debit side should record the liability decrease (d=1), which is correctly classified in the initial tuple. The credit side shows asset decrease (d=1), which is also correct for the cash outflow. The two sides tell a consistent story: debit accounts payable (liability decrease) and credit cash (asset decrease). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is settling accounts payable with a cheque. This involves two effects: (1) decreasing the liability (accounts payable) and (2) decreasing the asset (cash/bank). The debit side should record the liability decrease (d=1), which is correctly classified in the initial tuple. The credit side shows asset decrease (d=1), which is also correct for the cash outflow. The two sides tell a consistent story: debit accounts payable (liability decrease) and credit cash (asset decrease). No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 657,
+      "output_tokens": 526,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2411,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.010387200000000001,
+      "raw_cost_usd": 0.015123,
+      "output": {
+        "reason": "The transaction \"Issued a cheque for $50 to settle accounts payable\" involves two economic effects: (1) Cash (asset) decreases when the cheque is issued, and (2) Accounts payable (liability) decreases when the obligation is settled.\n\nThe initial credit tuple (0,0,0,1,0,0) shows only an asset decrease (slot d), which correctly captures the cash outflow but is incomplete.\n\nThe debit tuple (0,0,0,1,0,0) shows a liability decrease (slot d), which correctly captures the settlement of accounts payable.\n\nFor the credit side, we need BOTH:\n- Slot a = 1 (liability increase) - Wait, this is wrong. Let me reconsider.\n\nActually, when settling accounts payable:\n- Debit: Accounts Payable (liability decrease) \n- Credit: Cash (asset decrease)\n\nThe debit tuple correctly shows liability decrease (slot d = 1).\nThe credit side should show asset decrease (cash going out), which is slot d = 1.\n\nHowever, there's tension here. Both sides show the same slot pattern, which suggests one is wrong.\n\nRe-analyzing: The debit side should show liability decrease (accounts payable going down). The credit side should show asset decrease (cash going down). \n\nInitial credit tuple (0,0,0,1,0,0) = asset decrease - this is CORRECT for the cash outflow.\n\nBut wait - if both tuples are (0,0,0,1,0,0), that means both are recording the same type of effect, which is impossible in double-entry bookkeeping.\n\nThe debit tuple shows slot d=1, which in debit terms is \"liability decrease\" - CORRECT for paying off accounts payable.\nThe credit tuple should show slot d=1, which in credit terms is \"asset decrease\" - CORRECT for cash going out.\n\nThe initial credit tuple is already correct. The apparent \"matching\" of the tuples is actually fine because the slot positions mean different things on each side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Issued a cheque for $50 to settle accounts payable\" involves two economic effects: (1) Cash (asset) decreases when the cheque is issued, and (2) Accounts payable (liability) decreases when the obligation is settled.\n\nThe initial credit tuple (0,0,0,1,0,0) shows only an asset decrease (slot d), which correctly captures the cash outflow but is incomplete.\n\nThe debit tuple (0,0,0,1,0,0) shows a liability decrease (slot d), which correctly captures the settlement of accounts payable.\n\nFor the credit side, we need BOTH:\n- Slot a = 1 (liability increase) - Wait, this is wrong. Let me reconsider.\n\nActually, when settling accounts payable:\n- Debit: Accounts Payable (liability decrease) \n- Credit: Cash (asset decrease)\n\nThe debit tuple correctly shows liability decrease (slot d = 1).\nThe credit side should show asset decrease (cash going out), which is slot d = 1.\n\nHowever, there's tension here. Both sides show the same slot pattern, which suggests one is wrong.\n\nRe-analyzing: The debit side should show liability decrease (accounts payable going down). The credit side should show asset decrease (cash going down). \n\nInitial credit tuple (0,0,0,1,0,0) = asset decrease - this is CORRECT for the cash outflow.\n\nBut wait - if both tuples are (0,0,0,1,0,0), that means both are recording the same type of effect, which is impossible in double-entry bookkeeping.\n\nThe debit tuple shows slot d=1, which in debit terms is \"liability decrease\" - CORRECT for paying off accounts payable.\nThe credit tuple should show slot d=1, which in credit terms is \"asset decrease\" - CORRECT for cash going out.\n\nThe initial credit tuple is already correct. The apparent \"matching\" of the tuples is actually fine because the slot positions mean different things on each side."
+    },
+    "entry_builder": {
+      "input_tokens": 788,
+      "output_tokens": 289,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3903,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076335,
+      "raw_cost_usd": 0.016044,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Payment to settle accounts payable",
+        "rationale": "Settling accounts payable reduces the liability (debit Accounts Payable) and decreases cash (credit Cash). The debit tuple (0,0,0,1,0,0) correctly indicates one liability decrease line, and the credit tuple (1,0,0,1,0,0) indicates one asset decrease line (the 'a' slot for liability increase is an error in the credit tuple - we override to follow the transaction text). No tax applies to debt settlement payments.",
+        "lines": [
+          {
+            "account_name": "Accounts Payable",
+            "type": "debit",
+            "amount": 50.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 50.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Settling accounts payable = liability decrease. The debit reduces the accounts payable balance.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Settling accounts payable by cheque involves two credit-side effects: (1) Cash/bank account decreases (asset decrease) when the cheque is issued, and (2) Accounts payable decreases (liability decrease = debit side, not credit side). On the credit side, we only have the cash leaving the business, which is an asset decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is settling accounts payable with a cheque. This involves two effects: (1) decreasing the liability (accounts payable) and (2) decreasing the asset (cash/bank). The debit side should record the liability decrease (d=1), which is correctly classified in the initial tuple. The credit side shows asset decrease (d=1), which is also correct for the cash outflow. The two sides tell a consistent story: debit accounts payable (liability decrease) and credit cash (asset decrease). No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction \"Issued a cheque for $50 to settle accounts payable\" involves two economic effects: (1) Cash (asset) decreases when the cheque is issued, and (2) Accounts payable (liability) decreases when the obligation is settled.\n\nThe initial credit tuple (0,0,0,1,0,0) shows only an asset decrease (slot d), which correctly captures the cash outflow but is incomplete.\n\nThe debit tuple (0,0,0,1,0,0) shows a liability decrease (slot d), which correctly captures the settlement of accounts payable.\n\nFor the credit side, we need BOTH:\n- Slot a = 1 (liability increase) - Wait, this is wrong. Let me reconsider.\n\nActually, when settling accounts payable:\n- Debit: Accounts Payable (liability decrease) \n- Credit: Cash (asset decrease)\n\nThe debit tuple correctly shows liability decrease (slot d = 1).\nThe credit side should show asset decrease (cash going out), which is slot d = 1.\n\nHowever, there's tension here. Both sides show the same slot pattern, which suggests one is wrong.\n\nRe-analyzing: The debit side should show liability decrease (accounts payable going down). The credit side should show asset decrease (cash going down). \n\nInitial credit tuple (0,0,0,1,0,0) = asset decrease - this is CORRECT for the cash outflow.\n\nBut wait - if both tuples are (0,0,0,1,0,0), that means both are recording the same type of effect, which is impossible in double-entry bookkeeping.\n\nThe debit tuple shows slot d=1, which in debit terms is \"liability decrease\" - CORRECT for paying off accounts payable.\nThe credit tuple should show slot d=1, which in credit terms is \"asset decrease\" - CORRECT for cash going out.\n\nThe initial credit tuple is already correct. The apparent \"matching\" of the tuples is actually fine because the slot positions mean different things on each side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Payment to settle accounts payable",
+        "rationale": "Settling accounts payable reduces the liability (debit Accounts Payable) and decreases cash (credit Cash). The debit tuple (0,0,0,1,0,0) correctly indicates one liability decrease line, and the credit tuple (1,0,0,1,0,0) indicates one asset decrease line (the 'a' slot for liability increase is an error in the credit tuple - we override to follow the transaction text). No tax applies to debt settlement payments.",
+        "lines": [
+          {
+            "account_name": "Accounts Payable",
+            "type": "debit",
+            "amount": 50.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 50.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 489,
+        "output_tokens": 84,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 487,
+        "output_tokens": 142,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 657,
+        "output_tokens": 179,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 657,
+        "output_tokens": 526,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 788,
+        "output_tokens": 289,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

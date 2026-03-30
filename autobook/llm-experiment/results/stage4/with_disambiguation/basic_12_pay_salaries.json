@@ -1,0 +1,583 @@
+{
+  "test_case_id": "basic_12_pay_salaries",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Salary payment is an operating expense that reduces cash. The transaction clearly states $100 paid in cash for employee salaries. This is a straightforward expense recognition: debit Salary Expense (increases expense) and credit Cash (decreases asset). No tax mentioned, so no tax lines added. Total debits ($100) equal total credits ($100).",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Salary Expense",
+        "amount": 100.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 100.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0463827,
+  "raw_cost_usd": 0.073758,
+  "total_latency_ms": 29895,
+  "total_input_tokens": 12426,
+  "total_output_tokens": 2432,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 511,
+      "output_tokens": 236,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2858,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0057771,
+      "raw_cost_usd": 0.012114,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "Payment method (cash vs other) does not affect the journal entry structure - both debit Salaries Expense/Salaries Payable and credit Cash/Bank"
+          },
+          {
+            "aspect": "which employees or payroll period",
+            "resolution": "Employee identity and period do not change the accounts used or amounts - all salary payments use the same expense and cash accounts"
+          },
+          {
+            "aspect": "whether payroll deductions were withheld",
+            "resolution": "'Paid employee salaries' with a stated amount conventionally means the gross amount, with standard payroll deductions (CPP, EI, income tax) implied for Canadian corporations"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 484,
+      "output_tokens": 357,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2000,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0072618000000000005,
+      "raw_cost_usd": 0.011355,
+      "output": {
+        "liability_increase_reason": "No liabilities are being created or increased; salaries are being paid, not accrued.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are increased; this is an expense payment transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a salary payment transaction.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash (an asset) decreases by $100 as it is paid out for employee salaries.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Salary expense is being recognized (debited), not decreased. The credit side reflects the cash outflow.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 486,
+      "output_tokens": 372,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2032,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0075018,
+      "raw_cost_usd": 0.011676,
+      "output": {
+        "asset_increase_reason": "No assets increase. Cash decreases (credit side), not a debit.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals. This is employee compensation, not owner distributions.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Salary expense increases by debit. Employee salaries are operating expenses recognized when incurred.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities decrease. Salaries are paid directly, not settling a prior payable in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts decrease. Expenses reduce equity indirectly through net income, but the debit is to the expense account itself.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenues decrease. This is an expense transaction, not a revenue reversal or reduction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 806,
+      "output_tokens": 1467,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5536,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.025842,
+      "raw_cost_usd": 0.038613,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Salary payment timing",
+            "reason": "Transaction states salaries were paid in cash. This is a straightforward payment of earned salaries, which is an expense recognition event. No additional information needed.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Tax withholding",
+            "reason": "The transaction states $100 paid in cash without mentioning any withholding. Under IFRS, if gross salary differs from net payment due to withholdings, this would typically be stated. The transaction describes the actual cash outflow, which is the complete picture needed for the entry.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. Salaries paid represent an expense, not an asset acquisition.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution. This is a salary payment to employees, not a distribution to owners.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Salary payment is an operating expense. The classifier correctly identified one expense increase line for the salary expense.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Salary Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability decrease. The transaction describes a direct cash payment for salaries, not the settlement of a previously accrued salary payable.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No direct equity decrease. Expenses reduce equity indirectly through retained earnings, but this is not a direct equity transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease. This is an expense transaction, not a revenue adjustment.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability increase. Cash is being paid out, not a liability being created.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase. This is an expense payment that reduces equity, not increases it.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue increase. This is a salary expense payment, not a revenue transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Cash is being paid out, which decreases the cash asset. The classifier correctly identified one asset decrease line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease. This is a salary payment, not a dividend transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease. This transaction increases expense (salary expense), not decreases it.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Salary payment is an operating expense that reduces cash. The transaction clearly states $100 paid in cash for employee salaries. This is a straightforward expense recognition: debit Salary Expense (increases expense) and credit Cash (decreases asset). No tax mentioned, so no tax lines added. Total debits ($100) equal total credits ($100).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Salary Expense",
+              "amount": 100.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 100.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is clear and complete. Employee salaries of $100 were paid in cash. This is a standard operating expense transaction. The classifier tuples are correct: one debit line for expense increase (Salary Expense) and one credit line for asset decrease (Cash). No tax is mentioned in the transaction, so no tax lines are needed. The entry balances (debits $100 = credits $100) and follows IFRS standards. No missing information - the transaction provides all necessary facts.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method",
+            "resolution": "Payment method (cash vs other) does not affect the journal entry structure - both debit Salaries Expense/Salaries Payable and credit Cash/Bank"
+          },
+          {
+            "aspect": "which employees or payroll period",
+            "resolution": "Employee identity and period do not change the accounts used or amounts - all salary payments use the same expense and cash accounts"
+          },
+          {
+            "aspect": "whether payroll deductions were withheld",
+            "resolution": "'Paid employee salaries' with a stated amount conventionally means the gross amount, with standard payroll deductions (CPP, EI, income tax) implied for Canadian corporations"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No assets increase. Cash decreases (credit side), not a debit.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals. This is employee compensation, not owner distributions.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Salary expense increases by debit. Employee salaries are operating expenses recognized when incurred.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities decrease. Salaries are paid directly, not settling a prior payable in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts decrease. Expenses reduce equity indirectly through net income, but the debit is to the expense account itself.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenues decrease. This is an expense transaction, not a revenue reversal or reduction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are being created or increased; salaries are being paid, not accrued.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are increased; this is an expense payment transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a salary payment transaction.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash (an asset) decreases by $100 as it is paid out for employee salaries.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Salary expense is being recognized (debited), not decreased. The credit side reflects the cash outflow.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No assets increase. Cash decreases (credit side), not a debit.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No owner withdrawals. This is employee compensation, not owner distributions.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Salary expense increases by debit. Employee salaries are operating expenses recognized when incurred.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities decrease. Salaries are paid directly, not settling a prior payable in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts decrease. Expenses reduce equity indirectly through net income, but the debit is to the expense account itself.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenues decrease. This is an expense transaction, not a revenue reversal or reduction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are being created or increased; salaries are being paid, not accrued.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No equity accounts are increased; this is an expense payment transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a salary payment transaction.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash (an asset) decreases by $100 as it is paid out for employee salaries.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "Salary expense is being recognized (debited), not decreased. The credit side reflects the cash outflow.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Salary payment timing",
+            "reason": "Transaction states salaries were paid in cash. This is a straightforward payment of earned salaries, which is an expense recognition event. No additional information needed.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Tax withholding",
+            "reason": "The transaction states $100 paid in cash without mentioning any withholding. Under IFRS, if gross salary differs from net payment due to withholdings, this would typically be stated. The transaction describes the actual cash outflow, which is the complete picture needed for the entry.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. Salaries paid represent an expense, not an asset acquisition.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend distribution. This is a salary payment to employees, not a distribution to owners.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Salary payment is an operating expense. The classifier correctly identified one expense increase line for the salary expense.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Salary Expense"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability decrease. The transaction describes a direct cash payment for salaries, not the settlement of a previously accrued salary payable.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No direct equity decrease. Expenses reduce equity indirectly through retained earnings, but this is not a direct equity transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease. This is an expense transaction, not a revenue adjustment.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability increase. Cash is being paid out, not a liability being created.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase. This is an expense payment that reduces equity, not increases it.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue increase. This is a salary expense payment, not a revenue transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Cash is being paid out, which decreases the cash asset. The classifier correctly identified one asset decrease line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend decrease. This is a salary payment, not a dividend transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease. This transaction increases expense (salary expense), not decreases it.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Salary payment is an operating expense that reduces cash. The transaction clearly states $100 paid in cash for employee salaries. This is a straightforward expense recognition: debit Salary Expense (increases expense) and credit Cash (decreases asset). No tax mentioned, so no tax lines added. Total debits ($100) equal total credits ($100).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Salary Expense",
+              "amount": 100.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 100.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is clear and complete. Employee salaries of $100 were paid in cash. This is a standard operating expense transaction. The classifier tuples are correct: one debit line for expense increase (Salary Expense) and one credit line for asset decrease (Cash). No tax is mentioned in the transaction, so no tax lines are needed. The entry balances (debits $100 = credits $100) and follows IFRS standards. No missing information - the transaction provides all necessary facts.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 511,
+        "output_tokens": 236,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 484,
+        "output_tokens": 357,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 486,
+        "output_tokens": 372,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 806,
+        "output_tokens": 1467,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

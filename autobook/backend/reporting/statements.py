@@ -15,6 +15,8 @@ class AccountSnapshot:
     account_code: str
     account_name: str
     account_type: str
+    debit_total: Decimal
+    credit_total: Decimal
     balance: Decimal
 
 
@@ -34,36 +36,34 @@ def _parse_as_of(value: str | None) -> date:
 
 def _build_account_snapshots(db: Session, user_id, as_of: date) -> list[AccountSnapshot]:
     accounts = ChartOfAccountsDAO.list_by_user(db, user_id)
-    entries = JournalEntryDAO.list_by_user(db, user_id, filters={"date_to": as_of, "status": "posted"})
-
-    totals: dict[str, dict[str, Decimal]] = {
-        account.account_code: {"debit": Decimal("0"), "credit": Decimal("0")}
-        for account in accounts
-    }
-
-    for entry in entries:
-        for line in entry.lines:
-            bucket = totals.setdefault(
-                line.account_code,
-                {"debit": Decimal("0"), "credit": Decimal("0")},
-            )
-            bucket[line.type] += _to_decimal(line.amount)
+    accounts_by_code = {account.account_code: account for account in accounts}
+    balances = JournalEntryDAO.compute_balances(
+        db,
+        user_id,
+        filters={"date_to": as_of, "status": "posted"},
+    )
+    balance_map = {str(item["account_code"]): item for item in balances}
 
     snapshots: list[AccountSnapshot] = []
-    for account in accounts:
-        bucket = totals.get(account.account_code, {"debit": Decimal("0"), "credit": Decimal("0")})
-        debit_total = bucket["debit"]
-        credit_total = bucket["credit"]
-        if account.account_type in {"asset", "expense"}:
-            balance = debit_total - credit_total
-        else:
-            balance = credit_total - debit_total
+    for account_code in sorted(set(accounts_by_code) | set(balance_map)):
+        account = accounts_by_code.get(account_code)
+        balance_item = balance_map.get(account_code)
         snapshots.append(
             AccountSnapshot(
-                account_code=account.account_code,
-                account_name=account.account_name,
-                account_type=account.account_type,
-                balance=balance,
+                account_code=account_code,
+                account_name=(
+                    account.account_name
+                    if account is not None
+                    else str((balance_item or {}).get("account_name") or account_code)
+                ),
+                account_type=(
+                    account.account_type
+                    if account is not None
+                    else str((balance_item or {}).get("account_type") or "expense")
+                ),
+                debit_total=_to_decimal((balance_item or {}).get("debit_total", Decimal("0"))),
+                credit_total=_to_decimal((balance_item or {}).get("credit_total", Decimal("0"))),
+                balance=_to_decimal((balance_item or {}).get("balance", Decimal("0"))),
             )
         )
     return snapshots
@@ -150,11 +150,14 @@ def build_trial_balance(db: Session, user_id, as_of: str | None) -> dict:
     total_credits = Decimal("0")
 
     for snapshot in sorted(snapshots, key=lambda item: item.account_code):
-        if snapshot.balance == 0:
+        if snapshot.debit_total == 0 and snapshot.credit_total == 0:
             continue
         debit = Decimal("0")
         credit = Decimal("0")
-        if snapshot.account_type in {"asset", "expense"}:
+        if snapshot.balance == 0:
+            debit = snapshot.debit_total
+            credit = snapshot.credit_total
+        elif snapshot.account_type in {"asset", "expense"}:
             if snapshot.balance >= 0:
                 debit = snapshot.balance
             else:
@@ -164,14 +167,16 @@ def build_trial_balance(db: Session, user_id, as_of: str | None) -> dict:
                 credit = snapshot.balance
             else:
                 debit = -snapshot.balance
-        total_debits += debit
-        total_credits += credit
         rows.append(
             {
                 "label": f"{snapshot.account_code} {snapshot.account_name}",
+                "debit": _to_float(debit),
+                "credit": _to_float(credit),
                 "amount": _to_float(debit if debit != 0 else credit),
             }
         )
+        total_debits += debit
+        total_credits += credit
 
     return {
         "statement_type": "trial_balance",

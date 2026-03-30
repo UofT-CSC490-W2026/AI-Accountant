@@ -1,7 +1,7 @@
 """Agent 3 — Debit Corrector node.
 
-Cross-validates debit tuple using credit side. Fixes misclassifications.
-Output: DebitCorrectorOutput {"tuple": [int*6], "reason": str}
+Cross-validates debit structure using credit side. Fixes misclassifications.
+Output: DebitCorrectorOutput with per-slot counts.
 """
 from langchain_core.runnables import RunnableConfig
 
@@ -12,11 +12,13 @@ from services.agent.prompts.debit_corrector import build_prompt
 from services.agent.rag.transaction import retrieve_transaction_examples
 from services.agent.rag.correction import retrieve_correction_examples
 from services.agent.utils.llm import get_llm
-from services.agent.utils.parsers.json_output import DebitCorrectorOutput
+from services.agent.utils.parsers.json_output import (
+    DebitCorrectorOutput, extract_debit_tuple, DEBIT_SLOTS,
+)
 
 
 def debit_corrector_node(state: PipelineState, config: RunnableConfig) -> dict:
-    """Re-evaluate debit tuple using credit side as cross-validation."""
+    """Re-evaluate debit structure using credit side as cross-validation."""
     # ── Iteration + history ───────────────────────────────────────
     i = state["iteration"]
     history = list(state.get("output_debit_corrector", []))
@@ -41,10 +43,15 @@ def debit_corrector_node(state: PipelineState, config: RunnableConfig) -> dict:
     result = structured_llm.invoke(messages)
     output = result.model_dump()
 
-    # ── Guard: if reasoning says no change but tuple differs, keep input
+    # ── Guard: if reasoning says no change but structure differs, keep input
     input_tuple = state["output_debit_classifier"][i]["tuple"]
-    if "no correction" in output["reason"].lower() and list(output["tuple"]) != list(input_tuple):
-        output["tuple"] = input_tuple
+    output_tuple = list(extract_debit_tuple(output))
+    if "no correction" in output["reason"].lower() and output_tuple != list(input_tuple):
+        for slot, val in zip(DEBIT_SLOTS, input_tuple):
+            output[f"{slot}_count"] = val
+
+    # ── Add tuple for downstream compatibility ────────────────────
+    output["tuple"] = list(extract_debit_tuple(output))
 
     history.append(output)
 

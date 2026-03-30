@@ -1,0 +1,589 @@
+{
+  "test_case_id": "int_19_service_revenue_cash",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Moving services provided to customer, payment received by certified cheque",
+    "rationale": "Atlas Van Lines earned revenue from providing moving services. The $25,500 is the base service price. Moving services are taxable in Canada. Assuming HST at 13% (Ontario rate as default), HST collected is $3,315 ($25,500 \u00d7 13%). Total payment received is $28,815. Cash increases (debit), Moving Services Revenue increases (credit), and HST Payable increases (credit) for tax collected on behalf of CRA.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 28815.0
+      },
+      {
+        "account_name": "Moving Services Revenue",
+        "type": "credit",
+        "amount": 25500.0
+      },
+      {
+        "account_name": "HST Payable",
+        "type": "credit",
+        "amount": 3315.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0721155,
+  "raw_cost_usd": 0.12823500000000002,
+  "total_latency_ms": 50167,
+  "total_input_tokens": 31355,
+  "total_output_tokens": 2278,
+  "total_llm_calls": 10,
+  "iteration_count": 2,
+  "final_decision": "STUCK",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 523,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2918,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0028125,
+      "raw_cost_usd": 0.009279,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 498,
+      "output_tokens": 114,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1760,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035826,
+      "raw_cost_usd": 0.00699,
+      "output": {
+        "reason": "Atlas Van Lines receives a certified cheque (cash equivalent) for $25,500. This represents an asset increase (cash/bank account). The debit side records: 1 line for asset increase (certified cheque received).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines receives a certified cheque (cash equivalent) for $25,500. This represents an asset increase (cash/bank account). The debit side records: 1 line for asset increase (certified cheque received)."
+    },
+    "credit_classifier": {
+      "input_tokens": 496,
+      "output_tokens": 115,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1737,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035853,
+      "raw_cost_usd": 0.006936,
+      "output": {
+        "reason": "Atlas Van Lines provided moving services and received payment. On the credit side: (1) Service revenue is recognized = revenue increase. The certified cheque received represents the debit side (asset increase in cash/bank), which is not classified here.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines provided moving services and received payment. On the credit side: (1) Service revenue is recognized = revenue increase. The certified cheque received represents the debit side (asset increase in cash/bank), which is not classified here."
+    },
+    "debit_corrector": {
+      "input_tokens": 666,
+      "output_tokens": 185,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2412,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0052968,
+      "raw_cost_usd": 0.010011,
+      "output": {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving a certified cheque. This is a revenue-earning transaction. The debit side records the receipt of cash (certified cheque), which is an asset increase - correctly classified as (1,0,0,0,0,0). The credit side shows revenue increase (0,0,1,0,0,0), which is consistent with earning service revenue. The two sides tell a coherent story: debit cash (asset increase), credit service revenue (revenue increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving a certified cheque. This is a revenue-earning transaction. The debit side records the receipt of cash (certified cheque), which is an asset increase - correctly classified as (1,0,0,0,0,0). The credit side shows revenue increase (0,0,1,0,0,0), which is consistent with earning service revenue. The two sides tell a coherent story: debit cash (asset increase), credit service revenue (revenue increase). No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 666,
+      "output_tokens": 256,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2420,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063641999999999995,
+      "raw_cost_usd": 0.0111,
+      "output": {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving payment via certified cheque. This is a straightforward revenue transaction.\n\nCredit side analysis:\n- Services provided = revenue earned = revenue increase (slot c)\n- Initial credit tuple (0,0,1,0,0,0) correctly records 1 revenue increase line\n\nDebit side cross-validation:\n- Certified cheque received = cash/asset increase (slot a)\n- Debit tuple (1,0,0,0,0,0) correctly records 1 asset increase line\n\nThe two sides tell a consistent story: Asset (cash) increases on debit, Revenue increases on credit. This is the standard journal entry for services rendered with immediate payment. Under IFRS, revenue is recognized when services are delivered and payment is received, which both occurred here.\n\nNo correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving payment via certified cheque. This is a straightforward revenue transaction.\n\nCredit side analysis:\n- Services provided = revenue earned = revenue increase (slot c)\n- Initial credit tuple (0,0,1,0,0,0) correctly records 1 revenue increase line\n\nDebit side cross-validation:\n- Certified cheque received = cash/asset increase (slot a)\n- Debit tuple (1,0,0,0,0,0) correctly records 1 asset increase line\n\nThe two sides tell a consistent story: Asset (cash) increases on debit, Revenue increases on credit. This is the standard journal entry for services rendered with immediate payment. Under IFRS, revenue is recognized when services are delivered and payment is received, which both occurred here.\n\nNo correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1594,
+      "output_tokens": 694,
+      "cache_read_tokens": 6428,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8022,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0171204,
+      "raw_cost_usd": 0.034476,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Moving services provided to customer, payment received by certified cheque",
+        "rationale": "Atlas Van Lines earned revenue from providing moving services. The $25,500 is the base service price. Moving services are taxable in Canada. Assuming HST at 13% (Ontario rate as default), HST collected is $3,315 ($25,500 \u00d7 13%). Total payment received is $28,815. Cash increases (debit), Moving Services Revenue increases (credit), and HST Payable increases (credit) for tax collected on behalf of CRA.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 28815.0
+          },
+          {
+            "account_name": "Moving Services Revenue",
+            "type": "credit",
+            "amount": 25500.0
+          },
+          {
+            "account_name": "HST Payable",
+            "type": "credit",
+            "amount": 3315.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4514,
+      "output_tokens": 346,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8618,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0199632,
+      "raw_cost_usd": 0.031044000000000002,
+      "output": {
+        "reason": "Transaction states customer paid $25,500 for moving services via certified cheque. Entry interprets this as base price before tax, adding $3,315 HST (13%) for total $28,815. However, transaction could equally mean $25,500 is the total amount paid (tax-inclusive). Without explicit statement of tax amount or whether $25,500 is pre-tax or total, cannot determine which interpretation is correct. Both readings produce structurally different but valid entries.",
+        "decision": "STUCK",
+        "confidence": "SOMEWHAT_CONFIDENT"
+      },
+      "reason": "Transaction states customer paid $25,500 for moving services via certified cheque. Entry interprets this as base price before tax, adding $3,315 HST (13%) for total $28,815. However, transaction could equally mean $25,500 is the total amount paid (tax-inclusive). Without explicit statement of tax amount or whether $25,500 is pre-tax or total, cannot determine which interpretation is correct. Both readings produce structurally different but valid entries."
+    },
+    "diagnostician": {
+      "input_tokens": 1613,
+      "output_tokens": 533,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3468,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0133905,
+      "raw_cost_usd": 0.018399,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Moving services are taxable in Canada. Transaction states services were \"for $25,500\" which represents the service price before tax. No tax amount is stated in the transaction text, but moving services fall under taxable purchases/sales of services per Domain Knowledge. The entry must include HST/GST on the $25,500 base. The customer would pay $25,500 + applicable tax. Missing required tax lines (HST Payable and proper revenue/cash amounts).",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Atlas Van Lines receives a certified cheque (cash equivalent) for $25,500. This represents an asset increase (cash/bank account). The debit side records: 1 line for asset increase (certified cheque received).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Atlas Van Lines receives a certified cheque (cash equivalent) for $25,500. This represents an asset increase (cash/bank account). The debit side records: 1 line for asset increase (certified cheque received).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Atlas Van Lines provided moving services and received payment. On the credit side: (1) Service revenue is recognized = revenue increase. The certified cheque received represents the debit side (asset increase in cash/bank), which is not classified here.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Atlas Van Lines provided moving services and received payment. On the credit side: (1) Service revenue is recognized = revenue increase. The certified cheque received represents the debit side (asset increase in cash/bank), which is not classified here.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving a certified cheque. This is a revenue-earning transaction. The debit side records the receipt of cash (certified cheque), which is an asset increase - correctly classified as (1,0,0,0,0,0). The credit side shows revenue increase (0,0,1,0,0,0), which is consistent with earning service revenue. The two sides tell a coherent story: debit cash (asset increase), credit service revenue (revenue increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving a certified cheque. This is a revenue-earning transaction. The debit side records the receipt of cash (certified cheque), which is an asset increase - correctly classified as (1,0,0,0,0,0). The credit side shows revenue increase (0,0,1,0,0,0), which is consistent with earning service revenue. The two sides tell a coherent story: debit cash (asset increase), credit service revenue (revenue increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving payment via certified cheque. This is a straightforward revenue transaction.\n\nCredit side analysis:\n- Services provided = revenue earned = revenue increase (slot c)\n- Initial credit tuple (0,0,1,0,0,0) correctly records 1 revenue increase line\n\nDebit side cross-validation:\n- Certified cheque received = cash/asset increase (slot a)\n- Debit tuple (1,0,0,0,0,0) correctly records 1 asset increase line\n\nThe two sides tell a consistent story: Asset (cash) increases on debit, Revenue increases on credit. This is the standard journal entry for services rendered with immediate payment. Under IFRS, revenue is recognized when services are delivered and payment is received, which both occurred here.\n\nNo correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction describes Atlas Van Lines providing moving services for $25,500 and receiving payment via certified cheque. This is a straightforward revenue transaction.\n\nCredit side analysis:\n- Services provided = revenue earned = revenue increase (slot c)\n- Initial credit tuple (0,0,1,0,0,0) correctly records 1 revenue increase line\n\nDebit side cross-validation:\n- Certified cheque received = cash/asset increase (slot a)\n- Debit tuple (1,0,0,0,0,0) correctly records 1 asset increase line\n\nThe two sides tell a consistent story: Asset (cash) increases on debit, Revenue increases on credit. This is the standard journal entry for services rendered with immediate payment. Under IFRS, revenue is recognized when services are delivered and payment is received, which both occurred here.\n\nNo correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Moving services provided to customer, payment received by certified cheque",
+        "rationale": "Atlas Van Lines earned revenue from providing moving services. The certified cheque represents immediate payment, increasing cash (asset). The debit tuple (1,0,0,0,0,0) indicates one asset increase line, and the credit tuple (0,0,1,0,0,0) indicates one revenue increase line. No tax information was provided in the transaction text or tax_rules, and moving services are typically taxable in Canada, but since no tax amount or rate is stated in the transaction and the customer paid with a certified cheque (suggesting a fixed amount), I am treating the $25,500 as the total amount received. If HST/GST were applicable and not stated, the transaction would need clarification, but the transaction states the service was \"for $25,500\" which typically means the service price, and payment was received, suggesting this is the gross amount. Without explicit tax rules provided and no tax mentioned in the transaction, I am recording the full amount as received.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 25500.0
+          },
+          {
+            "account_name": "Moving Services Revenue",
+            "type": "credit",
+            "amount": 25500.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Moving services provided to customer, payment received by certified cheque",
+        "rationale": "Atlas Van Lines earned revenue from providing moving services. The $25,500 is the base service price. Moving services are taxable in Canada. Assuming HST at 13% (Ontario rate as default), HST collected is $3,315 ($25,500 \u00d7 13%). Total payment received is $28,815. Cash increases (debit), Moving Services Revenue increases (credit), and HST Payable increases (credit) for tax collected on behalf of CRA.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 28815.0
+          },
+          {
+            "account_name": "Moving Services Revenue",
+            "type": "credit",
+            "amount": 25500.0
+          },
+          {
+            "account_name": "HST Payable",
+            "type": "credit",
+            "amount": 3315.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Moving services are taxable in Canada. Transaction states services were \"for $25,500\" which represents the service price before tax. No tax amount is stated in the transaction text, but moving services fall under taxable purchases/sales of services per Domain Knowledge. The entry must include HST/GST on the $25,500 base. The customer would pay $25,500 + applicable tax. Missing required tax lines (HST Payable and proper revenue/cash amounts).",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Transaction states customer paid $25,500 for moving services via certified cheque. Entry interprets this as base price before tax, adding $3,315 HST (13%) for total $28,815. However, transaction could equally mean $25,500 is the total amount paid (tax-inclusive). Without explicit statement of tax amount or whether $25,500 is pre-tax or total, cannot determine which interpretation is correct. Both readings produce structurally different but valid entries.",
+        "decision": "STUCK",
+        "confidence": "SOMEWHAT_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because moving services are taxable in Canada and the entry is missing required tax lines (HST/GST Payable and proper revenue/cash amounts). The transaction states services were \"for $25,500\" which represents the pre-tax service price.\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier): Classified the certified cheque as asset increase (1,0,0,0,0,0) - correct for the cash received\n- Agent 2 (Credit Classifier): Classified as revenue increase (0,0,1,0,0,0) - correct for service revenue\n- Agent 3 (Debit Corrector): Validated the debit tuple, no correction\n- Agent 4 (Credit Corrector): Validated the credit tuple, no correction\n- Agent 5 (Entry Builder): Built the entry with Cash debit $25,500 and Moving Services Revenue credit $25,500, but did NOT add tax lines\n\nThe classifiers (Agents 1 and 2) correctly identified this as an asset increase / revenue increase transaction. The tuples themselves are correct. However, Agent 5 explicitly acknowledged in its rationale that \"moving services are typically taxable in Canada\" but then failed to add the required tax lines. Agent 5's rationale shows it was aware of the tax issue but made an incorrect decision to treat $25,500 as the gross amount without adding tax.\n\nThe root cause is Agent 5 (Entry Builder). It received correct tuples but failed to add the mandatory tax lines for a taxable service transaction. The $25,500 is the service price (base amount), and HST/GST must be added on top of this amount.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Moving services are taxable in Canada. The $25,500 stated is the service price (base amount). Must add HST/GST Payable credit line and increase the Cash debit by the tax amount. Customer pays $25,500 + tax."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Moving services are taxable in Canada. The $25,500 stated is the service price (base amount). Must add HST/GST Payable credit line and increase the Cash debit by the tax amount. Customer pays $25,500 + tax."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "STUCK",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 523,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 498,
+        "output_tokens": 114,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 496,
+        "output_tokens": 115,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 666,
+        "output_tokens": 185,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 666,
+        "output_tokens": 256,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 755,
+        "output_tokens": 381,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1849,
+        "output_tokens": 172,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1613,
+        "output_tokens": 533,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 839,
+        "output_tokens": 313,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2665,
+        "output_tokens": 174,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

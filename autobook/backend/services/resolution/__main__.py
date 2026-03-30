@@ -16,7 +16,7 @@ def main() -> None:
     while True:
         message = dequeue(queue_url)
         if message is not None:
-            process(message)
+            execute(message)
 
 
 if __name__ == "__main__":

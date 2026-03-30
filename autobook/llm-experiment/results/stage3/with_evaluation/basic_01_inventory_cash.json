@@ -1,0 +1,522 @@
+{
+  "test_case_id": "basic_01_inventory_cash",
+  "variant_name": "with_evaluation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase inventory for cash",
+    "rationale": "Inventory is an asset account. The $100 is treated as pre-tax amount per fix context. HST/GST paid on inventory purchases is recoverable as an input tax credit (HST Receivable). Assuming a default GST rate of 5% (can be adjusted based on province). Total cash paid = $100 + $5 = $105.",
+    "lines": [
+      {
+        "account_name": "Inventory",
+        "type": "debit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 5.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 105.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0612201,
+  "raw_cost_usd": 0.105897,
+  "total_latency_ms": 46825,
+  "total_input_tokens": 24959,
+  "total_output_tokens": 2068,
+  "total_llm_calls": 8,
+  "iteration_count": 2,
+  "final_decision": "error",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 482,
+      "output_tokens": 86,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1744,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031146,
+      "raw_cost_usd": 0.006522,
+      "output": {
+        "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold."
+    },
+    "credit_classifier": {
+      "input_tokens": 480,
+      "output_tokens": 101,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1721,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033273,
+      "raw_cost_usd": 0.006678,
+      "output": {
+        "reason": "Cash leaving the business to purchase inventory = asset decrease. Inventory is an asset that increases (debit side), while cash is an asset that decreases (credit side).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Cash leaving the business to purchase inventory = asset decrease. Inventory is an asset that increases (debit side), while cash is an asset that decreases (credit side)."
+    },
+    "entry_builder": {
+      "input_tokens": 1521,
+      "output_tokens": 540,
+      "cache_read_tokens": 6230,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7751,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.014532,
+      "raw_cost_usd": 0.031353,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase inventory for cash",
+        "rationale": "Inventory is an asset account. The $100 is treated as pre-tax amount per fix context. HST/GST paid on inventory purchases is recoverable as an input tax credit (HST Receivable). Assuming a default GST rate of 5% (can be adjusted based on province). Total cash paid = $100 + $5 = $105.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 5.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 105.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3073,
+      "output_tokens": 377,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7177,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0161052,
+      "raw_cost_usd": 0.027186000000000002,
+      "output": {
+        "reason": "Transaction states \"Purchase inventory for $100 cash\" with no mention of tax. The $100 represents the total cash paid, not a pre-tax amount. The entry incorrectly adds $5 HST and credits Cash for $105, but the transaction explicitly states $100 cash was paid. The entry should be: Dr Inventory $100, Cr Cash $100 (or if tax must be separated and $100 is tax-inclusive: Dr Inventory ~$95.24, Dr HST Receivable ~$4.76, Cr Cash $100). The current entry overstates the cash payment.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Transaction states \"Purchase inventory for $100 cash\" with no mention of tax. The $100 represents the total cash paid, not a pre-tax amount. The entry incorrectly adds $5 HST and credits Cash for $105, but the transaction explicitly states $100 cash was paid. The entry should be: Dr Inventory $100, Cr Cash $100 (or if tax must be separated and $100 is tax-inclusive: Dr Inventory ~$95.24, Dr HST Receivable ~$4.76, Cr Cash $100). The current entry overstates the cash payment."
+    },
+    "diagnostician": {
+      "input_tokens": 2856,
+      "output_tokens": 964,
+      "cache_read_tokens": 3710,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 6566,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.024141,
+      "raw_cost_usd": 0.034158,
+      "output": {
+        "reasoning": "The Approver rejected because the entry incorrectly treats $100 as a pre-tax amount and adds $5 HST, crediting Cash for $105. However, the transaction explicitly states \"Purchase inventory for $100 cash\" \u2014 meaning $100 is the total cash paid, not a pre-tax base.\n\nTracing through the generator reasoning:\n- Iteration 0: Agent 5 correctly built the entry as Dr Inventory $100, Cr Cash $100, noting \"No tax information provided, so assuming no HST/GST applies or amount is tax-inclusive.\"\n- Iteration 1: Agent 5 changed its approach, stating \"The $100 is treated as pre-tax amount per fix context\" and added HST, resulting in the rejected entry.\n\nThe phrase \"per fix context\" indicates Agent 5 received guidance from a previous diagnostician run that incorrectly instructed it to treat $100 as pre-tax. This is visible in the fix_context that would have been provided between iterations.\n\nRoot cause: Agent 5 was given incorrect fix guidance. The original Iteration 0 entry was correct. The transaction states \"$100 cash\" was paid \u2014 this is the total cash outflow, not a pre-tax amount. If tax separation is required and the transaction is in a taxable jurisdiction, the $100 should be treated as tax-inclusive (e.g., Dr Inventory ~$95.24, Dr HST Receivable ~$4.76, Cr Cash $100), but never should Cash exceed $100.\n\nAgent 5 is the root cause because it misinterpreted the fix guidance and incorrectly inflated the cash payment beyond what the transaction states.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Transaction states '$100 cash' was paid \u2014 this is the total cash outflow, not a pre-tax base. Cash credit must equal $100. If tax separation is needed, treat $100 as tax-inclusive: back out HST from the $100 total (e.g., Inventory \u2248 $95.24, HST Receivable \u2248 $4.76 at 5% rate, Cash $100). Do not add tax on top of $100."
+          }
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Missing HST/GST tax lines. Inventory purchases are taxable transactions in Canada. The transaction states $100 for inventory but does not specify whether this is tax-inclusive or tax-exclusive. Standard practice is to treat stated amounts as pre-tax unless explicitly noted otherwise. Entry should include HST Receivable (input tax credit) and the actual cash outflow should reflect the tax-inclusive amount. Without jurisdiction specified, cannot determine exact rate, but tax treatment is required for inventory purchases.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Cash leaving the business to purchase inventory = asset decrease. Inventory is an asset that increases (debit side), while cash is an asset that decreases (credit side).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Cash leaving the business to purchase inventory = asset decrease. Inventory is an asset that increases (debit side), while cash is an asset that decreases (credit side).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Purchase of inventory = asset increase. Inventory is recorded as an asset on the balance sheet until sold.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Cash leaving the business to purchase inventory = asset decrease. Inventory is an asset that increases (debit side), while cash is an asset that decreases (credit side).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Cash leaving the business to purchase inventory = asset decrease. Inventory is an asset that increases (debit side), while cash is an asset that decreases (credit side).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase inventory for cash",
+        "rationale": "Inventory is purchased for $100 cash. Debit tuple (1,0,0,0,0,0) indicates one asset increase (Inventory), credit tuple (0,0,0,1,0,0) indicates one asset decrease (Cash). This is a straightforward asset exchange transaction. No tax information provided, so assuming no HST/GST applies or amount is tax-inclusive. Total debits ($100) equal total credits ($100).",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Purchase inventory for cash",
+        "rationale": "Inventory is an asset account. The $100 is treated as pre-tax amount per fix context. HST/GST paid on inventory purchases is recoverable as an input tax credit (HST Receivable). Assuming a default GST rate of 5% (can be adjusted based on province). Total cash paid = $100 + $5 = $105.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 5.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 105.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Missing HST/GST tax lines. Inventory purchases are taxable transactions in Canada. The transaction states $100 for inventory but does not specify whether this is tax-inclusive or tax-exclusive. Standard practice is to treat stated amounts as pre-tax unless explicitly noted otherwise. Entry should include HST Receivable (input tax credit) and the actual cash outflow should reflect the tax-inclusive amount. Without jurisdiction specified, cannot determine exact rate, but tax treatment is required for inventory purchases.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Transaction states \"Purchase inventory for $100 cash\" with no mention of tax. The $100 represents the total cash paid, not a pre-tax amount. The entry incorrectly adds $5 HST and credits Cash for $105, but the transaction explicitly states $100 cash was paid. The entry should be: Dr Inventory $100, Cr Cash $100 (or if tax must be separated and $100 is tax-inclusive: Dr Inventory ~$95.24, Dr HST Receivable ~$4.76, Cr Cash $100). The current entry overstates the cash payment.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because the entry is missing HST/GST tax lines on an inventory purchase, which is a taxable transaction in Canada. \n\nTracing through the pipeline:\n- Agents 1-4 (classifiers and correctors) correctly identified the transaction as an asset exchange: Inventory (asset increase) and Cash (asset decrease). Their tuples are correct for the pre-tax amounts.\n- Agent 5 (Entry Builder) constructed the journal entry from the tuples but failed to add the required tax lines. The Entry Builder's rationale explicitly states \"No tax information provided, so assuming no HST/GST applies or amount is tax-inclusive\" \u2014 this assumption is incorrect for Canadian inventory purchases, which are taxable transactions requiring HST Receivable (input tax credit) and adjustment to the cash amount.\n\nThe root cause is Agent 5. The classifiers did their job correctly by identifying the directional movements. It is the Entry Builder's responsibility to recognize that inventory purchases in Canada are taxable and to add the appropriate tax lines (HST Receivable debit and increase the Cash credit to reflect the tax-inclusive amount).",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Inventory purchases are taxable in Canada and require HST/GST treatment. Add HST Receivable debit line (input tax credit) and increase Cash credit to reflect tax-inclusive amount. Treat the $100 as pre-tax unless explicitly stated otherwise."
+          }
+        ],
+        "stuck_reason": null
+      },
+      {
+        "reasoning": "The Approver rejected because the entry incorrectly treats $100 as a pre-tax amount and adds $5 HST, crediting Cash for $105. However, the transaction explicitly states \"Purchase inventory for $100 cash\" \u2014 meaning $100 is the total cash paid, not a pre-tax base.\n\nTracing through the generator reasoning:\n- Iteration 0: Agent 5 correctly built the entry as Dr Inventory $100, Cr Cash $100, noting \"No tax information provided, so assuming no HST/GST applies or amount is tax-inclusive.\"\n- Iteration 1: Agent 5 changed its approach, stating \"The $100 is treated as pre-tax amount per fix context\" and added HST, resulting in the rejected entry.\n\nThe phrase \"per fix context\" indicates Agent 5 received guidance from a previous diagnostician run that incorrectly instructed it to treat $100 as pre-tax. This is visible in the fix_context that would have been provided between iterations.\n\nRoot cause: Agent 5 was given incorrect fix guidance. The original Iteration 0 entry was correct. The transaction states \"$100 cash\" was paid \u2014 this is the total cash outflow, not a pre-tax amount. If tax separation is required and the transaction is in a taxable jurisdiction, the $100 should be treated as tax-inclusive (e.g., Dr Inventory ~$95.24, Dr HST Receivable ~$4.76, Cr Cash $100), but never should Cash exceed $100.\n\nAgent 5 is the root cause because it misinterpreted the fix guidance and incorrectly inflated the cash payment beyond what the transaction states.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Transaction states '$100 cash' was paid \u2014 this is the total cash outflow, not a pre-tax base. Cash credit must equal $100. If tax separation is needed, treat $100 as tax-inclusive: back out HST from the $100 total (e.g., Inventory \u2248 $95.24, HST Receivable \u2248 $4.76 at 5% rate, Cash $100). Do not add tax on top of $100."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Inventory purchases are taxable in Canada and require HST/GST treatment. Add HST Receivable debit line (input tax credit) and increase Cash credit to reflect tax-inclusive amount. Treat the $100 as pre-tax unless explicitly stated otherwise."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": null,
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 482,
+        "output_tokens": 86,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 480,
+        "output_tokens": 101,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 718,
+        "output_tokens": 261,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1267,
+        "output_tokens": 173,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1152,
+        "output_tokens": 388,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 803,
+        "output_tokens": 279,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1806,
+        "output_tokens": 204,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1704,
+        "output_tokens": 576,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

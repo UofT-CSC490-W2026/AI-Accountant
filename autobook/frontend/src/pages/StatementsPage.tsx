@@ -1,21 +1,28 @@
 import { useEffect, useState } from "react";
 import { subscribeToRealtimeUpdates } from "../api/realtime";
 import { getStatements } from "../api/statements";
-import type { StatementsResponse } from "../api/types";
+import type { StatementType, StatementsResponse } from "../api/types";
 import { FreshnessStatus } from "../components/FreshnessStatus";
 import { downloadStatementsCsv, exportStatementsPdf } from "../utils/statementsExport";
 
+const STATEMENT_TYPES: StatementType[] = ["trial_balance", "balance_sheet", "income_statement"];
+
 export function StatementsPage() {
-  const [statements, setStatements] = useState<StatementsResponse | null>(null);
+  const [selectedType, setSelectedType] = useState<StatementType>("trial_balance");
+  const [statementsByType, setStatementsByType] = useState<Record<StatementType, StatementsResponse> | null>(null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadStatements() {
-      const response = await getStatements();
+      const responses = await Promise.all(
+        STATEMENT_TYPES.map(async (statementType) => [statementType, await getStatements(statementType)] as const),
+      );
       if (isMounted) {
-        setStatements(response);
+        setStatementsByType(
+          Object.fromEntries(responses) as Record<StatementType, StatementsResponse>,
+        );
         setLastUpdatedAt(new Date());
       }
     }
@@ -30,6 +37,8 @@ export function StatementsPage() {
       unsubscribe();
     };
   }, []);
+
+  const statements = statementsByType?.[selectedType] ?? null;
 
   return (
     <div className="page-grid">
@@ -64,6 +73,17 @@ export function StatementsPage() {
           <p className="body-copy">Loading statements...</p>
         ) : (
           <div className="statement-stack">
+            <div className="chip-row">
+              {STATEMENT_TYPES.map((statementType) => (
+                <button
+                  key={statementType}
+                  className={statementType === selectedType ? "prompt-chip prompt-chip-active" : "prompt-chip"}
+                  onClick={() => setSelectedType(statementType)}
+                >
+                  {statementType.replace(/_/g, " ")}
+                </button>
+              ))}
+            </div>
             <div className="review-meta-row">
               <span className="review-pill">
                 Statement {statements.statement_type.replace(/_/g, " ")}
@@ -76,7 +96,7 @@ export function StatementsPage() {
               This page isolates the financial statement view so the demo can move from ledger mechanics to business reporting cleanly.
             </p>
             <p className="field-help">
-              Export the current statement package as CSV for handoff, or use PDF export for a presentation-friendly artifact.
+              Switch between trial balance, balance sheet, and income statement to confirm a new posting is reflected in reporting.
             </p>
 
             {statements.sections.map((section) => (
@@ -90,14 +110,28 @@ export function StatementsPage() {
                     <thead>
                       <tr>
                         <th>Line Item</th>
-                        <th>Amount</th>
+                        {selectedType === "trial_balance" ? (
+                          <>
+                            <th>Debit</th>
+                            <th>Credit</th>
+                          </>
+                        ) : (
+                          <th>Amount</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody>
                       {section.rows.map((row) => (
                         <tr key={row.label}>
                           <td>{row.label}</td>
-                          <td>${row.amount.toFixed(2)}</td>
+                          {selectedType === "trial_balance" ? (
+                            <>
+                              <td>{row.debit ? `$${row.debit.toFixed(2)}` : " "}</td>
+                              <td>{row.credit ? `$${row.credit.toFixed(2)}` : " "}</td>
+                            </>
+                          ) : (
+                            <td>${row.amount.toFixed(2)}</td>
+                          )}
                         </tr>
                       ))}
                     </tbody>
@@ -105,6 +139,15 @@ export function StatementsPage() {
                 </div>
               </section>
             ))}
+
+            {statements.sections.every((section) => section.rows.length === 0) ? (
+              <div className="empty-review-state panel compact-panel">
+                <p className="review-title">No rows in this statement yet.</p>
+                <p className="body-copy">
+                  Try switching statement type. Trial balance is the fastest way to confirm a new posting landed in reporting.
+                </p>
+              </div>
+            ) : null}
 
             {Object.keys(statements.totals).length > 0 ? (
               <section className="statement-totals">

@@ -1,0 +1,55 @@
+======================================================================
+Test Case: int_12_site_improvements
+Variant:   with_disambiguation
+Decision:  INCOMPLETE_INFORMATION
+======================================================================
+
+Final Tuples:
+  Debit:  [2, 0, 0, 0, 0, 0]  ✓
+  Credit: [0, 0, 0, 2, 0, 0]  ✓
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (5):
+  [RESOLVED] capitalization vs. expense treatment of fencing, streetlights, and walkways
+    Resolution: These are permanent improvements surrounding a factory asset. Under IAS 16, costs that enhance or are integral to bringing property, plant, and equipment to working condition are capitalized. Infrastructure improvements like fencing, streetlights, and walkways are capital expenditures.
+  [RESOLVED] capitalization vs. expense treatment of permanent landscaping
+    Resolution: Described as 'permanent landscaping installations' — the word 'permanent' indicates long-lived improvements that are capitalized under IAS 16, not maintenance expense.
+  [UNRESOLVED] whether improvements are part of building cost or separate land improvements
+    Options: ['Capitalize as part of Factory Building asset (depreciable)', 'Capitalize as separate Land Improvements asset (depreciable)', 'Capitalize as part of Land asset (non-depreciable)']
+    Question: Should these improvements be recorded as part of the factory building asset, as separate land improvements, or as part of the land itself?
+    Why not resolved: The transaction states these surround the factory but does not specify whether they are integral to the building structure, improvements to land separate from the building, or enhancements to land value. Accounting standards require separate classification for items with different useful lives, but the text does not provide enough detail to determine the appropriate asset account.
+  [RESOLVED] payment method for fencing, streetlights, and walkways
+    Resolution: 'Incurred in cash' indicates cash payment — credits Cash account
+  [RESOLVED] payment method for landscaping
+    Resolution: 'Paid by cheque' indicates cash payment — credits Cash account (cheques are cash equivalents in accounting)
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [2, 0, 0, 0, 0, 0]
+Reason: Two distinct asset increases: (1) Fencing, streetlights, and walkways = depreciable land improvements asset, and (2) Permanent landscaping installations = non-depreciable land improvements asset. These must use separate accounts because they have different depreciation treatment under IFRS - the first is depreciable infrastructure, while permanent landscaping is typically non-depreciable. Both are asset increases (debits), resulting in 2 debit lines.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 0, 2, 0, 0]
+Reason: Two asset decreases: (1) Cash paid $1,750,000 for fencing, streetlights, and walkways = asset decrease; (2) Cash (via cheque) paid $2,360,000 for permanent landscaping = asset decrease. Both payments reduce cash/bank assets. The items purchased (infrastructure improvements and permanent landscaping) are capitalized as separate assets on the debit side, but on the credit side we have two distinct payment methods reducing liquid assets.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Disambiguator Responses:
+  [INCOMPLETE] whether improvements are part of building cost or separate land improvements
+    The debit/credit structure remains the same (debit asset, credit cash), but the ACCOUNT NAME differs fundamentally: Factory Building (depreciable over building life), Land Improvements (depreciable over 15-20 years), or Land (non-depreciable). This affects subsequent depreciation treatment and financial statement classification. The transaction text does not specify which classification applies, and IFRS requires separate accounts for items with different useful lives. This is a business fact about the nature and intended treatment of these improvements that only management can determine.
+Rationale: Under IAS 16, permanent improvements surrounding the factory are capitalized. Fencing, streetlights, and walkways ($1,750,000) are infrastructure improvements that enhance the factory's functionality and security. Permanent landscaping installations ($2,360,000) are long-lived improvements. Both are capital expenditures. However, the transaction does not specify whether these should be classified as: (1) part of the Factory Building asset (depreciable over building life), (2) separate Land Improvements (depreciable over 15-20 years typically), or (3) part of Land (non-depreciable). The permanent landscaping, in particular, could be non-depreciable if it enhances land value indefinitely. IFRS requires separate classification for assets with different useful lives and depreciation treatment. Without knowing management's intent on classification and the nature of these improvements relative to the building vs. land, I cannot determine the correct asset account(s).
+Entry:
+  (no lines)
+Decision: INCOMPLETE_INFORMATION
+Clarification Questions: ['Should the fencing, streetlights, and walkways ($1,750,000) be recorded as part of the Factory Building, as separate Land Improvements, or as part of Land?', 'Should the permanent landscaping installations ($2,360,000) be recorded as part of the Factory Building, as separate Land Improvements, or as part of Land? (Note: permanent landscaping may be non-depreciable if it enhances land value indefinitely)']
+
+======================================================================
+Final Journal Entry:
+  {'date': '2026-03-22', 'description': 'Capitalization of fencing, streetlights, walkways, and permanent landscaping for factory', 'rationale': "Under IAS 16, permanent improvements surrounding the factory are capitalized. Fencing, streetlights, and walkways ($1,750,000) are infrastructure improvements that enhance the factory's functionality and security. Permanent landscaping installations ($2,360,000) are long-lived improvements. Both are capital expenditures. However, the transaction does not specify whether these should be classified as: (1) part of the Factory Building asset (depreciable over building life), (2) separate Land Improvements (depreciable over 15-20 years typically), or (3) part of Land (non-depreciable). The permanent landscaping, in particular, could be non-depreciable if it enhances land value indefinitely. IFRS requires separate classification for assets with different useful lives and depreciation treatment. Without knowing management's intent on classification and the nature of these improvements relative to the building vs. land, I cannot determine the correct asset account(s).", 'lines': [], 'disambiguator_responses': [{'aspect': 'whether improvements are part of building cost or separate land improvements', 'action': 'incomplete', 'reason': 'The debit/credit structure remains the same (debit asset, credit cash), but the ACCOUNT NAME differs fundamentally: Factory Building (depreciable over building life), Land Improvements (depreciable over 15-20 years), or Land (non-depreciable). This affects subsequent depreciation treatment and financial statement classification. The transaction text does not specify which classification applies, and IFRS requires separate accounts for items with different useful lives. This is a business fact about the nature and intended treatment of these improvements that only management can determine.'}], 'decision': 'INCOMPLETE_INFORMATION', 'clarification_questions': ['Should the fencing, streetlights, and walkways ($1,750,000) be recorded as part of the Factory Building, as separate Land Improvements, or as part of Land?', 'Should the permanent landscaping installations ($2,360,000) be recorded as part of the Factory Building, as separate Land Improvements, or as part of Land? (Note: permanent landscaping may be non-depreciable if it enhances land value indefinitely)'], 'stuck_reason': None}
+======================================================================

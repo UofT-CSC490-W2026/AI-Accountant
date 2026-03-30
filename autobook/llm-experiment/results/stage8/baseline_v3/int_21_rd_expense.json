@@ -1,0 +1,367 @@
+{
+  "test_case_id": "int_21_rd_expense",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": null,
+  "actual_cost_usd": 0.0416841,
+  "raw_cost_usd": 0.09184200000000001,
+  "total_latency_ms": 30418,
+  "total_input_tokens": 22639,
+  "total_output_tokens": 1595,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "unknown": {
+      "input_tokens": 3075,
+      "output_tokens": 1434,
+      "cache_read_tokens": 11557,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 14632,
+      "llm_calls": 4,
+      "actual_cost_usd": 0.0342021,
+      "raw_cost_usd": 0.065406,
+      "output": null,
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 494,
+      "output_tokens": 80,
+      "cache_read_tokens": 3554,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4048,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037481999999999997,
+      "raw_cost_usd": 0.013344,
+      "output": {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Raw materials purchased for R&D of new snack product",
+            "category": "Research and development expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 81,
+      "cache_read_tokens": 3466,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3959,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037338000000000002,
+      "raw_cost_usd": 0.013092,
+      "output": {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cheque payment for raw materials used in R&D",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "accounting treatment of R&D raw materials",
+            "why_entry_depends_on_clarification": "Immediate use: debit R&D expense. Inventory storage: debit Inventories\u2014raw materials, then expense as consumed.",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states materials are 'for R&D' but does not specify whether they are consumed immediately or held in inventory. IAS 38 requires R&D costs to be expensed when incurred, but raw materials inventory follows IAS 2 until consumed. The timing of consumption determines the entry.",
+            "clarification_question": "Are these raw materials intended for immediate use in R&D activities, or will they be stored in inventory and consumed over time in the R&D process?",
+            "options": [
+              "Expense immediately as research and development expense",
+              "Capitalize to inventory for later allocation to R&D expense as consumed"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "R&D raw materials classification",
+            "why_llm_cannot_do_this": "Requires judgment on whether materials are for research phase (expense immediately per IAS 38.54) vs development phase meeting capitalization criteria (IAS 38.57), and whether they are consumed in R&D (expense) or incorporated into a prototype/asset. The transaction states 'research and development' without specifying phase or technical feasibility status.",
+            "what_is_best_llm_can_do": "Expense the full amount as R&D expense based on the explicit 'research and development' purpose, following the general principle that research costs are expensed",
+            "skeptical": true
+          },
+          {
+            "aspect": "HST on raw materials purchase",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "cash payment by cheque",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Raw materials purchase is normally taxable, but the transaction text does not mention any tax amount or rate. Following the rule that tax lines should only be added when explicitly mentioned in the transaction text, no tax lines should be added.",
+        "tax_mentioned": false,
+        "taxable": true,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "The ambiguity detector flags whether materials are consumed immediately or stored in inventory. However, this distinction does NOT change the account name or amount in the entry we build today. Both paths lead to the same immediate entry: if consumed immediately, we debit R&D expense directly; if stored, we debit Inventories\u2014raw materials. The transaction states materials were \"purchased...for research and development\" which indicates acquisition, not consumption. Standard practice: raw materials purchases are capitalized to inventory at acquisition, then expensed as consumed. The entry structure differs (inventory vs expense), so this IS a material ambiguity that affects the account name.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "Are these raw materials consumed immediately in R&D activities, or will they be stored in inventory and consumed over time in the R&D process?"
+        ],
+        "complexity_assessment": "The complexity detector flags R&D phase classification (research vs development). However, this is a red herring for THIS transaction. The real issue is not research vs development phase capitalization (IAS 38 development capitalization applies to internally generated intangible assets, not raw materials consumed in R&D). The issue is simpler: are the materials inventory or immediate expense? The complexity flag conflates two separate issues. The LLM can handle this once the timing question is resolved.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "The debit classifier chose \"Research and development expense\" assuming immediate consumption. The credit classifier correctly identified cash decrease. However, the debit classification assumes a fact not in evidence (immediate consumption). If materials are stored, the correct debit is \"Inventories\u2014raw materials\" not R&D expense. The classifier made a reasonable guess but the ambiguity is real and material\u2014it changes the account name from expense to asset.",
+        "debit_approved": false,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity about immediate consumption vs inventory storage is material because it changes the account name (R&D expense vs Inventories\u2014raw materials). The transaction text says materials were \"purchased...for research and development\" but does not state they were consumed. Standard accounting practice treats raw materials purchases as inventory at acquisition, expensed upon consumption. The debit classifier assumed immediate consumption, but this is not stated. The answer would come from the person who initiated the transaction (procurement or R&D manager). This is a business fact question, not a knowledge gap. The complexity flag about research vs development phase is not relevant\u2014raw materials consumed in R&D are expensed regardless of phase; the real question is timing of consumption.",
+        "decision": "missing_info"
+      }
+    ],
+    "output_entry_drafter": [],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "accounting treatment of R&D raw materials",
+            "why_entry_depends_on_clarification": "Immediate use: debit R&D expense. Inventory storage: debit Inventories\u2014raw materials, then expense as consumed.",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states materials are 'for R&D' but does not specify whether they are consumed immediately or held in inventory. IAS 38 requires R&D costs to be expensed when incurred, but raw materials inventory follows IAS 2 until consumed. The timing of consumption determines the entry.",
+            "clarification_question": "Are these raw materials intended for immediate use in R&D activities, or will they be stored in inventory and consumed over time in the R&D process?",
+            "options": [
+              "Expense immediately as research and development expense",
+              "Capitalize to inventory for later allocation to R&D expense as consumed"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Raw materials purchased for R&D of new snack product",
+            "category": "Research and development expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cheque payment for raw materials used in R&D",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 0,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 154,
+        "input_token_details": {
+          "cache_read": 2727,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 494,
+        "output_tokens": 80,
+        "input_token_details": {
+          "cache_read": 3554,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 254,
+        "input_token_details": {
+          "cache_read": 2389,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 532,
+        "output_tokens": 275,
+        "input_token_details": {
+          "cache_read": 2996,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 81,
+        "input_token_details": {
+          "cache_read": 3466,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 1517,
+        "output_tokens": 751,
+        "input_token_details": {
+          "cache_read": 3445,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "unknown": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,478 @@
+{
+  "test_case_id": "int_11_land_instalment_discount",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Land acquired at present value of 6 annual instalments of $10,000,000 discounted at 6% market rate. PV = $10M/(1.06^1) + $10M/(1.06^2) + $10M/(1.06^3) + $10M/(1.06^4) + $10M/(1.06^5) + $10M/(1.06^6) = $9,433,962.26 + $8,899,964.40 + $8,396,192.83 + $7,920,936.63 + $7,472,581.73 + $7,049,605.40 = $49,173,243.25. Demolition cost is capitalized to Land as necessary to prepare land for intended use.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Land",
+        "amount": 49173243.25
+      },
+      {
+        "type": "credit",
+        "account_name": "Long-term borrowings",
+        "amount": 49173243.25
+      }
+    ]
+  },
+  "actual_cost_usd": 0.068073,
+  "raw_cost_usd": 0.133926,
+  "total_latency_ms": 35965,
+  "total_input_tokens": 31107,
+  "total_output_tokens": 2707,
+  "total_llm_calls": 8,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "unknown": {
+      "input_tokens": 5612,
+      "output_tokens": 2309,
+      "cache_read_tokens": 17370,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 22982,
+      "llm_calls": 6,
+      "actual_cost_usd": 0.056681999999999996,
+      "raw_cost_usd": 0.10358099999999999,
+      "output": null,
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 553,
+      "output_tokens": 206,
+      "cache_read_tokens": 3554,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4107,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058151999999999995,
+      "raw_cost_usd": 0.015411,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Land and demolition cost capitalized at present value of future payments (land is acquired for factory construction; demolition of existing building is necessary to prepare the land for its intended use, so demolition cost is capitalized to Land)",
+            "category": "Land",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 552,
+      "output_tokens": 192,
+      "cache_read_tokens": 3466,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4018,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0055758000000000005,
+      "raw_cost_usd": 0.014934,
+      "output": {
+        "liability_increase": [
+          {
+            "reason": "Present value of 6 annual instalments of $10,000,000 at 6% market rate for land and building acquisition",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of $60,000,000 purchase price between land and existing building",
+            "why_entry_depends_on_clarification": "If the building has allocated value, demolition creates a loss (building cost written off); if entire price is allocated to land, demolition costs are capitalized to land with no loss recognized",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states a single combined purchase price for 'land with an existing building' but does not provide separate values. IFRS requires allocation based on fair values at acquisition, but these are not stated. The demolition intent suggests the building may have minimal or zero value, but this is not explicitly confirmed.",
+            "clarification_question": "What were the separate fair values of the land and the existing building at acquisition, or was the building considered to have no value given the demolition intent?",
+            "options": [
+              "Allocate based on relative fair values of land and building",
+              "Allocate entire amount to land since building will be demolished",
+              "Use appraisal or assessment values to split the price"
+            ],
+            "resolved": false
+          },
+          {
+            "aspect": "timing of demolition within the year",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "whether demolition costs are included in the transaction or separate",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "present value calculation method",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "present value calculation for deferred payment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "allocation of purchase price between land and building",
+            "why_llm_cannot_do_this": "The transaction states a single purchase price for land with existing building but provides no fair value split. IFRS requires allocating the cost to separately identifiable assets based on their relative fair values at acquisition. The system lacks the market data to determine what portion of $60M relates to land versus building.",
+            "what_is_best_llm_can_do": "Capitalize entire present value to Land account, treating the building as having zero separate value",
+            "skeptical": true
+          },
+          {
+            "aspect": "demolition cost capitalization",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "interest accretion on deferred payment liability",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Transaction describes acquisition of land and building for $60,000,000 paid in instalments. No tax is mentioned in the transaction text. Real estate purchases may be subject to land transfer tax but no tax is stated here. Do not add tax lines when tax is not mentioned.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "The unresolved ambiguity is \"allocation of $60,000,000 purchase price between land and existing building.\" This ambiguity asks whether to allocate value to the building (which would create a loss on demolition) or allocate the entire amount to land (no loss). However, under IFRS, when an asset is acquired with the immediate intent to demolish it to prepare land for its intended use, the demolition cost and any allocated building value are capitalized to Land (IAS 16.16(b) - costs of site preparation). Whether the building has allocated value or not, the accounting treatment is the same: capitalize to Land. The account name (Land) and the amount (present value of payments) do not differ between the options. The ambiguity detector was overly cautious - this does not prevent building the entry.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The complexity flag for \"allocation of purchase price between land and building\" suggests the system cannot determine the split. However, IFRS IAS 16.16(b) provides clear guidance: when land is acquired with a building that will be demolished to prepare the site for its intended use, the costs (including any allocated building value and demolition costs) are capitalized to Land. The system can apply this standard principle without needing market data for the split. The best approach (capitalize entire present value to Land) is correct and complete.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classification: Correctly identifies one line for Land at present value, with valid reasoning that demolition costs for site preparation are capitalized to Land per IFRS. Credit classification: Correctly identifies one line for the liability representing the present value of deferred payments. However, the category \"Long-term borrowings\" is not quite right - this is a trade payable for asset acquisition, not a borrowing. Should be a non-current payable or deferred payment liability, but the structure is correct (one liability line). The reasoning is valid and the tuple is correct.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": false,
+        "override_credit": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "decision_rationale": "The ambiguity about allocation between land and building does not change the entry structure - under IFRS IAS 16.16(b), when land with a building is acquired for demolition to prepare the site, all costs are capitalized to Land regardless of how the purchase price is allocated. The complexity flag is overly cautious - the system can apply standard IFRS principles. The debit classification is correct. The credit classification has the right structure but uses \"Long-term borrowings\" when this should be a trade/deferred payment liability for asset acquisition, not a borrowing. However, this is a minor categorization issue that does not prevent proceeding - the entry structure is sound.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Land acquired at present value of 6 annual instalments of $10,000,000 discounted at 6% market rate. PV = $10M/(1.06^1) + $10M/(1.06^2) + $10M/(1.06^3) + $10M/(1.06^4) + $10M/(1.06^5) + $10M/(1.06^6) = $9,433,962.26 + $8,899,964.40 + $8,396,192.83 + $7,920,936.63 + $7,472,581.73 + $7,049,605.40 = $49,173,243.25. Demolition cost is capitalized to Land as necessary to prepare land for intended use.",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Land",
+            "amount": 49173243.25
+          },
+          {
+            "type": "credit",
+            "account_name": "Long-term borrowings",
+            "amount": 49173243.25
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of $60,000,000 purchase price between land and existing building",
+            "why_entry_depends_on_clarification": "If the building has allocated value, demolition creates a loss (building cost written off); if entire price is allocated to land, demolition costs are capitalized to land with no loss recognized",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states a single combined purchase price for 'land with an existing building' but does not provide separate values. IFRS requires allocation based on fair values at acquisition, but these are not stated. The demolition intent suggests the building may have minimal or zero value, but this is not explicitly confirmed.",
+            "clarification_question": "What were the separate fair values of the land and the existing building at acquisition, or was the building considered to have no value given the demolition intent?",
+            "options": [
+              "Allocate based on relative fair values of land and building",
+              "Allocate entire amount to land since building will be demolished",
+              "Use appraisal or assessment values to split the price"
+            ],
+            "resolved": false
+          },
+          {
+            "aspect": "timing of demolition within the year",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "whether demolition costs are included in the transaction or separate",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          },
+          {
+            "aspect": "present value calculation method",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Land and demolition cost capitalized at present value of future payments (land is acquired for factory construction; demolition of existing building is necessary to prepare the land for its intended use, so demolition cost is capitalized to Land)",
+            "category": "Land",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [
+          {
+            "reason": "Present value of 6 annual instalments of $10,000,000 at 6% market rate for land and building acquisition",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 577,
+        "output_tokens": 165,
+        "input_token_details": {
+          "cache_read": 2727,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 553,
+        "output_tokens": 206,
+        "input_token_details": {
+          "cache_read": 3554,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 567,
+        "output_tokens": 258,
+        "input_token_details": {
+          "cache_read": 2389,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 552,
+        "output_tokens": 192,
+        "input_token_details": {
+          "cache_read": 3466,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 591,
+        "output_tokens": 388,
+        "input_token_details": {
+          "cache_read": 2996,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 1940,
+        "output_tokens": 797,
+        "input_token_details": {
+          "cache_read": 3445,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 842,
+        "output_tokens": 391,
+        "input_token_details": {
+          "cache_read": 2934,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 1095,
+        "output_tokens": 310,
+        "input_token_details": {
+          "cache_read": 2879,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "unknown": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use"
+    }
+  }
+}

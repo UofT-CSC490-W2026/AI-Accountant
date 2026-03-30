@@ -1,0 +1,44 @@
+======================================================================
+Test Case: int_hard_32b_grocery_breakroom
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [0, 0, 2, 0, 0, 0]  ✗
+  Credit: [2, 0, 0, 0, 0, 0]  ✗
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (0):
+  (none)
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 2, 0, 0, 0]
+Reason: Two debit lines: (1) Employee refreshments/break room supplies = expense increase (employee welfare/office expense), and (2) Sales tax paid = expense increase (tax expense). Both are consumed immediately for business operations and represent expense increases under IFRS.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [2, 0, 0, 0, 0, 0]
+Reason: Two credit lines: (1) Sales tax payable = liability increase (the business owes $120 to the tax authority), and (2) Credit card payable = liability increase (the business owes $1,320 to the credit card company). Total: 2 liability increases.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Rationale: Break room supplies are an operating expense (employee amenities). The transaction specifies $1,200 base amount plus 10% sales tax ($120), totaling $1,320 paid by corporate credit card. The debit tuple (0,0,2,0,0,0) suggests 2 expense lines, and credit tuple (2,0,0,0,0,0) suggests 2 liability increases. This maps to: (1) expense for the supplies, (2) sales tax receivable (input tax credit), (3) credit card liability for the supplies, and (4) credit card liability for the tax. However, the credit card is a single liability account, so we combine the credit card amounts into one line. The sales tax paid on business purchases is recoverable as an input tax credit (HST/GST Receivable). Total debits: $1,200 (expense) + $120 (tax receivable) = $1,320. Total credits: $1,320 (credit card payable).
+Entry:
+  debit  Office Supplies Expense                       $      1,200.00
+  debit  HST Receivable                                $        120.00
+  credit Credit Card Payable                           $      1,320.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Office Supplies Expense                       $      1,200.00
+  debit  HST Receivable                                $        120.00
+  credit Credit Card Payable                           $      1,320.00
+======================================================================

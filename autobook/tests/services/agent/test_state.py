@@ -4,8 +4,9 @@ from services.agent.graph.state import AGENT_NAMES, PipelineState, NOT_RUN, COMP
 
 
 def test_agent_names():
-    assert len(AGENT_NAMES) == 8
+    assert len(AGENT_NAMES) == 13
     assert "disambiguator" in AGENT_NAMES
+    assert "ambiguity_detector" in AGENT_NAMES
 
 
 def test_pipeline_state_is_typed_dict():

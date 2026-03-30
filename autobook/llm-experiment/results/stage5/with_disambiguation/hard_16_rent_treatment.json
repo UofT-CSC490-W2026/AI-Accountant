@@ -1,0 +1,579 @@
+{
+  "test_case_id": "hard_16_rent_treatment",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Atlas Van Lines paid $24,000 for 12 months of rent in advance. Under IFRS, prepaid rent is recognized as an asset (Prepaid Rent) because it represents future economic benefits. The payment by cheque reduces Cash. No tax is mentioned in the transaction, so no tax lines are added. Total debits ($24,000) equal total credits ($24,000).",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Prepaid Rent",
+        "amount": 24000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 24000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.047913000000000004,
+  "raw_cost_usd": 0.074994,
+  "total_latency_ms": 34338,
+  "total_input_tokens": 12373,
+  "total_output_tokens": 2525,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 525,
+      "output_tokens": 506,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2872,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0098691,
+      "raw_cost_usd": 0.016206,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment timing relative to lease period",
+            "resolution": "'paid $24,000... representing 12 months of rent' clearly indicates upfront payment for future periods \u2014 prepaid rent asset treatment"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Cheque specified \u2014 but payment method doesn't change the entry structure (credit Cash/Bank regardless)"
+          },
+          {
+            "aspect": "lease accounting treatment under IFRS 16",
+            "resolution": "12-month lease qualifies for short-term lease exemption under IFRS 16 (\u226412 months). Entity may elect to apply exemption and recognize as prepaid rent rather than ROU asset. However, this is a policy election that affects the entry."
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "application of IFRS 16 short-term lease exemption",
+            "options": [
+              "Apply short-term lease exemption \u2014 recognize as prepaid rent expense",
+              "Recognize right-of-use asset and lease liability under IFRS 16"
+            ],
+            "clarification_question": "Does Atlas Van Lines apply the short-term lease exemption for this 12-month office lease, or does it recognize a right-of-use asset under IFRS 16?",
+            "why_entry_differs": "Exemption: Debit Prepaid Rent (current asset), amortize to Rent Expense monthly. IFRS 16: Debit Right-of-Use Asset and Credit Lease Liability (with different amortization pattern including interest)",
+            "why_not_resolved": "IFRS 16 permits but does not require the short-term lease exemption for leases \u226412 months. This is an entity policy election that must be consistently applied by class of asset. The transaction text and context do not indicate which policy the entity has elected."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 500,
+      "output_tokens": 378,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2046,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076338000000000005,
+      "raw_cost_usd": 0.011808,
+      "output": {
+        "asset_increase_reason": "Prepaid rent is an asset. Paying $24,000 for 12 months of rent in advance creates a prepaid rent asset that will be expensed over time as the rental period is consumed.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "This is a prepayment for future periods, not an immediate expense. The rent will be expensed monthly as it is consumed over the 12-month period.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are affected by this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 498,
+      "output_tokens": 387,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2014,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0077538,
+      "raw_cost_usd": 0.011847,
+      "output": {
+        "liability_increase_reason": "No liabilities are created; this is a prepayment transaction, not a loan or obligation incurred.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No owner investment or retained earnings increase occurs.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned; this is a payment for rent expense.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash (bank account) decreases by $24,000 when the cheque is paid. This is the only credit-side entry.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals are reversed.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense is reversed or reduced. The prepaid rent will be recognized as expense over time through subsequent adjusting entries, but at the point of payment, we are crediting cash (asset decrease) and debiting prepaid rent (asset increase).",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 820,
+      "output_tokens": 1254,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5441,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0226563,
+      "raw_cost_usd": 0.035133,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear: Atlas Van Lines paid $24,000 by cheque for 12 months of rent in advance. Under IFRS, prepaid rent is an asset (prepaid expense) that will be expensed over the rental period. The payment method (cheque), amount ($24,000), and period (12 months) are all stated. No business facts are missing.",
+        "debit_asset_increase": {
+          "reason": "Accept. Prepaying 12 months of rent creates a prepaid expense asset that will be consumed over time.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Prepaid Rent"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense is recognized at payment. The prepayment is an asset that will be expensed monthly over the lease term.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability is being created in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Payment by cheque reduces the cash/bank asset account.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Atlas Van Lines paid $24,000 for 12 months of rent in advance. Under IFRS, prepaid rent is recognized as an asset (Prepaid Rent) because it represents future economic benefits. The payment by cheque reduces Cash. No tax is mentioned in the transaction, so no tax lines are added. Total debits ($24,000) equal total credits ($24,000).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Prepaid Rent",
+              "amount": 24000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 24000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction clearly describes a prepayment of 12 months rent for $24,000 by cheque. Under IFRS, prepaid expenses are assets. The classifier tuples correctly identify this as an asset increase (debit) and asset decrease (credit). All amounts are determinable from the transaction text. No tax is mentioned. The entry balances. No business facts are missing. Decision: APPROVED.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment timing relative to lease period",
+            "resolution": "'paid $24,000... representing 12 months of rent' clearly indicates upfront payment for future periods \u2014 prepaid rent asset treatment"
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Cheque specified \u2014 but payment method doesn't change the entry structure (credit Cash/Bank regardless)"
+          },
+          {
+            "aspect": "lease accounting treatment under IFRS 16",
+            "resolution": "12-month lease qualifies for short-term lease exemption under IFRS 16 (\u226412 months). Entity may elect to apply exemption and recognize as prepaid rent rather than ROU asset. However, this is a policy election that affects the entry."
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "application of IFRS 16 short-term lease exemption",
+            "options": [
+              "Apply short-term lease exemption \u2014 recognize as prepaid rent expense",
+              "Recognize right-of-use asset and lease liability under IFRS 16"
+            ],
+            "clarification_question": "Does Atlas Van Lines apply the short-term lease exemption for this 12-month office lease, or does it recognize a right-of-use asset under IFRS 16?",
+            "why_entry_differs": "Exemption: Debit Prepaid Rent (current asset), amortize to Rent Expense monthly. IFRS 16: Debit Right-of-Use Asset and Credit Lease Liability (with different amortization pattern including interest)",
+            "why_not_resolved": "IFRS 16 permits but does not require the short-term lease exemption for leases \u226412 months. This is an entity policy election that must be consistently applied by class of asset. The transaction text and context do not indicate which policy the entity has elected."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Prepaid rent is an asset. Paying $24,000 for 12 months of rent in advance creates a prepaid rent asset that will be expensed over time as the rental period is consumed.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "This is a prepayment for future periods, not an immediate expense. The rent will be expensed monthly as it is consumed over the 12-month period.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are affected by this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created; this is a prepayment transaction, not a loan or obligation incurred.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No owner investment or retained earnings increase occurs.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned; this is a payment for rent expense.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash (bank account) decreases by $24,000 when the cheque is paid. This is the only credit-side entry.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals are reversed.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense is reversed or reduced. The prepaid rent will be recognized as expense over time through subsequent adjusting entries, but at the point of payment, we are crediting cash (asset decrease) and debiting prepaid rent (asset increase).",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Prepaid rent is an asset. Paying $24,000 for 12 months of rent in advance creates a prepaid rent asset that will be expensed over time as the rental period is consumed.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "This is a prepayment for future periods, not an immediate expense. The rent will be expensed monthly as it is consumed over the 12-month period.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are affected by this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created; this is a prepayment transaction, not a loan or obligation incurred.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No owner investment or retained earnings increase occurs.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned; this is a payment for rent expense.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash (bank account) decreases by $24,000 when the cheque is paid. This is the only credit-side entry.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals are reversed.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense is reversed or reduced. The prepaid rent will be recognized as expense over time through subsequent adjusting entries, but at the point of payment, we are crediting cash (asset decrease) and debiting prepaid rent (asset increase).",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear: Atlas Van Lines paid $24,000 by cheque for 12 months of rent in advance. Under IFRS, prepaid rent is an asset (prepaid expense) that will be expensed over the rental period. The payment method (cheque), amount ($24,000), and period (12 months) are all stated. No business facts are missing.",
+        "debit_asset_increase": {
+          "reason": "Accept. Prepaying 12 months of rent creates a prepaid expense asset that will be consumed over time.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Prepaid Rent"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense is recognized at payment. The prepayment is an asset that will be expensed monthly over the lease term.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being reduced in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability is being created in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Payment by cheque reduces the cash/bank asset account.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Atlas Van Lines paid $24,000 for 12 months of rent in advance. Under IFRS, prepaid rent is recognized as an asset (Prepaid Rent) because it represents future economic benefits. The payment by cheque reduces Cash. No tax is mentioned in the transaction, so no tax lines are added. Total debits ($24,000) equal total credits ($24,000).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Prepaid Rent",
+              "amount": 24000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 24000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction clearly describes a prepayment of 12 months rent for $24,000 by cheque. Under IFRS, prepaid expenses are assets. The classifier tuples correctly identify this as an asset increase (debit) and asset decrease (credit). All amounts are determinable from the transaction text. No tax is mentioned. The entry balances. No business facts are missing. Decision: APPROVED.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 525,
+        "output_tokens": 506,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 500,
+        "output_tokens": 378,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 498,
+        "output_tokens": 387,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 820,
+        "output_tokens": 1254,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

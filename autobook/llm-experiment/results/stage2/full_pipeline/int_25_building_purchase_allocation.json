@@ -1,0 +1,631 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of land and building for warehouse, partial payment by cheque",
+    "rationale": "The $9,000,000 purchase price is allocated between land ($6,000,000) and building ($3,000,000) based on relative fair values (8M:4M ratio). Land is recorded separately as it is non-depreciable, while the building is depreciable. The 10% sales tax of $300,000 applies only to the building (land is tax-exempt) and is recoverable as HST Receivable. Payment structure: $4,500,000 (50%) deferred as Accounts Payable due in 6 months, and $4,800,000 ($4,500,000 balance + $300,000 tax) paid immediately by cheque.",
+    "lines": [
+      {
+        "account_name": "Land",
+        "type": "debit",
+        "amount": 6000000.0
+      },
+      {
+        "account_name": "Building",
+        "type": "debit",
+        "amount": 3000000.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 300000.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 4500000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 4800000.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "allocation of $9,000,000 purchase price between land and building",
+        "action": "proceed",
+        "reason": "Fair values are explicitly stated in the transaction text, and IFRS requires allocation based on relative fair values. This is a determinable accounting calculation, not a missing business fact."
+      },
+      {
+        "aspect": "sales tax applicability",
+        "action": "proceed",
+        "reason": "Transaction explicitly states '10% sales tax on the building' and land is tax-exempt under Canadian tax law. No ambiguity exists."
+      },
+      {
+        "aspect": "payment structure and amounts",
+        "action": "proceed",
+        "reason": "Transaction clearly states 50% due in 6 months and balance plus tax paid by cheque. Amounts are determinable from the transaction text."
+      },
+      {
+        "aspect": "sales tax recovery",
+        "action": "proceed",
+        "reason": "For a corporation making a business purchase, HST is recoverable as an input tax credit under Canadian tax rules. This is standard treatment, not a missing business fact."
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0900507,
+  "raw_cost_usd": 0.131952,
+  "total_latency_ms": 54803,
+  "total_input_tokens": 26919,
+  "total_output_tokens": 3413,
+  "total_llm_calls": 8,
+  "iteration_count": 1,
+  "final_decision": "STUCK",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 600,
+      "output_tokens": 384,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2995,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0082785,
+      "raw_cost_usd": 0.014745,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "resolved": true,
+            "resolution": "Fair values are explicitly provided ($8,000,000 land, $4,000,000 building). Standard accounting convention requires allocation based on relative fair values: land = $9M \u00d7 (8M/12M) = $6M, building = $9M \u00d7 (4M/12M) = $3M",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "sales tax applicability",
+            "resolved": true,
+            "resolution": "Transaction states '10% sales tax on the building' \u2014 land is exempt from sales tax in Ontario, only building is taxable. Tax = $3,000,000 \u00d7 10% = $300,000",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment structure and amounts",
+            "resolved": true,
+            "resolution": "Total consideration is $9,000,000. 50% ($4,500,000) is due in 6 months (accounts payable). Balance of $4,500,000 plus $300,000 sales tax = $4,800,000 paid by cheque",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "sales tax recovery",
+            "resolved": true,
+            "resolution": "Corporation in Ontario can claim input tax credits on business purchases. HST paid is recoverable (HST Recoverable/Input Tax Credit account), not capitalized to building cost",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 575,
+      "output_tokens": 214,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1837,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.005313600000000001,
+      "raw_cost_usd": 0.008721,
+      "output": {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. The sales tax on the building is capitalized to the building cost under IFRS. The payment method (partial cash, partial payable) affects only the credit side, not the debit classification.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. The sales tax on the building is capitalized to the building cost under IFRS. The payment method (partial cash, partial payable) affects only the credit side, not the debit classification."
+    },
+    "credit_classifier": {
+      "input_tokens": 573,
+      "output_tokens": 282,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1814,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063213,
+      "raw_cost_usd": 0.009672,
+      "output": {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cheque payment = $4,800,000. This is an asset decrease.\n2. Accounts payable or note payable increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the 10% tax on the building = $300,000. This is a liability increase.\n\nTherefore: 2 liability increases (deferred payment + sales tax payable) and 1 asset decrease (cash/bank).",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cheque payment = $4,800,000. This is an asset decrease.\n2. Accounts payable or note payable increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the 10% tax on the building = $300,000. This is a liability increase.\n\nTherefore: 2 liability increases (deferred payment + sales tax payable) and 1 asset decrease (cash/bank)."
+    },
+    "credit_corrector": {
+      "input_tokens": 743,
+      "output_tokens": 413,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2497,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0089502,
+      "raw_cost_usd": 0.013686,
+      "output": {
+        "reason": "The transaction involves purchasing land and building for $9,000,000 plus 10% sales tax on the building portion. \n\nBreaking down the economics:\n- Land fair value: $8,000,000\n- Building fair value: $4,000,000\n- Total fair value: $12,000,000\n- Purchase price allocated proportionally: Land gets $6,000,000 (8/12 \u00d7 $9M), Building gets $3,000,000 (4/12 \u00d7 $9M)\n- Sales tax on building: $300,000 (10% \u00d7 $3,000,000)\n- Total payment: $9,000,000 + $300,000 = $9,300,000\n\nPayment structure:\n- 50% of purchase price ($4,500,000) is deferred \u2192 liability increase\n- Balance of purchase price ($4,500,000) + sales tax ($300,000) = $4,800,000 paid by cheque \u2192 asset decrease (cash)\n\nThe initial credit tuple showed (2,0,0,1,0,0) = 2 liability increases + 1 asset decrease. However, there is only ONE liability being created (the deferred payment obligation for $4,500,000), not two separate liabilities. The sales tax is paid immediately by cheque, so it doesn't create a liability.\n\nCorrected to (1,0,0,1,0,0): 1 liability increase (deferred payment) + 1 asset decrease (cash payment including sales tax).",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves purchasing land and building for $9,000,000 plus 10% sales tax on the building portion. \n\nBreaking down the economics:\n- Land fair value: $8,000,000\n- Building fair value: $4,000,000\n- Total fair value: $12,000,000\n- Purchase price allocated proportionally: Land gets $6,000,000 (8/12 \u00d7 $9M), Building gets $3,000,000 (4/12 \u00d7 $9M)\n- Sales tax on building: $300,000 (10% \u00d7 $3,000,000)\n- Total payment: $9,000,000 + $300,000 = $9,300,000\n\nPayment structure:\n- 50% of purchase price ($4,500,000) is deferred \u2192 liability increase\n- Balance of purchase price ($4,500,000) + sales tax ($300,000) = $4,800,000 paid by cheque \u2192 asset decrease (cash)\n\nThe initial credit tuple showed (2,0,0,1,0,0) = 2 liability increases + 1 asset decrease. However, there is only ONE liability being created (the deferred payment obligation for $4,500,000), not two separate liabilities. The sales tax is paid immediately by cheque, so it doesn't create a liability.\n\nCorrected to (1,0,0,1,0,0): 1 liability increase (deferred payment) + 1 asset decrease (cash payment including sales tax)."
+    },
+    "debit_corrector": {
+      "input_tokens": 743,
+      "output_tokens": 363,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2489,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081978,
+      "raw_cost_usd": 0.012912,
+      "output": {
+        "reason": "The transaction involves three distinct economic events on the debit side:\n\n1. Land acquisition ($6,000,000 allocated based on fair value ratio 8M/12M) - Asset increase\n2. Building acquisition ($3,000,000 allocated based on fair value ratio 4M/12M) - Asset increase  \n3. Sales tax on building ($300,000 = 10% \u00d7 $3,000,000) - Expense increase\n\nUnder IFRS, sales tax that is not recoverable must be expensed when paid, not capitalized to the asset. The transaction states \"10% sales tax on the building was paid by cheque\" as part of the immediate payment, indicating it was paid now (not deferred with the 50% liability).\n\nThe initial tuple (2,0,0,0,0,0) correctly identified two asset increases (land and building) but missed the sales tax expense component. The credit tuple (2,0,0,1,0,0) showing 2 liability increases, 0 revenue, and 1 asset decrease is consistent with: liability for deferred payment, liability for sales tax payable (or direct expense if paid), and cash decrease.\n\nCorrected to (2,0,1,0,0,0): two asset increases (land and building) plus one expense increase (sales tax paid).",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves three distinct economic events on the debit side:\n\n1. Land acquisition ($6,000,000 allocated based on fair value ratio 8M/12M) - Asset increase\n2. Building acquisition ($3,000,000 allocated based on fair value ratio 4M/12M) - Asset increase  \n3. Sales tax on building ($300,000 = 10% \u00d7 $3,000,000) - Expense increase\n\nUnder IFRS, sales tax that is not recoverable must be expensed when paid, not capitalized to the asset. The transaction states \"10% sales tax on the building was paid by cheque\" as part of the immediate payment, indicating it was paid now (not deferred with the 50% liability).\n\nThe initial tuple (2,0,0,0,0,0) correctly identified two asset increases (land and building) but missed the sales tax expense component. The credit tuple (2,0,0,1,0,0) showing 2 liability increases, 0 revenue, and 1 asset decrease is consistent with: liability for deferred payment, liability for sales tax payable (or direct expense if paid), and cash decrease.\n\nCorrected to (2,0,1,0,0,0): two asset increases (land and building) plus one expense increase (sales tax paid)."
+    },
+    "entry_builder": {
+      "input_tokens": 1373,
+      "output_tokens": 731,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4587,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.016048200000000002,
+      "raw_cost_usd": 0.024726,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of land and building for warehouse, partial payment by cheque",
+        "rationale": "The $9,000,000 purchase price is allocated between land ($6,000,000) and building ($3,000,000) based on relative fair values (8M:4M ratio). Land is recorded separately as it is non-depreciable, while the building is depreciable. The 10% sales tax of $300,000 applies only to the building (land is tax-exempt) and is recoverable as HST Receivable. Payment structure: $4,500,000 (50%) deferred as Accounts Payable due in 6 months, and $4,800,000 ($4,500,000 balance + $300,000 tax) paid immediately by cheque.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 300000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4800000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "action": "proceed",
+            "reason": "Fair values are explicitly stated in the transaction text, and IFRS requires allocation based on relative fair values. This is a determinable accounting calculation, not a missing business fact."
+          },
+          {
+            "aspect": "sales tax applicability",
+            "action": "proceed",
+            "reason": "Transaction explicitly states '10% sales tax on the building' and land is tax-exempt under Canadian tax law. No ambiguity exists."
+          },
+          {
+            "aspect": "payment structure and amounts",
+            "action": "proceed",
+            "reason": "Transaction clearly states 50% due in 6 months and balance plus tax paid by cheque. Amounts are determinable from the transaction text."
+          },
+          {
+            "aspect": "sales tax recovery",
+            "action": "proceed",
+            "reason": "For a corporation making a business purchase, HST is recoverable as an input tax credit under Canadian tax rules. This is standard treatment, not a missing business fact."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3608,
+      "output_tokens": 314,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5660,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0161496,
+      "raw_cost_usd": 0.02169,
+      "output": {
+        "reason": "Sales tax treatment is incorrect. The transaction states '10% sales tax on the building' which is unusual (standard HST in most Canadian provinces is 13-15%). However, per procedure step 6a, when transaction text states a specific tax amount or rate, the entry must match it exactly. The entry correctly applies 10% to the building portion ($300,000). BUT: The entry records HST Receivable (recoverable tax) when the transaction states the tax 'was paid by cheque' as part of the payment - this indicates non-recoverable tax that should be capitalized to the building cost under IFRS IAS 16, not recorded as a receivable. Under IFRS, only recoverable taxes are excluded from asset cost; non-recoverable taxes must be capitalized. The building should be debited $3,300,000 (not $3,000,000), with no HST Receivable line. This would make total debits = $9,300,000 and credits = $9,300,000 ($4,500,000 AP + $4,800,000 Cash).",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Sales tax treatment is incorrect. The transaction states '10% sales tax on the building' which is unusual (standard HST in most Canadian provinces is 13-15%). However, per procedure step 6a, when transaction text states a specific tax amount or rate, the entry must match it exactly. The entry correctly applies 10% to the building portion ($300,000). BUT: The entry records HST Receivable (recoverable tax) when the transaction states the tax 'was paid by cheque' as part of the payment - this indicates non-recoverable tax that should be capitalized to the building cost under IFRS IAS 16, not recorded as a receivable. Under IFRS, only recoverable taxes are excluded from asset cost; non-recoverable taxes must be capitalized. The building should be debited $3,300,000 (not $3,000,000), with no HST Receivable line. This would make total debits = $9,300,000 and credits = $9,300,000 ($4,500,000 AP + $4,800,000 Cash)."
+    },
+    "diagnostician": {
+      "input_tokens": 3185,
+      "output_tokens": 712,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5040,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0207915,
+      "raw_cost_usd": 0.0258,
+      "output": {
+        "reasoning": "The Approver's rejection states that the entry incorrectly records HST Receivable (recoverable tax) when the transaction indicates the tax \"was paid by cheque\" as part of the payment, which signals non-recoverable tax that should be capitalized to the building cost under IFRS IAS 16.\n\nTracing through the pipeline:\n\n1. Agent 0 (Disambiguator) resolved \"sales tax recovery\" by stating \"Corporation in Ontario can claim input tax credits on business purchases. HST paid is recoverable (HST Recoverable/Input Tax Credit account), not capitalized to building cost.\" This is an ASSUMPTION about recoverability that is not stated in the transaction text.\n\n2. Agent 1 (Debit Classifier) classified correctly based on the assumption that tax would be capitalized or separate.\n\n3. Agent 3 (Debit Corrector) initially tried to add sales tax as an expense increase, changing the tuple to (2,0,1,0,0,0), but this was later overridden.\n\n4. Agent 4 (Credit Corrector) corrected the credit tuple to (1,0,0,1,0,0), removing what it thought was an erroneous second liability.\n\n5. Agent 5 (Entry Builder) constructed the final entry with HST Receivable as a debit, following the Disambiguator's resolution that the tax is recoverable.\n\nThe ROOT CAUSE is Agent 0's assumption about tax recoverability. However, the transaction text does NOT state whether the business can recover the tax or not. It only states \"10% sales tax on the building was paid by cheque.\" The Approver interprets \"was paid by cheque\" as indicating non-recoverable tax, but this is an INTERPRETATION, not an explicit fact.\n\nThis is genuinely ambiguous: the transaction does not state:\n- Whether Mondelez is registered for HST/can claim input tax credits\n- Whether this purchase qualifies for input tax credits\n- Management's accounting policy for this tax\n\nThe Disambiguator made an assumption (recoverable), and the Approver made a different assumption (non-recoverable based on payment language). Neither interpretation is definitively wrong based solely on the transaction text. This requires clarification from the user about the tax treatment.",
+        "decision": "STUCK",
+        "fix_plans": [],
+        "stuck_reason": "Transaction does not specify whether the 10% sales tax on the building is recoverable (HST Receivable) or non-recoverable (capitalize to Building cost). The Approver interprets \"was paid by cheque\" as indicating non-recoverable tax under IFRS IAS 16, but the transaction does not explicitly state the company's HST registration status or whether input tax credits can be claimed. Clarification needed: Is Mondelez registered for HST and can it recover the sales tax paid on this building purchase?"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "resolved": true,
+            "resolution": "Fair values are explicitly provided ($8,000,000 land, $4,000,000 building). Standard accounting convention requires allocation based on relative fair values: land = $9M \u00d7 (8M/12M) = $6M, building = $9M \u00d7 (4M/12M) = $3M",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "sales tax applicability",
+            "resolved": true,
+            "resolution": "Transaction states '10% sales tax on the building' \u2014 land is exempt from sales tax in Ontario, only building is taxable. Tax = $3,000,000 \u00d7 10% = $300,000",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment structure and amounts",
+            "resolved": true,
+            "resolution": "Total consideration is $9,000,000. 50% ($4,500,000) is due in 6 months (accounts payable). Balance of $4,500,000 plus $300,000 sales tax = $4,800,000 paid by cheque",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "sales tax recovery",
+            "resolved": true,
+            "resolution": "Corporation in Ontario can claim input tax credits on business purchases. HST paid is recoverable (HST Recoverable/Input Tax Credit account), not capitalized to building cost",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Two distinct asset increases on the debit side: (1) Land asset increase of $6,000,000 (allocated based on relative fair value: 8M/(8M+4M) \u00d7 9M), and (2) Building asset increase of $3,000,000 (allocated based on relative fair value: 4M/(8M+4M) \u00d7 9M). Land and building must use separate accounts because land is non-depreciable while buildings are depreciable assets. The sales tax on the building is capitalized to the building cost under IFRS. The payment method (partial cash, partial payable) affects only the credit side, not the debit classification.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "On the credit side:\n1. Cash/bank account decrease for the payment made by cheque. The payment consists of: (a) 50% of $9,000,000 = $4,500,000, plus (b) 10% sales tax on the building portion. The building's allocated cost is $9,000,000 \u00d7 ($4,000,000/$12,000,000) = $3,000,000, so sales tax = $300,000. Total cheque payment = $4,800,000. This is an asset decrease.\n2. Accounts payable or note payable increase for the deferred 50% payment = $4,500,000. This is a liability increase.\n3. Sales tax payable increase for the 10% tax on the building = $300,000. This is a liability increase.\n\nTherefore: 2 liability increases (deferred payment + sales tax payable) and 1 asset decrease (cash/bank).",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves three distinct economic events on the debit side:\n\n1. Land acquisition ($6,000,000 allocated based on fair value ratio 8M/12M) - Asset increase\n2. Building acquisition ($3,000,000 allocated based on fair value ratio 4M/12M) - Asset increase  \n3. Sales tax on building ($300,000 = 10% \u00d7 $3,000,000) - Expense increase\n\nUnder IFRS, sales tax that is not recoverable must be expensed when paid, not capitalized to the asset. The transaction states \"10% sales tax on the building was paid by cheque\" as part of the immediate payment, indicating it was paid now (not deferred with the 50% liability).\n\nThe initial tuple (2,0,0,0,0,0) correctly identified two asset increases (land and building) but missed the sales tax expense component. The credit tuple (2,0,0,1,0,0) showing 2 liability increases, 0 revenue, and 1 asset decrease is consistent with: liability for deferred payment, liability for sales tax payable (or direct expense if paid), and cash decrease.\n\nCorrected to (2,0,1,0,0,0): two asset increases (land and building) plus one expense increase (sales tax paid).",
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves purchasing land and building for $9,000,000 plus 10% sales tax on the building portion. \n\nBreaking down the economics:\n- Land fair value: $8,000,000\n- Building fair value: $4,000,000\n- Total fair value: $12,000,000\n- Purchase price allocated proportionally: Land gets $6,000,000 (8/12 \u00d7 $9M), Building gets $3,000,000 (4/12 \u00d7 $9M)\n- Sales tax on building: $300,000 (10% \u00d7 $3,000,000)\n- Total payment: $9,000,000 + $300,000 = $9,300,000\n\nPayment structure:\n- 50% of purchase price ($4,500,000) is deferred \u2192 liability increase\n- Balance of purchase price ($4,500,000) + sales tax ($300,000) = $4,800,000 paid by cheque \u2192 asset decrease (cash)\n\nThe initial credit tuple showed (2,0,0,1,0,0) = 2 liability increases + 1 asset decrease. However, there is only ONE liability being created (the deferred payment obligation for $4,500,000), not two separate liabilities. The sales tax is paid immediately by cheque, so it doesn't create a liability.\n\nCorrected to (1,0,0,1,0,0): 1 liability increase (deferred payment) + 1 asset decrease (cash payment including sales tax).",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of land and building for warehouse, partial payment by cheque",
+        "rationale": "The $9,000,000 purchase price is allocated between land ($6,000,000) and building ($3,000,000) based on relative fair values (8M:4M ratio). Land is recorded separately as it is non-depreciable, while the building is depreciable. The 10% sales tax of $300,000 applies only to the building (land is tax-exempt) and is recoverable as HST Receivable. Payment structure: $4,500,000 (50%) deferred as Accounts Payable due in 6 months, and $4,800,000 ($4,500,000 balance + $300,000 tax) paid immediately by cheque.",
+        "lines": [
+          {
+            "account_name": "Land",
+            "type": "debit",
+            "amount": 6000000.0
+          },
+          {
+            "account_name": "Building",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 300000.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 4500000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 4800000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "action": "proceed",
+            "reason": "Fair values are explicitly stated in the transaction text, and IFRS requires allocation based on relative fair values. This is a determinable accounting calculation, not a missing business fact."
+          },
+          {
+            "aspect": "sales tax applicability",
+            "action": "proceed",
+            "reason": "Transaction explicitly states '10% sales tax on the building' and land is tax-exempt under Canadian tax law. No ambiguity exists."
+          },
+          {
+            "aspect": "payment structure and amounts",
+            "action": "proceed",
+            "reason": "Transaction clearly states 50% due in 6 months and balance plus tax paid by cheque. Amounts are determinable from the transaction text."
+          },
+          {
+            "aspect": "sales tax recovery",
+            "action": "proceed",
+            "reason": "For a corporation making a business purchase, HST is recoverable as an input tax credit under Canadian tax rules. This is standard treatment, not a missing business fact."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Sales tax treatment is incorrect. The transaction states '10% sales tax on the building' which is unusual (standard HST in most Canadian provinces is 13-15%). However, per procedure step 6a, when transaction text states a specific tax amount or rate, the entry must match it exactly. The entry correctly applies 10% to the building portion ($300,000). BUT: The entry records HST Receivable (recoverable tax) when the transaction states the tax 'was paid by cheque' as part of the payment - this indicates non-recoverable tax that should be capitalized to the building cost under IFRS IAS 16, not recorded as a receivable. Under IFRS, only recoverable taxes are excluded from asset cost; non-recoverable taxes must be capitalized. The building should be debited $3,300,000 (not $3,000,000), with no HST Receivable line. This would make total debits = $9,300,000 and credits = $9,300,000 ($4,500,000 AP + $4,800,000 Cash).",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver's rejection states that the entry incorrectly records HST Receivable (recoverable tax) when the transaction indicates the tax \"was paid by cheque\" as part of the payment, which signals non-recoverable tax that should be capitalized to the building cost under IFRS IAS 16.\n\nTracing through the pipeline:\n\n1. Agent 0 (Disambiguator) resolved \"sales tax recovery\" by stating \"Corporation in Ontario can claim input tax credits on business purchases. HST paid is recoverable (HST Recoverable/Input Tax Credit account), not capitalized to building cost.\" This is an ASSUMPTION about recoverability that is not stated in the transaction text.\n\n2. Agent 1 (Debit Classifier) classified correctly based on the assumption that tax would be capitalized or separate.\n\n3. Agent 3 (Debit Corrector) initially tried to add sales tax as an expense increase, changing the tuple to (2,0,1,0,0,0), but this was later overridden.\n\n4. Agent 4 (Credit Corrector) corrected the credit tuple to (1,0,0,1,0,0), removing what it thought was an erroneous second liability.\n\n5. Agent 5 (Entry Builder) constructed the final entry with HST Receivable as a debit, following the Disambiguator's resolution that the tax is recoverable.\n\nThe ROOT CAUSE is Agent 0's assumption about tax recoverability. However, the transaction text does NOT state whether the business can recover the tax or not. It only states \"10% sales tax on the building was paid by cheque.\" The Approver interprets \"was paid by cheque\" as indicating non-recoverable tax, but this is an INTERPRETATION, not an explicit fact.\n\nThis is genuinely ambiguous: the transaction does not state:\n- Whether Mondelez is registered for HST/can claim input tax credits\n- Whether this purchase qualifies for input tax credits\n- Management's accounting policy for this tax\n\nThe Disambiguator made an assumption (recoverable), and the Approver made a different assumption (non-recoverable based on payment language). Neither interpretation is definitively wrong based solely on the transaction text. This requires clarification from the user about the tax treatment.",
+        "decision": "STUCK",
+        "fix_plans": [],
+        "stuck_reason": "Transaction does not specify whether the 10% sales tax on the building is recoverable (HST Receivable) or non-recoverable (capitalize to Building cost). The Approver interprets \"was paid by cheque\" as indicating non-recoverable tax under IFRS IAS 16, but the transaction does not explicitly state the company's HST registration status or whether input tax credits can be claimed. Clarification needed: Is Mondelez registered for HST and can it recover the sales tax paid on this building purchase?"
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "STUCK",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 600,
+        "output_tokens": 384,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 575,
+        "output_tokens": 214,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 573,
+        "output_tokens": 282,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 743,
+        "output_tokens": 413,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 743,
+        "output_tokens": 363,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1373,
+        "output_tokens": 731,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 3608,
+        "output_tokens": 314,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 3185,
+        "output_tokens": 712,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,620 @@
+{
+  "test_case_id": "int_hard_27d_meal_factory",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Meal for factory production staff, classified as manufacturing overhead",
+    "rationale": "The $125 meal for factory production staff is manufacturing overhead. In Ontario, meals are subject to 13% HST ($16.25). Under Canadian tax rules, only 50% of meal-related HST is recoverable as an Input Tax Credit (ITC). Therefore: debit HST Receivable for 50% of HST ($8.13), debit Manufacturing Overhead for the base meal cost ($125.00) plus the non-recoverable 50% of HST ($8.12), and credit Credit Card Payable for the total amount paid ($141.25). The tuples indicate one asset increase (Manufacturing Overhead, which accumulates in inventory) and one liability increase (Credit Card Payable).",
+    "lines": [
+      {
+        "account_name": "Manufacturing Overhead",
+        "type": "debit",
+        "amount": 133.12
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 8.13
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 141.25
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.084168,
+  "raw_cost_usd": 0.145296,
+  "total_latency_ms": 53497,
+  "total_input_tokens": 35217,
+  "total_output_tokens": 2643,
+  "total_llm_calls": 11,
+  "iteration_count": 2,
+  "final_decision": "error",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 531,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2926,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0028365,
+      "raw_cost_usd": 0.009303,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 504,
+      "output_tokens": 92,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1745,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032643000000000004,
+      "raw_cost_usd": 0.006615,
+      "output": {
+        "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is debited to manufacturing overhead, not credited.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is debited to manufacturing overhead, not credited."
+    },
+    "debit_classifier": {
+      "input_tokens": 506,
+      "output_tokens": 146,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1768,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0040866,
+      "raw_cost_usd": 0.007494,
+      "output": {
+        "reason": "Manufacturing overhead costs are accumulated in an inventory/work-in-process asset account. The $125 meal for factory production staff is a manufacturing overhead cost that increases the asset (inventory/WIP) rather than being expensed immediately. Under IFRS, product costs (including manufacturing overhead) are capitalized as inventory assets until the goods are sold. This is 1 asset increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Manufacturing overhead costs are accumulated in an inventory/work-in-process asset account. The $125 meal for factory production staff is a manufacturing overhead cost that increases the asset (inventory/WIP) rather than being expensed immediately. Under IFRS, product costs (including manufacturing overhead) are capitalized as inventory assets until the goods are sold. This is 1 asset increase."
+    },
+    "credit_corrector": {
+      "input_tokens": 674,
+      "output_tokens": 173,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2428,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051432,
+      "raw_cost_usd": 0.009879,
+      "output": {
+        "reason": "The transaction describes a meal purchase using a corporate credit card. This creates a liability (credit card payable) that must be paid later. The credit side correctly records a liability increase (slot a=1). The debit side shows an asset increase (slot a=1), which appears incorrect - manufacturing overhead should be an expense increase (slot c), not an asset increase. However, my role is only to review the credit tuple. The credit classification is correct: using a corporate credit card creates a liability increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a meal purchase using a corporate credit card. This creates a liability (credit card payable) that must be paid later. The credit side correctly records a liability increase (slot a=1). The debit side shows an asset increase (slot a=1), which appears incorrect - manufacturing overhead should be an expense increase (slot c), not an asset increase. However, my role is only to review the credit tuple. The credit classification is correct: using a corporate credit card creates a liability increase. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 674,
+      "output_tokens": 204,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2420,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0056058,
+      "raw_cost_usd": 0.01032,
+      "output": {
+        "reason": "The transaction describes a meal purchased on corporate credit card for factory production staff, classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that becomes part of inventory (Work in Process or Finished Goods) as an asset, not a period expense. The debit should be to inventory (asset increase), and the credit to accounts payable/credit card liability (liability increase). The initial debit tuple (1,0,0,0,0,0) correctly shows an asset increase, and the credit tuple (1,0,0,0,0,0) correctly shows a liability increase. Both sides are consistent and correct. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes a meal purchased on corporate credit card for factory production staff, classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that becomes part of inventory (Work in Process or Finished Goods) as an asset, not a period expense. The debit should be to inventory (asset increase), and the credit to accounts payable/credit card liability (liability increase). The initial debit tuple (1,0,0,0,0,0) correctly shows an asset increase, and the credit tuple (1,0,0,0,0,0) correctly shows a liability increase. Both sides are consistent and correct. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1638,
+      "output_tokens": 669,
+      "cache_read_tokens": 6428,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8066,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0168774,
+      "raw_cost_usd": 0.034233,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Meal for factory production staff, classified as manufacturing overhead",
+        "rationale": "The $125 meal for factory production staff is manufacturing overhead. In Ontario, meals are subject to 13% HST ($16.25). Under Canadian tax rules, only 50% of meal-related HST is recoverable as an Input Tax Credit (ITC). Therefore: debit HST Receivable for 50% of HST ($8.13), debit Manufacturing Overhead for the base meal cost ($125.00) plus the non-recoverable 50% of HST ($8.12), and credit Credit Card Payable for the total amount paid ($141.25). The tuples indicate one asset increase (Manufacturing Overhead, which accumulates in inventory) and one liability increase (Credit Card Payable).",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 133.12
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 8.13
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 141.25
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4203,
+      "output_tokens": 366,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8307,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.019330200000000002,
+      "raw_cost_usd": 0.030411,
+      "output": {
+        "reason": "Transaction states \"$125 for a meal\" but entry records $141.25 total payment. The transaction text does not state any tax amount or rate - it only mentions $125. When tax is not explicitly stated in the transaction text, we should not invent amounts. The entry should record exactly what the transaction describes: $125 paid via credit card.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Transaction states \"$125 for a meal\" but entry records $141.25 total payment. The transaction text does not state any tax amount or rate - it only mentions $125. When tax is not explicitly stated in the transaction text, we should not invent amounts. The entry should record exactly what the transaction describes: $125 paid via credit card."
+    },
+    "diagnostician": {
+      "input_tokens": 3847,
+      "output_tokens": 958,
+      "cache_read_tokens": 3710,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7557,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.027024,
+      "raw_cost_usd": 0.037041,
+      "output": {
+        "reasoning": "The Approver rejected because the entry records $141.25 total payment when the transaction text only states \"$125 for a meal\" with no mention of tax. \n\nTracing through the pipeline:\n- Iteration 0: Agent 5 correctly built an entry with $125 debit to Manufacturing Overhead and $125 credit to Credit Card Payable, matching the transaction text exactly.\n- Iteration 1: Agent 5 changed the entry to include HST calculations, adding $16.25 in tax (13% HST) and splitting it between HST Receivable ($8.13) and Manufacturing Overhead ($8.12), resulting in a total payment of $141.25.\n\nThe root cause is Agent 5 (Entry Builder) in Iteration 1. The transaction text does not state any tax amount or rate. Agent 5 invented the HST calculation without any basis in the transaction description. The Approver is correct: when tax is not explicitly stated in the transaction text, we should not invent amounts.\n\nThis is a fixable error - Agent 5 needs to be instructed to only add tax lines when tax is explicitly mentioned in the transaction or when there is clear evidence that the stated amount excludes tax.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Transaction states '$125 for a meal' with no mention of tax. Do not add HST lines or adjust amounts when tax is not explicitly stated in the transaction text. Record exactly $125 as stated."
+          }
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Transaction states meal cost is $125, but meals are taxable and subject to HST. The entry is missing tax lines entirely. Even though meals have restricted ITC (50% recoverable), the transaction should record the full HST paid and HST Receivable at 50% of the tax amount. The entry should have: Manufacturing Overhead debit for base amount, HST Receivable debit for 50% of HST, additional Manufacturing Overhead debit for the non-recoverable 50% of HST, and Credit Card Payable credit for total amount including tax. Without knowing the jurisdiction, cannot verify the exact rate, but the absence of any tax treatment is incorrect for a taxable meal purchase.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Manufacturing overhead costs are accumulated in an inventory/work-in-process asset account. The $125 meal for factory production staff is a manufacturing overhead cost that increases the asset (inventory/WIP) rather than being expensed immediately. Under IFRS, product costs (including manufacturing overhead) are capitalized as inventory assets until the goods are sold. This is 1 asset increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Manufacturing overhead costs are accumulated in an inventory/work-in-process asset account. The $125 meal for factory production staff is a manufacturing overhead cost that increases the asset (inventory/WIP) rather than being expensed immediately. Under IFRS, product costs (including manufacturing overhead) are capitalized as inventory assets until the goods are sold. This is 1 asset increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is debited to manufacturing overhead, not credited.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is debited to manufacturing overhead, not credited.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes a meal purchased on corporate credit card for factory production staff, classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that becomes part of inventory (Work in Process or Finished Goods) as an asset, not a period expense. The debit should be to inventory (asset increase), and the credit to accounts payable/credit card liability (liability increase). The initial debit tuple (1,0,0,0,0,0) correctly shows an asset increase, and the credit tuple (1,0,0,0,0,0) correctly shows a liability increase. Both sides are consistent and correct. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction describes a meal purchased on corporate credit card for factory production staff, classified as manufacturing overhead. Under IFRS, manufacturing overhead is a product cost that becomes part of inventory (Work in Process or Finished Goods) as an asset, not a period expense. The debit should be to inventory (asset increase), and the credit to accounts payable/credit card liability (liability increase). The initial debit tuple (1,0,0,0,0,0) correctly shows an asset increase, and the credit tuple (1,0,0,0,0,0) correctly shows a liability increase. Both sides are consistent and correct. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes a meal purchase using a corporate credit card. This creates a liability (credit card payable) that must be paid later. The credit side correctly records a liability increase (slot a=1). The debit side shows an asset increase (slot a=1), which appears incorrect - manufacturing overhead should be an expense increase (slot c), not an asset increase. However, my role is only to review the credit tuple. The credit classification is correct: using a corporate credit card creates a liability increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction describes a meal purchase using a corporate credit card. This creates a liability (credit card payable) that must be paid later. The credit side correctly records a liability increase (slot a=1). The debit side shows an asset increase (slot a=1), which appears incorrect - manufacturing overhead should be an expense increase (slot c), not an asset increase. However, my role is only to review the credit tuple. The credit classification is correct: using a corporate credit card creates a liability increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-01-01",
+        "description": "Meal for factory production staff - manufacturing overhead",
+        "rationale": "The meal provided to factory production staff is a manufacturing overhead cost. Under IFRS, manufacturing overhead is accumulated in an inventory account (Work in Process or Manufacturing Overhead) as part of product cost, not expensed immediately. The debit tuple (1,0,0,0,0,0) correctly indicates an asset increase (inventory/WIP), and the credit tuple (1,0,0,0,0,0) correctly indicates a liability increase (credit card payable). The $125 is added to manufacturing overhead which will eventually flow through inventory to cost of goods sold when products are completed and sold.",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Meal for factory production staff, classified as manufacturing overhead",
+        "rationale": "The $125 meal for factory production staff is manufacturing overhead. In Ontario, meals are subject to 13% HST ($16.25). Under Canadian tax rules, only 50% of meal-related HST is recoverable as an Input Tax Credit (ITC). Therefore: debit HST Receivable for 50% of HST ($8.13), debit Manufacturing Overhead for the base meal cost ($125.00) plus the non-recoverable 50% of HST ($8.12), and credit Credit Card Payable for the total amount paid ($141.25). The tuples indicate one asset increase (Manufacturing Overhead, which accumulates in inventory) and one liability increase (Credit Card Payable).",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 133.12
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 8.13
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 141.25
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Transaction states meal cost is $125, but meals are taxable and subject to HST. The entry is missing tax lines entirely. Even though meals have restricted ITC (50% recoverable), the transaction should record the full HST paid and HST Receivable at 50% of the tax amount. The entry should have: Manufacturing Overhead debit for base amount, HST Receivable debit for 50% of HST, additional Manufacturing Overhead debit for the non-recoverable 50% of HST, and Credit Card Payable credit for total amount including tax. Without knowing the jurisdiction, cannot verify the exact rate, but the absence of any tax treatment is incorrect for a taxable meal purchase.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Transaction states \"$125 for a meal\" but entry records $141.25 total payment. The transaction text does not state any tax amount or rate - it only mentions $125. When tax is not explicitly stated in the transaction text, we should not invent amounts. The entry should record exactly what the transaction describes: $125 paid via credit card.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because the entry is missing HST tax lines entirely. The transaction states the meal cost is $125, but meals are taxable purchases subject to HST. Even though meals have restricted ITC (50% recoverable), the entry should record: (1) Manufacturing Overhead debit for base amount, (2) HST Receivable debit for 50% of HST, (3) additional Manufacturing Overhead debit for non-recoverable 50% of HST, and (4) Credit Card Payable credit for total including tax.\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier) classified the $125 as asset increase (manufacturing overhead capitalized to inventory)\n- Agent 2 (Credit Classifier) classified as liability increase (credit card payable)\n- Agent 3 (Debit Corrector) validated the debit tuple as correct\n- Agent 4 (Credit Corrector) validated the credit tuple as correct\n- Agent 5 (Entry Builder) constructed the entry with Manufacturing Overhead debit $125 and Credit Card Payable credit $125\n\nThe classifiers and correctors worked with tuples that don't include tax treatment - they only classify the directional categories. None of them made a classification error. The root cause is Agent 5 (Entry Builder), which is responsible for constructing the complete journal entry including all required tax lines. Agent 5 failed to recognize that this is a taxable meal purchase requiring HST treatment with restricted ITC (50% recoverable for meals).\n\nThe error is fixable - Agent 5 needs to add the appropriate HST lines for a meal purchase with 50% ITC restriction.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Meal purchases are taxable and subject to HST. Must add tax lines: HST Receivable debit for 50% of HST (meals have restricted ITC), additional Manufacturing Overhead debit for non-recoverable 50% of HST, and increase Credit Card Payable credit to include full HST amount. The $125 stated is likely the base amount before tax."
+          }
+        ],
+        "stuck_reason": null
+      },
+      {
+        "reasoning": "The Approver rejected because the entry records $141.25 total payment when the transaction text only states \"$125 for a meal\" with no mention of tax. \n\nTracing through the pipeline:\n- Iteration 0: Agent 5 correctly built an entry with $125 debit to Manufacturing Overhead and $125 credit to Credit Card Payable, matching the transaction text exactly.\n- Iteration 1: Agent 5 changed the entry to include HST calculations, adding $16.25 in tax (13% HST) and splitting it between HST Receivable ($8.13) and Manufacturing Overhead ($8.12), resulting in a total payment of $141.25.\n\nThe root cause is Agent 5 (Entry Builder) in Iteration 1. The transaction text does not state any tax amount or rate. Agent 5 invented the HST calculation without any basis in the transaction description. The Approver is correct: when tax is not explicitly stated in the transaction text, we should not invent amounts.\n\nThis is a fixable error - Agent 5 needs to be instructed to only add tax lines when tax is explicitly mentioned in the transaction or when there is clear evidence that the stated amount excludes tax.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Transaction states '$125 for a meal' with no mention of tax. Do not add HST lines or adjust amounts when tax is not explicitly stated in the transaction text. Record exactly $125 as stated."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Meal purchases are taxable and subject to HST. Must add tax lines: HST Receivable debit for 50% of HST (meals have restricted ITC), additional Manufacturing Overhead debit for non-recoverable 50% of HST, and increase Credit Card Payable credit to include full HST amount. The $125 stated is likely the base amount before tax."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": null,
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 531,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 92,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 506,
+        "output_tokens": 146,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 674,
+        "output_tokens": 173,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 674,
+        "output_tokens": 204,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 763,
+        "output_tokens": 301,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1633,
+        "output_tokens": 222,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1527,
+        "output_tokens": 550,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 875,
+        "output_tokens": 368,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2570,
+        "output_tokens": 144,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 2320,
+        "output_tokens": 408,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

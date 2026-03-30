@@ -1,0 +1,579 @@
+{
+  "test_case_id": "basic_07_loan_to_equity",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Debt-to-equity conversion: the $200 loan payable is extinguished (debit to decrease liability) by issuing 400 common shares valued at $200 (credit to increase equity). Under IFRS, this is a capital transaction recorded at the carrying amount of the liability extinguished. No gain or loss is recognized. The entry reflects the legal conversion of debt to equity capital.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Loan Payable",
+        "amount": 200.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Common Shares",
+        "amount": 200.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.048714,
+  "raw_cost_usd": 0.075795,
+  "total_latency_ms": 35949,
+  "total_input_tokens": 12345,
+  "total_output_tokens": 2584,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 518,
+      "output_tokens": 449,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2865,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0089931,
+      "raw_cost_usd": 0.01533,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "conversion mechanism",
+            "resolution": "Transaction states 'converted loan to equity' \u2014 this is a debt-to-equity conversion at the stated amounts ($200 loan extinguished, 400 shares issued)"
+          },
+          {
+            "aspect": "share value per share",
+            "resolution": "Stated amounts imply $0.50 per share ($200 \u00f7 400 shares) \u2014 this is the conversion price"
+          },
+          {
+            "aspect": "accounting treatment of conversion",
+            "resolution": "Standard treatment: debit Loan Payable $200, credit Common Shares at stated/par value (if any), credit Additional Paid-in Capital for remainder"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "par value of common shares",
+            "options": [
+              "Shares have a stated par value (e.g., $0.01, $0.10, $0.50 per share)",
+              "Shares are no-par value"
+            ],
+            "clarification_question": "What is the par value (or stated value) of the common shares being issued, or are they no-par value shares?",
+            "why_entry_differs": "If shares have par value, the $200 must be split between Common Shares (at par) and Additional Paid-in Capital (excess). If no-par, the entire $200 is credited to Common Shares. The accounts and amounts differ.",
+            "why_not_resolved": "Par value is a corporate charter specification not determinable from the transaction text. Ontario corporations can issue par or no-par shares, and there is no default convention."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 379,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2007,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076128,
+      "raw_cost_usd": 0.011706,
+      "output": {
+        "liability_increase_reason": "No liabilities increase. The bank loan liability is being eliminated (debited), not increased.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "Common shares (equity) increase by $200 as the loan is converted to equity ownership. This is credited to share capital/common stock.",
+        "equity_increase_count": 1,
+        "revenue_increase_reason": "No revenue is generated. This is a financing transaction converting debt to equity, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. This is a pure liability-to-equity conversion with no asset movement.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this debt-to-equity conversion.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease. This is a balance sheet restructuring transaction, not an expense reversal.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 396,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2039,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0078828,
+      "raw_cost_usd": 0.012057,
+      "output": {
+        "asset_increase_reason": "No assets increase. This is a debt-to-equity conversion that only affects liabilities and equity.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends or owner withdrawals occur. This is a conversion transaction, not a distribution.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are incurred. Debt-to-equity conversions are balance sheet reclassifications, not income statement events.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The $200 bank loan (liability) is extinguished/decreased as it is converted to equity. This is debited to reduce the loan payable.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity decreases. Equity increases (common shares issued) on the credit side, not the debit side.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue is affected. This is a financing transaction between liability and equity accounts.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 813,
+      "output_tokens": 1360,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5434,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.024225299999999998,
+      "raw_cost_usd": 0.036702,
+      "output": {
+        "incomplete_information_reasoning": "The transaction is clear: a debt-to-equity conversion where a $200 loan liability is extinguished by issuing 400 common shares. This is a straightforward capital restructuring transaction. All necessary business facts are present: the loan amount ($200), the number of shares issued (400), and the nature of the transaction (conversion). No additional information is needed to construct the entry.",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. This is a debt-to-equity conversion that affects only liabilities and equity.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend declared or paid in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense incurred. Debt-to-equity conversions are balance sheet transactions that do not generate expenses.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "The $200 bank loan liability is extinguished through conversion to equity. This is a liability decrease, debited to remove the loan payable.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loan Payable"
+          ]
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease. The transaction increases equity through share issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue involved in this balance sheet restructuring transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability increase. The loan liability is being eliminated, not increased.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "Issuing 400 common shares for $200 increases equity. The credit represents the increase in common share capital (or share capital and share premium if par value accounting applies, but typically recorded as one line for the total consideration).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Common Shares"
+          ]
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue generated. This is a capital transaction, not an operating transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset decrease. No cash or other assets are being paid out.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend reversal or decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Debt-to-equity conversion: the $200 loan payable is extinguished (debit to decrease liability) by issuing 400 common shares valued at $200 (credit to increase equity). Under IFRS, this is a capital transaction recorded at the carrying amount of the liability extinguished. No gain or loss is recognized. The entry reflects the legal conversion of debt to equity capital.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Loan Payable",
+              "amount": 200.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Common Shares",
+              "amount": 200.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction describes a straightforward debt-to-equity conversion. The classifier tuples correctly identify this as a liability decrease (debit) and equity increase (credit). The entry is balanced (200 debit = 200 credit), uses appropriate account names, and follows IFRS treatment for debt-to-equity conversions (recorded at carrying amount of liability, no gain/loss). No tax implications for capital restructuring. All business facts are present and the entry is complete and correct.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "conversion mechanism",
+            "resolution": "Transaction states 'converted loan to equity' \u2014 this is a debt-to-equity conversion at the stated amounts ($200 loan extinguished, 400 shares issued)"
+          },
+          {
+            "aspect": "share value per share",
+            "resolution": "Stated amounts imply $0.50 per share ($200 \u00f7 400 shares) \u2014 this is the conversion price"
+          },
+          {
+            "aspect": "accounting treatment of conversion",
+            "resolution": "Standard treatment: debit Loan Payable $200, credit Common Shares at stated/par value (if any), credit Additional Paid-in Capital for remainder"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "par value of common shares",
+            "options": [
+              "Shares have a stated par value (e.g., $0.01, $0.10, $0.50 per share)",
+              "Shares are no-par value"
+            ],
+            "clarification_question": "What is the par value (or stated value) of the common shares being issued, or are they no-par value shares?",
+            "why_entry_differs": "If shares have par value, the $200 must be split between Common Shares (at par) and Additional Paid-in Capital (excess). If no-par, the entire $200 is credited to Common Shares. The accounts and amounts differ.",
+            "why_not_resolved": "Par value is a corporate charter specification not determinable from the transaction text. Ontario corporations can issue par or no-par shares, and there is no default convention."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No assets increase. This is a debt-to-equity conversion that only affects liabilities and equity.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends or owner withdrawals occur. This is a conversion transaction, not a distribution.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are incurred. Debt-to-equity conversions are balance sheet reclassifications, not income statement events.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The $200 bank loan (liability) is extinguished/decreased as it is converted to equity. This is debited to reduce the loan payable.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity decreases. Equity increases (common shares issued) on the credit side, not the debit side.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue is affected. This is a financing transaction between liability and equity accounts.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities increase. The bank loan liability is being eliminated (debited), not increased.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "Common shares (equity) increase by $200 as the loan is converted to equity ownership. This is credited to share capital/common stock.",
+        "equity_increase_count": 1,
+        "revenue_increase_reason": "No revenue is generated. This is a financing transaction converting debt to equity, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. This is a pure liability-to-equity conversion with no asset movement.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this debt-to-equity conversion.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease. This is a balance sheet restructuring transaction, not an expense reversal.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No assets increase. This is a debt-to-equity conversion that only affects liabilities and equity.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends or owner withdrawals occur. This is a conversion transaction, not a distribution.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are incurred. Debt-to-equity conversions are balance sheet reclassifications, not income statement events.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The $200 bank loan (liability) is extinguished/decreased as it is converted to equity. This is debited to reduce the loan payable.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity decreases. Equity increases (common shares issued) on the credit side, not the debit side.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue is affected. This is a financing transaction between liability and equity accounts.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities increase. The bank loan liability is being eliminated (debited), not increased.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "Common shares (equity) increase by $200 as the loan is converted to equity ownership. This is credited to share capital/common stock.",
+        "equity_increase_count": 1,
+        "revenue_increase_reason": "No revenue is generated. This is a financing transaction converting debt to equity, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. This is a pure liability-to-equity conversion with no asset movement.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this debt-to-equity conversion.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease. This is a balance sheet restructuring transaction, not an expense reversal.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction is clear: a debt-to-equity conversion where a $200 loan liability is extinguished by issuing 400 common shares. This is a straightforward capital restructuring transaction. All necessary business facts are present: the loan amount ($200), the number of shares issued (400), and the nature of the transaction (conversion). No additional information is needed to construct the entry.",
+        "debit_asset_increase": {
+          "reason": "No asset increase in this transaction. This is a debt-to-equity conversion that affects only liabilities and equity.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend declared or paid in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense incurred. Debt-to-equity conversions are balance sheet transactions that do not generate expenses.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "The $200 bank loan liability is extinguished through conversion to equity. This is a liability decrease, debited to remove the loan payable.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loan Payable"
+          ]
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity decrease. The transaction increases equity through share issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue involved in this balance sheet restructuring transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "No liability increase. The loan liability is being eliminated, not increased.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "Issuing 400 common shares for $200 increases equity. The credit represents the increase in common share capital (or share capital and share premium if par value accounting applies, but typically recorded as one line for the total consideration).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Common Shares"
+          ]
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue generated. This is a capital transaction, not an operating transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "No asset decrease. No cash or other assets are being paid out.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend reversal or decrease in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Debt-to-equity conversion: the $200 loan payable is extinguished (debit to decrease liability) by issuing 400 common shares valued at $200 (credit to increase equity). Under IFRS, this is a capital transaction recorded at the carrying amount of the liability extinguished. No gain or loss is recognized. The entry reflects the legal conversion of debt to equity capital.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Loan Payable",
+              "amount": 200.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Common Shares",
+              "amount": 200.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction describes a straightforward debt-to-equity conversion. The classifier tuples correctly identify this as a liability decrease (debit) and equity increase (credit). The entry is balanced (200 debit = 200 credit), uses appropriate account names, and follows IFRS treatment for debt-to-equity conversions (recorded at carrying amount of liability, no gain/loss). No tax implications for capital restructuring. All business facts are present and the entry is complete and correct.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 449,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 379,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 396,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 813,
+        "output_tokens": 1360,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

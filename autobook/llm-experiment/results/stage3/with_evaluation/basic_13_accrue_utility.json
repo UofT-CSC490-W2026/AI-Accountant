@@ -1,0 +1,354 @@
+{
+  "test_case_id": "basic_13_accrue_utility",
+  "variant_name": "with_evaluation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Accrual of utility bill",
+    "rationale": "Recording utility expense incurred but not yet paid. Debit Utilities Expense (expense increase, c=1) to recognize the cost of utilities consumed during the period. Credit Accounts Payable or Accrued Liabilities (liability increase, a=1) to record the obligation to pay the utility provider. No tax lines are added because utility bills typically include tax in the stated amount, and the accrual is based on the invoice total. The tuples correctly identify this as an expense recognition with a corresponding liability.",
+    "lines": [
+      {
+        "account_name": "Utilities Expense",
+        "type": "debit",
+        "amount": 50.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 50.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0349095,
+  "raw_cost_usd": 0.060627,
+  "total_latency_ms": 28936,
+  "total_input_tokens": 13844,
+  "total_output_tokens": 1273,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "STUCK",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 481,
+      "output_tokens": 102,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1722,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033453000000000003,
+      "raw_cost_usd": 0.006696,
+      "output": {
+        "reason": "Accruing a utility bill means recognizing the obligation to pay. This creates a liability (accounts payable or accrued expenses) which is increased by crediting it.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Accruing a utility bill means recognizing the obligation to pay. This creates a liability (accounts payable or accrued expenses) which is increased by crediting it."
+    },
+    "debit_classifier": {
+      "input_tokens": 483,
+      "output_tokens": 114,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1745,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035376,
+      "raw_cost_usd": 0.006945,
+      "output": {
+        "reason": "Accruing a utility bill means recognizing the expense incurred. The debit side records the utility expense increase (1 line). The credit side (not classified here) would increase accounts payable/accrued liabilities.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Accruing a utility bill means recognizing the expense incurred. The debit side records the utility expense increase (1 line). The credit side (not classified here) would increase accounts payable/accrued liabilities."
+    },
+    "entry_builder": {
+      "input_tokens": 719,
+      "output_tokens": 281,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3834,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0073065,
+      "raw_cost_usd": 0.015717,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Accrual of utility bill",
+        "rationale": "Recording utility expense incurred but not yet paid. Debit Utilities Expense (expense increase, c=1) to recognize the cost of utilities consumed during the period. Credit Accounts Payable or Accrued Liabilities (liability increase, a=1) to record the obligation to pay the utility provider. No tax lines are added because utility bills typically include tax in the stated amount, and the accrual is based on the invoice total. The tuples correctly identify this as an expense recognition with a corresponding liability.",
+        "lines": [
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 50.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 50.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 1369,
+      "output_tokens": 206,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3421,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.007812600000000001,
+      "raw_cost_usd": 0.013353,
+      "output": {
+        "reason": "Tax treatment error. Utilities are taxable services in Canada. The transaction states '$50 utility bill' but does not specify whether this is pre-tax or tax-inclusive. The entry builder's rationale incorrectly assumes 'utility bills typically include tax in the stated amount' and records no tax lines. However, utilities are taxable purchases requiring HST treatment. If $50 is the pre-tax amount, HST Receivable must be added. If $50 is tax-inclusive, the entry must split it into expense base and HST Receivable components. The current entry treats a taxable transaction as non-taxable.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Tax treatment error. Utilities are taxable services in Canada. The transaction states '$50 utility bill' but does not specify whether this is pre-tax or tax-inclusive. The entry builder's rationale incorrectly assumes 'utility bills typically include tax in the stated amount' and records no tax lines. However, utilities are taxable purchases requiring HST treatment. If $50 is the pre-tax amount, HST Receivable must be added. If $50 is tax-inclusive, the entry must split it into expense base and HST Receivable components. The current entry treats a taxable transaction as non-taxable."
+    },
+    "diagnostician": {
+      "input_tokens": 1267,
+      "output_tokens": 570,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3122,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0129075,
+      "raw_cost_usd": 0.017916,
+      "output": {
+        "reasoning": "The Approver rejected the entry because utilities are taxable services in Canada requiring HST treatment, but no tax lines were included. The rejection identifies that the transaction description '$50 utility bill' is ambiguous about whether this is pre-tax or tax-inclusive, and the entry builder incorrectly assumed the amount includes tax and recorded no tax lines.\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier): Correctly classified as expense increase (0,0,1,0,0,0)\n- Agent 2 (Credit Classifier): Correctly classified as liability increase (1,0,0,0,0,0)\n- Agent 3 (Debit Corrector): Validated the debit tuple, no changes\n- Agent 4 (Credit Corrector): Validated the credit tuple, no changes\n- Agent 5 (Entry Builder): Built the entry but failed to add HST lines, with rationale stating \"utility bills typically include tax in the stated amount, and the accrual is based on the invoice total\"\n\nThe tuples themselves are correct - this is indeed an expense increase and liability increase. The error is NOT in classification but in the Entry Builder's tax treatment logic. Agent 5 made an incorrect assumption about tax inclusion and failed to add the required HST Receivable debit line and adjust the amounts accordingly.\n\nHowever, there's a deeper issue: the transaction description is genuinely ambiguous. It doesn't specify whether $50 is pre-tax or tax-inclusive. The Approver correctly identifies this ambiguity. Without knowing which interpretation is correct, no agent can definitively resolve this - it requires clarification from the source document or user.\n\nThis is a STUCK situation because the ambiguity about tax treatment (pre-tax vs tax-inclusive) cannot be resolved by the pipeline without additional information.",
+        "decision": "STUCK",
+        "fix_plans": [],
+        "stuck_reason": "Transaction states '$50 utility bill' without specifying whether amount is pre-tax or tax-inclusive. Utilities are taxable services requiring HST treatment, but correct entry depends on interpretation: if pre-tax, HST must be added on top; if tax-inclusive, amount must be split into base and HST components. Source document clarification needed to determine correct tax treatment."
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Accruing a utility bill means recognizing the expense incurred. The debit side records the utility expense increase (1 line). The credit side (not classified here) would increase accounts payable/accrued liabilities.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Accruing a utility bill means recognizing the obligation to pay. This creates a liability (accounts payable or accrued expenses) which is increased by crediting it.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Accruing a utility bill means recognizing the expense incurred. The debit side records the utility expense increase (1 line). The credit side (not classified here) would increase accounts payable/accrued liabilities.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Accruing a utility bill means recognizing the obligation to pay. This creates a liability (accounts payable or accrued expenses) which is increased by crediting it.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Accrual of utility bill",
+        "rationale": "Recording utility expense incurred but not yet paid. Debit Utilities Expense (expense increase, c=1) to recognize the cost of utilities consumed during the period. Credit Accounts Payable or Accrued Liabilities (liability increase, a=1) to record the obligation to pay the utility provider. No tax lines are added because utility bills typically include tax in the stated amount, and the accrual is based on the invoice total. The tuples correctly identify this as an expense recognition with a corresponding liability.",
+        "lines": [
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 50.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 50.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Tax treatment error. Utilities are taxable services in Canada. The transaction states '$50 utility bill' but does not specify whether this is pre-tax or tax-inclusive. The entry builder's rationale incorrectly assumes 'utility bills typically include tax in the stated amount' and records no tax lines. However, utilities are taxable purchases requiring HST treatment. If $50 is the pre-tax amount, HST Receivable must be added. If $50 is tax-inclusive, the entry must split it into expense base and HST Receivable components. The current entry treats a taxable transaction as non-taxable.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected the entry because utilities are taxable services in Canada requiring HST treatment, but no tax lines were included. The rejection identifies that the transaction description '$50 utility bill' is ambiguous about whether this is pre-tax or tax-inclusive, and the entry builder incorrectly assumed the amount includes tax and recorded no tax lines.\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier): Correctly classified as expense increase (0,0,1,0,0,0)\n- Agent 2 (Credit Classifier): Correctly classified as liability increase (1,0,0,0,0,0)\n- Agent 3 (Debit Corrector): Validated the debit tuple, no changes\n- Agent 4 (Credit Corrector): Validated the credit tuple, no changes\n- Agent 5 (Entry Builder): Built the entry but failed to add HST lines, with rationale stating \"utility bills typically include tax in the stated amount, and the accrual is based on the invoice total\"\n\nThe tuples themselves are correct - this is indeed an expense increase and liability increase. The error is NOT in classification but in the Entry Builder's tax treatment logic. Agent 5 made an incorrect assumption about tax inclusion and failed to add the required HST Receivable debit line and adjust the amounts accordingly.\n\nHowever, there's a deeper issue: the transaction description is genuinely ambiguous. It doesn't specify whether $50 is pre-tax or tax-inclusive. The Approver correctly identifies this ambiguity. Without knowing which interpretation is correct, no agent can definitively resolve this - it requires clarification from the source document or user.\n\nThis is a STUCK situation because the ambiguity about tax treatment (pre-tax vs tax-inclusive) cannot be resolved by the pipeline without additional information.",
+        "decision": "STUCK",
+        "fix_plans": [],
+        "stuck_reason": "Transaction states '$50 utility bill' without specifying whether amount is pre-tax or tax-inclusive. Utilities are taxable services requiring HST treatment, but correct entry depends on interpretation: if pre-tax, HST must be added on top; if tax-inclusive, amount must be split into base and HST components. Source document clarification needed to determine correct tax treatment."
+      }
+    ],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "STUCK",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 481,
+        "output_tokens": 102,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 483,
+        "output_tokens": 114,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 719,
+        "output_tokens": 281,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1369,
+        "output_tokens": 206,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1267,
+        "output_tokens": 570,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

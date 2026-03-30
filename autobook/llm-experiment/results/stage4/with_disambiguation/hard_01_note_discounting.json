@@ -1,0 +1,575 @@
+{
+  "test_case_id": "hard_01_note_discounting",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Cannot construct entry without knowing recourse nature. Calculation would be: Face value $100,000, 40 days remaining (90-50), discount = $100,000 \u00d7 15% \u00d7 (40/360) = $1,667. Net proceeds = $100,000 - $1,667 = $98,333. If sale: Dr Cash $98,333, Dr Loss $1,667, Cr Notes Receivable $100,000. If borrowing: Dr Cash $98,333, Cr Liability $98,333 (note stays on books). The structure differs fundamentally based on recourse.",
+    "lines": []
+  },
+  "actual_cost_usd": 0.0564207,
+  "raw_cost_usd": 0.08379600000000001,
+  "total_latency_ms": 42763,
+  "total_input_tokens": 12682,
+  "total_output_tokens": 3050,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 575,
+      "output_tokens": 615,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2922,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0116541,
+      "raw_cost_usd": 0.017991,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "nature of discounting transaction",
+            "resolution": "The term 'discounted at the bank' with 'receiving net proceeds' and 'deducting discount charges' indicates a sale/derecognition of the receivable (factoring), not a collateralized loan. The bank assumes collection risk and Ford receives immediate cash less a fee."
+          },
+          {
+            "aspect": "calculation of discount amount",
+            "resolution": "Standard discounting convention: 15% annual rate applied to $100,000 face value for remaining 40 days (90 - 50 = 40 days). Discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $98,356.16."
+          },
+          {
+            "aspect": "original note terms",
+            "resolution": "Non-interest-bearing note received as settlement of trade receivable means the note was recorded at face value ($100,000), replacing the original accounts receivable."
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "recourse vs. non-recourse factoring",
+            "options": [
+              "Non-recourse factoring: bank assumes all credit risk, Ford derecognizes note receivable entirely and recognizes loss on disposal",
+              "Recourse factoring: Ford retains credit risk, transaction is treated as secured borrowing with note receivable remaining on books and liability recorded"
+            ],
+            "clarification_question": "When Ford discounted the note at the bank, did the bank assume the credit risk if the maker defaults (non-recourse), or does Ford remain liable to repay the bank if the note is not collected (recourse)?",
+            "why_entry_differs": "Non-recourse: Debit Cash and Loss on Note Disposal, Credit Note Receivable (derecognition). Recourse: Debit Cash, Credit Note Receivable Pledged and Liability to Bank (secured borrowing, no derecognition).",
+            "why_not_resolved": "The term 'discounted at the bank' is ambiguous between sale (non-recourse) and collateralized borrowing (recourse). The text states net proceeds were received, which suggests sale, but does not explicitly state whether Ford retains or transfers the credit risk. Standard convention does not provide a default\u2014this depends on the specific agreement terms with the bank."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 550,
+      "output_tokens": 373,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2096,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0077088,
+      "raw_cost_usd": 0.011883,
+      "output": {
+        "asset_increase_reason": "Cash increases when Ford receives the net proceeds from discounting the note at the bank (face value minus discount charges for the remaining 40 days).",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Interest/discount expense increases for the discount charges deducted by the bank (calculated as 15% annual rate on $100,000 for the remaining 40 days of the note term).",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue is being reversed or reduced in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 548,
+      "output_tokens": 394,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2064,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0080088,
+      "raw_cost_usd": 0.012102,
+      "output": {
+        "liability_increase_reason": "No liabilities are created or increased. Ford is discounting (selling) a note receivable to the bank, not borrowing.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No owner investments or equity contributions occur in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned. This is a financing transaction involving the disposal of a financial asset (note receivable).",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "The note receivable (face value $100,000) is removed from Ford's books when discounted/sold to the bank. This represents one asset decrease line.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or reduced. The discount charge is recognized as an expense (debit side), not a decrease of expense on the credit side.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 870,
+      "output_tokens": 1668,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5600,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.029049,
+      "raw_cost_usd": 0.04182,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Accounting treatment election for note discounting",
+            "reason": "Under IFRS 9, when a note receivable is discounted at a bank, the entity must determine whether the transaction qualifies as derecognition (sale) or a secured borrowing. This depends on whether substantially all risks and rewards of ownership have been transferred. If Ford retains recourse obligations or significant credit risk, it would be a secured borrowing (debit Cash, credit Liability). If Ford transfers substantially all risks and rewards with no recourse, it would be derecognition (debit Cash and Loss, credit Notes Receivable). The transaction text does not specify whether Ford has recourse obligations or the nature of the discounting arrangement.",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "Does Ford have any recourse obligation if the maker of the note defaults? In other words, if the note is not paid at maturity, is Ford required to repay the bank?",
+          "Did Ford transfer substantially all risks and rewards of the note to the bank, or does Ford retain significant involvement with the note?"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "The classifier proposes 1 asset increase (Cash received from bank). This is correct regardless of whether the transaction is a sale or secured borrowing - cash is received in both cases.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction is involved in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier proposes 1 expense increase. If this is treated as a sale/derecognition, the discount charge would be a loss on disposal (expense/loss). However, if treated as a secured borrowing, there would be no immediate expense - instead, interest expense would be accrued over time. The correct treatment depends on the recourse nature of the arrangement, which is not specified.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loss on Note Discounting"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being decreased in a note discounting transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No direct equity decrease occurs in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease occurs in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "If the discounting is treated as a secured borrowing (with recourse), a liability would be created. However, the classifier proposes 0 liability increase, suggesting a sale treatment. Without knowing the recourse nature, we cannot determine if this is correct.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase occurs in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue is generated from note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier proposes 1 asset decrease. If treated as a sale/derecognition, the Notes Receivable would be removed (credited). If treated as a secured borrowing, the note would remain on the books. The correct treatment depends on whether Ford has recourse obligations.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Notes Receivable"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction is involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease occurs in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot construct entry without knowing recourse nature. Calculation would be: Face value $100,000, 40 days remaining (90-50), discount = $100,000 \u00d7 15% \u00d7 (40/360) = $1,667. Net proceeds = $100,000 - $1,667 = $98,333. If sale: Dr Cash $98,333, Dr Loss $1,667, Cr Notes Receivable $100,000. If borrowing: Dr Cash $98,333, Cr Liability $98,333 (note stays on books). The structure differs fundamentally based on recourse.",
+          "lines": []
+        },
+        "decision_rationale": "Under IFRS 9, the accounting treatment for discounting a note receivable depends critically on whether the arrangement includes recourse obligations. With recourse (Ford must repay if maker defaults), this is a secured borrowing and the note remains on Ford's books with a liability created. Without recourse (risks transferred), this is derecognition and the note is removed with a loss recognized. The transaction text does not specify the recourse nature of the discounting arrangement. These two treatments produce structurally different journal entries - different accounts and different debit/credit structures. This is genuine missing business information that only the person who executed the transaction would know.",
+        "decision": "INCOMPLETE_INFORMATION"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "Does Ford have any recourse obligation if the maker of the note defaults? In other words, if the note is not paid at maturity, is Ford required to repay the bank?",
+    "Did Ford transfer substantially all risks and rewards of the note to the bank, or does Ford retain significant involvement with the note?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "nature of discounting transaction",
+            "resolution": "The term 'discounted at the bank' with 'receiving net proceeds' and 'deducting discount charges' indicates a sale/derecognition of the receivable (factoring), not a collateralized loan. The bank assumes collection risk and Ford receives immediate cash less a fee."
+          },
+          {
+            "aspect": "calculation of discount amount",
+            "resolution": "Standard discounting convention: 15% annual rate applied to $100,000 face value for remaining 40 days (90 - 50 = 40 days). Discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $98,356.16."
+          },
+          {
+            "aspect": "original note terms",
+            "resolution": "Non-interest-bearing note received as settlement of trade receivable means the note was recorded at face value ($100,000), replacing the original accounts receivable."
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "recourse vs. non-recourse factoring",
+            "options": [
+              "Non-recourse factoring: bank assumes all credit risk, Ford derecognizes note receivable entirely and recognizes loss on disposal",
+              "Recourse factoring: Ford retains credit risk, transaction is treated as secured borrowing with note receivable remaining on books and liability recorded"
+            ],
+            "clarification_question": "When Ford discounted the note at the bank, did the bank assume the credit risk if the maker defaults (non-recourse), or does Ford remain liable to repay the bank if the note is not collected (recourse)?",
+            "why_entry_differs": "Non-recourse: Debit Cash and Loss on Note Disposal, Credit Note Receivable (derecognition). Recourse: Debit Cash, Credit Note Receivable Pledged and Liability to Bank (secured borrowing, no derecognition).",
+            "why_not_resolved": "The term 'discounted at the bank' is ambiguous between sale (non-recourse) and collateralized borrowing (recourse). The text states net proceeds were received, which suggests sale, but does not explicitly state whether Ford retains or transfers the credit risk. Standard convention does not provide a default\u2014this depends on the specific agreement terms with the bank."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Cash increases when Ford receives the net proceeds from discounting the note at the bank (face value minus discount charges for the remaining 40 days).",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Interest/discount expense increases for the discount charges deducted by the bank (calculated as 15% annual rate on $100,000 for the remaining 40 days of the note term).",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue is being reversed or reduced in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased. Ford is discounting (selling) a note receivable to the bank, not borrowing.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No owner investments or equity contributions occur in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned. This is a financing transaction involving the disposal of a financial asset (note receivable).",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "The note receivable (face value $100,000) is removed from Ford's books when discounted/sold to the bank. This represents one asset decrease line.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or reduced. The discount charge is recognized as an expense (debit side), not a decrease of expense on the credit side.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Cash increases when Ford receives the net proceeds from discounting the note at the bank (face value minus discount charges for the remaining 40 days).",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Interest/discount expense increases for the discount charges deducted by the bank (calculated as 15% annual rate on $100,000 for the remaining 40 days of the note term).",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or reduced in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue is being reversed or reduced in this transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities are created or increased. Ford is discounting (selling) a note receivable to the bank, not borrowing.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "No owner investments or equity contributions occur in this transaction.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is earned. This is a financing transaction involving the disposal of a financial asset (note receivable).",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "The note receivable (face value $100,000) is removed from Ford's books when discounted/sold to the bank. This represents one asset decrease line.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or reduced. The discount charge is recognized as an expense (debit side), not a decrease of expense on the credit side.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Accounting treatment election for note discounting",
+            "reason": "Under IFRS 9, when a note receivable is discounted at a bank, the entity must determine whether the transaction qualifies as derecognition (sale) or a secured borrowing. This depends on whether substantially all risks and rewards of ownership have been transferred. If Ford retains recourse obligations or significant credit risk, it would be a secured borrowing (debit Cash, credit Liability). If Ford transfers substantially all risks and rewards with no recourse, it would be derecognition (debit Cash and Loss, credit Notes Receivable). The transaction text does not specify whether Ford has recourse obligations or the nature of the discounting arrangement.",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "Does Ford have any recourse obligation if the maker of the note defaults? In other words, if the note is not paid at maturity, is Ford required to repay the bank?",
+          "Did Ford transfer substantially all risks and rewards of the note to the bank, or does Ford retain significant involvement with the note?"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "The classifier proposes 1 asset increase (Cash received from bank). This is correct regardless of whether the transaction is a sale or secured borrowing - cash is received in both cases.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction is involved in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier proposes 1 expense increase. If this is treated as a sale/derecognition, the discount charge would be a loss on disposal (expense/loss). However, if treated as a secured borrowing, there would be no immediate expense - instead, interest expense would be accrued over time. The correct treatment depends on the recourse nature of the arrangement, which is not specified.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loss on Note Discounting"
+          ]
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being decreased in a note discounting transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No direct equity decrease occurs in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue decrease occurs in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "If the discounting is treated as a secured borrowing (with recourse), a liability would be created. However, the classifier proposes 0 liability increase, suggesting a sale treatment. Without knowing the recourse nature, we cannot determine if this is correct.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "No equity increase occurs in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue is generated from note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier proposes 1 asset decrease. If treated as a sale/derecognition, the Notes Receivable would be removed (credited). If treated as a secured borrowing, the note would remain on the books. The correct treatment depends on whether Ford has recourse obligations.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Notes Receivable"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction is involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease occurs in note discounting.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot construct entry without knowing recourse nature. Calculation would be: Face value $100,000, 40 days remaining (90-50), discount = $100,000 \u00d7 15% \u00d7 (40/360) = $1,667. Net proceeds = $100,000 - $1,667 = $98,333. If sale: Dr Cash $98,333, Dr Loss $1,667, Cr Notes Receivable $100,000. If borrowing: Dr Cash $98,333, Cr Liability $98,333 (note stays on books). The structure differs fundamentally based on recourse.",
+          "lines": []
+        },
+        "decision_rationale": "Under IFRS 9, the accounting treatment for discounting a note receivable depends critically on whether the arrangement includes recourse obligations. With recourse (Ford must repay if maker defaults), this is a secured borrowing and the note remains on Ford's books with a liability created. Without recourse (risks transferred), this is derecognition and the note is removed with a loss recognized. The transaction text does not specify the recourse nature of the discounting arrangement. These two treatments produce structurally different journal entries - different accounts and different debit/credit structures. This is genuine missing business information that only the person who executed the transaction would know.",
+        "decision": "INCOMPLETE_INFORMATION"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 575,
+        "output_tokens": 615,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 550,
+        "output_tokens": 373,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 548,
+        "output_tokens": 394,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 870,
+        "output_tokens": 1668,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

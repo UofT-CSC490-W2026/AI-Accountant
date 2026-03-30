@@ -69,6 +69,14 @@ def test_clarifications_empty(monkeypatch):
     assert response.json()["items"] == []
 
 
+def test_clarifications_list_surfaces_missing_proposed_entry(monkeypatch):
+    task = _make_task(proposed_entry=None)
+    client = _make_client(monkeypatch, tasks=[task])
+    response = client.get("/api/v1/clarifications")
+    assert response.status_code == 200
+    assert response.json()["items"][0]["proposed_entry"] is None
+
+
 def test_clarifications_resolve_approve(monkeypatch):
     task = _make_task(status="resolved")
     je = SimpleNamespace(id=uuid.uuid4())

@@ -1,0 +1,589 @@
+{
+  "test_case_id": "basic_02_inventory_on_account",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase inventory on account",
+    "rationale": "Inventory is an asset acquired on credit. Per fix context, the $300 is pre-tax and inventory purchases are taxable in Canada. HST at 13% (assuming ON jurisdiction as default) is recoverable as input tax credit. Accounts Payable includes both the inventory cost and HST.",
+    "lines": [
+      {
+        "account_name": "Inventory",
+        "type": "debit",
+        "amount": 300.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 39.0
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 339.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0642015,
+  "raw_cost_usd": 0.120321,
+  "total_latency_ms": 47567,
+  "total_input_tokens": 30277,
+  "total_output_tokens": 1966,
+  "total_llm_calls": 10,
+  "iteration_count": 2,
+  "final_decision": "APPROVED",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 507,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2902,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0027645,
+      "raw_cost_usd": 0.009231,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 480,
+      "output_tokens": 105,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1721,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033873,
+      "raw_cost_usd": 0.006738,
+      "output": {
+        "reason": "Purchasing inventory on account means the business receives inventory (asset increase on debit side) and incurs an obligation to pay the supplier later. The credit side records accounts payable = liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Purchasing inventory on account means the business receives inventory (asset increase on debit side) and incurs an obligation to pay the supplier later. The credit side records accounts payable = liability increase."
+    },
+    "debit_classifier": {
+      "input_tokens": 482,
+      "output_tokens": 92,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1744,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032045999999999997,
+      "raw_cost_usd": 0.006612,
+      "output": {
+        "reason": "Purchasing inventory on account increases the Inventory asset account. This is recorded as 1 asset increase on the debit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Purchasing inventory on account increases the Inventory asset account. This is recorded as 1 asset increase on the debit side."
+    },
+    "credit_corrector": {
+      "input_tokens": 650,
+      "output_tokens": 200,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2404,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0054762,
+      "raw_cost_usd": 0.010212,
+      "output": {
+        "reason": "The transaction \"Purchase inventory $300 on account\" involves two accounting effects: (1) Inventory (an asset) increases, and (2) Accounts Payable (a liability) increases because the purchase is \"on account\" (credit terms). The debit tuple shows (1,0,0,0,0,0) = one asset increase, which correctly represents the inventory increase. The credit side should show a liability increase (accounts payable), which is slot a in the credit tuple. The initial credit tuple (1,0,0,0,0,0) correctly classifies this as one liability increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Purchase inventory $300 on account\" involves two accounting effects: (1) Inventory (an asset) increases, and (2) Accounts Payable (a liability) increases because the purchase is \"on account\" (credit terms). The debit tuple shows (1,0,0,0,0,0) = one asset increase, which correctly represents the inventory increase. The credit side should show a liability increase (accounts payable), which is slot a in the credit tuple. The initial credit tuple (1,0,0,0,0,0) correctly classifies this as one liability increase. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 650,
+      "output_tokens": 181,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2396,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051888,
+      "raw_cost_usd": 0.009903,
+      "output": {
+        "reason": "The transaction is a purchase of inventory on account. Under IFRS, inventory is an asset. When purchased, inventory increases (debit asset). The \"on account\" means accounts payable increases (credit liability). The initial debit tuple (1,0,0,0,0,0) correctly shows one asset increase. The credit tuple (1,0,0,0,0,0) correctly shows one liability increase. Both sides tell a consistent story: debit inventory (asset up), credit accounts payable (liability up). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a purchase of inventory on account. Under IFRS, inventory is an asset. When purchased, inventory increases (debit asset). The \"on account\" means accounts payable increases (credit liability). The initial debit tuple (1,0,0,0,0,0) correctly shows one asset increase. The credit tuple (1,0,0,0,0,0) correctly shows one liability increase. Both sides tell a consistent story: debit inventory (asset up), credit accounts payable (liability up). No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1559,
+      "output_tokens": 547,
+      "cache_read_tokens": 6428,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7987,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0148104,
+      "raw_cost_usd": 0.032166,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase inventory on account",
+        "rationale": "Inventory is an asset acquired on credit. Per fix context, the $300 is pre-tax and inventory purchases are taxable in Canada. HST at 13% (assuming ON jurisdiction as default) is recoverable as input tax credit. Accounts Payable includes both the inventory cost and HST.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 39.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 339.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3779,
+      "output_tokens": 324,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7883,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0174282,
+      "raw_cost_usd": 0.028509,
+      "output": {
+        "reason": "Entry correctly records taxable inventory purchase on account. Balance verified: debits ($300 + $39 = $339) equal credits ($339). Inventory purchases are taxable in Canada. HST at 13% on $300 base = $39 is correct and fully recoverable as input tax credit. Accounts Payable properly includes both inventory cost and HST ($339 total). All accounts appropriate and directionally correct.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records taxable inventory purchase on account. Balance verified: debits ($300 + $39 = $339) equal credits ($339). Inventory purchases are taxable in Canada. HST at 13% on $300 base = $39 is correct and fully recoverable as input tax credit. Accounts Payable properly includes both inventory cost and HST ($339 total). All accounts appropriate and directionally correct."
+    },
+    "diagnostician": {
+      "input_tokens": 1385,
+      "output_tokens": 482,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3240,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0119415,
+      "raw_cost_usd": 0.01695,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Inventory purchases are taxable transactions in Canada. The transaction states \"$300\" but does not explicitly state whether this is tax-inclusive or tax-exclusive. Standard business practice treats stated amounts as pre-tax unless explicitly noted otherwise. The entry is missing HST lines. For a $300 inventory purchase, HST Receivable (input tax credit) should be recorded along with the corresponding increase to Accounts Payable for the tax portion.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Purchasing inventory on account increases the Inventory asset account. This is recorded as 1 asset increase on the debit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Purchasing inventory on account increases the Inventory asset account. This is recorded as 1 asset increase on the debit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Purchasing inventory on account means the business receives inventory (asset increase on debit side) and incurs an obligation to pay the supplier later. The credit side records accounts payable = liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Purchasing inventory on account means the business receives inventory (asset increase on debit side) and incurs an obligation to pay the supplier later. The credit side records accounts payable = liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is a purchase of inventory on account. Under IFRS, inventory is an asset. When purchased, inventory increases (debit asset). The \"on account\" means accounts payable increases (credit liability). The initial debit tuple (1,0,0,0,0,0) correctly shows one asset increase. The credit tuple (1,0,0,0,0,0) correctly shows one liability increase. Both sides tell a consistent story: debit inventory (asset up), credit accounts payable (liability up). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction is a purchase of inventory on account. Under IFRS, inventory is an asset. When purchased, inventory increases (debit asset). The \"on account\" means accounts payable increases (credit liability). The initial debit tuple (1,0,0,0,0,0) correctly shows one asset increase. The credit tuple (1,0,0,0,0,0) correctly shows one liability increase. Both sides tell a consistent story: debit inventory (asset up), credit accounts payable (liability up). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction \"Purchase inventory $300 on account\" involves two accounting effects: (1) Inventory (an asset) increases, and (2) Accounts Payable (a liability) increases because the purchase is \"on account\" (credit terms). The debit tuple shows (1,0,0,0,0,0) = one asset increase, which correctly represents the inventory increase. The credit side should show a liability increase (accounts payable), which is slot a in the credit tuple. The initial credit tuple (1,0,0,0,0,0) correctly classifies this as one liability increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction \"Purchase inventory $300 on account\" involves two accounting effects: (1) Inventory (an asset) increases, and (2) Accounts Payable (a liability) increases because the purchase is \"on account\" (credit terms). The debit tuple shows (1,0,0,0,0,0) = one asset increase, which correctly represents the inventory increase. The credit side should show a liability increase (accounts payable), which is slot a in the credit tuple. The initial credit tuple (1,0,0,0,0,0) correctly classifies this as one liability increase. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase inventory on account",
+        "rationale": "Inventory is an asset account that increases when goods are purchased for resale. \"On account\" means the purchase is made on credit, creating a liability (Accounts Payable). No tax lines are added because the transaction states the amount as $300 without mentioning tax separately, indicating this is the total amount payable. The debit tuple (1,0,0,0,0,0) correctly identifies one asset increase, and the credit tuple (1,0,0,0,0,0) correctly identifies one liability increase.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 300.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2026-03-22",
+        "description": "Purchase inventory on account",
+        "rationale": "Inventory is an asset acquired on credit. Per fix context, the $300 is pre-tax and inventory purchases are taxable in Canada. HST at 13% (assuming ON jurisdiction as default) is recoverable as input tax credit. Accounts Payable includes both the inventory cost and HST.",
+        "lines": [
+          {
+            "account_name": "Inventory",
+            "type": "debit",
+            "amount": 300.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 39.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 339.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Inventory purchases are taxable transactions in Canada. The transaction states \"$300\" but does not explicitly state whether this is tax-inclusive or tax-exclusive. Standard business practice treats stated amounts as pre-tax unless explicitly noted otherwise. The entry is missing HST lines. For a $300 inventory purchase, HST Receivable (input tax credit) should be recorded along with the corresponding increase to Accounts Payable for the tax portion.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Entry correctly records taxable inventory purchase on account. Balance verified: debits ($300 + $39 = $339) equal credits ($339). Inventory purchases are taxable in Canada. HST at 13% on $300 base = $39 is correct and fully recoverable as input tax credit. Accounts Payable properly includes both inventory cost and HST ($339 total). All accounts appropriate and directionally correct.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because the entry is missing HST lines on a taxable inventory purchase. The transaction states \"$300\" which, per standard Canadian business practice, should be treated as pre-tax unless explicitly noted otherwise.\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier): Correctly identified inventory as asset increase (1,0,0,0,0,0)\n- Agent 2 (Credit Classifier): Correctly identified accounts payable as liability increase (1,0,0,0,0,0)\n- Agent 3 (Debit Corrector): Validated the tuples, no correction needed\n- Agent 4 (Credit Corrector): Validated the tuples, no correction needed\n- Agent 5 (Entry Builder): Built the entry from the tuples BUT explicitly stated in its rationale \"No tax lines are added because the transaction states the amount as $300 without mentioning tax separately, indicating this is the total amount payable.\"\n\nThe tuples themselves are correct - they represent the core business transaction (inventory increase, accounts payable increase). The error is NOT in classification but in the Entry Builder's decision to omit tax lines. Agent 5 made an incorrect judgment about whether to add HST, reasoning that the absence of explicit tax mention meant the amount was tax-inclusive/total. This contradicts standard Canadian business practice where stated amounts are pre-tax unless noted otherwise.\n\nRoot cause: Agent 5 (Entry Builder) failed to add HST lines on a taxable transaction.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Inventory purchases are taxable in Canada. The $300 should be treated as pre-tax per standard business practice. Add HST Receivable debit (input tax credit) and increase Accounts Payable credit to include the HST amount."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Inventory purchases are taxable in Canada. The $300 should be treated as pre-tax per standard business practice. Add HST Receivable debit (input tax credit) and increase Accounts Payable credit to include the HST amount."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 507,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 480,
+        "output_tokens": 105,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 482,
+        "output_tokens": 92,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 650,
+        "output_tokens": 200,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 650,
+        "output_tokens": 181,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 739,
+        "output_tokens": 279,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1528,
+        "output_tokens": 162,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1385,
+        "output_tokens": 482,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 820,
+        "output_tokens": 268,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2251,
+        "output_tokens": 162,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

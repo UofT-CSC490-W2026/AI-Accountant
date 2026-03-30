@@ -56,7 +56,7 @@ def test_get_llm_default_config(mock_get_settings, mock_chat_cls):
         model="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
         region_name="ca-central-1",
         temperature=0,
-        max_tokens=2000,
+        max_tokens=4000,
         additional_model_request_fields=None,
     )
     assert result is mock_chat_cls.return_value

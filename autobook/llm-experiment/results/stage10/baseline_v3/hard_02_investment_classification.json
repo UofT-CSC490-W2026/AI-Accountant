@@ -1,0 +1,461 @@
+{
+  "test_case_id": "hard_02_investment_classification",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": null,
+  "actual_cost_usd": 0.0480555,
+  "raw_cost_usd": 0.103392,
+  "total_latency_ms": 28816,
+  "total_input_tokens": 24574,
+  "total_output_tokens": 1978,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "tax_specialist": {
+      "input_tokens": 523,
+      "output_tokens": 128,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3539,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0043938,
+      "raw_cost_usd": 0.012537,
+      "output": {
+        "reasoning": "Investment acquisition and transaction fees are not taxable supplies. The transaction text does not mention any tax.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 498,
+      "output_tokens": 172,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4265,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0052041000000000006,
+      "raw_cost_usd": 0.015375,
+      "output": {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for investment acquisition and transaction fee",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 499,
+      "output_tokens": 181,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4464,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0054015,
+      "raw_cost_usd": 0.016107,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Acquisition of 10% equity stake in Ford \u2014 investment at cost plus transaction costs",
+            "category": "Investments \u2014 equity method",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "ambiguity_detector": {
+      "input_tokens": 537,
+      "output_tokens": 278,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3822,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0067665,
+      "raw_cost_usd": 0.015636,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "classification of Ford investment",
+            "why_entry_depends_on_clarification": "FVTPL expenses the $100k fee immediately; FVOCI and equity method capitalize it into the investment carrying amount",
+            "why_ambiguity_not_resolved_by_given_info": "10% ownership can indicate significant influence (equity method) or passive investment (FVTPL/FVOCI). Significant influence depends on board representation, participation in policy-making, or other factors not stated. If passive, classification between FVTPL and FVOCI depends on management's business model election, also not stated.",
+            "clarification_question": "Does BlackRock have significant influence over Ford, or what is management's intent for holding this investment?",
+            "options": [
+              "FVTPL (fair value through profit or loss)",
+              "FVOCI (fair value through other comprehensive income)",
+              "Equity method (significant influence)"
+            ],
+            "resolved": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 513,
+      "output_tokens": 326,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3191,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0072324,
+      "raw_cost_usd": 0.014463,
+      "output": {
+        "flags": [
+          {
+            "aspect": "classification of 10% equity investment",
+            "why_llm_cannot_do_this": "10% ownership is ambiguous between FVTPL, FVOCI, and equity method. Requires knowledge of whether BlackRock has significant influence (IAS 28), which depends on board representation, material transactions, technical dependency, and other factors not stated in the transaction. IFRS 9 vs IAS 28 classification cannot be determined from ownership percentage alone.",
+            "what_is_best_llm_can_do": "Default to FVTPL or make arbitrary assumption about significant influence, without proper assessment of control indicators",
+            "skeptical": true
+          },
+          {
+            "aspect": "transaction fee capitalization vs expense",
+            "why_llm_cannot_do_this": "IFRS 9 requires transaction costs to be capitalized for FVOCI and equity method investments but expensed for FVTPL. The correct treatment depends on the investment classification, which cannot be determined from the transaction text.",
+            "what_is_best_llm_can_do": "Apply one treatment arbitrarily (likely capitalize or expense) without knowing the correct classification",
+            "skeptical": true
+          }
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1509,
+      "output_tokens": 893,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5293,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0190572,
+      "raw_cost_usd": 0.029274,
+      "output": {
+        "ambiguity_assessment": "The ambiguity detector correctly identifies that 10% ownership is ambiguous between FVTPL, FVOCI, and equity method. Each classification produces a materially different entry:\n- FVTPL: Dr Investments\u2014FVTPL $3,000,000, Dr Professional fees expense $100,000, Cr Cash $3,100,000\n- FVOCI: Dr Investments\u2014FVOCI $3,100,000, Cr Cash $3,100,000\n- Equity method: Dr Investments\u2014equity method $3,100,000, Cr Cash $3,100,000\n\nThe account names differ (different investment categories, and FVTPL creates an expense line). The transaction text does not state management's intent, business model election, or whether significant influence exists. IAS 28 requires assessment of board representation, participation in policy-making, material transactions, etc.\u2014none of which are determinable from \"acquired 10% of Ford's outstanding common shares.\" This is genuinely missing information.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "Does BlackRock have significant influence over Ford (e.g., board representation, participation in policy-making decisions)?",
+          "If no significant influence, what is management's business model and intent for this investment (held for trading/FVTPL, or held for strategic purposes/FVOCI)?"
+        ],
+        "complexity_assessment": "The complexity detector flags are valid. The system cannot determine investment classification from ownership percentage alone\u2014IAS 28 and IFRS 9 require entity-specific facts not present in the transaction. The transaction fee treatment (capitalize vs expense) depends entirely on the classification, which cannot be determined. These are not computational complexities but missing business facts.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "The debit classifier chose \"Investments\u2014equity method\" and capitalized the full $3,100,000. This is one valid interpretation, but it assumes significant influence without evidence. The classifier should not have made this determination\u2014it requires facts not in the transaction. However, the classifier's reasoning is internally consistent (if equity method, then capitalize transaction costs per IAS 28). The credit classifier correctly identifies cash decrease of $3,100,000 total. The issue is not that the classifications are wrong per se, but that the investment category cannot be determined from the transaction text.",
+        "debit_approved": false,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity is material: FVTPL produces a different account structure (expense line) than FVOCI/equity method (capitalized). The transaction text provides only ownership percentage (10%), which is insufficient to determine classification under IAS 28 (significant influence assessment) or IFRS 9 (business model election). The debit classifier assumed equity method without basis. This is not an LLM knowledge gap\u2014it is missing business facts that the transaction initiator would know. The person who authorized this investment would know whether BlackRock obtained board seats, voting agreements, or other influence indicators, and what management's intent is for holding the investment.",
+        "decision": "missing_info"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "Does BlackRock have significant influence over Ford (e.g., board representation, participation in policy-making decisions)?",
+    "If no significant influence, what is management's business model and intent for this investment (held for trading/FVTPL, or held for strategic purposes/FVOCI)?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "classification of Ford investment",
+            "why_entry_depends_on_clarification": "FVTPL expenses the $100k fee immediately; FVOCI and equity method capitalize it into the investment carrying amount",
+            "why_ambiguity_not_resolved_by_given_info": "10% ownership can indicate significant influence (equity method) or passive investment (FVTPL/FVOCI). Significant influence depends on board representation, participation in policy-making, or other factors not stated. If passive, classification between FVTPL and FVOCI depends on management's business model election, also not stated.",
+            "clarification_question": "Does BlackRock have significant influence over Ford, or what is management's intent for holding this investment?",
+            "options": [
+              "FVTPL (fair value through profit or loss)",
+              "FVOCI (fair value through other comprehensive income)",
+              "Equity method (significant influence)"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "classification of 10% equity investment",
+            "why_llm_cannot_do_this": "10% ownership is ambiguous between FVTPL, FVOCI, and equity method. Requires knowledge of whether BlackRock has significant influence (IAS 28), which depends on board representation, material transactions, technical dependency, and other factors not stated in the transaction. IFRS 9 vs IAS 28 classification cannot be determined from ownership percentage alone.",
+            "what_is_best_llm_can_do": "Default to FVTPL or make arbitrary assumption about significant influence, without proper assessment of control indicators",
+            "skeptical": true
+          },
+          {
+            "aspect": "transaction fee capitalization vs expense",
+            "why_llm_cannot_do_this": "IFRS 9 requires transaction costs to be capitalized for FVOCI and equity method investments but expensed for FVTPL. The correct treatment depends on the investment classification, which cannot be determined from the transaction text.",
+            "what_is_best_llm_can_do": "Apply one treatment arbitrarily (likely capitalize or expense) without knowing the correct classification",
+            "skeptical": true
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Investment acquisition and transaction fees are not taxable supplies. The transaction text does not mention any tax.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "The ambiguity detector correctly identifies that 10% ownership is ambiguous between FVTPL, FVOCI, and equity method. Each classification produces a materially different entry:\n- FVTPL: Dr Investments\u2014FVTPL $3,000,000, Dr Professional fees expense $100,000, Cr Cash $3,100,000\n- FVOCI: Dr Investments\u2014FVOCI $3,100,000, Cr Cash $3,100,000\n- Equity method: Dr Investments\u2014equity method $3,100,000, Cr Cash $3,100,000\n\nThe account names differ (different investment categories, and FVTPL creates an expense line). The transaction text does not state management's intent, business model election, or whether significant influence exists. IAS 28 requires assessment of board representation, participation in policy-making, material transactions, etc.\u2014none of which are determinable from \"acquired 10% of Ford's outstanding common shares.\" This is genuinely missing information.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "Does BlackRock have significant influence over Ford (e.g., board representation, participation in policy-making decisions)?",
+          "If no significant influence, what is management's business model and intent for this investment (held for trading/FVTPL, or held for strategic purposes/FVOCI)?"
+        ],
+        "complexity_assessment": "The complexity detector flags are valid. The system cannot determine investment classification from ownership percentage alone\u2014IAS 28 and IFRS 9 require entity-specific facts not present in the transaction. The transaction fee treatment (capitalize vs expense) depends entirely on the classification, which cannot be determined. These are not computational complexities but missing business facts.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "The debit classifier chose \"Investments\u2014equity method\" and capitalized the full $3,100,000. This is one valid interpretation, but it assumes significant influence without evidence. The classifier should not have made this determination\u2014it requires facts not in the transaction. However, the classifier's reasoning is internally consistent (if equity method, then capitalize transaction costs per IAS 28). The credit classifier correctly identifies cash decrease of $3,100,000 total. The issue is not that the classifications are wrong per se, but that the investment category cannot be determined from the transaction text.",
+        "debit_approved": false,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity is material: FVTPL produces a different account structure (expense line) than FVOCI/equity method (capitalized). The transaction text provides only ownership percentage (10%), which is insufficient to determine classification under IAS 28 (significant influence assessment) or IFRS 9 (business model election). The debit classifier assumed equity method without basis. This is not an LLM knowledge gap\u2014it is missing business facts that the transaction initiator would know. The person who authorized this investment would know whether BlackRock obtained board seats, voting agreements, or other influence indicators, and what management's intent is for holding the investment.",
+        "decision": "missing_info"
+      }
+    ],
+    "output_entry_drafter": [],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "classification of Ford investment",
+            "why_entry_depends_on_clarification": "FVTPL expenses the $100k fee immediately; FVOCI and equity method capitalize it into the investment carrying amount",
+            "why_ambiguity_not_resolved_by_given_info": "10% ownership can indicate significant influence (equity method) or passive investment (FVTPL/FVOCI). Significant influence depends on board representation, participation in policy-making, or other factors not stated. If passive, classification between FVTPL and FVOCI depends on management's business model election, also not stated.",
+            "clarification_question": "Does BlackRock have significant influence over Ford, or what is management's intent for holding this investment?",
+            "options": [
+              "FVTPL (fair value through profit or loss)",
+              "FVOCI (fair value through other comprehensive income)",
+              "Equity method (significant influence)"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Acquisition of 10% equity stake in Ford \u2014 investment at cost plus transaction costs",
+            "category": "Investments \u2014 equity method",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for investment acquisition and transaction fee",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 0,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 523,
+        "output_tokens": 128,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 498,
+        "output_tokens": 172,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 499,
+        "output_tokens": 181,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 537,
+        "output_tokens": 278,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 513,
+        "output_tokens": 326,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1509,
+        "output_tokens": 893,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "tax_specialist": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "ambiguity_detector": "tool_use",
+      "complexity_detector": "tool_use",
+      "decision_maker": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,557 @@
+{
+  "test_case_id": "int_05_bond_issuance_discount",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Bonds issued at discount: cash received at present value of future cash flows (annual coupons + principal at maturity), discounted at market rate 15%",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Cash and cash equivalents",
+        "amount": 2657610.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Discount on Bonds Payable",
+        "amount": 342390.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Bonds Payable",
+        "amount": 3000000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0585714,
+  "raw_cost_usd": 0.132978,
+  "total_latency_ms": 36559,
+  "total_input_tokens": 33951,
+  "total_output_tokens": 2075,
+  "total_llm_calls": 8,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "ambiguity_detector": {
+      "input_tokens": 570,
+      "output_tokens": 35,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3855,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032205,
+      "raw_cost_usd": 0.01209,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "tax_specialist": {
+      "input_tokens": 556,
+      "output_tokens": 163,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3572,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0050178,
+      "raw_cost_usd": 0.013161,
+      "output": {
+        "reasoning": "Bond issuance is a financing transaction (borrowing). The transaction involves issuing debt securities for cash proceeds. Financing transactions such as loans, bonds, and equity issuances are not taxable supplies under tax law. No tax is mentioned in the transaction text.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 531,
+      "output_tokens": 218,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4298,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059931,
+      "raw_cost_usd": 0.016164,
+      "output": {
+        "liability_increase": [
+          {
+            "reason": "Bond liability recorded at face value",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "asset_decrease": [
+          {
+            "reason": "Discount on bonds payable (contra-liability recorded as asset decrease)",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "_parse_error": "1 validation error for CreditClassifierOutput\nasset_decrease.0.category\n  Input should be 'Land', 'Buildings', 'Machinery', 'Motor vehicles', 'Office equipment', 'Fixtures and fittings', 'Construction in progress', 'Site improvements', 'Right-of-use assets', 'Goodwill', 'Intangible assets', 'Investment property', 'Investments \u2014 equity method', 'Investments \u2014 FVTPL', 'Investments \u2014 FVOCI', 'Deferred tax assets', 'Non-current loans receivable', 'Long-term deposits', 'Non-current prepayments', 'Inventories \u2014 raw materials', 'Inventories \u2014 work in progress', 'Inventories \u2014 finished goods', 'Inventories \u2014 merchandise', 'Cash and cash equivalents', 'Trade receivables', 'Contract assets', 'Prepaid expenses', 'Tax assets', 'Short-term loans receivable', 'Short-term deposits' or 'Restricted cash' [type=literal_error, input_value='Long-term borrowings', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 546,
+      "output_tokens": 258,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3224,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063114,
+      "raw_cost_usd": 0.013542,
+      "output": {
+        "flags": [
+          {
+            "aspect": "bond issuance at discount with present value calculation",
+            "why_llm_cannot_do_this": "Requires multi-step present value calculation: PV of principal ($3M discounted at 15% for 3 years) plus PV of annuity stream (10% \u00d7 $3M = $300k annually, discounted at 15% for 3 years). System must compute PV factors accurately and sum components correctly.",
+            "what_is_best_llm_can_do": "Attempt PV calculation but may introduce rounding errors or use incorrect discount factors; likely to produce proceeds amount close to $2,628,947 but precision not guaranteed",
+            "skeptical": true
+          },
+          {
+            "aspect": "discount on bonds payable classification",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "cash receipt from bond proceeds",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 532,
+      "output_tokens": 238,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4497,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063555,
+      "raw_cost_usd": 0.017061,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Cash proceeds from bond issuance at present value (discounted at market rate 15%)",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [
+          {
+            "reason": "Discount on bonds payable \u2014 contra-liability representing difference between face value and present value at market rate",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1775,
+      "output_tokens": 743,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5559,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0176052,
+      "raw_cost_usd": 0.027822,
+      "output": {
+        "ambiguity_assessment": "No ambiguities flagged. The transaction is clear: bonds issued at discount with stated face value, coupon rate, market rate, and term.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The complexity detector flagged PV calculation as skeptical, citing potential rounding errors. However, this is a standard bond discount calculation well within IFRS knowledge: PV of principal ($3M / (1.15)^3) + PV of annuity ($300k \u00d7 [(1 - (1.15)^-3) / 0.15]). The calculation is: $3M \u00d7 0.657516 = $1,972,548 + $300k \u00d7 2.283225 = $684,968 = $2,657,516 total proceeds. This is a routine calculation that the system can handle. The skepticism is overly cautious.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classifier is correct: Dr Cash (asset increase) and Dr Discount on bonds payable (liability decrease, contra-liability). Credit classifier has a validation error: it attempted to classify the discount as 'asset_decrease' with category 'Long-term borrowings', which is invalid because Long-term borrowings is not an asset category. The correct treatment is that discount on bonds payable is a contra-liability, which means it reduces the liability. In the credit side, we should only record the face value of bonds payable as a liability increase. The discount appears on the debit side as a liability decrease (contra). The credit classifier's conceptual understanding is wrong: it tried to show the discount on both sides, but the discount should only appear once (on the debit side as liability decrease). The correct credit side has only one line: Cr Bonds Payable at face value.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": false,
+        "override_credit": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "decision_rationale": "No ambiguities exist. The PV calculation complexity is routine and within system capability. The debit classification is correct (cash increase + discount as liability decrease). The credit classification has a validation error and conceptual error: it attempted to record the discount on both sides. The correct entry structure is: Dr Cash (PV), Dr Discount (contra-liability), Cr Bonds Payable (face value). Correcting credit side to show only the liability increase at face value. All information needed is present in the transaction text.",
+        "decision": "proceed"
+      },
+      "reason": null
+    },
+    "entry_drafter": {
+      "input_tokens": 1883,
+      "output_tokens": 420,
+      "cache_read_tokens": 7063,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8946,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0140679,
+      "raw_cost_usd": 0.033138,
+      "output": {
+        "reason": "Bonds issued at discount: cash received at present value of future cash flows (annual coupons + principal at maturity), discounted at market rate 15%",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Cash and cash equivalents",
+            "amount": 2657610.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Discount on Bonds Payable",
+            "amount": 342390.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Bonds Payable",
+            "amount": 3000000.0
+          }
+        ]
+      },
+      "reason": "Bonds issued at discount: cash received at present value of future cash flows (annual coupons + principal at maturity), discounted at market rate 15%"
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "bond issuance at discount with present value calculation",
+            "why_llm_cannot_do_this": "Requires multi-step present value calculation: PV of principal ($3M discounted at 15% for 3 years) plus PV of annuity stream (10% \u00d7 $3M = $300k annually, discounted at 15% for 3 years). System must compute PV factors accurately and sum components correctly.",
+            "what_is_best_llm_can_do": "Attempt PV calculation but may introduce rounding errors or use incorrect discount factors; likely to produce proceeds amount close to $2,628,947 but precision not guaranteed",
+            "skeptical": true
+          },
+          {
+            "aspect": "discount on bonds payable classification",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "cash receipt from bond proceeds",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Bond issuance is a financing transaction (borrowing). The transaction involves issuing debt securities for cash proceeds. Financing transactions such as loans, bonds, and equity issuances are not taxable supplies under tax law. No tax is mentioned in the transaction text.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged. The transaction is clear: bonds issued at discount with stated face value, coupon rate, market rate, and term.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The complexity detector flagged PV calculation as skeptical, citing potential rounding errors. However, this is a standard bond discount calculation well within IFRS knowledge: PV of principal ($3M / (1.15)^3) + PV of annuity ($300k \u00d7 [(1 - (1.15)^-3) / 0.15]). The calculation is: $3M \u00d7 0.657516 = $1,972,548 + $300k \u00d7 2.283225 = $684,968 = $2,657,516 total proceeds. This is a routine calculation that the system can handle. The skepticism is overly cautious.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classifier is correct: Dr Cash (asset increase) and Dr Discount on bonds payable (liability decrease, contra-liability). Credit classifier has a validation error: it attempted to classify the discount as 'asset_decrease' with category 'Long-term borrowings', which is invalid because Long-term borrowings is not an asset category. The correct treatment is that discount on bonds payable is a contra-liability, which means it reduces the liability. In the credit side, we should only record the face value of bonds payable as a liability increase. The discount appears on the debit side as a liability decrease (contra). The credit classifier's conceptual understanding is wrong: it tried to show the discount on both sides, but the discount should only appear once (on the debit side as liability decrease). The correct credit side has only one line: Cr Bonds Payable at face value.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": false,
+        "override_credit": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "decision_rationale": "No ambiguities exist. The PV calculation complexity is routine and within system capability. The debit classification is correct (cash increase + discount as liability decrease). The credit classification has a validation error and conceptual error: it attempted to record the discount on both sides. The correct entry structure is: Dr Cash (PV), Dr Discount (contra-liability), Cr Bonds Payable (face value). Correcting credit side to show only the liability increase at face value. All information needed is present in the transaction text.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Bonds issued at discount: cash received at present value of future cash flows (annual coupons + principal at maturity), discounted at market rate 15%",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Cash and cash equivalents",
+            "amount": 2657610.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Discount on Bonds Payable",
+            "amount": 342390.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Bonds Payable",
+            "amount": 3000000.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Cash proceeds from bond issuance at present value (discounted at market rate 15%)",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [
+          {
+            "reason": "Discount on bonds payable \u2014 contra-liability representing difference between face value and present value at market rate",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [
+          {
+            "reason": "Bond liability recorded at face value",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "asset_decrease": [
+          {
+            "reason": "Discount on bonds payable (contra-liability recorded as asset decrease)",
+            "category": "Long-term borrowings",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "_parse_error": "1 validation error for CreditClassifierOutput\nasset_decrease.0.category\n  Input should be 'Land', 'Buildings', 'Machinery', 'Motor vehicles', 'Office equipment', 'Fixtures and fittings', 'Construction in progress', 'Site improvements', 'Right-of-use assets', 'Goodwill', 'Intangible assets', 'Investment property', 'Investments \u2014 equity method', 'Investments \u2014 FVTPL', 'Investments \u2014 FVOCI', 'Deferred tax assets', 'Non-current loans receivable', 'Long-term deposits', 'Non-current prepayments', 'Inventories \u2014 raw materials', 'Inventories \u2014 work in progress', 'Inventories \u2014 finished goods', 'Inventories \u2014 merchandise', 'Cash and cash equivalents', 'Trade receivables', 'Contract assets', 'Prepaid expenses', 'Tax assets', 'Short-term loans receivable', 'Short-term deposits' or 'Restricted cash' [type=literal_error, input_value='Long-term borrowings', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error",
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 570,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 556,
+        "output_tokens": 163,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 531,
+        "output_tokens": 218,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 546,
+        "output_tokens": 258,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 532,
+        "output_tokens": 238,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1775,
+        "output_tokens": 743,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 856,
+        "output_tokens": 214,
+        "input_token_details": {
+          "cache_read": 3559,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 1027,
+        "output_tokens": 206,
+        "input_token_details": {
+          "cache_read": 3504,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "ambiguity_detector": "tool_use",
+      "tax_specialist": "tool_use",
+      "credit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "debit_classifier": "tool_use",
+      "decision_maker": "tool_use",
+      "entry_drafter": "tool_use"
+    }
+  }
+}

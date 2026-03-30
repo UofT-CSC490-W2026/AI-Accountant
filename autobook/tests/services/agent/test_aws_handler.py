@@ -41,12 +41,14 @@ class TestHandlerRouting:
         monkeypatch.setattr(agent_aws, "should_post", lambda stage, r: False)
 
         resolution_msgs = []
+        clarification_events = []
         monkeypatch.setattr(agent_aws.pub, "stage_started", lambda **kw: None)
-        monkeypatch.setattr(agent_aws.pub, "clarification_created", lambda **kw: None)
+        monkeypatch.setattr(agent_aws.pub, "clarification_created", lambda **kw: clarification_events.append(kw))
         monkeypatch.setattr(agent_aws.sqs.enqueue, "resolution", lambda r: resolution_msgs.append(r))
 
         agent_aws.handler(_make_event(BASE_MSG), None)
         assert len(resolution_msgs) == 1
+        assert clarification_events == []
 
     def test_fallthrough_to_next_stage(self, monkeypatch):
         result = {**BASE_MSG, "post_stages": []}

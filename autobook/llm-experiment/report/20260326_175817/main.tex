@@ -1,0 +1,179 @@
+\documentclass[11pt, a4paper]{article}
+
+% ── Encoding & fonts ────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% ── Layout ──────────────────────────────────────────────────────────────
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% ── Tables ──────────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{graphicx}          % \resizebox
+\usepackage{makecell}
+
+% ── Math ────────────────────────────────────────────────────────────────
+\usepackage{amsmath, amssymb}
+
+% ── Check/cross marks ──────────────────────────────────────────────────
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+% ── Hyperlinks ──────────────────────────────────────────────────────────
+\usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+
+% ── Headers ─────────────────────────────────────────────────────────────
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Multi-Agent LLM Pipeline Ablation Study}
+\fancyhead[R]{\small \today}
+\fancyfoot[C]{\thepage}
+
+% ── Title ───────────────────────────────────────────────────────────────
+\title{%
+  Multi-Agent LLM Pipeline Ablation Study:\\
+  Cost--Accuracy Trade-offs in Automated Journal Entry Generation%
+}
+\author{Autobook --- CSC490}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% ── Abstract ────────────────────────────────────────────────────────────
+\begin{abstract}
+This report presents an ablation study of a multi-agent LLM pipeline for
+automated double-entry journal entry generation. We evaluate six pipeline
+variants---from a single-agent baseline to a full eight-agent pipeline with
+disambiguation, classification, correction, and evaluation---across basic,
+intermediate, and hard accounting test cases. We measure exact-match accuracy,
+slot-level accuracy, decision correctness, cost efficiency (cost-of-pass),
+token consumption, cache utilization, latency distribution, and multi-run
+consistency. Marginal component analysis quantifies the accuracy--cost
+trade-off of each pipeline stage.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ── 1. Introduction ────────────────────────────────────────────────────
+\section{Introduction}
+
+The Autobook system converts natural-language transaction descriptions into
+IFRS-compliant double-entry journal entries using a configurable multi-agent
+LLM pipeline. The pipeline decomposes the task into disambiguation,
+classification (debit/credit 6-tuples), cross-validation, entry construction,
+approval, and diagnostic repair.
+
+Three ablation flags control which agents are active:
+\texttt{disambiguator\_active}, \texttt{correction\_active}, and
+\texttt{evaluation\_active}. This yields eight possible pipeline variants,
+of which six are evaluated in this study (five multi-agent variants plus a
+single-agent baseline).
+
+% ── 2. Methodology ─────────────────────────────────────────────────────
+\section{Methodology}
+
+\subsection{Variants}
+\begin{itemize}
+  \item \textbf{single\_agent}: One LLM call classifies and builds the entry.
+  \item \textbf{baseline} (D=off, C=off, E=off): Classifiers + entry builder only.
+  \item \textbf{with\_correction} (D=off, C=on, E=off): Adds cross-validation correctors.
+  \item \textbf{with\_evaluation} (D=off, C=off, E=on): Adds approver + diagnostician + fix loop.
+  \item \textbf{with\_disambiguation} (D=on, C=off, E=off): Adds disambiguator.
+  \item \textbf{full\_pipeline} (D=on, C=on, E=on): All agents active.
+\end{itemize}
+
+\subsection{Test Cases}
+Test cases span three difficulty tiers:
+\begin{itemize}
+  \item \textbf{Basic} (15 cases): Unambiguous single- and multi-line entries.
+  \item \textbf{Intermediate} (27 cases): Complex capitalization, tax handling,
+        present value, compound entries.
+  \item \textbf{Hard} (5 cases): Genuinely ambiguous transactions requiring
+        clarification (multiple valid interpretations).
+\end{itemize}
+
+\subsection{Metrics}
+Following recent multi-agent evaluation methodology
+\cite{multiagentbench2025, efficient-agents2025, financial-benchmark2026},
+we measure:
+\begin{enumerate}
+  \item \textbf{Exact match rate}: Both debit and credit tuples match expected.
+  \item \textbf{Slot accuracy}: Per-slot correctness averaged across tuples.
+  \item \textbf{Decision accuracy}: Pipeline decision (Approved/Incomplete/Stuck) matches expected.
+  \item \textbf{Entry validity}: Debits equal credits, valid account types.
+  \item \textbf{Cost-of-pass}: Cost per correctly classified transaction.
+  \item \textbf{Token efficiency}: Output tokens / total tokens consumed.
+  \item \textbf{Cache hit rate}: Cache-read tokens / total input tokens.
+  \item \textbf{Latency}: p50 and p95 end-to-end latency.
+  \item \textbf{Marginal value}: Per-component accuracy $\Delta$ vs cost $\Delta$.
+  \item \textbf{Multi-run consistency}: $\mu \pm \sigma$ across repeated runs.
+\end{enumerate}
+
+% ── 3. Results ──────────────────────────────────────────────────────────
+\section{Results}
+
+\subsection{Variant Comparison}
+\input{component/variant_comparison}
+
+\subsection{Accuracy by Difficulty Tier}
+\input{component/tier_breakdown}
+
+\subsection{Marginal Component Value}
+\input{component/marginal_deltas}
+
+\subsection{Per-Test-Case Breakdown}
+\input{component/per_test_case}
+
+\subsection{Per-Agent Resource Consumption}
+\input{component/agent_breakdown}
+
+\subsection{Multi-Run Consistency}
+\input{component/consistency}
+
+% ── 4. Discussion ──────────────────────────────────────────────────────
+\section{Discussion}
+
+% Analysis of results goes here.
+% Key questions to address:
+% - Which component contributes the most accuracy per dollar?
+% - Is the correction pass worth its cost?
+% - Does the fix loop recover meaningful errors?
+% - How does disambiguation affect hard-case handling?
+% - Is the pipeline more cost-effective than the single-agent baseline?
+
+% ── 5. Conclusion ──────────────────────────────────────────────────────
+\section{Conclusion}
+
+% Summary of findings and recommended production configuration.
+
+% ── References ──────────────────────────────────────────────────────────
+\begin{thebibliography}{9}
+
+\bibitem{multiagentbench2025}
+  MultiAgentBench: Evaluating the Collaboration and Competition of LLM Agents.
+  \textit{arXiv:2503.01935}, March 2025.
+
+\bibitem{efficient-agents2025}
+  Efficient Agents: Building Effective Agents While Reducing Cost.
+  \textit{arXiv:2508.02694}, 2025.
+
+\bibitem{financial-benchmark2026}
+  Benchmarking Multi-Agent LLM Architectures for Financial Document Processing.
+  \textit{arXiv:2603.22651}, March 2026.
+
+\bibitem{kdd-survey2025}
+  Evaluation and Benchmarking of LLM Agents: A Survey.
+  \textit{KDD 2025}.
+
+\end{thebibliography}
+
+\end{document}

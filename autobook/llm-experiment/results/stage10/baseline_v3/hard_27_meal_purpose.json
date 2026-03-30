@@ -1,0 +1,473 @@
+{
+  "test_case_id": "hard_27_meal_purpose",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": null,
+  "actual_cost_usd": 0.0432465,
+  "raw_cost_usd": 0.098583,
+  "total_latency_ms": 27106,
+  "total_input_tokens": 24391,
+  "total_output_tokens": 1694,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "tax_specialist": {
+      "input_tokens": 504,
+      "output_tokens": 140,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3520,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0045168000000000005,
+      "raw_cost_usd": 0.01266,
+      "output": {
+        "reasoning": "Meals are taxable supplies, but the transaction text does not mention any tax amount or rate. The $125 appears to be the total amount paid.",
+        "tax_mentioned": false,
+        "taxable": true,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 480,
+      "output_tokens": 157,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4445,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049845,
+      "raw_cost_usd": 0.01569,
+      "output": {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Meal expense paid with corporate credit card",
+            "category": "Entertainment expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 479,
+      "output_tokens": 160,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4246,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049671,
+      "raw_cost_usd": 0.015138,
+      "output": {
+        "liability_increase": [
+          {
+            "reason": "Corporate credit card liability for meal purchase",
+            "category": "Accrued liabilities",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 494,
+      "output_tokens": 294,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3172,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0066954,
+      "raw_cost_usd": 0.013926,
+      "output": {
+        "flags": [
+          {
+            "aspect": "meal expense classification",
+            "why_llm_cannot_do_this": "Cannot determine if this is a business meal (50% deductible under Canadian tax rules) vs employee meal benefit (100% deductible) vs entertainment (50% deductible) without context about the business purpose, attendees, or occasion",
+            "what_is_best_llm_can_do": "Record full $125 as general meal/entertainment expense without tax limitation consideration",
+            "skeptical": true
+          },
+          {
+            "aspect": "HST recovery on meal",
+            "why_llm_cannot_do_this": "Ontario HST (13%) applies to meals, but the $125 could be tax-inclusive or tax-exclusive. Transaction does not state whether tax is included or the breakdown",
+            "what_is_best_llm_can_do": "Treat $125 as the expense amount without separating HST component",
+            "skeptical": true
+          },
+          {
+            "aspect": "corporate credit card liability",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "ambiguity_detector": {
+      "input_tokens": 518,
+      "output_tokens": 203,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3803,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0055845,
+      "raw_cost_usd": 0.014454,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of the meal",
+            "why_entry_depends_on_clarification": "Different purposes map to different expense accounts: travel expense vs. entertainment expense vs. meeting expense vs. employee benefits expense",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states only that a meal was purchased with corporate card. No convention exists for default meal classification. Business type 'general' and corporate structure do not narrow the purpose.",
+            "clarification_question": "What was the business purpose of this meal expense?",
+            "options": [
+              "Employee meal during travel",
+              "Client entertainment",
+              "Team meeting meal",
+              "Employee benefit/perk"
+            ],
+            "resolved": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1421,
+      "output_tokens": 740,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5205,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0164982,
+      "raw_cost_usd": 0.026715,
+      "output": {
+        "ambiguity_assessment": "The ambiguity detector flagged \"business purpose of the meal\" with 4 options: travel expense, entertainment, meeting expense, or employee benefit. Each option maps to a different expense account name (Travel expense vs Entertainment expense vs Meeting expense vs Employee benefits expense). The transaction text provides no clues about purpose\u2014only that a meal was purchased with a corporate card. No convention exists to default meal classification. The tuple (Dr expense, Cr liability) remains the same, but the account NAME differs materially depending on the answer. This ambiguity is NOT resolved by the transaction text or context.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "What was the business purpose of this meal expense?"
+        ],
+        "complexity_assessment": "Flag 1 (meal expense classification for tax deductibility): This is about tax treatment (50% vs 100% deductible), not the journal entry structure. The entry itself is straightforward\u2014debit expense, credit liability. The system can handle this. Flag 2 (HST recovery): The tax specialist correctly determined no tax was mentioned in the transaction, so no HST lines should be added. Per source of truth: \"If no tax is mentioned in the transaction, do not add tax lines.\" The system can handle this by treating $125 as stated. Flag 3 (corporate credit card liability): marked not skeptical. Both complexity flags are overly cautious for entry construction purposes.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit: Classified as \"Entertainment expense\" with reason \"Meal expense paid with corporate credit card\". However, the ambiguity detector correctly identified that we cannot determine if this should be Entertainment expense vs Travel expense vs Meeting expense vs Employee benefits expense without knowing the business purpose. The classifier made an assumption (Entertainment) that is not supported by the transaction text. Credit: Classified as \"Accrued liabilities\" for corporate credit card liability. This is correct\u2014corporate credit card creates a liability. The credit side is valid.",
+        "debit_approved": false,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity about meal purpose is material because it changes the expense account name (Travel expense vs Entertainment expense vs Meeting expense vs Employee benefits expense). The transaction text provides no information to determine which account is correct. The debit classifier assumed \"Entertainment expense\" without justification. The complexity flags are about tax treatment and HST breakdown, which do not prevent entry construction\u2014the entry structure is clear (Dr expense $125, Cr liability $125), but we cannot determine WHICH expense account to use. This is a missing business fact that the person who made the purchase could answer.",
+        "decision": "missing_info"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "What was the business purpose of this meal expense?"
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of the meal",
+            "why_entry_depends_on_clarification": "Different purposes map to different expense accounts: travel expense vs. entertainment expense vs. meeting expense vs. employee benefits expense",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states only that a meal was purchased with corporate card. No convention exists for default meal classification. Business type 'general' and corporate structure do not narrow the purpose.",
+            "clarification_question": "What was the business purpose of this meal expense?",
+            "options": [
+              "Employee meal during travel",
+              "Client entertainment",
+              "Team meeting meal",
+              "Employee benefit/perk"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "meal expense classification",
+            "why_llm_cannot_do_this": "Cannot determine if this is a business meal (50% deductible under Canadian tax rules) vs employee meal benefit (100% deductible) vs entertainment (50% deductible) without context about the business purpose, attendees, or occasion",
+            "what_is_best_llm_can_do": "Record full $125 as general meal/entertainment expense without tax limitation consideration",
+            "skeptical": true
+          },
+          {
+            "aspect": "HST recovery on meal",
+            "why_llm_cannot_do_this": "Ontario HST (13%) applies to meals, but the $125 could be tax-inclusive or tax-exclusive. Transaction does not state whether tax is included or the breakdown",
+            "what_is_best_llm_can_do": "Treat $125 as the expense amount without separating HST component",
+            "skeptical": true
+          },
+          {
+            "aspect": "corporate credit card liability",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Meals are taxable supplies, but the transaction text does not mention any tax amount or rate. The $125 appears to be the total amount paid.",
+        "tax_mentioned": false,
+        "taxable": true,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "The ambiguity detector flagged \"business purpose of the meal\" with 4 options: travel expense, entertainment, meeting expense, or employee benefit. Each option maps to a different expense account name (Travel expense vs Entertainment expense vs Meeting expense vs Employee benefits expense). The transaction text provides no clues about purpose\u2014only that a meal was purchased with a corporate card. No convention exists to default meal classification. The tuple (Dr expense, Cr liability) remains the same, but the account NAME differs materially depending on the answer. This ambiguity is NOT resolved by the transaction text or context.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "What was the business purpose of this meal expense?"
+        ],
+        "complexity_assessment": "Flag 1 (meal expense classification for tax deductibility): This is about tax treatment (50% vs 100% deductible), not the journal entry structure. The entry itself is straightforward\u2014debit expense, credit liability. The system can handle this. Flag 2 (HST recovery): The tax specialist correctly determined no tax was mentioned in the transaction, so no HST lines should be added. Per source of truth: \"If no tax is mentioned in the transaction, do not add tax lines.\" The system can handle this by treating $125 as stated. Flag 3 (corporate credit card liability): marked not skeptical. Both complexity flags are overly cautious for entry construction purposes.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit: Classified as \"Entertainment expense\" with reason \"Meal expense paid with corporate credit card\". However, the ambiguity detector correctly identified that we cannot determine if this should be Entertainment expense vs Travel expense vs Meeting expense vs Employee benefits expense without knowing the business purpose. The classifier made an assumption (Entertainment) that is not supported by the transaction text. Credit: Classified as \"Accrued liabilities\" for corporate credit card liability. This is correct\u2014corporate credit card creates a liability. The credit side is valid.",
+        "debit_approved": false,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity about meal purpose is material because it changes the expense account name (Travel expense vs Entertainment expense vs Meeting expense vs Employee benefits expense). The transaction text provides no information to determine which account is correct. The debit classifier assumed \"Entertainment expense\" without justification. The complexity flags are about tax treatment and HST breakdown, which do not prevent entry construction\u2014the entry structure is clear (Dr expense $125, Cr liability $125), but we cannot determine WHICH expense account to use. This is a missing business fact that the person who made the purchase could answer.",
+        "decision": "missing_info"
+      }
+    ],
+    "output_entry_drafter": [],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "business purpose of the meal",
+            "why_entry_depends_on_clarification": "Different purposes map to different expense accounts: travel expense vs. entertainment expense vs. meeting expense vs. employee benefits expense",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states only that a meal was purchased with corporate card. No convention exists for default meal classification. Business type 'general' and corporate structure do not narrow the purpose.",
+            "clarification_question": "What was the business purpose of this meal expense?",
+            "options": [
+              "Employee meal during travel",
+              "Client entertainment",
+              "Team meeting meal",
+              "Employee benefit/perk"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Meal expense paid with corporate credit card",
+            "category": "Entertainment expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [
+          {
+            "reason": "Corporate credit card liability for meal purchase",
+            "category": "Accrued liabilities",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 0,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 140,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 480,
+        "output_tokens": 157,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 479,
+        "output_tokens": 160,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 494,
+        "output_tokens": 294,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 203,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1421,
+        "output_tokens": 740,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "tax_specialist": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "ambiguity_detector": "tool_use",
+      "decision_maker": "tool_use"
+    }
+  }
+}

@@ -22,6 +22,7 @@ from schemas.clarifications import (
     ResolveResponse,
 )
 from schemas.parse import Confidence, JournalLine, ProposedEntry
+from services.shared.parse_status import record_batch_result_sync
 
 router = APIRouter(prefix="/api/v1")
 
@@ -43,9 +44,14 @@ def _serialize_line(line: dict) -> JournalLine:
     )
 
 
-def _serialize_proposed_entry(task: ClarificationTask) -> ProposedEntry:
+def _serialize_proposed_entry(task: ClarificationTask) -> ProposedEntry | None:
+    if task.proposed_entry is None:
+        return None
+
     entry_payload, line_payload = _normalize_entry_payload(task.proposed_entry)
     journal_entry_id = entry_payload.get("journal_entry_id") or entry_payload.get("id")
+    if journal_entry_id is None and not line_payload:
+        return None
     return ProposedEntry(
         journal_entry_id=str(journal_entry_id) if journal_entry_id is not None else None,
         lines=[_serialize_line(line) for line in line_payload],
@@ -112,8 +118,15 @@ async def resolve_clarification(
 
     db.commit()
 
+    stored_entry_payload, _ = _normalize_entry_payload(task.proposed_entry)
+    event_parse_id = (
+        stored_entry_payload.get("child_parse_id")
+        or stored_entry_payload.get("parse_id")
+        or clarification_id
+    )
+
     pub.clarification_resolved(
-        parse_id=clarification_id,
+        parse_id=str(event_parse_id),
         user_id=str(task.user_id),
         status=task.status,
         input_text=task.source_text,
@@ -121,6 +134,20 @@ async def resolve_clarification(
         explanation=task.explanation,
         proposed_entry=task.proposed_entry,
     )
+
+    parent_parse_id = stored_entry_payload.get("parent_parse_id")
+    child_parse_id = stored_entry_payload.get("child_parse_id") or stored_entry_payload.get("parse_id")
+    if parent_parse_id and child_parse_id:
+        record_batch_result_sync(
+            parent_parse_id=str(parent_parse_id),
+            child_parse_id=str(child_parse_id),
+            user_id=str(task.user_id),
+            statement_index=int(stored_entry_payload.get("statement_index") or 0),
+            total_statements=int(stored_entry_payload.get("statement_total") or 1),
+            status=task.status,
+            input_text=task.source_text,
+            journal_entry_id=str(journal_entry.id) if journal_entry is not None else None,
+        )
 
     return ResolveResponse(
         clarification_id=clarification_id,

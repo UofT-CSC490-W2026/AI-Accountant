@@ -1,0 +1,539 @@
+{
+  "test_case_id": "int_hard_27a_meal_overtime",
+  "variant_name": "with_evaluation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2024-01-01",
+    "description": "Employee meal benefit for overtime workers, paid by corporate credit card",
+    "rationale": "The meal provided to employees working overtime is an employee benefit expense. Under IFRS, employee benefits are recognized as expenses when incurred. The transaction is subject to HST on the purchase (meals are generally taxable in Canada unless they meet basic grocery exemptions, which prepared meals do not). HST paid is recoverable as HST Receivable. The credit card creates a liability (Credit Card Payable). Per fix context, HST must be added to this transaction. Assuming Ontario HST rate of 13% on the $125 base amount.",
+    "lines": [
+      {
+        "account_name": "Employee Benefits Expense",
+        "type": "debit",
+        "amount": 125.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 16.25
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 141.25
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0747777,
+  "raw_cost_usd": 0.122862,
+  "total_latency_ms": 65898,
+  "total_input_tokens": 28179,
+  "total_output_tokens": 2555,
+  "total_llm_calls": 9,
+  "iteration_count": 2,
+  "final_decision": "error",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 502,
+      "output_tokens": 108,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1743,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034983,
+      "raw_cost_usd": 0.006849,
+      "output": {
+        "reason": "The credit side records the corporate credit card obligation. When Mondelez uses the corporate credit card to pay for the meal, a liability is created (credit card payable increases). This is a liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The credit side records the corporate credit card obligation. When Mondelez uses the corporate credit card to pay for the meal, a liability is created (credit card payable increases). This is a liability increase."
+    },
+    "debit_classifier": {
+      "input_tokens": 1105,
+      "output_tokens": 269,
+      "cache_read_tokens": 2524,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3629,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0081072,
+      "raw_cost_usd": 0.014922000000000001,
+      "output": {
+        "reason": "This is a purchase of food/catering services (taxable supply in Canada). The $125 is the pre-tax amount. Debit side has two lines: (1) Employee Benefits Expense increase (c-slot) for the meal cost, and (2) HST Receivable increase (a-slot) for the input tax credit on this taxable purchase. Total: 1 asset increase + 1 expense increase.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This is a purchase of food/catering services (taxable supply in Canada). The $125 is the pre-tax amount. Debit side has two lines: (1) Employee Benefits Expense increase (c-slot) for the meal cost, and (2) HST Receivable increase (a-slot) for the input tax credit on this taxable purchase. Total: 1 asset increase + 1 expense increase."
+    },
+    "entry_builder": {
+      "input_tokens": 1560,
+      "output_tokens": 681,
+      "cache_read_tokens": 6230,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7790,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.016764,
+      "raw_cost_usd": 0.033585000000000004,
+      "output": {
+        "date": "2024-01-01",
+        "description": "Employee meal benefit for overtime workers, paid by corporate credit card",
+        "rationale": "The meal provided to employees working overtime is an employee benefit expense. Under IFRS, employee benefits are recognized as expenses when incurred. The transaction is subject to HST on the purchase (meals are generally taxable in Canada unless they meet basic grocery exemptions, which prepared meals do not). HST paid is recoverable as HST Receivable. The credit card creates a liability (Credit Card Payable). Per fix context, HST must be added to this transaction. Assuming Ontario HST rate of 13% on the $125 base amount.",
+        "lines": [
+          {
+            "account_name": "Employee Benefits Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 16.25
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 141.25
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3777,
+      "output_tokens": 384,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7881,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0183222,
+      "raw_cost_usd": 0.029403,
+      "output": {
+        "reason": "Meals have 50% restricted ITC recovery. HST Receivable should be $8.13 (50% of $16.25), not $16.25. The remaining 50% of HST ($8.12) must stay in Employee Benefits Expense, making total expense $133.12. Correct entry: Dr Employee Benefits Expense $133.12, Dr HST Receivable $8.13, Cr Credit Card Payable $141.25.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Meals have 50% restricted ITC recovery. HST Receivable should be $8.13 (50% of $16.25), not $16.25. The remaining 50% of HST ($8.12) must stay in Employee Benefits Expense, making total expense $133.12. Correct entry: Dr Employee Benefits Expense $133.12, Dr HST Receivable $8.13, Cr Credit Card Payable $141.25."
+    },
+    "diagnostician": {
+      "input_tokens": 3426,
+      "output_tokens": 1113,
+      "cache_read_tokens": 3710,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7136,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.028086,
+      "raw_cost_usd": 0.038103,
+      "output": {
+        "reasoning": "The Approver rejected because HST Receivable should be $8.13 (50% of $16.25), not $16.25, due to restricted ITC recovery on meals. The remaining 50% of HST ($8.12) must stay in Employee Benefits Expense.\n\nTracing the error:\n- Agent 5 (Entry Builder) in Iteration 1 created the entry with full HST recovery: Dr HST Receivable $16.25\n- Agent 5's rationale states \"HST paid is recoverable as HST Receivable\" without acknowledging the 50% ITC restriction on meals\n- Agents 1 and 3 (Debit Classifier/Corrector) correctly identified the tuple structure (1,0,1,0,0,0) = 1 asset increase + 1 expense increase, which is correct for a taxable purchase\n- The tuple structure itself is correct \u2014 the issue is HOW Agent 5 applied the tax rules\n\nThis is a tax computation error specific to meal expenses. The classifiers correctly identified this as a taxable purchase with HST. The root cause is Agent 5 failing to apply the 50% ITC restriction rule for meals when building the entry.\n\nUnder Canadian GST/HST rules, meals and entertainment expenses have a 50% ITC restriction \u2014 only 50% of the HST paid can be recovered as HST Receivable, and the other 50% must be capitalized into the expense account.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Meals have 50% restricted ITC recovery under Canadian GST/HST rules. Only 50% of HST ($8.13 of $16.25) goes to HST Receivable. The remaining 50% ($8.12) must be added to Employee Benefits Expense, making total expense $133.12."
+          }
+        ],
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    1,
+    5
+  ],
+  "rejection_reason": "Transaction states meal was purchased for $125, but this is a taxable purchase of food/catering services. The entry incorrectly treats this as a non-taxable employee benefit. When a company purchases a meal from a vendor using a credit card, it is buying a taxable supply. The $125 is the pre-tax amount, and HST should be added. The entry should have: Employee Benefits Expense debit $125, HST Receivable debit (at applicable rate), and Credit Card Payable credit for the total including tax. The fact that the meal is provided to employees as a benefit does not exempt the purchase transaction from sales tax.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "The meal provided to employees working overtime is an employee benefit expense. This represents compensation/benefit provided to employees, which is an operating expense. Debit: 1 expense increase (employee benefits/meals expense).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "This is a purchase of food/catering services (taxable supply in Canada). The $125 is the pre-tax amount. Debit side has two lines: (1) Employee Benefits Expense increase (c-slot) for the meal cost, and (2) HST Receivable increase (a-slot) for the input tax credit on this taxable purchase. Total: 1 asset increase + 1 expense increase.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit side records the corporate credit card obligation. When Mondelez uses the corporate credit card to pay for the meal, a liability is created (credit card payable increases). This is a liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The credit side records the corporate credit card obligation. When Mondelez uses the corporate credit card to pay for the meal, a liability is created (credit card payable increases). This is a liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The meal provided to employees working overtime is an employee benefit expense. This represents compensation/benefit provided to employees, which is an operating expense. Debit: 1 expense increase (employee benefits/meals expense).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "This is a purchase of food/catering services (taxable supply in Canada). The $125 is the pre-tax amount. Debit side has two lines: (1) Employee Benefits Expense increase (c-slot) for the meal cost, and (2) HST Receivable increase (a-slot) for the input tax credit on this taxable purchase. Total: 1 asset increase + 1 expense increase.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The credit side records the corporate credit card obligation. When Mondelez uses the corporate credit card to pay for the meal, a liability is created (credit card payable increases). This is a liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The credit side records the corporate credit card obligation. When Mondelez uses the corporate credit card to pay for the meal, a liability is created (credit card payable increases). This is a liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2024-01-01",
+        "description": "Employee meal benefit for overtime workers paid via corporate credit card",
+        "rationale": "The transaction clearly states the meal was provided to employees working overtime as an employee benefit. Under IFRS, employee benefits are recognized as an expense when the entity consumes the economic benefit arising from service provided by an employee. The meal is a short-term employee benefit (IAS 19) and should be recorded as Employee Benefits Expense or Salaries and Wages Expense. The corporate credit card creates a liability (Credit Card Payable). The debit tuple (0,0,1,0,0,0) correctly identifies this as an expense increase, and the credit tuple (1,0,0,0,0,0) correctly identifies a liability increase. No tax is applicable as this is an employee benefit provided directly by the employer (not a taxable supply). The business purpose is explicitly stated, so no clarification is needed.",
+        "lines": [
+          {
+            "account_name": "Employee Benefits Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2024-01-01",
+        "description": "Employee meal benefit for overtime workers, paid by corporate credit card",
+        "rationale": "The meal provided to employees working overtime is an employee benefit expense. Under IFRS, employee benefits are recognized as expenses when incurred. The transaction is subject to HST on the purchase (meals are generally taxable in Canada unless they meet basic grocery exemptions, which prepared meals do not). HST paid is recoverable as HST Receivable. The credit card creates a liability (Credit Card Payable). Per fix context, HST must be added to this transaction. Assuming Ontario HST rate of 13% on the $125 base amount.",
+        "lines": [
+          {
+            "account_name": "Employee Benefits Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 16.25
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 141.25
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Transaction states meal was purchased for $125, but this is a taxable purchase of food/catering services. The entry incorrectly treats this as a non-taxable employee benefit. When a company purchases a meal from a vendor using a credit card, it is buying a taxable supply. The $125 is the pre-tax amount, and HST should be added. The entry should have: Employee Benefits Expense debit $125, HST Receivable debit (at applicable rate), and Credit Card Payable credit for the total including tax. The fact that the meal is provided to employees as a benefit does not exempt the purchase transaction from sales tax.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Meals have 50% restricted ITC recovery. HST Receivable should be $8.13 (50% of $16.25), not $16.25. The remaining 50% of HST ($8.12) must stay in Employee Benefits Expense, making total expense $133.12. Correct entry: Dr Employee Benefits Expense $133.12, Dr HST Receivable $8.13, Cr Credit Card Payable $141.25.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because the entry is missing HST on a taxable purchase. The transaction describes Mondelez purchasing a meal from a vendor for $125 using a corporate credit card. This is a taxable supply - when a company buys food/catering services from a vendor, sales tax applies to the purchase transaction.\n\nTracing the error:\n- Agent 1 (Debit Classifier) classified this as 1 expense increase only, missing that there should also be an HST Receivable (asset increase). The debit tuple should have been (1,0,1,0,0,0) to account for both the HST Receivable and the Employee Benefits Expense.\n- Agent 2 (Credit Classifier) correctly identified the credit card liability increase.\n- Agent 3 (Debit Corrector) failed to catch the missing HST and repeated Agent 1's error.\n- Agent 5 (Entry Builder) explicitly stated \"No tax is applicable as this is an employee benefit provided directly by the employer (not a taxable supply)\" which is incorrect reasoning. However, Agent 5 was working with an incorrect debit tuple that didn't include HST.\n\nThe root cause is Agent 1. It misunderstood the tax treatment - the fact that the meal is provided to employees as a benefit is irrelevant to whether the PURCHASE transaction is taxable. When buying from a vendor, HST applies. Agent 1 should have classified this as requiring both an expense increase (Employee Benefits) and an asset increase (HST Receivable).\n\nAgent 5 also needs guidance because even if it had received the correct tuple, its rationale shows it misunderstood the tax treatment of purchased meals.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 1,
+            "fix_context": "This is a purchase of food/catering services from a vendor, which is a taxable supply. The debit side needs both Employee Benefits Expense increase AND HST Receivable (asset increase). The $125 is pre-tax. Tuple should be (1,0,1,0,0,0)."
+          },
+          {
+            "agent": 5,
+            "fix_context": "When a company purchases meals from a vendor using a credit card, the purchase transaction is subject to HST regardless of how the meal is used internally. Add HST Receivable debit and increase Credit Card Payable credit by the HST amount."
+          }
+        ],
+        "stuck_reason": null
+      },
+      {
+        "reasoning": "The Approver rejected because HST Receivable should be $8.13 (50% of $16.25), not $16.25, due to restricted ITC recovery on meals. The remaining 50% of HST ($8.12) must stay in Employee Benefits Expense.\n\nTracing the error:\n- Agent 5 (Entry Builder) in Iteration 1 created the entry with full HST recovery: Dr HST Receivable $16.25\n- Agent 5's rationale states \"HST paid is recoverable as HST Receivable\" without acknowledging the 50% ITC restriction on meals\n- Agents 1 and 3 (Debit Classifier/Corrector) correctly identified the tuple structure (1,0,1,0,0,0) = 1 asset increase + 1 expense increase, which is correct for a taxable purchase\n- The tuple structure itself is correct \u2014 the issue is HOW Agent 5 applied the tax rules\n\nThis is a tax computation error specific to meal expenses. The classifiers correctly identified this as a taxable purchase with HST. The root cause is Agent 5 failing to apply the 50% ITC restriction rule for meals when building the entry.\n\nUnder Canadian GST/HST rules, meals and entertainment expenses have a 50% ITC restriction \u2014 only 50% of the HST paid can be recovered as HST Receivable, and the other 50% must be capitalized into the expense account.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Meals have 50% restricted ITC recovery under Canadian GST/HST rules. Only 50% of HST ($8.13 of $16.25) goes to HST Receivable. The remaining 50% ($8.12) must be added to Employee Benefits Expense, making total expense $133.12."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [
+      "This is a purchase of food/catering services from a vendor, which is a taxable supply. The debit side needs both Employee Benefits Expense increase AND HST Receivable (asset increase). The $125 is pre-tax. Tuple should be (1,0,1,0,0,0)."
+    ],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "When a company purchases meals from a vendor using a credit card, the purchase transaction is subject to HST regardless of how the meal is used internally. Add HST Receivable debit and increase Credit Card Payable credit by the HST amount."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": null,
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 502,
+        "output_tokens": 108,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 110,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 740,
+        "output_tokens": 351,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1532,
+        "output_tokens": 210,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1364,
+        "output_tokens": 615,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 601,
+        "output_tokens": 159,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 820,
+        "output_tokens": 330,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2245,
+        "output_tokens": 174,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 2062,
+        "output_tokens": 498,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

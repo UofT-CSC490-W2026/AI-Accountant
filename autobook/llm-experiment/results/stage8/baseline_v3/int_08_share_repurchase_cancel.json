@@ -1,0 +1,389 @@
+{
+  "test_case_id": "int_08_share_repurchase_cancel",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    2,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Repurchase and immediate cancellation of 10,000 common shares at $6.00 per share: par value $5.00 removed from Issued capital, $1.00 premium charged to Retained earnings",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Issued capital",
+        "amount": 50000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Retained earnings",
+        "amount": 10000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash and cash equivalents",
+        "amount": 60000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0443208,
+  "raw_cost_usd": 0.102252,
+  "total_latency_ms": 24527,
+  "total_input_tokens": 26239,
+  "total_output_tokens": 1569,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "unknown": {
+      "input_tokens": 3764,
+      "output_tokens": 1161,
+      "cache_read_tokens": 14436,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 18200,
+      "llm_calls": 5,
+      "actual_cost_usd": 0.0330378,
+      "raw_cost_usd": 0.072015,
+      "output": null,
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 509,
+      "output_tokens": 173,
+      "cache_read_tokens": 3466,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3975,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051618,
+      "raw_cost_usd": 0.01452,
+      "output": {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash payment to repurchase and cancel shares",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 510,
+      "output_tokens": 235,
+      "cache_read_tokens": 3554,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4064,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.006121199999999999,
+      "raw_cost_usd": 0.015717,
+      "output": {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [
+          {
+            "reason": "Cancellation of issued capital at par value (10,000 shares \u00d7 $5.00)",
+            "category": "Issued capital",
+            "count": 1
+          },
+          {
+            "reason": "Excess paid over par value for share cancellation (10,000 shares \u00d7 $1.00 premium)",
+            "category": "Retained earnings",
+            "count": 1
+          }
+        ],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ]
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "share repurchase and immediate cancellation",
+            "why_llm_cannot_do_this": "Cancellation of shares requires allocation of the excess paid over par value between share premium and retained earnings according to jurisdiction-specific rules. Ontario OBCA rules and the specific allocation method (proportional vs. sequential) are not in the system's standard IFRS knowledge base.",
+            "what_is_best_llm_can_do": "Record as treasury stock method (debit Treasury shares $60,000, credit Cash $60,000) which is incorrect when shares are immediately cancelled",
+            "skeptical": true
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Transaction involves repurchase and cancellation of own shares. Equity transactions (share issuance, buybacks, cancellations) are not taxable supplies. No tax is mentioned in the transaction text.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged. The transaction clearly states immediate cancellation, not treasury stock treatment.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The complexity detector flags allocation rules for excess over par. However, under IFRS (IAS 32), when shares are repurchased and cancelled, the consideration paid is allocated: (1) par value reduces Issued capital, (2) any excess first reduces Share premium to the extent available from the original issuance of those shares, then any remainder reduces Retained earnings. The transaction states par $5.00, paid $6.00, so $1.00 excess per share. Without knowing the original share premium on these shares, the standard IFRS approach is to charge the excess to Retained earnings (conservative treatment when share premium history is unknown). The debit classifier's treatment (par to Issued capital, excess to Retained earnings) is a reasonable IFRS-compliant approach. This is within standard IFRS knowledge - not stuck.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classifier: Two equity decrease lines - (1) Issued capital $50,000 for par value, (2) Retained earnings $10,000 for excess. This is correct under IFRS IAS 32 for share cancellation when share premium history is unknown. Credit classifier: One asset decrease line for Cash $60,000. Correct. Both classifications are valid and produce the correct entry structure.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The complexity flag is overly cautious. The transaction explicitly states immediate cancellation, which triggers IAS 32 treatment (not treasury stock). The debit classifier correctly applies the standard IFRS approach: par value reduces Issued capital, excess reduces Retained earnings (appropriate when original share premium is unknown). This is standard IFRS knowledge, not jurisdiction-specific. The entry can be built correctly.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Repurchase and immediate cancellation of 10,000 common shares at $6.00 per share: par value $5.00 removed from Issued capital, $1.00 premium charged to Retained earnings",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Issued capital",
+            "amount": 50000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Retained earnings",
+            "amount": 10000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash and cash equivalents",
+            "amount": 60000.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [
+          {
+            "reason": "Cancellation of issued capital at par value (10,000 shares \u00d7 $5.00)",
+            "category": "Issued capital",
+            "count": 1
+          },
+          {
+            "reason": "Excess paid over par value for share cancellation (10,000 shares \u00d7 $1.00 premium)",
+            "category": "Retained earnings",
+            "count": 1
+          }
+        ],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          2,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash payment to repurchase and cancel shares",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 534,
+        "output_tokens": 151,
+        "input_token_details": {
+          "cache_read": 2727,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 509,
+        "output_tokens": 173,
+        "input_token_details": {
+          "cache_read": 3466,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 510,
+        "output_tokens": 235,
+        "input_token_details": {
+          "cache_read": 3554,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 548,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2996,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 524,
+        "output_tokens": 184,
+        "input_token_details": {
+          "cache_read": 2389,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 1216,
+        "output_tokens": 579,
+        "input_token_details": {
+          "cache_read": 3445,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 942,
+        "output_tokens": 212,
+        "input_token_details": {
+          "cache_read": 2879,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "unknown": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use"
+    }
+  }
+}

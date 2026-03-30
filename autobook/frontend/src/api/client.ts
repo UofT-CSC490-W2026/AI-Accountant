@@ -9,6 +9,7 @@ import type {
   ParseRequest,
   ResolveClarificationRequest,
   ResolveClarificationResponse,
+  StatementType,
   StatementsResponse,
   TransactionInputSource,
 } from "./types";
@@ -45,10 +46,28 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    throw new Error(await buildErrorMessage(response));
   }
 
   return (await response.json()) as T;
+}
+
+async function buildErrorMessage(response: Response): Promise<string> {
+  const fallback = `Request failed: ${response.status}`;
+  const contentType = response.headers.get("Content-Type") ?? "";
+
+  try {
+    if (contentType.includes("application/json")) {
+      const payload = (await response.json()) as { detail?: string; message?: string } | null;
+      const detail = payload?.detail ?? payload?.message;
+      return detail ? `${fallback} - ${detail}` : fallback;
+    }
+
+    const text = (await response.text()).trim();
+    return text ? `${fallback} - ${text}` : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 export async function parseTransaction(input: ParseRequest): Promise<ParseAccepted> {
@@ -92,7 +111,7 @@ export async function uploadTransactionFile(
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    throw new Error(await buildErrorMessage(response));
   }
 
   return (await response.json()) as ParseAccepted;
@@ -136,10 +155,18 @@ export async function getLedger(): Promise<LedgerResponse> {
   return request<LedgerResponse>("/ledger");
 }
 
-export async function getStatements(): Promise<StatementsResponse> {
+export async function getStatements(statementType?: StatementType, asOf?: string): Promise<StatementsResponse> {
   if (isMockApiEnabled()) {
-    return mockApi.getStatements();
+    return mockApi.getStatements(statementType, asOf);
   }
 
-  return request<StatementsResponse>("/statements");
+  const params = new URLSearchParams();
+  if (statementType) {
+    params.set("statement_type", statementType);
+  }
+  if (asOf) {
+    params.set("as_of", asOf);
+  }
+  const suffix = params.size > 0 ? `?${params.toString()}` : "";
+  return request<StatementsResponse>(`/statements${suffix}`);
 }

@@ -1,0 +1,557 @@
+{
+  "test_case_id": "int_05_bond_issuance_discount",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Under IFRS 9, bonds are initially recognized at fair value, which is the present value of future cash flows discounted at the market rate. The bond has: Face value $3,000,000, coupon 10% ($300,000 annually), market rate 15%, 3-year term. Present value calculation: PV of principal = 3,000,000 / (1.15)^3 = 1,972,547; PV of interest = 300,000 \u00d7 [(1 - (1.15)^-3) / 0.15] = 300,000 \u00d7 2.283225 = 684,968; Total proceeds = 2,657,515. The bond is recorded at this net amount (amortized cost basis under IFRS), not gross with a separate discount account. Debit Cash for proceeds received, Credit Bonds Payable for the same amount.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Cash",
+        "amount": 2657515.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Bonds Payable",
+        "amount": 2657515.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.049944,
+  "raw_cost_usd": 0.077025,
+  "total_latency_ms": 34257,
+  "total_input_tokens": 12545,
+  "total_output_tokens": 2626,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 568,
+      "output_tokens": 249,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2915,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0061431,
+      "raw_cost_usd": 0.01248,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "bond issuance price",
+            "resolution": "The transaction states bonds were 'issued at a discount to reflect the market interest rate of 15%' \u2014 the discount is the difference between face value and present value of future cash flows discounted at 15%. This is calculable from the stated terms (face value $3,000,000, 10% coupon, 3 years, market rate 15%)."
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Transaction explicitly states 'proceeds were received in cash' \u2014 debit Cash."
+          },
+          {
+            "aspect": "interest payment frequency and date",
+            "resolution": "Transaction explicitly states 'interest payable annually on December 31' \u2014 no ambiguity about payment schedule."
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 543,
+      "output_tokens": 384,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2089,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0078528,
+      "raw_cost_usd": 0.012027,
+      "output": {
+        "asset_increase_reason": "Cash increases by the present value of the bond proceeds (discounted at 15% market rate). This is one asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are incurred at bond issuance. The discount will be amortized over the bond term in future periods.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The bond discount is a contra-liability account that reduces the carrying amount of bonds payable. Since face value and present value differ, the discount is counted as a separate line representing a liability decrease.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity accounts are decreased in this bond issuance transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by bond issuance.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 541,
+      "output_tokens": 426,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2057,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0084678,
+      "raw_cost_usd": 0.012561,
+      "output": {
+        "liability_increase_reason": "The bonds payable (face value $3,000,000) represents a liability increase. This is credited at face value.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts are affected; this is a debt financing transaction, not equity financing.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from issuing bonds; this is a financing activity, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "The discount on bonds payable is a contra-liability account that reduces the carrying amount of the bonds. Under IFRS, this is classified as an asset decrease (reduction to the net liability recorded). The discount arises because market rate (15%) exceeds coupon rate (10%).",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner withdrawals are involved in this bond issuance transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased; the discount will be amortized to interest expense over time in future periods, but not at issuance.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 863,
+      "output_tokens": 1567,
+      "cache_read_tokens": 4621,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5484,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0274803,
+      "raw_cost_usd": 0.039957,
+      "output": {
+        "incomplete_information_reasoning": "The transaction provides all necessary business facts: face value ($3,000,000), term (3 years), coupon rate (10%), market rate (15%), payment frequency (annual), and that bonds were issued at a discount. The present value calculation is deterministic using these facts. No business decision or policy election is missing.",
+        "debit_asset_increase": {
+          "reason": "Cash received from bond issuance. The tuple correctly identifies one asset increase line for the cash proceeds.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense is recognized at bond issuance. Interest expense will be recognized over time using the effective interest method.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "Override: The tuple shows 1 liability decrease, but this is a bond issuance which increases liabilities, not decreases them. The discount on bonds is a contra-liability that reduces the carrying amount, but under IFRS it should be presented as a single net liability at amortized cost, not as a separate debit. The debit side should only show the cash received.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Bond issuance creates a financial liability. Under IFRS 9, the bond is initially recognized at fair value (proceeds received), which equals present value. This is one liability increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Bonds Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Override: The tuple shows 1 asset decrease, but at bond issuance we receive cash (asset increase), we don't pay out cash. This appears to be a classifier error.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS 9, bonds are initially recognized at fair value, which is the present value of future cash flows discounted at the market rate. The bond has: Face value $3,000,000, coupon 10% ($300,000 annually), market rate 15%, 3-year term. Present value calculation: PV of principal = 3,000,000 / (1.15)^3 = 1,972,547; PV of interest = 300,000 \u00d7 [(1 - (1.15)^-3) / 0.15] = 300,000 \u00d7 2.283225 = 684,968; Total proceeds = 2,657,515. The bond is recorded at this net amount (amortized cost basis under IFRS), not gross with a separate discount account. Debit Cash for proceeds received, Credit Bonds Payable for the same amount.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Cash",
+              "amount": 2657515.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Bonds Payable",
+              "amount": 2657515.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction provides all necessary facts to calculate the bond proceeds using present value. Under IFRS 9, financial liabilities are initially measured at fair value (the proceeds), which is the present value of future cash flows discounted at the market rate of 15%. The calculation yields proceeds of $2,657,515. The classifier tuples incorrectly suggested a liability decrease and asset decrease on the credit side, which I overrode because bond issuance increases liabilities and increases cash. The entry debits Cash and credits Bonds Payable for the same amount, satisfying the accounting equation. No tax applies to bond issuance. Total debits ($2,657,515) equal total credits ($2,657,515).",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "bond issuance price",
+            "resolution": "The transaction states bonds were 'issued at a discount to reflect the market interest rate of 15%' \u2014 the discount is the difference between face value and present value of future cash flows discounted at 15%. This is calculable from the stated terms (face value $3,000,000, 10% coupon, 3 years, market rate 15%)."
+          },
+          {
+            "aspect": "payment method",
+            "resolution": "Transaction explicitly states 'proceeds were received in cash' \u2014 debit Cash."
+          },
+          {
+            "aspect": "interest payment frequency and date",
+            "resolution": "Transaction explicitly states 'interest payable annually on December 31' \u2014 no ambiguity about payment schedule."
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Cash increases by the present value of the bond proceeds (discounted at 15% market rate). This is one asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are incurred at bond issuance. The discount will be amortized over the bond term in future periods.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The bond discount is a contra-liability account that reduces the carrying amount of bonds payable. Since face value and present value differ, the discount is counted as a separate line representing a liability decrease.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity accounts are decreased in this bond issuance transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by bond issuance.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "The bonds payable (face value $3,000,000) represents a liability increase. This is credited at face value.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts are affected; this is a debt financing transaction, not equity financing.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from issuing bonds; this is a financing activity, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "The discount on bonds payable is a contra-liability account that reduces the carrying amount of the bonds. Under IFRS, this is classified as an asset decrease (reduction to the net liability recorded). The discount arises because market rate (15%) exceeds coupon rate (10%).",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner withdrawals are involved in this bond issuance transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased; the discount will be amortized to interest expense over time in future periods, but not at issuance.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Cash increases by the present value of the bond proceeds (discounted at 15% market rate). This is one asset increase line.",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses are incurred at bond issuance. The discount will be amortized over the bond term in future periods.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The bond discount is a contra-liability account that reduces the carrying amount of bonds payable. Since face value and present value differ, the discount is counted as a separate line representing a liability decrease.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity accounts are decreased in this bond issuance transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected by bond issuance.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "The bonds payable (face value $3,000,000) represents a liability increase. This is credited at face value.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts are affected; this is a debt financing transaction, not equity financing.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated from issuing bonds; this is a financing activity, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "The discount on bonds payable is a contra-liability account that reduces the carrying amount of the bonds. Under IFRS, this is classified as an asset decrease (reduction to the net liability recorded). The discount arises because market rate (15%) exceeds coupon rate (10%).",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner withdrawals are involved in this bond issuance transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased; the discount will be amortized to interest expense over time in future periods, but not at issuance.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_reasoning": "The transaction provides all necessary business facts: face value ($3,000,000), term (3 years), coupon rate (10%), market rate (15%), payment frequency (annual), and that bonds were issued at a discount. The present value calculation is deterministic using these facts. No business decision or policy election is missing.",
+        "debit_asset_increase": {
+          "reason": "Cash received from bond issuance. The tuple correctly identifies one asset increase line for the cash proceeds.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "No expense is recognized at bond issuance. Interest expense will be recognized over time using the effective interest method.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "Override: The tuple shows 1 liability decrease, but this is a bond issuance which increases liabilities, not decreases them. The discount on bonds is a contra-liability that reduces the carrying amount, but under IFRS it should be presented as a single net liability at amortized cost, not as a separate debit. The debit side should only show the cash received.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Bond issuance creates a financial liability. Under IFRS 9, the bond is initially recognized at fair value (proceeds received), which equals present value. This is one liability increase line.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Bonds Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Override: The tuple shows 1 asset decrease, but at bond issuance we receive cash (asset increase), we don't pay out cash. This appears to be a classifier error.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense transaction in this bond issuance.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS 9, bonds are initially recognized at fair value, which is the present value of future cash flows discounted at the market rate. The bond has: Face value $3,000,000, coupon 10% ($300,000 annually), market rate 15%, 3-year term. Present value calculation: PV of principal = 3,000,000 / (1.15)^3 = 1,972,547; PV of interest = 300,000 \u00d7 [(1 - (1.15)^-3) / 0.15] = 300,000 \u00d7 2.283225 = 684,968; Total proceeds = 2,657,515. The bond is recorded at this net amount (amortized cost basis under IFRS), not gross with a separate discount account. Debit Cash for proceeds received, Credit Bonds Payable for the same amount.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Cash",
+              "amount": 2657515.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Bonds Payable",
+              "amount": 2657515.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction provides all necessary facts to calculate the bond proceeds using present value. Under IFRS 9, financial liabilities are initially measured at fair value (the proceeds), which is the present value of future cash flows discounted at the market rate of 15%. The calculation yields proceeds of $2,657,515. The classifier tuples incorrectly suggested a liability decrease and asset decrease on the credit side, which I overrode because bond issuance increases liabilities and increases cash. The entry debits Cash and credits Bonds Payable for the same amount, satisfying the accounting equation. No tax applies to bond issuance. Total debits ($2,657,515) equal total credits ($2,657,515).",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 568,
+        "output_tokens": 249,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 543,
+        "output_tokens": 384,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 541,
+        "output_tokens": 426,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 863,
+        "output_tokens": 1567,
+        "input_token_details": {
+          "cache_read": 4621,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

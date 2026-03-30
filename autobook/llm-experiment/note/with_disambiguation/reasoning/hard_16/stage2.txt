@@ -1,0 +1,47 @@
+======================================================================
+Test Case: hard_16_rent_treatment
+Variant:   with_disambiguation
+Decision:  INCOMPLETE_INFORMATION
+======================================================================
+
+Final Tuples:
+  Debit:  [1, 0, 0, 0, 0, 0]  ✗
+  Credit: [0, 0, 0, 1, 0, 0]  ✗
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (1):
+  [UNRESOLVED] timing of rent expense recognition
+    Options: ['Recognize as prepaid rent asset and amortize monthly over 12 months', 'Recognize right-of-use asset and lease liability under IFRS 16']
+    Question: Does Atlas Van Lines apply a policy election to expense short-term leases (12 months or less) immediately, recognize prepaid rent, or recognize a right-of-use asset under IFRS 16?
+    Why not resolved: IFRS 16 permits a short-term lease exemption (12 months or less) allowing immediate expensing, but this is an entity policy election. The transaction states exactly 12 months, which is at the threshold. Without knowing the entity's accounting policy election, the correct treatment cannot be determined.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [1, 0, 0, 0, 0, 0]
+Reason: Prepaid rent for 12 months = asset increase. The $24,000 payment represents future economic benefits (rent for future periods), so it is recorded as a prepaid expense asset, not an immediate expense. Under IFRS, prepayments are recognized as assets and expensed over time as the benefit is consumed.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 0, 1, 0, 0]
+Reason: Atlas Van Lines paid $24,000 by cheque for 12 months of rent. The payment reduces the cash asset account. This is an asset decrease, which is recorded as a credit. Count: 1 credit line for asset decrease (cash).
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Disambiguator Responses:
+  [INCOMPLETE] timing of rent expense recognition
+    The transaction is exactly at the 12-month threshold for IFRS 16 short-term lease exemption. Three structurally different entries are possible depending on the entity's policy election: immediate expense (Rent Expense), prepaid asset (Prepaid Rent), or IFRS 16 full recognition (Right-of-Use Asset and Lease Liability). Each produces different accounts and subsequent treatment. This is a policy election that cannot be inferred from the transaction text alone.
+Rationale: The transaction involves a 12-month lease payment of $24,000. Under IFRS 16, entities may elect a recognition exemption for short-term leases (12 months or less). This transaction is exactly at the 12-month threshold. The accounting treatment differs materially based on the entity's policy election: (1) If the short-term lease exemption is applied, the full amount is expensed immediately (debit Rent Expense $24,000); (2) If treated as prepaid rent, it is recorded as an asset and amortized monthly (debit Prepaid Rent $24,000); (3) If IFRS 16 full recognition is applied, a right-of-use asset and lease liability are recognized with different measurement. The classifier tuples suggest asset increase (debit) and asset decrease (credit), consistent with prepaid rent treatment, but this is only one of three valid approaches. Without knowing the entity's accounting policy election for short-term leases, the correct journal entry structure cannot be determined.
+Entry:
+  (no lines)
+Decision: INCOMPLETE_INFORMATION
+Clarification Questions: ['Has the company elected to apply the IFRS 16 short-term lease exemption for leases of 12 months or less, or does it apply full IFRS 16 recognition to all leases?', 'If the short-term exemption is applied, does the company expense the rent immediately or recognize it as prepaid rent to be amortized monthly?']
+
+======================================================================
+Final Journal Entry:
+  {'date': '2026-03-22', 'description': 'Prepayment of 12 months office rent to Atlas Van Lines', 'rationale': "The transaction involves a 12-month lease payment of $24,000. Under IFRS 16, entities may elect a recognition exemption for short-term leases (12 months or less). This transaction is exactly at the 12-month threshold. The accounting treatment differs materially based on the entity's policy election: (1) If the short-term lease exemption is applied, the full amount is expensed immediately (debit Rent Expense $24,000); (2) If treated as prepaid rent, it is recorded as an asset and amortized monthly (debit Prepaid Rent $24,000); (3) If IFRS 16 full recognition is applied, a right-of-use asset and lease liability are recognized with different measurement. The classifier tuples suggest asset increase (debit) and asset decrease (credit), consistent with prepaid rent treatment, but this is only one of three valid approaches. Without knowing the entity's accounting policy election for short-term leases, the correct journal entry structure cannot be determined.", 'lines': [], 'disambiguator_responses': [{'aspect': 'timing of rent expense recognition', 'action': 'incomplete', 'reason': "The transaction is exactly at the 12-month threshold for IFRS 16 short-term lease exemption. Three structurally different entries are possible depending on the entity's policy election: immediate expense (Rent Expense), prepaid asset (Prepaid Rent), or IFRS 16 full recognition (Right-of-Use Asset and Lease Liability). Each produces different accounts and subsequent treatment. This is a policy election that cannot be inferred from the transaction text alone."}], 'decision': 'INCOMPLETE_INFORMATION', 'clarification_questions': ['Has the company elected to apply the IFRS 16 short-term lease exemption for leases of 12 months or less, or does it apply full IFRS 16 recognition to all leases?', 'If the short-term exemption is applied, does the company expense the rent immediately or recognize it as prepaid rent to be amortized monthly?'], 'stuck_reason': None}
+======================================================================

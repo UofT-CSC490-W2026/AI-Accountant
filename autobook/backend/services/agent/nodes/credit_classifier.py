@@ -1,7 +1,8 @@
 """Agent 2 — Credit Classifier node.
 
-Classifies credit-side journal lines into 6 directional categories.
-Output: CreditClassifierOutput {"tuple": [int*6], "reason": str}
+Classifies credit-side journal lines into 6 directional slots.
+Each line gets a reason and IFRS taxonomy category.
+Output: CreditClassifierOutput with list[ClassifiedLine] per slot.
 """
 from langchain_core.runnables import RunnableConfig
 
@@ -10,12 +11,12 @@ from services.agent.graph.state import (
 )
 from services.agent.prompts.credit_classifier import build_prompt
 from services.agent.rag.transaction import retrieve_transaction_examples
-from services.agent.utils.llm import get_llm
-from services.agent.utils.parsers.json_output import CreditClassifierOutput
+from services.agent.utils.llm import get_llm, invoke_structured
+from services.agent.utils.parsers.json_output import CreditClassifierOutput, extract_credit_tuple
 
 
 def credit_classifier_node(state: PipelineState, config: RunnableConfig) -> dict:
-    """Classify credit lines into 6-tuple directional categories."""
+    """Classify credit lines into per-slot directional categories."""
     # ── Iteration + history ───────────────────────────────────────
     i = state["iteration"]
     history = list(state.get("output_credit_classifier", []))
@@ -31,9 +32,12 @@ def credit_classifier_node(state: PipelineState, config: RunnableConfig) -> dict
 
     # ── Build prompt + call LLM ───────────────────────────────────
     messages = build_prompt(state, rag_examples, fix_context=fix_ctx)
-    structured_llm = get_llm(CREDIT_CLASSIFIER, config).with_structured_output(CreditClassifierOutput)
-    result = structured_llm.invoke(messages)
-    history.append(result.model_dump())
+    output = invoke_structured(get_llm(CREDIT_CLASSIFIER, config), CreditClassifierOutput, messages)
+
+    # ── Add tuple for downstream compatibility ────────────────────
+    output["tuple"] = list(extract_credit_tuple(output))
+
+    history.append(output)
 
     # ── Return state update ───────────────────────────────────────
     return {

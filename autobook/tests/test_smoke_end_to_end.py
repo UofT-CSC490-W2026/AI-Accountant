@@ -234,7 +234,7 @@ def _make_journal_store(store: Store):
             entries = [entry for entry in entries if str(entry.date) <= str(filters["date_to"])]
         return sorted(entries, key=lambda item: (str(item.date), str(item.created_at)), reverse=True)
 
-    def compute_balances(_db, user_id):
+    def compute_balances(_db, user_id, **kwargs):
         balances: dict[str, dict[str, Decimal | str]] = {}
         account_types = {a.account_code: a.account_type for a in store.accounts[user_id]}
         account_names = {a.account_code: a.account_name for a in store.accounts[user_id]}
@@ -269,7 +269,7 @@ def _make_journal_store(store: Store):
 
 
 def _make_clarification_store(store: Store):
-    def insert(*, db=None, user_id, transaction_id, source_text, explanation, confidence, proposed_entry, verdict):
+    def insert(*, db=None, user_id, transaction_id, source_text, explanation, confidence, proposed_entry, verdict, **kwargs):
         task = SimpleNamespace(
             id=uuid4(),
             user_id=user_id,

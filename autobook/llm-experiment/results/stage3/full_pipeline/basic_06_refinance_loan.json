@@ -1,0 +1,485 @@
+{
+  "test_case_id": "basic_06_refinance_loan",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Refinance bank loan \u2014 old note replaced by new note",
+    "rationale": "This is a straightforward debt refinancing where the old loan liability of $100 is extinguished and simultaneously replaced by a new loan liability of $100. The debit tuple (d=1) correctly indicates a liability decrease (extinguishing the old note), and the credit tuple (a=1) correctly indicates a liability increase (recording the new note). Since the transaction explicitly states the old $100 note is replaced by a new $100 note with no mention of fees, penalties, or settlement differences, this is recorded at face value with no gain/loss on extinguishment. No tax implications apply to debt refinancing transactions.",
+    "lines": [
+      {
+        "account_name": "Loan Payable - Old",
+        "type": "debit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "Loan Payable - New",
+        "type": "credit",
+        "amount": 100.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "interest rate or terms of new loan",
+        "action": "proceed",
+        "reason": "Interest rate and terms affect future interest expense accruals, not the refinancing entry itself. The entry records the extinguishment of the old liability and recognition of the new liability at their principal amounts."
+      },
+      {
+        "aspect": "whether any fees, penalties, or gain/loss on extinguishment occurred",
+        "action": "proceed",
+        "reason": "The transaction explicitly states '$100 note replaced by new $100 note' with no mention of additional costs or settlement differences. This indicates a clean replacement at face value. If fees or penalties existed, they would have been stated in the transaction text."
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0448272,
+  "raw_cost_usd": 0.08172,
+  "total_latency_ms": 33443,
+  "total_input_tokens": 19705,
+  "total_output_tokens": 1507,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 518,
+      "output_tokens": 205,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2913,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053475,
+      "raw_cost_usd": 0.011814,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "interest rate or terms of new loan",
+            "resolved": true,
+            "resolution": "Interest rate and terms don't affect the refinancing entry itself \u2014 old liability is extinguished at book value ($100) and new liability is recorded at principal amount ($100). Terms affect future interest accruals, not this transaction.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether any fees, penalties, or gain/loss on extinguishment occurred",
+            "resolved": true,
+            "resolution": "Transaction states 'old $100 note replaced by new $100 note' \u2014 this indicates a straightforward replacement at face value with no additional costs or settlement differences mentioned. If fees existed, they would have been stated.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 115,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1755,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035826,
+      "raw_cost_usd": 0.00699,
+      "output": {
+        "reason": "Refinancing replaces one loan with another. The debit side records the elimination of the old $100 loan obligation = liability decrease (1 line). The new $100 loan is recorded on the credit side as a liability increase.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Refinancing replaces one loan with another. The debit side records the elimination of the old $100 loan obligation = liability decrease (1 line). The new $100 loan is recorded on the credit side as a liability increase."
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 123,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1732,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036903,
+      "raw_cost_usd": 0.007041,
+      "output": {
+        "reason": "Refinancing replaces one liability with another. The old loan is extinguished (liability decrease, which is a debit), and the new loan is established (liability increase, which is a credit). On the credit side: new loan = liability increase (1 line).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Refinancing replaces one liability with another. The old loan is extinguished (liability decrease, which is a debit), and the new loan is established (liability increase, which is a credit). On the credit side: new loan = liability increase (1 line)."
+    },
+    "debit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 163,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2407,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049518,
+      "raw_cost_usd": 0.009666,
+      "output": {
+        "reason": "Refinancing a loan means the old liability is extinguished and a new liability is created. The debit side records the decrease of the old $100 liability (d=1), and the credit side records the increase of the new $100 liability (a=1). The two sides are consistent and correctly reflect the economic substance: this is a liability-for-liability exchange with no impact on assets, expenses, or equity. The initial debit tuple is correct.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Refinancing a loan means the old liability is extinguished and a new liability is created. The debit side records the decrease of the old $100 liability (d=1), and the credit side records the increase of the new $100 liability (a=1). The two sides are consistent and correctly reflect the economic substance: this is a liability-for-liability exchange with no impact on assets, expenses, or equity. The initial debit tuple is correct."
+    },
+    "credit_corrector": {
+      "input_tokens": 661,
+      "output_tokens": 211,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2415,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0056742,
+      "raw_cost_usd": 0.01041,
+      "output": {
+        "reason": "Refinancing a bank loan involves replacing an old liability with a new liability. The transaction has two components: (1) extinguishing the old $100 note (liability decrease - debit side), and (2) recording the new $100 note (liability increase - credit side). The debit tuple shows (0,0,0,1,0,0) = one liability decrease, which correctly represents paying off the old note. The initial credit tuple (1,0,0,0,0,0) = one liability increase, which correctly represents the new note being issued. The two sides tell a consistent story of a refinancing transaction where one debt replaces another. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Refinancing a bank loan involves replacing an old liability with a new liability. The transaction has two components: (1) extinguishing the old $100 note (liability decrease - debit side), and (2) recording the new $100 note (liability increase - credit side). The debit tuple shows (0,0,0,1,0,0) = one liability decrease, which correctly represents paying off the old note. The initial credit tuple (1,0,0,0,0,0) = one liability increase, which correctly represents the new note being issued. The two sides tell a consistent story of a refinancing transaction where one debt replaces another. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1028,
+      "output_tokens": 504,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4242,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0116082,
+      "raw_cost_usd": 0.020286,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Refinance bank loan \u2014 old note replaced by new note",
+        "rationale": "This is a straightforward debt refinancing where the old loan liability of $100 is extinguished and simultaneously replaced by a new loan liability of $100. The debit tuple (d=1) correctly indicates a liability decrease (extinguishing the old note), and the credit tuple (a=1) correctly indicates a liability increase (recording the new note). Since the transaction explicitly states the old $100 note is replaced by a new $100 note with no mention of fees, penalties, or settlement differences, this is recorded at face value with no gain/loss on extinguishment. No tax implications apply to debt refinancing transactions.",
+        "lines": [
+          {
+            "account_name": "Loan Payable - Old",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Loan Payable - New",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "interest rate or terms of new loan",
+            "action": "proceed",
+            "reason": "Interest rate and terms affect future interest expense accruals, not the refinancing entry itself. The entry records the extinguishment of the old liability and recognition of the new liability at their principal amounts."
+          },
+          {
+            "aspect": "whether any fees, penalties, or gain/loss on extinguishment occurred",
+            "action": "proceed",
+            "reason": "The transaction explicitly states '$100 note replaced by new $100 note' with no mention of additional costs or settlement differences. This indicates a clean replacement at face value. If fees or penalties existed, they would have been stated in the transaction text."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2189,
+      "output_tokens": 186,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4241,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0099726,
+      "raw_cost_usd": 0.015513,
+      "output": {
+        "reason": "Entry correctly records debt refinancing. Balance verified: $100 debit = $100 credit. The debit to Loan Payable - Old correctly extinguishes the old liability (liability decrease), and the credit to Loan Payable - New correctly establishes the new liability (liability increase). Transaction states old $100 note replaced by new $100 note with no mention of fees, penalties, or settlement differences, so recording at face value is appropriate. Debt refinancing is not taxable. Directionality correct for both accounts.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records debt refinancing. Balance verified: $100 debit = $100 credit. The debit to Loan Payable - Old correctly extinguishes the old liability (liability decrease), and the credit to Loan Payable - New correctly establishes the new liability (liability increase). Transaction states old $100 note replaced by new $100 note with no mention of fees, penalties, or settlement differences, so recording at face value is appropriate. Debt refinancing is not taxable. Directionality correct for both accounts."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "interest rate or terms of new loan",
+            "resolved": true,
+            "resolution": "Interest rate and terms don't affect the refinancing entry itself \u2014 old liability is extinguished at book value ($100) and new liability is recorded at principal amount ($100). Terms affect future interest accruals, not this transaction.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "whether any fees, penalties, or gain/loss on extinguishment occurred",
+            "resolved": true,
+            "resolution": "Transaction states 'old $100 note replaced by new $100 note' \u2014 this indicates a straightforward replacement at face value with no additional costs or settlement differences mentioned. If fees existed, they would have been stated.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Refinancing replaces one loan with another. The debit side records the elimination of the old $100 loan obligation = liability decrease (1 line). The new $100 loan is recorded on the credit side as a liability increase.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Refinancing replaces one liability with another. The old loan is extinguished (liability decrease, which is a debit), and the new loan is established (liability increase, which is a credit). On the credit side: new loan = liability increase (1 line).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Refinancing a loan means the old liability is extinguished and a new liability is created. The debit side records the decrease of the old $100 liability (d=1), and the credit side records the increase of the new $100 liability (a=1). The two sides are consistent and correctly reflect the economic substance: this is a liability-for-liability exchange with no impact on assets, expenses, or equity. The initial debit tuple is correct.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Refinancing a bank loan involves replacing an old liability with a new liability. The transaction has two components: (1) extinguishing the old $100 note (liability decrease - debit side), and (2) recording the new $100 note (liability increase - credit side). The debit tuple shows (0,0,0,1,0,0) = one liability decrease, which correctly represents paying off the old note. The initial credit tuple (1,0,0,0,0,0) = one liability increase, which correctly represents the new note being issued. The two sides tell a consistent story of a refinancing transaction where one debt replaces another. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Refinance bank loan \u2014 old note replaced by new note",
+        "rationale": "This is a straightforward debt refinancing where the old loan liability of $100 is extinguished and simultaneously replaced by a new loan liability of $100. The debit tuple (d=1) correctly indicates a liability decrease (extinguishing the old note), and the credit tuple (a=1) correctly indicates a liability increase (recording the new note). Since the transaction explicitly states the old $100 note is replaced by a new $100 note with no mention of fees, penalties, or settlement differences, this is recorded at face value with no gain/loss on extinguishment. No tax implications apply to debt refinancing transactions.",
+        "lines": [
+          {
+            "account_name": "Loan Payable - Old",
+            "type": "debit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Loan Payable - New",
+            "type": "credit",
+            "amount": 100.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "interest rate or terms of new loan",
+            "action": "proceed",
+            "reason": "Interest rate and terms affect future interest expense accruals, not the refinancing entry itself. The entry records the extinguishment of the old liability and recognition of the new liability at their principal amounts."
+          },
+          {
+            "aspect": "whether any fees, penalties, or gain/loss on extinguishment occurred",
+            "action": "proceed",
+            "reason": "The transaction explicitly states '$100 note replaced by new $100 note' with no mention of additional costs or settlement differences. This indicates a clean replacement at face value. If fees or penalties existed, they would have been stated in the transaction text."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry correctly records debt refinancing. Balance verified: $100 debit = $100 credit. The debit to Loan Payable - Old correctly extinguishes the old liability (liability decrease), and the credit to Loan Payable - New correctly establishes the new liability (liability increase). Transaction states old $100 note replaced by new $100 note with no mention of fees, penalties, or settlement differences, so recording at face value is appropriate. Debt refinancing is not taxable. Directionality correct for both accounts.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 205,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 115,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 123,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 163,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 661,
+        "output_tokens": 211,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1028,
+        "output_tokens": 504,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2189,
+        "output_tokens": 186,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

@@ -16,6 +16,7 @@ describe("statement export controls", () => {
       await screen.findByText(/isolates the financial statement view/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/statements synced/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /trial balance/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /export csv/i }));
     fireEvent.click(screen.getByRole("button", { name: /export pdf/i }));
@@ -27,7 +28,7 @@ describe("statement export controls", () => {
   test("refreshes statement balances after a posted ledger update", async () => {
     render(<StatementsPage />);
 
-    expect(await screen.findByText("$-2400.00")).toBeInTheDocument();
+    expect(await screen.findByText("1500 Equipment")).toBeInTheDocument();
 
     await act(async () => {
       await parseTransaction({
@@ -37,7 +38,10 @@ describe("statement export controls", () => {
       });
     });
 
-    expect(await screen.findByText("$-4800.00")).toBeInTheDocument();
-    expect(screen.getByText("$4800.00")).toBeInTheDocument();
+    expect(await screen.findByText("1000 Cash")).toBeInTheDocument();
+    expect((await screen.findAllByText("$4800.00")).length).toBe(2);
+    expect((await screen.findAllByText("$6300.00")).length).toBe(2);
+    fireEvent.click(screen.getByRole("button", { name: /income statement/i }));
+    expect(await screen.findByText("Service Revenue")).toBeInTheDocument();
   });
 });

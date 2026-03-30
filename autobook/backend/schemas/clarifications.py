@@ -9,7 +9,7 @@ class ClarificationItem(BaseModel):
     source_text: str
     explanation: str
     confidence: Confidence
-    proposed_entry: ProposedEntry
+    proposed_entry: ProposedEntry | None
 
 
 class ClarificationsResponse(BaseModel):

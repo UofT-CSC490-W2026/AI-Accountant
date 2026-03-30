@@ -1,0 +1,602 @@
+{
+  "test_case_id": "int_14_vehicle_mixed_payment",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Atlas Van Lines acquired a delivery vehicle (depreciable asset) for $40,000. Payment structure: $20,000 cash (50%) and $20,000 via 2-month promissory note (50%). The vehicle is capitalized as a fixed asset. Cash decreases by the amount paid. Notes Payable increases by the financed amount. No tax mentioned in transaction, so no tax lines added. Debits total $40,000, credits total $40,000 (balanced).",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Delivery Vehicle",
+        "amount": 40000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 20000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Notes Payable",
+        "amount": 20000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0471807,
+  "raw_cost_usd": 0.074556,
+  "total_latency_ms": 29686,
+  "total_input_tokens": 12522,
+  "total_output_tokens": 2466,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 535,
+      "output_tokens": 220,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2882,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0056091000000000005,
+      "raw_cost_usd": 0.011946,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method for cash portion",
+            "resolution": "Payment method (cash, check, wire) does not affect the journal entry structure \u2014 all reduce cash/bank account"
+          },
+          {
+            "aspect": "interest rate on promissory note",
+            "resolution": "Short-term note (2 months) \u2014 if interest not stated, convention is to record at face value; interest will be recorded when paid or at period-end if material"
+          },
+          {
+            "aspect": "specific vehicle details (make, model, year)",
+            "resolution": "Vehicle specifications do not change the accounting entry \u2014 all are recorded as delivery vehicle/equipment asset"
+          }
+        ],
+        "unresolved_ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 508,
+      "output_tokens": 378,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2024,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076488,
+      "raw_cost_usd": 0.011742,
+      "output": {
+        "liability_increase_reason": "The 2-month promissory note for $20,000 (50% of $40,000) creates a notes payable liability that increases.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts are affected; this is an asset acquisition financed by cash and debt.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a capital expenditure for a delivery vehicle asset.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases by $20,000 (50% of the purchase price paid immediately).",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased; the vehicle is capitalized as an asset, not expensed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 510,
+      "output_tokens": 376,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2056,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076338000000000005,
+      "raw_cost_usd": 0.011808,
+      "output": {
+        "asset_increase_reason": "Delivery vehicle (equipment) is acquired for $40,000, representing one asset increase. The vehicle is recorded at its full acquisition cost regardless of the payment method (cash + note).",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Vehicle is a capital asset, not an expense. It will be depreciated over its useful life.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid off or reduced. The promissory note is being issued (liability increase on credit side), not reduced.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this asset acquisition transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are involved in this asset purchase transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 830,
+      "output_tokens": 1492,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5560,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.026289,
+      "raw_cost_usd": 0.03906,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Vehicle purchase details",
+            "reason": "Transaction clearly states purchase of delivery vehicle for $40,000, 50% cash ($20,000) and 50% promissory note ($20,000). All necessary information is present.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Tax treatment",
+            "reason": "No tax mentioned in transaction. Vehicle purchases may or may not be subject to sales tax depending on jurisdiction, but no tax information provided.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Accept. One delivery vehicle asset acquired for $40,000 total.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Delivery Vehicle"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "Accept. No dividend transaction in this vehicle purchase.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. Vehicle is a capital asset, not an expense. Will be depreciated over useful life.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "Accept. No liability is being paid down; a new liability is being created.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "Accept. No equity transaction involved in this asset purchase.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "Accept. No revenue adjustment in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept. Promissory note for $20,000 (50% of $40,000) creates a liability.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Notes Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "Accept. No equity contribution in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Accept. No revenue earned in this asset acquisition.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Cash paid out is $20,000 (50% of $40,000).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "Accept. No dividend transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "Accept. No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Atlas Van Lines acquired a delivery vehicle (depreciable asset) for $40,000. Payment structure: $20,000 cash (50%) and $20,000 via 2-month promissory note (50%). The vehicle is capitalized as a fixed asset. Cash decreases by the amount paid. Notes Payable increases by the financed amount. No tax mentioned in transaction, so no tax lines added. Debits total $40,000, credits total $40,000 (balanced).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Delivery Vehicle",
+              "amount": 40000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 20000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Notes Payable",
+              "amount": 20000.0
+            }
+          ]
+        },
+        "decision_rationale": "Transaction is clear and complete. Atlas Van Lines purchased a delivery vehicle for $40,000 with mixed financing: 50% cash ($20,000) and 50% promissory note ($20,000). This is a straightforward asset acquisition with partial debt financing. The classifier tuples are correct: 1 debit for asset increase (vehicle), 2 credits for asset decrease (cash) and liability increase (note payable). All amounts are determinable from the transaction text. No tax mentioned, so none applied. Entry balances at $40,000 debit = $40,000 credit. Follows IFRS standards for capitalizing property, plant, and equipment.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "payment method for cash portion",
+            "resolution": "Payment method (cash, check, wire) does not affect the journal entry structure \u2014 all reduce cash/bank account"
+          },
+          {
+            "aspect": "interest rate on promissory note",
+            "resolution": "Short-term note (2 months) \u2014 if interest not stated, convention is to record at face value; interest will be recorded when paid or at period-end if material"
+          },
+          {
+            "aspect": "specific vehicle details (make, model, year)",
+            "resolution": "Vehicle specifications do not change the accounting entry \u2014 all are recorded as delivery vehicle/equipment asset"
+          }
+        ],
+        "unresolved_ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Delivery vehicle (equipment) is acquired for $40,000, representing one asset increase. The vehicle is recorded at its full acquisition cost regardless of the payment method (cash + note).",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Vehicle is a capital asset, not an expense. It will be depreciated over its useful life.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid off or reduced. The promissory note is being issued (liability increase on credit side), not reduced.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this asset acquisition transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are involved in this asset purchase transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "The 2-month promissory note for $20,000 (50% of $40,000) creates a notes payable liability that increases.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts are affected; this is an asset acquisition financed by cash and debt.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a capital expenditure for a delivery vehicle asset.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases by $20,000 (50% of the purchase price paid immediately).",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased; the vehicle is capitalized as an asset, not expensed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Delivery vehicle (equipment) is acquired for $40,000, representing one asset increase. The vehicle is recorded at its full acquisition cost regardless of the payment method (cash + note).",
+        "asset_increase_count": 1,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Vehicle is a capital asset, not an expense. It will be depreciated over its useful life.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being paid off or reduced. The promissory note is being issued (liability increase on credit side), not reduced.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this asset acquisition transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are involved in this asset purchase transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "The 2-month promissory note for $20,000 (50% of $40,000) creates a notes payable liability that increases.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity accounts are affected; this is an asset acquisition financed by cash and debt.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is a capital expenditure for a delivery vehicle asset.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash decreases by $20,000 (50% of the purchase price paid immediately).",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No owner withdrawals or dividends are involved in this transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are reversed or decreased; the vehicle is capitalized as an asset, not expensed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Vehicle purchase details",
+            "reason": "Transaction clearly states purchase of delivery vehicle for $40,000, 50% cash ($20,000) and 50% promissory note ($20,000). All necessary information is present.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Tax treatment",
+            "reason": "No tax mentioned in transaction. Vehicle purchases may or may not be subject to sales tax depending on jurisdiction, but no tax information provided.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Accept. One delivery vehicle asset acquired for $40,000 total.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Delivery Vehicle"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "Accept. No dividend transaction in this vehicle purchase.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Accept. Vehicle is a capital asset, not an expense. Will be depreciated over useful life.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "Accept. No liability is being paid down; a new liability is being created.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "Accept. No equity transaction involved in this asset purchase.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "Accept. No revenue adjustment in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept. Promissory note for $20,000 (50% of $40,000) creates a liability.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Notes Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "Accept. No equity contribution in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "Accept. No revenue earned in this asset acquisition.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Accept. Cash paid out is $20,000 (50% of $40,000).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "Accept. No dividend transaction involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "Accept. No expense reversal in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Atlas Van Lines acquired a delivery vehicle (depreciable asset) for $40,000. Payment structure: $20,000 cash (50%) and $20,000 via 2-month promissory note (50%). The vehicle is capitalized as a fixed asset. Cash decreases by the amount paid. Notes Payable increases by the financed amount. No tax mentioned in transaction, so no tax lines added. Debits total $40,000, credits total $40,000 (balanced).",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Delivery Vehicle",
+              "amount": 40000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 20000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Notes Payable",
+              "amount": 20000.0
+            }
+          ]
+        },
+        "decision_rationale": "Transaction is clear and complete. Atlas Van Lines purchased a delivery vehicle for $40,000 with mixed financing: 50% cash ($20,000) and 50% promissory note ($20,000). This is a straightforward asset acquisition with partial debt financing. The classifier tuples are correct: 1 debit for asset increase (vehicle), 2 credits for asset decrease (cash) and liability increase (note payable). All amounts are determinable from the transaction text. No tax mentioned, so none applied. Entry balances at $40,000 debit = $40,000 credit. Follows IFRS standards for capitalizing property, plant, and equipment.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 535,
+        "output_tokens": 220,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 378,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 510,
+        "output_tokens": 376,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 830,
+        "output_tokens": 1492,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

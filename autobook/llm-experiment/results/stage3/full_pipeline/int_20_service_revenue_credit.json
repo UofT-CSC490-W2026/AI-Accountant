@@ -1,0 +1,589 @@
+{
+  "test_case_id": "int_20_service_revenue_credit",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2024-01-01",
+    "description": "Office relocation services provided to customer, payment due in 10 days",
+    "rationale": "Atlas Van Lines provided relocation services, creating revenue. Since payment is due in 10 days, we recognize Accounts Receivable (asset increase). Relocation services are taxable in Canada. Per fix context, applying 13% HST (Ontario standard rate) on the $31,500 service amount. HST collected of $4,095 is recorded as HST Payable (liability). Total amount receivable is $35,595 ($31,500 + $4,095 HST).",
+    "lines": [
+      {
+        "account_name": "Accounts Receivable",
+        "type": "debit",
+        "amount": 35595.0
+      },
+      {
+        "account_name": "Relocation Services Revenue",
+        "type": "credit",
+        "amount": 31500.0
+      },
+      {
+        "account_name": "HST Payable",
+        "type": "credit",
+        "amount": 4095.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0710385,
+  "raw_cost_usd": 0.127158,
+  "total_latency_ms": 44990,
+  "total_input_tokens": 31106,
+  "total_output_tokens": 2256,
+  "total_llm_calls": 10,
+  "iteration_count": 2,
+  "final_decision": "STUCK",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 525,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2920,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0028185,
+      "raw_cost_usd": 0.009285,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 498,
+      "output_tokens": 107,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1739,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0034713,
+      "raw_cost_usd": 0.006822,
+      "output": {
+        "reason": "Atlas Van Lines provided relocation services to a customer with payment due in 10 days. This is a revenue-generating transaction. The credit side records service revenue = revenue increase (1 line).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines provided relocation services to a customer with payment due in 10 days. This is a revenue-generating transaction. The credit side records service revenue = revenue increase (1 line)."
+    },
+    "debit_classifier": {
+      "input_tokens": 500,
+      "output_tokens": 111,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1762,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035436,
+      "raw_cost_usd": 0.006951,
+      "output": {
+        "reason": "Atlas Van Lines provided services to a customer with payment due in 10 days. This creates an account receivable (asset increase). The debit side records: 1 asset increase (Accounts Receivable).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines provided services to a customer with payment due in 10 days. This creates an account receivable (asset increase). The debit side records: 1 asset increase (Accounts Receivable)."
+    },
+    "debit_corrector": {
+      "input_tokens": 668,
+      "output_tokens": 148,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2414,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0047478,
+      "raw_cost_usd": 0.009462,
+      "output": {
+        "reason": "Atlas Van Lines provided services on credit (payment due in 10 days), which creates an accounts receivable. The debit side correctly records an asset increase (accounts receivable). The credit side correctly shows revenue increase (c=1), representing the earned service revenue. The two sides tell a consistent story: debit accounts receivable (asset increase), credit service revenue (revenue increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Atlas Van Lines provided services on credit (payment due in 10 days), which creates an accounts receivable. The debit side correctly records an asset increase (accounts receivable). The credit side correctly shows revenue increase (c=1), representing the earned service revenue. The two sides tell a consistent story: debit accounts receivable (asset increase), credit service revenue (revenue increase). No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 668,
+      "output_tokens": 263,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2422,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0064751999999999995,
+      "raw_cost_usd": 0.011211,
+      "output": {
+        "reason": "The transaction describes Atlas Van Lines providing office relocation services for $31,500 with payment due in 10 days. This is a revenue-earning transaction on account.\n\nUnder IFRS (specifically IFRS 15), revenue should be recognized when the performance obligation is satisfied - in this case, when the services are provided. The fact that payment is due later doesn't affect revenue recognition.\n\nThe accounting entry should be:\n- Debit: Accounts Receivable (asset increase) - correctly shown in debit tuple as (1,0,0,0,0,0)\n- Credit: Service Revenue (revenue increase) - correctly shown in initial credit tuple as (0,0,1,0,0,0)\n\nBoth the debit and credit tuples tell a consistent story: an asset (accounts receivable) increases and revenue increases. This is the correct treatment for services provided on account. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes Atlas Van Lines providing office relocation services for $31,500 with payment due in 10 days. This is a revenue-earning transaction on account.\n\nUnder IFRS (specifically IFRS 15), revenue should be recognized when the performance obligation is satisfied - in this case, when the services are provided. The fact that payment is due later doesn't affect revenue recognition.\n\nThe accounting entry should be:\n- Debit: Accounts Receivable (asset increase) - correctly shown in debit tuple as (1,0,0,0,0,0)\n- Credit: Service Revenue (revenue increase) - correctly shown in initial credit tuple as (0,0,1,0,0,0)\n\nBoth the debit and credit tuples tell a consistent story: an asset (accounts receivable) increases and revenue increases. This is the correct treatment for services provided on account. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1610,
+      "output_tokens": 679,
+      "cache_read_tokens": 6428,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8038,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.016943400000000004,
+      "raw_cost_usd": 0.034298999999999996,
+      "output": {
+        "date": "2024-01-01",
+        "description": "Office relocation services provided to customer, payment due in 10 days",
+        "rationale": "Atlas Van Lines provided relocation services, creating revenue. Since payment is due in 10 days, we recognize Accounts Receivable (asset increase). Relocation services are taxable in Canada. Per fix context, applying 13% HST (Ontario standard rate) on the $31,500 service amount. HST collected of $4,095 is recorded as HST Payable (liability). Total amount receivable is $35,595 ($31,500 + $4,095 HST).",
+        "lines": [
+          {
+            "account_name": "Accounts Receivable",
+            "type": "debit",
+            "amount": 35595.0
+          },
+          {
+            "account_name": "Relocation Services Revenue",
+            "type": "credit",
+            "amount": 31500.0
+          },
+          {
+            "account_name": "HST Payable",
+            "type": "credit",
+            "amount": 4095.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4312,
+      "output_tokens": 378,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8416,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0198372,
+      "raw_cost_usd": 0.030918,
+      "output": {
+        "reason": "Transaction states service amount is $31,500 but does not specify whether this is tax-inclusive or tax-exclusive, nor does it state the province/tax jurisdiction. Entry applies 13% HST (Ontario rate) treating $31,500 as tax-exclusive base, resulting in $35,595 total receivable. However, the transaction could equally be interpreted as $31,500 being the total amount due (tax-inclusive), or could be in a different province with different rates, or could be exempt/zero-rated services. Without explicit tax information or jurisdiction in the transaction text, cannot determine which interpretation is correct.",
+        "decision": "STUCK",
+        "confidence": "SOMEWHAT_CONFIDENT"
+      },
+      "reason": "Transaction states service amount is $31,500 but does not specify whether this is tax-inclusive or tax-exclusive, nor does it state the province/tax jurisdiction. Entry applies 13% HST (Ontario rate) treating $31,500 as tax-exclusive base, resulting in $35,595 total receivable. However, the transaction could equally be interpreted as $31,500 being the total amount due (tax-inclusive), or could be in a different province with different rates, or could be exempt/zero-rated services. Without explicit tax information or jurisdiction in the transaction text, cannot determine which interpretation is correct."
+    },
+    "diagnostician": {
+      "input_tokens": 1540,
+      "output_tokens": 535,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3395,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0132015,
+      "raw_cost_usd": 0.01821,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Missing tax lines. The transaction describes relocation services, which are taxable in Canada. The transaction states the service amount is $31,500, but does not specify whether this is tax-inclusive or tax-exclusive. In Canadian business practice, service amounts are typically quoted exclusive of HST/GST. The entry should include HST Receivable (debit) and HST Payable (credit) lines. Without jurisdiction specified, cannot determine exact rate, but tax treatment is required for taxable services.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Atlas Van Lines provided services to a customer with payment due in 10 days. This creates an account receivable (asset increase). The debit side records: 1 asset increase (Accounts Receivable).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Atlas Van Lines provided services to a customer with payment due in 10 days. This creates an account receivable (asset increase). The debit side records: 1 asset increase (Accounts Receivable).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Atlas Van Lines provided relocation services to a customer with payment due in 10 days. This is a revenue-generating transaction. The credit side records service revenue = revenue increase (1 line).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Atlas Van Lines provided relocation services to a customer with payment due in 10 days. This is a revenue-generating transaction. The credit side records service revenue = revenue increase (1 line).",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Atlas Van Lines provided services on credit (payment due in 10 days), which creates an accounts receivable. The debit side correctly records an asset increase (accounts receivable). The credit side correctly shows revenue increase (c=1), representing the earned service revenue. The two sides tell a consistent story: debit accounts receivable (asset increase), credit service revenue (revenue increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Atlas Van Lines provided services on credit (payment due in 10 days), which creates an accounts receivable. The debit side correctly records an asset increase (accounts receivable). The credit side correctly shows revenue increase (c=1), representing the earned service revenue. The two sides tell a consistent story: debit accounts receivable (asset increase), credit service revenue (revenue increase). No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes Atlas Van Lines providing office relocation services for $31,500 with payment due in 10 days. This is a revenue-earning transaction on account.\n\nUnder IFRS (specifically IFRS 15), revenue should be recognized when the performance obligation is satisfied - in this case, when the services are provided. The fact that payment is due later doesn't affect revenue recognition.\n\nThe accounting entry should be:\n- Debit: Accounts Receivable (asset increase) - correctly shown in debit tuple as (1,0,0,0,0,0)\n- Credit: Service Revenue (revenue increase) - correctly shown in initial credit tuple as (0,0,1,0,0,0)\n\nBoth the debit and credit tuples tell a consistent story: an asset (accounts receivable) increases and revenue increases. This is the correct treatment for services provided on account. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction describes Atlas Van Lines providing office relocation services for $31,500 with payment due in 10 days. This is a revenue-earning transaction on account.\n\nUnder IFRS (specifically IFRS 15), revenue should be recognized when the performance obligation is satisfied - in this case, when the services are provided. The fact that payment is due later doesn't affect revenue recognition.\n\nThe accounting entry should be:\n- Debit: Accounts Receivable (asset increase) - correctly shown in debit tuple as (1,0,0,0,0,0)\n- Credit: Service Revenue (revenue increase) - correctly shown in initial credit tuple as (0,0,1,0,0,0)\n\nBoth the debit and credit tuples tell a consistent story: an asset (accounts receivable) increases and revenue increases. This is the correct treatment for services provided on account. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Office relocation services provided to customer, payment due in 10 days",
+        "rationale": "Atlas Van Lines provided relocation services and has earned revenue. Since payment is due in 10 days, this is a credit sale creating an accounts receivable (asset increase). The debit tuple (1,0,0,0,0,0) correctly identifies one asset increase line (Accounts Receivable). The credit tuple (0,0,1,0,0,0) correctly identifies one revenue increase line (Service Revenue or Moving Services Revenue). No tax information was provided in the transaction text, and services are typically taxable in Canada, but since no tax was mentioned and no tax_rules were provided, I am recording the transaction as stated at $31,500. If HST/GST applies, it would typically be added on top of this amount, but the transaction does not specify tax treatment.",
+        "lines": [
+          {
+            "account_name": "Accounts Receivable",
+            "type": "debit",
+            "amount": 31500.0
+          },
+          {
+            "account_name": "Service Revenue",
+            "type": "credit",
+            "amount": 31500.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2024-01-01",
+        "description": "Office relocation services provided to customer, payment due in 10 days",
+        "rationale": "Atlas Van Lines provided relocation services, creating revenue. Since payment is due in 10 days, we recognize Accounts Receivable (asset increase). Relocation services are taxable in Canada. Per fix context, applying 13% HST (Ontario standard rate) on the $31,500 service amount. HST collected of $4,095 is recorded as HST Payable (liability). Total amount receivable is $35,595 ($31,500 + $4,095 HST).",
+        "lines": [
+          {
+            "account_name": "Accounts Receivable",
+            "type": "debit",
+            "amount": 35595.0
+          },
+          {
+            "account_name": "Relocation Services Revenue",
+            "type": "credit",
+            "amount": 31500.0
+          },
+          {
+            "account_name": "HST Payable",
+            "type": "credit",
+            "amount": 4095.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Missing tax lines. The transaction describes relocation services, which are taxable in Canada. The transaction states the service amount is $31,500, but does not specify whether this is tax-inclusive or tax-exclusive. In Canadian business practice, service amounts are typically quoted exclusive of HST/GST. The entry should include HST Receivable (debit) and HST Payable (credit) lines. Without jurisdiction specified, cannot determine exact rate, but tax treatment is required for taxable services.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Transaction states service amount is $31,500 but does not specify whether this is tax-inclusive or tax-exclusive, nor does it state the province/tax jurisdiction. Entry applies 13% HST (Ontario rate) treating $31,500 as tax-exclusive base, resulting in $35,595 total receivable. However, the transaction could equally be interpreted as $31,500 being the total amount due (tax-inclusive), or could be in a different province with different rates, or could be exempt/zero-rated services. Without explicit tax information or jurisdiction in the transaction text, cannot determine which interpretation is correct.",
+        "decision": "STUCK",
+        "confidence": "SOMEWHAT_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected the entry for missing tax lines on a taxable service transaction. The transaction describes relocation services provided in Canada, which are taxable under GST/HST.\n\nTracing through the pipeline:\n- Agent 0 (Disambiguator): Found no ambiguities\n- Agent 1 (Debit Classifier): Correctly identified asset increase (Accounts Receivable)\n- Agent 2 (Credit Classifier): Correctly identified revenue increase (Service Revenue)\n- Agent 3 (Debit Corrector): Validated the debit tuple, no changes\n- Agent 4 (Credit Corrector): Validated the credit tuple, no changes\n- Agent 5 (Entry Builder): Built the entry with only two lines (AR debit, Service Revenue credit) and explicitly noted \"No tax information was provided in the transaction text... I am recording the transaction as stated at $31,500\"\n\nThe classifiers (Agents 1 and 2) correctly identified the directional categories. The correctors (Agents 3 and 4) correctly validated the tuples. However, none of these agents are responsible for adding tax lines \u2014 that responsibility falls to Agent 5 (Entry Builder).\n\nAgent 5's rationale shows it recognized that \"services are typically taxable in Canada\" but chose not to add tax lines because \"no tax was mentioned and no tax_rules were provided.\" This is the error. Under Canadian business practice, commercial services like relocation are taxable, and the $31,500 should be treated as the pre-tax amount unless explicitly stated otherwise.\n\nThe root cause is Agent 5 failing to apply standard Canadian tax treatment to a taxable service transaction.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Relocation services are taxable in Canada. The $31,500 is the service amount (pre-tax). Add HST Receivable debit and HST Payable credit. Without jurisdiction specified, use 13% HST (Ontario standard rate). Total AR should be $31,500 + tax."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Relocation services are taxable in Canada. The $31,500 is the service amount (pre-tax). Add HST Receivable debit and HST Payable credit. Without jurisdiction specified, use 13% HST (Ontario standard rate). Total AR should be $31,500 + tax."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "STUCK",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 525,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 498,
+        "output_tokens": 107,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 500,
+        "output_tokens": 111,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 668,
+        "output_tokens": 148,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 668,
+        "output_tokens": 263,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 757,
+        "output_tokens": 348,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1739,
+        "output_tokens": 176,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1540,
+        "output_tokens": 535,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 853,
+        "output_tokens": 331,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2573,
+        "output_tokens": 202,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

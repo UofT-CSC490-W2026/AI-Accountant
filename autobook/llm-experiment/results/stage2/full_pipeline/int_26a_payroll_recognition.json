@@ -1,0 +1,574 @@
+{
+  "test_case_id": "int_26a_payroll_recognition",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.5,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    2,
+    4,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    4,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-01-31",
+    "description": "January payroll: production wages $25,000, administrative salaries $20,000, with statutory deductions withheld",
+    "rationale": "Production worker wages ($25,000) are capitalized to Work in Process Inventory as they are direct manufacturing costs under IFRS. Administrative salaries ($20,000) are expensed as period costs. Employee-borne deductions create liabilities until remitted: pension contributions $2,000, health insurance $3,250, EI premiums $1,050, and income tax $1,450 (total $7,750). Gross payroll $45,000 less deductions $7,750 = net pay $37,250 paid from cash. The transaction explicitly states only employee-borne deductions, so employer portions are not included in this entry.",
+    "lines": [
+      {
+        "account_name": "Work in Process Inventory",
+        "type": "debit",
+        "amount": 25000.0
+      },
+      {
+        "account_name": "Salaries and Wages Expense",
+        "type": "debit",
+        "amount": 20000.0
+      },
+      {
+        "account_name": "Pension Contributions Payable",
+        "type": "credit",
+        "amount": 2000.0
+      },
+      {
+        "account_name": "Health Insurance Premiums Payable",
+        "type": "credit",
+        "amount": 3250.0
+      },
+      {
+        "account_name": "Employment Insurance Premiums Payable",
+        "type": "credit",
+        "amount": 1050.0
+      },
+      {
+        "account_name": "Income Tax Payable",
+        "type": "credit",
+        "amount": 1450.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 37250.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "employer portion of statutory contributions",
+        "action": "proceed",
+        "reason": "The transaction explicitly states 'employee-borne statutory deductions were withheld' which clearly indicates only employee portions are included in this entry. Employer contributions, if any, would be recorded in a separate entry as employer payroll tax expense."
+      },
+      {
+        "aspect": "allocation of production worker wages",
+        "action": "proceed",
+        "reason": "Under IFRS (IAS 2), production worker wages are inventoriable costs that must be capitalized to Work in Process Inventory as they are directly attributable to manufacturing. This is not a policy election but a requirement. The wages will flow to Cost of Goods Sold when the manufactured goods are sold."
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0681312,
+  "raw_cost_usd": 0.105024,
+  "total_latency_ms": 45159,
+  "total_input_tokens": 21753,
+  "total_output_tokens": 2651,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 604,
+      "output_tokens": 451,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2999,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0092955,
+      "raw_cost_usd": 0.015762,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "employer portion of statutory contributions",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Employer contributions are included in the stated wage/salary amounts",
+              "Employer contributions are additional to the stated amounts and not yet recorded"
+            ],
+            "clarification_question": "Are the employer's matching contributions for CPP, EI, and health insurance included in this payroll recognition, or will they be recorded separately?",
+            "why_entry_differs": "If employer contributions are included, they affect the total expense allocation between production wages and administrative salaries. If separate, only employee-borne deductions are processed now and employer expense is recorded later.",
+            "why_not_resolved": "Transaction states 'employee-borne statutory deductions' were withheld but does not specify whether employer portions are being recognized. Standard practice varies - some entities record both simultaneously, others record employer portions separately."
+          },
+          {
+            "aspect": "allocation of production worker wages",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Expense immediately as period cost",
+              "Capitalize to work-in-process inventory",
+              "Allocate between inventory and cost of goods sold based on production status"
+            ],
+            "clarification_question": "Should the production worker wages be capitalized to inventory (work-in-process) or expensed as a period cost?",
+            "why_entry_differs": "Capitalization increases inventory asset and defers expense recognition until goods are sold. Immediate expensing reduces current period net income without affecting inventory balance.",
+            "why_not_resolved": "Production worker wages are typically inventoriable costs under IFRS, but the transaction does not indicate whether goods are in process, completed, or sold. Entity's costing system and production status determine treatment."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 579,
+      "output_tokens": 198,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1841,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0050856,
+      "raw_cost_usd": 0.008493,
+      "output": {
+        "reason": "The debit side records two expense increases: (1) Production worker wages $25,000 = expense increase (manufacturing labor cost/cost of goods sold component), and (2) Administrative salaries $20,000 = expense increase (operating expense). The gross amounts are debited to expense accounts. The withholdings are liabilities (amounts owed to government/benefit providers) and the net pay is also a liability (wages payable) until paid - these are all on the credit side. The payment from chequing account is also on the credit side (asset decrease). Therefore, debit side has 2 expense increases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The debit side records two expense increases: (1) Production worker wages $25,000 = expense increase (manufacturing labor cost/cost of goods sold component), and (2) Administrative salaries $20,000 = expense increase (operating expense). The gross amounts are debited to expense accounts. The withholdings are liabilities (amounts owed to government/benefit providers) and the net pay is also a liability (wages payable) until paid - these are all on the credit side. The payment from chequing account is also on the credit side (asset decrease). Therefore, debit side has 2 expense increases."
+    },
+    "credit_classifier": {
+      "input_tokens": 577,
+      "output_tokens": 273,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1818,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0061983,
+      "raw_cost_usd": 0.009549,
+      "output": {
+        "reason": "The credit side records:\n1. Pension contributions withheld = $2,000 liability increase (payable to pension plan)\n2. Health insurance premiums withheld = $3,250 liability increase (payable to insurer)\n3. Employment insurance premiums withheld = $1,050 liability increase (payable to government)\n4. Income tax withholdings = $1,450 liability increase (payable to tax authority)\n5. Net pay transferred = $37,250 asset decrease (cash leaving chequing account)\n\nTotal gross wages = $45,000. Total withholdings = $7,750. Net pay = $37,250.\n\nThe credit side shows 4 liability increases (for the various withholdings that create payables) and 1 asset decrease (cash paid out). The allocation of wages between production (WIP/inventory) and administrative (expense) affects only the debit side.",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The credit side records:\n1. Pension contributions withheld = $2,000 liability increase (payable to pension plan)\n2. Health insurance premiums withheld = $3,250 liability increase (payable to insurer)\n3. Employment insurance premiums withheld = $1,050 liability increase (payable to government)\n4. Income tax withholdings = $1,450 liability increase (payable to tax authority)\n5. Net pay transferred = $37,250 asset decrease (cash leaving chequing account)\n\nTotal gross wages = $45,000. Total withholdings = $7,750. Net pay = $37,250.\n\nThe credit side shows 4 liability increases (for the various withholdings that create payables) and 1 asset decrease (cash paid out). The allocation of wages between production (WIP/inventory) and administrative (expense) affects only the debit side."
+    },
+    "credit_corrector": {
+      "input_tokens": 747,
+      "output_tokens": 374,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2501,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.008377200000000001,
+      "raw_cost_usd": 0.013113,
+      "output": {
+        "reason": "The initial credit tuple is correct. This payroll transaction involves:\n\nDEBITS (2 expense increases):\n1. Production worker wages $25,000 (expense increase - manufacturing labor)\n2. Administrative salaries $20,000 (expense increase - admin expense)\n\nCREDITS (4 liability increases + 1 asset decrease):\n1. Pension contributions payable $2,000 (liability increase - withheld from employees)\n2. Health insurance premiums payable $3,250 (liability increase - withheld from employees)\n3. Employment insurance premiums payable $1,050 (liability increase - withheld from employees)\n4. Income tax withholdings payable $1,450 (liability increase - withheld from employees)\n5. Cash/chequing account decrease $37,250 (asset decrease - net pay: $45,000 gross - $7,750 deductions)\n\nThe credit tuple (4,0,0,1,0,0) correctly captures 4 liability increases for the statutory deductions withheld and 1 asset decrease for the cash payment of net wages. The debit tuple (0,0,2,0,0,0) correctly shows 2 expense increases for the two types of wages/salaries. The tuples are consistent and both reflect proper IFRS treatment of payroll with statutory withholdings.",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. This payroll transaction involves:\n\nDEBITS (2 expense increases):\n1. Production worker wages $25,000 (expense increase - manufacturing labor)\n2. Administrative salaries $20,000 (expense increase - admin expense)\n\nCREDITS (4 liability increases + 1 asset decrease):\n1. Pension contributions payable $2,000 (liability increase - withheld from employees)\n2. Health insurance premiums payable $3,250 (liability increase - withheld from employees)\n3. Employment insurance premiums payable $1,050 (liability increase - withheld from employees)\n4. Income tax withholdings payable $1,450 (liability increase - withheld from employees)\n5. Cash/chequing account decrease $37,250 (asset decrease - net pay: $45,000 gross - $7,750 deductions)\n\nThe credit tuple (4,0,0,1,0,0) correctly captures 4 liability increases for the statutory deductions withheld and 1 asset decrease for the cash payment of net wages. The debit tuple (0,0,2,0,0,0) correctly shows 2 expense increases for the two types of wages/salaries. The tuples are consistent and both reflect proper IFRS treatment of payroll with statutory withholdings."
+    },
+    "debit_corrector": {
+      "input_tokens": 747,
+      "output_tokens": 405,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2493,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0088398,
+      "raw_cost_usd": 0.013554,
+      "output": {
+        "reason": "The transaction contains two distinct economic events: (1) recognizing payroll expenses and (2) paying the net amount after withholdings.\n\nDebit side analysis:\n- Production worker wages $25,000: This is manufacturing labor, which should be recorded as an expense increase (COGS/manufacturing expense)\n- Administrative salaries $20,000: This is an expense increase (administrative expense)\n- Withholdings ($2,000 + $3,250 + $1,050 + $1,450 = $7,750): These are liability decreases - the company had obligations to remit these amounts to government/benefit providers, and by withholding from employees, the company is settling those liabilities\n- Net payment ($45,000 - $7,750 = $37,250): This is handled on the credit side (asset decrease - cash)\n\nThe initial tuple (0,0,2,0,0,0) correctly identified 2 expense increases but missed the 4 liability decreases from the withholdings (pension, health insurance, EI, and income tax are 4 separate statutory obligations).\n\nThe credit tuple shows 4 liability increases and 1 asset decrease, which creates tension. However, the debit side is about what happens when payroll is recognized AND paid. The withholdings represent liability decreases (debits to payables), not increases. The corrected debit tuple should be (0,0,2,4,0,0): 2 expense increases + 4 liability decreases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          4,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction contains two distinct economic events: (1) recognizing payroll expenses and (2) paying the net amount after withholdings.\n\nDebit side analysis:\n- Production worker wages $25,000: This is manufacturing labor, which should be recorded as an expense increase (COGS/manufacturing expense)\n- Administrative salaries $20,000: This is an expense increase (administrative expense)\n- Withholdings ($2,000 + $3,250 + $1,050 + $1,450 = $7,750): These are liability decreases - the company had obligations to remit these amounts to government/benefit providers, and by withholding from employees, the company is settling those liabilities\n- Net payment ($45,000 - $7,750 = $37,250): This is handled on the credit side (asset decrease - cash)\n\nThe initial tuple (0,0,2,0,0,0) correctly identified 2 expense increases but missed the 4 liability decreases from the withholdings (pension, health insurance, EI, and income tax are 4 separate statutory obligations).\n\nThe credit tuple shows 4 liability increases and 1 asset decrease, which creates tension. However, the debit side is about what happens when payroll is recognized AND paid. The withholdings represent liability decreases (debits to payables), not increases. The corrected debit tuple should be (0,0,2,4,0,0): 2 expense increases + 4 liability decreases."
+    },
+    "entry_builder": {
+      "input_tokens": 1290,
+      "output_tokens": 740,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4504,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0159342,
+      "raw_cost_usd": 0.024612,
+      "output": {
+        "date": "2026-01-31",
+        "description": "January payroll: production wages $25,000, administrative salaries $20,000, with statutory deductions withheld",
+        "rationale": "Production worker wages ($25,000) are capitalized to Work in Process Inventory as they are direct manufacturing costs under IFRS. Administrative salaries ($20,000) are expensed as period costs. Employee-borne deductions create liabilities until remitted: pension contributions $2,000, health insurance $3,250, EI premiums $1,050, and income tax $1,450 (total $7,750). Gross payroll $45,000 less deductions $7,750 = net pay $37,250 paid from cash. The transaction explicitly states only employee-borne deductions, so employer portions are not included in this entry.",
+        "lines": [
+          {
+            "account_name": "Work in Process Inventory",
+            "type": "debit",
+            "amount": 25000.0
+          },
+          {
+            "account_name": "Salaries and Wages Expense",
+            "type": "debit",
+            "amount": 20000.0
+          },
+          {
+            "account_name": "Pension Contributions Payable",
+            "type": "credit",
+            "amount": 2000.0
+          },
+          {
+            "account_name": "Health Insurance Premiums Payable",
+            "type": "credit",
+            "amount": 3250.0
+          },
+          {
+            "account_name": "Employment Insurance Premiums Payable",
+            "type": "credit",
+            "amount": 1050.0
+          },
+          {
+            "account_name": "Income Tax Payable",
+            "type": "credit",
+            "amount": 1450.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 37250.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "employer portion of statutory contributions",
+            "action": "proceed",
+            "reason": "The transaction explicitly states 'employee-borne statutory deductions were withheld' which clearly indicates only employee portions are included in this entry. Employer contributions, if any, would be recorded in a separate entry as employer payroll tax expense."
+          },
+          {
+            "aspect": "allocation of production worker wages",
+            "action": "proceed",
+            "reason": "Under IFRS (IAS 2), production worker wages are inventoriable costs that must be capitalized to Work in Process Inventory as they are directly attributable to manufacturing. This is not a policy election but a requirement. The wages will flow to Cost of Goods Sold when the manufactured goods are sold."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3545,
+      "output_tokens": 210,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5597,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0144006,
+      "raw_cost_usd": 0.019941,
+      "output": {
+        "reason": "Entry correctly records payroll with employee-borne deductions. Balance verified: debits $45,000 (WIP $25,000 + Salaries Expense $20,000) = credits $45,000 (payables $7,750 + cash $37,250). Production wages properly capitalized to WIP inventory per IAS 2. Administrative salaries correctly expensed. All four statutory deductions properly recorded as liabilities. Net pay calculation correct ($45,000 - $7,750 = $37,250). Payroll is non-taxable per domain knowledge. All accounts appropriate and amounts match transaction text.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records payroll with employee-borne deductions. Balance verified: debits $45,000 (WIP $25,000 + Salaries Expense $20,000) = credits $45,000 (payables $7,750 + cash $37,250). Production wages properly capitalized to WIP inventory per IAS 2. Administrative salaries correctly expensed. All four statutory deductions properly recorded as liabilities. Net pay calculation correct ($45,000 - $7,750 = $37,250). Payroll is non-taxable per domain knowledge. All accounts appropriate and amounts match transaction text."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "employer portion of statutory contributions",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Employer contributions are included in the stated wage/salary amounts",
+              "Employer contributions are additional to the stated amounts and not yet recorded"
+            ],
+            "clarification_question": "Are the employer's matching contributions for CPP, EI, and health insurance included in this payroll recognition, or will they be recorded separately?",
+            "why_entry_differs": "If employer contributions are included, they affect the total expense allocation between production wages and administrative salaries. If separate, only employee-borne deductions are processed now and employer expense is recorded later.",
+            "why_not_resolved": "Transaction states 'employee-borne statutory deductions' were withheld but does not specify whether employer portions are being recognized. Standard practice varies - some entities record both simultaneously, others record employer portions separately."
+          },
+          {
+            "aspect": "allocation of production worker wages",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Expense immediately as period cost",
+              "Capitalize to work-in-process inventory",
+              "Allocate between inventory and cost of goods sold based on production status"
+            ],
+            "clarification_question": "Should the production worker wages be capitalized to inventory (work-in-process) or expensed as a period cost?",
+            "why_entry_differs": "Capitalization increases inventory asset and defers expense recognition until goods are sold. Immediate expensing reduces current period net income without affecting inventory balance.",
+            "why_not_resolved": "Production worker wages are typically inventoriable costs under IFRS, but the transaction does not indicate whether goods are in process, completed, or sold. Entity's costing system and production status determine treatment."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "The debit side records two expense increases: (1) Production worker wages $25,000 = expense increase (manufacturing labor cost/cost of goods sold component), and (2) Administrative salaries $20,000 = expense increase (operating expense). The gross amounts are debited to expense accounts. The withholdings are liabilities (amounts owed to government/benefit providers) and the net pay is also a liability (wages payable) until paid - these are all on the credit side. The payment from chequing account is also on the credit side (asset decrease). Therefore, debit side has 2 expense increases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The credit side records:\n1. Pension contributions withheld = $2,000 liability increase (payable to pension plan)\n2. Health insurance premiums withheld = $3,250 liability increase (payable to insurer)\n3. Employment insurance premiums withheld = $1,050 liability increase (payable to government)\n4. Income tax withholdings = $1,450 liability increase (payable to tax authority)\n5. Net pay transferred = $37,250 asset decrease (cash leaving chequing account)\n\nTotal gross wages = $45,000. Total withholdings = $7,750. Net pay = $37,250.\n\nThe credit side shows 4 liability increases (for the various withholdings that create payables) and 1 asset decrease (cash paid out). The allocation of wages between production (WIP/inventory) and administrative (expense) affects only the debit side.",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction contains two distinct economic events: (1) recognizing payroll expenses and (2) paying the net amount after withholdings.\n\nDebit side analysis:\n- Production worker wages $25,000: This is manufacturing labor, which should be recorded as an expense increase (COGS/manufacturing expense)\n- Administrative salaries $20,000: This is an expense increase (administrative expense)\n- Withholdings ($2,000 + $3,250 + $1,050 + $1,450 = $7,750): These are liability decreases - the company had obligations to remit these amounts to government/benefit providers, and by withholding from employees, the company is settling those liabilities\n- Net payment ($45,000 - $7,750 = $37,250): This is handled on the credit side (asset decrease - cash)\n\nThe initial tuple (0,0,2,0,0,0) correctly identified 2 expense increases but missed the 4 liability decreases from the withholdings (pension, health insurance, EI, and income tax are 4 separate statutory obligations).\n\nThe credit tuple shows 4 liability increases and 1 asset decrease, which creates tension. However, the debit side is about what happens when payroll is recognized AND paid. The withholdings represent liability decreases (debits to payables), not increases. The corrected debit tuple should be (0,0,2,4,0,0): 2 expense increases + 4 liability decreases.",
+        "tuple": [
+          0,
+          0,
+          2,
+          4,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. This payroll transaction involves:\n\nDEBITS (2 expense increases):\n1. Production worker wages $25,000 (expense increase - manufacturing labor)\n2. Administrative salaries $20,000 (expense increase - admin expense)\n\nCREDITS (4 liability increases + 1 asset decrease):\n1. Pension contributions payable $2,000 (liability increase - withheld from employees)\n2. Health insurance premiums payable $3,250 (liability increase - withheld from employees)\n3. Employment insurance premiums payable $1,050 (liability increase - withheld from employees)\n4. Income tax withholdings payable $1,450 (liability increase - withheld from employees)\n5. Cash/chequing account decrease $37,250 (asset decrease - net pay: $45,000 gross - $7,750 deductions)\n\nThe credit tuple (4,0,0,1,0,0) correctly captures 4 liability increases for the statutory deductions withheld and 1 asset decrease for the cash payment of net wages. The debit tuple (0,0,2,0,0,0) correctly shows 2 expense increases for the two types of wages/salaries. The tuples are consistent and both reflect proper IFRS treatment of payroll with statutory withholdings.",
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-01-31",
+        "description": "January payroll: production wages $25,000, administrative salaries $20,000, with statutory deductions withheld",
+        "rationale": "Production worker wages ($25,000) are capitalized to Work in Process Inventory as they are direct manufacturing costs under IFRS. Administrative salaries ($20,000) are expensed as period costs. Employee-borne deductions create liabilities until remitted: pension contributions $2,000, health insurance $3,250, EI premiums $1,050, and income tax $1,450 (total $7,750). Gross payroll $45,000 less deductions $7,750 = net pay $37,250 paid from cash. The transaction explicitly states only employee-borne deductions, so employer portions are not included in this entry.",
+        "lines": [
+          {
+            "account_name": "Work in Process Inventory",
+            "type": "debit",
+            "amount": 25000.0
+          },
+          {
+            "account_name": "Salaries and Wages Expense",
+            "type": "debit",
+            "amount": 20000.0
+          },
+          {
+            "account_name": "Pension Contributions Payable",
+            "type": "credit",
+            "amount": 2000.0
+          },
+          {
+            "account_name": "Health Insurance Premiums Payable",
+            "type": "credit",
+            "amount": 3250.0
+          },
+          {
+            "account_name": "Employment Insurance Premiums Payable",
+            "type": "credit",
+            "amount": 1050.0
+          },
+          {
+            "account_name": "Income Tax Payable",
+            "type": "credit",
+            "amount": 1450.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 37250.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "employer portion of statutory contributions",
+            "action": "proceed",
+            "reason": "The transaction explicitly states 'employee-borne statutory deductions were withheld' which clearly indicates only employee portions are included in this entry. Employer contributions, if any, would be recorded in a separate entry as employer payroll tax expense."
+          },
+          {
+            "aspect": "allocation of production worker wages",
+            "action": "proceed",
+            "reason": "Under IFRS (IAS 2), production worker wages are inventoriable costs that must be capitalized to Work in Process Inventory as they are directly attributable to manufacturing. This is not a policy election but a requirement. The wages will flow to Cost of Goods Sold when the manufactured goods are sold."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry correctly records payroll with employee-borne deductions. Balance verified: debits $45,000 (WIP $25,000 + Salaries Expense $20,000) = credits $45,000 (payables $7,750 + cash $37,250). Production wages properly capitalized to WIP inventory per IAS 2. Administrative salaries correctly expensed. All four statutory deductions properly recorded as liabilities. Net pay calculation correct ($45,000 - $7,750 = $37,250). Payroll is non-taxable per domain knowledge. All accounts appropriate and amounts match transaction text.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 604,
+        "output_tokens": 451,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 579,
+        "output_tokens": 198,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 577,
+        "output_tokens": 273,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 747,
+        "output_tokens": 374,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 747,
+        "output_tokens": 405,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1290,
+        "output_tokens": 740,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 3545,
+        "output_tokens": 210,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

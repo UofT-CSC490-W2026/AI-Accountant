@@ -1,0 +1,533 @@
+{
+  "test_case_id": "int_hard_02a_investment_fvtpl",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Acquisition of 10% Ford common shares classified as FVTPL and transaction fee",
+    "rationale": "Under IFRS 9, financial assets classified as FVTPL are initially measured at fair value. Transaction costs for FVTPL assets must be expensed immediately and cannot be capitalized. The $3,000,000 investment is recorded as a financial asset at FVTPL. The $100,000 transaction fee is expensed. Both payments made by cheque reduce cash. The debit tuple (1,0,0,0,0,0) suggests one asset increase, but we need two debits: one for the investment asset and one for the transaction fee expense. The credit tuple (0,0,0,1,0,0) correctly indicates one asset decrease (cash). This is a case where the tuple guidance must be overridden to comply with IFRS 9 requirements.",
+    "lines": [
+      {
+        "account_name": "Financial Assets at FVTPL",
+        "type": "debit",
+        "amount": 3000000.0
+      },
+      {
+        "account_name": "Transaction Fee Expense",
+        "type": "debit",
+        "amount": 100000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 3100000.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "treatment of transaction fee",
+        "action": "proceed",
+        "reason": "IFRS 9 is unambiguous: transaction costs for FVTPL assets must be expensed immediately. The classification as FVTPL is explicitly stated in the transaction text."
+      },
+      {
+        "aspect": "payment method for shares vs fee",
+        "action": "proceed",
+        "reason": "Payment method does not affect the debit/credit structure of the entry. Both payments reduce the same cash account."
+      },
+      {
+        "aspect": "classification of investment",
+        "action": "proceed",
+        "reason": "The transaction explicitly states management's intent is short-term trading classified as FVTPL under IFRS 9. No ambiguity exists."
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0600132,
+  "raw_cost_usd": 0.096906,
+  "total_latency_ms": 37555,
+  "total_input_tokens": 20927,
+  "total_output_tokens": 2275,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 558,
+      "output_tokens": 208,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2953,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0055125,
+      "raw_cost_usd": 0.011979,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "treatment of transaction fee",
+            "resolved": true,
+            "resolution": "IFRS 9 requires transaction costs for FVTPL financial assets to be expensed immediately, not capitalized. The classification as FVTPL is explicitly stated.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method for shares vs fee",
+            "resolved": true,
+            "resolution": "Both paid by cheque as stated - payment method doesn't affect the entry structure",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "classification of investment",
+            "resolved": true,
+            "resolution": "Explicitly stated as FVTPL under IFRS 9 with short-term trading intent",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 533,
+      "output_tokens": 135,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1795,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0040026,
+      "raw_cost_usd": 0.00741,
+      "output": {
+        "reason": "Two debit lines: (1) Financial asset (Ford shares) classified as FVTPL = asset increase; (2) Transaction costs on FVTPL investments are expensed immediately under IFRS 9, not capitalized = expense increase. Total: 1 asset increase + 1 expense increase.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two debit lines: (1) Financial asset (Ford shares) classified as FVTPL = asset increase; (2) Transaction costs on FVTPL investments are expensed immediately under IFRS 9, not capitalized = expense increase. Total: 1 asset increase + 1 expense increase."
+    },
+    "credit_classifier": {
+      "input_tokens": 531,
+      "output_tokens": 216,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1772,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0052053,
+      "raw_cost_usd": 0.008556,
+      "output": {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share purchase = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Under IFRS 9, transaction costs for FVTPL investments are expensed immediately (not capitalized), but from the credit side perspective, we're looking at what is being credited. The payment of $3,100,000 total by cheque means cash is credited (asset decrease). This represents 2 distinct economic events: the investment acquisition and the fee payment, but both result in cash leaving, so we count 2 asset decrease lines.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share purchase = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Under IFRS 9, transaction costs for FVTPL investments are expensed immediately (not capitalized), but from the credit side perspective, we're looking at what is being credited. The payment of $3,100,000 total by cheque means cash is credited (asset decrease). This represents 2 distinct economic events: the investment acquisition and the fee payment, but both result in cash leaving, so we count 2 asset decrease lines."
+    },
+    "credit_corrector": {
+      "input_tokens": 701,
+      "output_tokens": 309,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2455,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0072642,
+      "raw_cost_usd": 0.012,
+      "output": {
+        "reason": "The transaction involves two economic events: (1) acquiring Ford shares for $3,000,000 and (2) paying a transaction fee of $100,000. Under IFRS 9, transaction costs for FVTPL financial assets are expensed immediately, not capitalized.\n\nThe debit side shows: 1 asset increase (the investment in Ford shares at $3,000,000) and 1 expense increase (the $100,000 transaction fee).\n\nThe credit side should reflect: cash decreasing for the total payment of $3,100,000. However, this is a single asset (cash) decreasing, not two separate asset decreases. The initial credit tuple of (0,0,0,2,0,0) incorrectly splits this into two asset decrease lines.\n\nCorrected to (0,0,0,1,0,0): one asset decrease line representing the total cash outflow of $3,100,000. The accounting treatment separates the debit side (investment vs. expense) but the credit side is simply the reduction of one asset account (cash/bank).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves two economic events: (1) acquiring Ford shares for $3,000,000 and (2) paying a transaction fee of $100,000. Under IFRS 9, transaction costs for FVTPL financial assets are expensed immediately, not capitalized.\n\nThe debit side shows: 1 asset increase (the investment in Ford shares at $3,000,000) and 1 expense increase (the $100,000 transaction fee).\n\nThe credit side should reflect: cash decreasing for the total payment of $3,100,000. However, this is a single asset (cash) decreasing, not two separate asset decreases. The initial credit tuple of (0,0,0,2,0,0) incorrectly splits this into two asset decrease lines.\n\nCorrected to (0,0,0,1,0,0): one asset decrease line representing the total cash outflow of $3,100,000. The accounting treatment separates the debit side (investment vs. expense) but the credit side is simply the reduction of one asset account (cash/bank)."
+    },
+    "debit_corrector": {
+      "input_tokens": 701,
+      "output_tokens": 595,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2447,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0115518,
+      "raw_cost_usd": 0.016266,
+      "output": {
+        "reason": "Under IFRS 9, when acquiring financial assets classified as FVTPL (fair value through profit or loss), transaction costs are expensed immediately to profit or loss, not capitalized to the asset. However, the initial debit tuple (1,0,1,0,0,0) incorrectly treats this as two separate debit lines: one asset increase and one expense increase.\n\nThe correct accounting is:\n- Debit: Financial asset at FVTPL $3,100,000 (investment cost $3,000,000 + transaction fee $100,000 capitalized)\n- Credit: Cash $3,100,000\n\nWait - I need to reconsider. Under IFRS 9, for FVTPL assets, transaction costs are NOT capitalized but expensed. So:\n- Debit: Financial asset at FVTPL $3,000,000 (asset increase)\n- Debit: Transaction expense $100,000 (expense increase)\n- Credit: Cash $3,100,000 (asset decrease)\n\nActually, reviewing IFRS 9 more carefully: Transaction costs on FVTPL financial assets are expensed immediately. This means the initial tuple showing (1,0,1,0,0,0) - one asset increase for the investment and one expense increase for the fee - appears correct.\n\nHowever, the credit side shows (0,0,0,2,0,0) meaning two asset decreases, which is consistent with two cash payments totaling $3,100,000.\n\nBut wait - this is a single payment by cheque for the total amount. The transaction describes one cheque payment covering both the acquisition and the fee. This should be recorded as one cash decrease, not two. The debit side should show the economic substance: the investment asset increases by $3,000,000 and transaction costs of $100,000 are expensed.\n\nUpon reflection, the initial debit tuple (1,0,1,0,0,0) is actually correct under IFRS 9 for FVTPL classification. The credit tuple showing 2 asset decreases appears to be the error - it should be 1 asset decrease (cash). But I only correct the debit side.\n\nThe debit tuple is correct as-is: one asset increase (investment) and one expense increase (transaction costs).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IFRS 9, when acquiring financial assets classified as FVTPL (fair value through profit or loss), transaction costs are expensed immediately to profit or loss, not capitalized to the asset. However, the initial debit tuple (1,0,1,0,0,0) incorrectly treats this as two separate debit lines: one asset increase and one expense increase.\n\nThe correct accounting is:\n- Debit: Financial asset at FVTPL $3,100,000 (investment cost $3,000,000 + transaction fee $100,000 capitalized)\n- Credit: Cash $3,100,000\n\nWait - I need to reconsider. Under IFRS 9, for FVTPL assets, transaction costs are NOT capitalized but expensed. So:\n- Debit: Financial asset at FVTPL $3,000,000 (asset increase)\n- Debit: Transaction expense $100,000 (expense increase)\n- Credit: Cash $3,100,000 (asset decrease)\n\nActually, reviewing IFRS 9 more carefully: Transaction costs on FVTPL financial assets are expensed immediately. This means the initial tuple showing (1,0,1,0,0,0) - one asset increase for the investment and one expense increase for the fee - appears correct.\n\nHowever, the credit side shows (0,0,0,2,0,0) meaning two asset decreases, which is consistent with two cash payments totaling $3,100,000.\n\nBut wait - this is a single payment by cheque for the total amount. The transaction describes one cheque payment covering both the acquisition and the fee. This should be recorded as one cash decrease, not two. The debit side should show the economic substance: the investment asset increases by $3,000,000 and transaction costs of $100,000 are expensed.\n\nUpon reflection, the initial debit tuple (1,0,1,0,0,0) is actually correct under IFRS 9 for FVTPL classification. The credit tuple showing 2 asset decreases appears to be the error - it should be 1 asset decrease (cash). But I only correct the debit side.\n\nThe debit tuple is correct as-is: one asset increase (investment) and one expense increase (transaction costs)."
+    },
+    "entry_builder": {
+      "input_tokens": 1101,
+      "output_tokens": 617,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4315,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.013522200000000002,
+      "raw_cost_usd": 0.0222,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% Ford common shares classified as FVTPL and transaction fee",
+        "rationale": "Under IFRS 9, financial assets classified as FVTPL are initially measured at fair value. Transaction costs for FVTPL assets must be expensed immediately and cannot be capitalized. The $3,000,000 investment is recorded as a financial asset at FVTPL. The $100,000 transaction fee is expensed. Both payments made by cheque reduce cash. The debit tuple (1,0,0,0,0,0) suggests one asset increase, but we need two debits: one for the investment asset and one for the transaction fee expense. The credit tuple (0,0,0,1,0,0) correctly indicates one asset decrease (cash). This is a case where the tuple guidance must be overridden to comply with IFRS 9 requirements.",
+        "lines": [
+          {
+            "account_name": "Financial Assets at FVTPL",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "Transaction Fee Expense",
+            "type": "debit",
+            "amount": 100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3100000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "treatment of transaction fee",
+            "action": "proceed",
+            "reason": "IFRS 9 is unambiguous: transaction costs for FVTPL assets must be expensed immediately. The classification as FVTPL is explicitly stated in the transaction text."
+          },
+          {
+            "aspect": "payment method for shares vs fee",
+            "action": "proceed",
+            "reason": "Payment method does not affect the debit/credit structure of the entry. Both payments reduce the same cash account."
+          },
+          {
+            "aspect": "classification of investment",
+            "action": "proceed",
+            "reason": "The transaction explicitly states management's intent is short-term trading classified as FVTPL under IFRS 9. No ambiguity exists."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3138,
+      "output_tokens": 195,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5190,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0129546,
+      "raw_cost_usd": 0.018495,
+      "output": {
+        "reason": "Entry correctly applies IFRS 9 treatment for FVTPL financial assets. Investment recorded at fair value ($3,000,000) with transaction costs expensed immediately ($100,000) rather than capitalized. Balance verified: debits $3,100,000 = credits $3,100,000. Accounts appropriate: Financial Assets at FVTPL (asset increase), Transaction Fee Expense (expense increase), Cash (asset decrease). Amounts match transaction text exactly. No tax treatment required for financial asset acquisitions. Directionality correct for all account types.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly applies IFRS 9 treatment for FVTPL financial assets. Investment recorded at fair value ($3,000,000) with transaction costs expensed immediately ($100,000) rather than capitalized. Balance verified: debits $3,100,000 = credits $3,100,000. Accounts appropriate: Financial Assets at FVTPL (asset increase), Transaction Fee Expense (expense increase), Cash (asset decrease). Amounts match transaction text exactly. No tax treatment required for financial asset acquisitions. Directionality correct for all account types."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "treatment of transaction fee",
+            "resolved": true,
+            "resolution": "IFRS 9 requires transaction costs for FVTPL financial assets to be expensed immediately, not capitalized. The classification as FVTPL is explicitly stated.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "payment method for shares vs fee",
+            "resolved": true,
+            "resolution": "Both paid by cheque as stated - payment method doesn't affect the entry structure",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "classification of investment",
+            "resolved": true,
+            "resolution": "Explicitly stated as FVTPL under IFRS 9 with short-term trading intent",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Two debit lines: (1) Financial asset (Ford shares) classified as FVTPL = asset increase; (2) Transaction costs on FVTPL investments are expensed immediately under IFRS 9, not capitalized = expense increase. Total: 1 asset increase + 1 expense increase.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share purchase = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Under IFRS 9, transaction costs for FVTPL investments are expensed immediately (not capitalized), but from the credit side perspective, we're looking at what is being credited. The payment of $3,100,000 total by cheque means cash is credited (asset decrease). This represents 2 distinct economic events: the investment acquisition and the fee payment, but both result in cash leaving, so we count 2 asset decrease lines.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Under IFRS 9, when acquiring financial assets classified as FVTPL (fair value through profit or loss), transaction costs are expensed immediately to profit or loss, not capitalized to the asset. However, the initial debit tuple (1,0,1,0,0,0) incorrectly treats this as two separate debit lines: one asset increase and one expense increase.\n\nThe correct accounting is:\n- Debit: Financial asset at FVTPL $3,100,000 (investment cost $3,000,000 + transaction fee $100,000 capitalized)\n- Credit: Cash $3,100,000\n\nWait - I need to reconsider. Under IFRS 9, for FVTPL assets, transaction costs are NOT capitalized but expensed. So:\n- Debit: Financial asset at FVTPL $3,000,000 (asset increase)\n- Debit: Transaction expense $100,000 (expense increase)\n- Credit: Cash $3,100,000 (asset decrease)\n\nActually, reviewing IFRS 9 more carefully: Transaction costs on FVTPL financial assets are expensed immediately. This means the initial tuple showing (1,0,1,0,0,0) - one asset increase for the investment and one expense increase for the fee - appears correct.\n\nHowever, the credit side shows (0,0,0,2,0,0) meaning two asset decreases, which is consistent with two cash payments totaling $3,100,000.\n\nBut wait - this is a single payment by cheque for the total amount. The transaction describes one cheque payment covering both the acquisition and the fee. This should be recorded as one cash decrease, not two. The debit side should show the economic substance: the investment asset increases by $3,000,000 and transaction costs of $100,000 are expensed.\n\nUpon reflection, the initial debit tuple (1,0,1,0,0,0) is actually correct under IFRS 9 for FVTPL classification. The credit tuple showing 2 asset decreases appears to be the error - it should be 1 asset decrease (cash). But I only correct the debit side.\n\nThe debit tuple is correct as-is: one asset increase (investment) and one expense increase (transaction costs).",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves two economic events: (1) acquiring Ford shares for $3,000,000 and (2) paying a transaction fee of $100,000. Under IFRS 9, transaction costs for FVTPL financial assets are expensed immediately, not capitalized.\n\nThe debit side shows: 1 asset increase (the investment in Ford shares at $3,000,000) and 1 expense increase (the $100,000 transaction fee).\n\nThe credit side should reflect: cash decreasing for the total payment of $3,100,000. However, this is a single asset (cash) decreasing, not two separate asset decreases. The initial credit tuple of (0,0,0,2,0,0) incorrectly splits this into two asset decrease lines.\n\nCorrected to (0,0,0,1,0,0): one asset decrease line representing the total cash outflow of $3,100,000. The accounting treatment separates the debit side (investment vs. expense) but the credit side is simply the reduction of one asset account (cash/bank).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% Ford common shares classified as FVTPL and transaction fee",
+        "rationale": "Under IFRS 9, financial assets classified as FVTPL are initially measured at fair value. Transaction costs for FVTPL assets must be expensed immediately and cannot be capitalized. The $3,000,000 investment is recorded as a financial asset at FVTPL. The $100,000 transaction fee is expensed. Both payments made by cheque reduce cash. The debit tuple (1,0,0,0,0,0) suggests one asset increase, but we need two debits: one for the investment asset and one for the transaction fee expense. The credit tuple (0,0,0,1,0,0) correctly indicates one asset decrease (cash). This is a case where the tuple guidance must be overridden to comply with IFRS 9 requirements.",
+        "lines": [
+          {
+            "account_name": "Financial Assets at FVTPL",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "Transaction Fee Expense",
+            "type": "debit",
+            "amount": 100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3100000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "treatment of transaction fee",
+            "action": "proceed",
+            "reason": "IFRS 9 is unambiguous: transaction costs for FVTPL assets must be expensed immediately. The classification as FVTPL is explicitly stated in the transaction text."
+          },
+          {
+            "aspect": "payment method for shares vs fee",
+            "action": "proceed",
+            "reason": "Payment method does not affect the debit/credit structure of the entry. Both payments reduce the same cash account."
+          },
+          {
+            "aspect": "classification of investment",
+            "action": "proceed",
+            "reason": "The transaction explicitly states management's intent is short-term trading classified as FVTPL under IFRS 9. No ambiguity exists."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry correctly applies IFRS 9 treatment for FVTPL financial assets. Investment recorded at fair value ($3,000,000) with transaction costs expensed immediately ($100,000) rather than capitalized. Balance verified: debits $3,100,000 = credits $3,100,000. Accounts appropriate: Financial Assets at FVTPL (asset increase), Transaction Fee Expense (expense increase), Cash (asset decrease). Amounts match transaction text exactly. No tax treatment required for financial asset acquisitions. Directionality correct for all account types.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 558,
+        "output_tokens": 208,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 533,
+        "output_tokens": 135,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 531,
+        "output_tokens": 216,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 701,
+        "output_tokens": 309,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 701,
+        "output_tokens": 595,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1101,
+        "output_tokens": 617,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 3138,
+        "output_tokens": 195,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,429 @@
+{
+  "test_case_id": "int_hard_01a_note_derecognition",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    1
+  ],
+  "journal_entry": {
+    "date": "2024-01-01",
+    "description": "Discounted 90-day non-interest-bearing note receivable at bank, 15% annual discount rate, 40 days remaining",
+    "rationale": "Ford discounted a $100,000 note with 40 days remaining at 15% annual rate. Discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $100,000 - $1,643.84 = $98,356.16. Since management determined this qualifies as derecognition under IFRS 9 (transfer of risks and rewards), the note receivable is removed from the books. The difference between the carrying amount ($100,000, which replaced the original trade receivable) and the proceeds ($98,356.16) is recognized as a loss on discounting ($1,643.84). Debit Cash for proceeds received, debit Loss on Note Discounting for the discount charge, and credit Notes Receivable to derecognize the asset. This matches the tuple structure: 1 asset increase (cash), 1 expense increase (loss), 1 liability decrease (actually asset decrease - notes receivable), and 1 asset decrease on credit side, 1 expense decrease (reversal pattern). The credit tuple f=1 appears to be a misclassification; the correct structure is asset decrease for notes receivable removal.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 98356.16
+      },
+      {
+        "account_name": "Loss on Note Discounting",
+        "type": "debit",
+        "amount": 1643.84
+      },
+      {
+        "account_name": "Notes Receivable",
+        "type": "credit",
+        "amount": 100000.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0704472,
+  "raw_cost_usd": 0.10734,
+  "total_latency_ms": 45281,
+  "total_input_tokens": 21425,
+  "total_output_tokens": 2871,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 601,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2996,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0030465,
+      "raw_cost_usd": 0.009513,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 576,
+      "output_tokens": 170,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1838,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0046566,
+      "raw_cost_usd": 0.008064,
+      "output": {
+        "reason": "Ford discounts the note at the bank, receiving cash (asset increase) but at a discount. The debit side records: (1) Cash received = asset increase, and (2) Loss on discounting = expense increase. The discount charge represents the financing cost/loss from selling the note before maturity, which is an expense. The credit side would derecognize the note receivable (asset decrease). Two distinct debit lines: one for the cash proceeds and one for the loss/discount expense.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Ford discounts the note at the bank, receiving cash (asset increase) but at a discount. The debit side records: (1) Cash received = asset increase, and (2) Loss on discounting = expense increase. The discount charge represents the financing cost/loss from selling the note before maturity, which is an expense. The credit side would derecognize the note receivable (asset decrease). Two distinct debit lines: one for the cash proceeds and one for the loss/discount expense."
+    },
+    "credit_classifier": {
+      "input_tokens": 574,
+      "output_tokens": 267,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1815,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0060993,
+      "raw_cost_usd": 0.00945,
+      "output": {
+        "reason": "On the credit side, Ford is discounting (selling) the note receivable to the bank, which qualifies as derecognition under IFRS 9. This transaction involves:\n1. Notes Receivable (asset decrease) - the note is removed from Ford's books as the risks and rewards have been transferred\n2. Loss on Discounting (expense increase, which when credited represents an expense decrease - but here we're recording a loss, so this is NOT a credit to expense decrease)\n\nActually, let me reconsider: When Ford discounts the note, the credits are:\n- The note receivable is removed (asset decrease via credit)\n- Cash is received (debit - not on credit side)\n- The difference between the note's carrying value and cash received is a loss (debit - not on credit side)\n\nTherefore, the only credit line is the removal of the Notes Receivable asset = 1 asset decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "On the credit side, Ford is discounting (selling) the note receivable to the bank, which qualifies as derecognition under IFRS 9. This transaction involves:\n1. Notes Receivable (asset decrease) - the note is removed from Ford's books as the risks and rewards have been transferred\n2. Loss on Discounting (expense increase, which when credited represents an expense decrease - but here we're recording a loss, so this is NOT a credit to expense decrease)\n\nActually, let me reconsider: When Ford discounts the note, the credits are:\n- The note receivable is removed (asset decrease via credit)\n- Cash is received (debit - not on credit side)\n- The difference between the note's carrying value and cash received is a loss (debit - not on credit side)\n\nTherefore, the only credit line is the removal of the Notes Receivable asset = 1 asset decrease."
+    },
+    "credit_corrector": {
+      "input_tokens": 744,
+      "output_tokens": 790,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2498,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0146082,
+      "raw_cost_usd": 0.019344,
+      "output": {
+        "reason": "The transaction involves discounting a note receivable at the bank. Let me break down the economics:\n\n1. Ford originally held a note receivable (asset) with face value $100,000\n2. The note is discounted at the bank with 40 days remaining (90 - 50 = 40 days)\n3. The bank charges a discount fee based on 15% annual rate for 40 days\n4. Ford receives net cash proceeds (face value minus discount charges)\n5. This qualifies as derecognition under IFRS 9\n\nThe journal entry should be:\n- Debit: Cash (asset increase) for net proceeds\n- Debit: Loss on discounting (expense increase) for the discount charges\n- Credit: Notes Receivable (asset decrease) for $100,000\n\nThe debit tuple (1,0,1,0,0,0) correctly shows: asset increase (cash) + expense increase (discount loss).\n\nThe initial credit tuple (0,0,0,1,0,0) shows only one asset decrease, but this is incomplete. When a note is discounted and derecognized, we need:\n- Asset decrease for the note receivable being removed\n- Expense decrease is NOT correct here\n\nHowever, looking more carefully: the discount charge is a loss/expense that reduces the cash received. The credit side should show the asset being given up (the note receivable). The expense is on the debit side.\n\nActually, the initial credit tuple (0,0,0,1,0,0) showing one asset decrease is correct for the note receivable being derecognized. But wait - I need to reconsider if there's a contra-revenue or other element.\n\nUpon reflection: The discount charge creates an expense (debit), cash comes in (debit), and the note receivable goes out (credit). The initial tuple shows only the note receivable decrease, which matches the single credit line needed. However, the transaction describes \"discount charges\" which represents a financing cost/expense that should be recorded.\n\nCorrection: The credit side should show (0,0,0,1,0,1) - the note receivable decrease (asset decrease) PLUS an expense decrease is wrong. Let me reconsider.\n\nActually, discount charges are deducted from proceeds, creating an expense on the debit side. The credit side should only show the asset (note receivable) being removed. Initial tuple (0,0,0,1,0,0) appears correct.\n\nWait - reviewing again: if there's a loss on discounting, that's an expense increase (debit side, already captured). The credit side removes the note receivable. But could there be interest income previously accrued that needs reversing? No - the note is non-interest-bearing.\n\nFinal analysis: The debit shows asset increase + expense increase. The credit should show asset decrease for the note. Initial tuple is correct at (0,0,0,1,0,0).\n\nActually, I need to reconsider one more time: Could there be accrued interest receivable that was previously recorded? No, it's non-interest-bearing. The initial credit tuple (0,0,0,1,0,0) is correct - it shows the note receivable being removed from the books.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          1
+        ]
+      },
+      "reason": "The transaction involves discounting a note receivable at the bank. Let me break down the economics:\n\n1. Ford originally held a note receivable (asset) with face value $100,000\n2. The note is discounted at the bank with 40 days remaining (90 - 50 = 40 days)\n3. The bank charges a discount fee based on 15% annual rate for 40 days\n4. Ford receives net cash proceeds (face value minus discount charges)\n5. This qualifies as derecognition under IFRS 9\n\nThe journal entry should be:\n- Debit: Cash (asset increase) for net proceeds\n- Debit: Loss on discounting (expense increase) for the discount charges\n- Credit: Notes Receivable (asset decrease) for $100,000\n\nThe debit tuple (1,0,1,0,0,0) correctly shows: asset increase (cash) + expense increase (discount loss).\n\nThe initial credit tuple (0,0,0,1,0,0) shows only one asset decrease, but this is incomplete. When a note is discounted and derecognized, we need:\n- Asset decrease for the note receivable being removed\n- Expense decrease is NOT correct here\n\nHowever, looking more carefully: the discount charge is a loss/expense that reduces the cash received. The credit side should show the asset being given up (the note receivable). The expense is on the debit side.\n\nActually, the initial credit tuple (0,0,0,1,0,0) showing one asset decrease is correct for the note receivable being derecognized. But wait - I need to reconsider if there's a contra-revenue or other element.\n\nUpon reflection: The discount charge creates an expense (debit), cash comes in (debit), and the note receivable goes out (credit). The initial tuple shows only the note receivable decrease, which matches the single credit line needed. However, the transaction describes \"discount charges\" which represents a financing cost/expense that should be recorded.\n\nCorrection: The credit side should show (0,0,0,1,0,1) - the note receivable decrease (asset decrease) PLUS an expense decrease is wrong. Let me reconsider.\n\nActually, discount charges are deducted from proceeds, creating an expense on the debit side. The credit side should only show the asset (note receivable) being removed. Initial tuple (0,0,0,1,0,0) appears correct.\n\nWait - reviewing again: if there's a loss on discounting, that's an expense increase (debit side, already captured). The credit side removes the note receivable. But could there be interest income previously accrued that needs reversing? No - the note is non-interest-bearing.\n\nFinal analysis: The debit shows asset increase + expense increase. The credit should show asset decrease for the note. Initial tuple is correct at (0,0,0,1,0,0).\n\nActually, I need to reconsider one more time: Could there be accrued interest receivable that was previously recorded? No, it's non-interest-bearing. The initial credit tuple (0,0,0,1,0,0) is correct - it shows the note receivable being removed from the books."
+    },
+    "debit_corrector": {
+      "input_tokens": 744,
+      "output_tokens": 877,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2490,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0159108,
+      "raw_cost_usd": 0.020625,
+      "output": {
+        "reason": "The transaction involves discounting a note receivable at a bank. This is a complex transaction with multiple economic components:\n\n1. Cash received (net proceeds after discount) = Asset increase (debit)\n2. Discount charges (interest expense for the 40 remaining days) = Expense increase (debit)\n3. Notes receivable derecognized = Asset decrease (credit)\n\nThe initial debit tuple (1,0,1,0,0,0) shows 1 asset increase and 1 expense increase, which captures the cash received and the discount expense. However, it's missing the derecognition of the notes receivable asset.\n\nUnder IFRS 9, when a financial asset is derecognized (transfer qualifies for derecognition), the carrying amount of the asset must be removed from the books. The notes receivable was itself an asset (originally a trade receivable, now a note). When Ford discounts the note and it qualifies for derecognition, Ford must:\n- Remove the notes receivable (asset decrease - this goes on the CREDIT side)\n- Record cash received (asset increase - debit)\n- Record the discount charge as expense (expense increase - debit)\n\nThe credit tuple shows (0,0,0,1,0,0) = 1 asset decrease, which correctly represents the derecognition of the notes receivable.\n\nHowever, looking more carefully: the debit side should also reflect that we're giving up one asset (the note) to receive another asset (cash). The net effect is we're decreasing one asset and increasing another, but the discount creates an expense.\n\nActually, reconsidering: the debit tuple should show what increases on the debit side. We have:\n- Cash (asset) increases\n- Discount expense increases\n- Notes receivable decreases (but a decrease in an asset is a CREDIT, not a debit)\n\nWait - I need to reconsider the structure. If notes receivable decreases, that's accomplished by CREDITING notes receivable, not debiting it. So the debit side should NOT show an asset decrease.\n\nRe-examining: The initial tuple (1,0,1,0,0,0) shows 1 asset increase (cash) and 1 expense increase (discount charges). This is correct for the debit side. The credit side correctly shows 1 asset decrease (notes receivable).\n\nActually, I need to reconsider once more. The transaction states this is settlement of a trade receivable that became a note. When discounting:\n- Dr. Cash (net amount)\n- Dr. Interest Expense (discount)\n- Cr. Notes Receivable (face value)\n\nBut wait - if the note had a face value of $100,000 and we're receiving less than that (due to the discount), we need to check if there's a loss component or if it's purely the time-value discount.\n\nGiven the facts: 90-day note, discounted after 50 days, so 40 days remaining. Discount = $100,000 \u00d7 15% \u00d7 (40/365) \u2248 $1,644.\n\nThe journal entry should be:\nDr. Cash (proceeds)\nDr. Interest Expense (discount)\nCr. Notes Receivable ($100,000)\n\nThis gives us 1 asset increase (cash), 1 expense increase (interest), and 1 asset decrease (notes receivable on credit side).\n\nThe initial debit tuple (1,0,1,0,0,0) is correct - it shows the two debit entries. The notes receivable decrease appears on the credit side, which is correct.",
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves discounting a note receivable at a bank. This is a complex transaction with multiple economic components:\n\n1. Cash received (net proceeds after discount) = Asset increase (debit)\n2. Discount charges (interest expense for the 40 remaining days) = Expense increase (debit)\n3. Notes receivable derecognized = Asset decrease (credit)\n\nThe initial debit tuple (1,0,1,0,0,0) shows 1 asset increase and 1 expense increase, which captures the cash received and the discount expense. However, it's missing the derecognition of the notes receivable asset.\n\nUnder IFRS 9, when a financial asset is derecognized (transfer qualifies for derecognition), the carrying amount of the asset must be removed from the books. The notes receivable was itself an asset (originally a trade receivable, now a note). When Ford discounts the note and it qualifies for derecognition, Ford must:\n- Remove the notes receivable (asset decrease - this goes on the CREDIT side)\n- Record cash received (asset increase - debit)\n- Record the discount charge as expense (expense increase - debit)\n\nThe credit tuple shows (0,0,0,1,0,0) = 1 asset decrease, which correctly represents the derecognition of the notes receivable.\n\nHowever, looking more carefully: the debit side should also reflect that we're giving up one asset (the note) to receive another asset (cash). The net effect is we're decreasing one asset and increasing another, but the discount creates an expense.\n\nActually, reconsidering: the debit tuple should show what increases on the debit side. We have:\n- Cash (asset) increases\n- Discount expense increases\n- Notes receivable decreases (but a decrease in an asset is a CREDIT, not a debit)\n\nWait - I need to reconsider the structure. If notes receivable decreases, that's accomplished by CREDITING notes receivable, not debiting it. So the debit side should NOT show an asset decrease.\n\nRe-examining: The initial tuple (1,0,1,0,0,0) shows 1 asset increase (cash) and 1 expense increase (discount charges). This is correct for the debit side. The credit side correctly shows 1 asset decrease (notes receivable).\n\nActually, I need to reconsider once more. The transaction states this is settlement of a trade receivable that became a note. When discounting:\n- Dr. Cash (net amount)\n- Dr. Interest Expense (discount)\n- Cr. Notes Receivable (face value)\n\nBut wait - if the note had a face value of $100,000 and we're receiving less than that (due to the discount), we need to check if there's a loss component or if it's purely the time-value discount.\n\nGiven the facts: 90-day note, discounted after 50 days, so 40 days remaining. Discount = $100,000 \u00d7 15% \u00d7 (40/365) \u2248 $1,644.\n\nThe journal entry should be:\nDr. Cash (proceeds)\nDr. Interest Expense (discount)\nCr. Notes Receivable ($100,000)\n\nThis gives us 1 asset increase (cash), 1 expense increase (interest), and 1 asset decrease (notes receivable on credit side).\n\nThe initial debit tuple (1,0,1,0,0,0) is correct - it shows the two debit entries. The notes receivable decrease appears on the credit side, which is correct."
+    },
+    "entry_builder": {
+      "input_tokens": 833,
+      "output_tokens": 502,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4047,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.010993200000000002,
+      "raw_cost_usd": 0.019671,
+      "output": {
+        "date": "2024-01-01",
+        "description": "Discounted 90-day non-interest-bearing note receivable at bank, 15% annual discount rate, 40 days remaining",
+        "rationale": "Ford discounted a $100,000 note with 40 days remaining at 15% annual rate. Discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $100,000 - $1,643.84 = $98,356.16. Since management determined this qualifies as derecognition under IFRS 9 (transfer of risks and rewards), the note receivable is removed from the books. The difference between the carrying amount ($100,000, which replaced the original trade receivable) and the proceeds ($98,356.16) is recognized as a loss on discounting ($1,643.84). Debit Cash for proceeds received, debit Loss on Note Discounting for the discount charge, and credit Notes Receivable to derecognize the asset. This matches the tuple structure: 1 asset increase (cash), 1 expense increase (loss), 1 liability decrease (actually asset decrease - notes receivable), and 1 asset decrease on credit side, 1 expense decrease (reversal pattern). The credit tuple f=1 appears to be a misclassification; the correct structure is asset decrease for notes receivable removal.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98356.16
+          },
+          {
+            "account_name": "Loss on Note Discounting",
+            "type": "debit",
+            "amount": 1643.84
+          },
+          {
+            "account_name": "Notes Receivable",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3689,
+      "output_tokens": 230,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5741,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0151326,
+      "raw_cost_usd": 0.020673,
+      "output": {
+        "reason": "Entry correctly records note receivable discounting with derecognition. Balance verified: debits ($98,356.16 + $1,643.84 = $100,000) equal credits ($100,000). Calculation correct: 40 days remaining (90-50), discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84, net proceeds = $98,356.16. Accounts appropriate: Cash (asset increase), Loss on Note Discounting (expense increase), Notes Receivable (asset decrease). Directionality correct for all account types. Transaction is not taxable (financial instrument transfer). IFRS 9 derecognition treatment properly applied per management determination.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records note receivable discounting with derecognition. Balance verified: debits ($98,356.16 + $1,643.84 = $100,000) equal credits ($100,000). Calculation correct: 40 days remaining (90-50), discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84, net proceeds = $98,356.16. Accounts appropriate: Cash (asset increase), Loss on Note Discounting (expense increase), Notes Receivable (asset decrease). Directionality correct for all account types. Transaction is not taxable (financial instrument transfer). IFRS 9 derecognition treatment properly applied per management determination."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Ford discounts the note at the bank, receiving cash (asset increase) but at a discount. The debit side records: (1) Cash received = asset increase, and (2) Loss on discounting = expense increase. The discount charge represents the financing cost/loss from selling the note before maturity, which is an expense. The credit side would derecognize the note receivable (asset decrease). Two distinct debit lines: one for the cash proceeds and one for the loss/discount expense.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "On the credit side, Ford is discounting (selling) the note receivable to the bank, which qualifies as derecognition under IFRS 9. This transaction involves:\n1. Notes Receivable (asset decrease) - the note is removed from Ford's books as the risks and rewards have been transferred\n2. Loss on Discounting (expense increase, which when credited represents an expense decrease - but here we're recording a loss, so this is NOT a credit to expense decrease)\n\nActually, let me reconsider: When Ford discounts the note, the credits are:\n- The note receivable is removed (asset decrease via credit)\n- Cash is received (debit - not on credit side)\n- The difference between the note's carrying value and cash received is a loss (debit - not on credit side)\n\nTherefore, the only credit line is the removal of the Notes Receivable asset = 1 asset decrease.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves discounting a note receivable at a bank. This is a complex transaction with multiple economic components:\n\n1. Cash received (net proceeds after discount) = Asset increase (debit)\n2. Discount charges (interest expense for the 40 remaining days) = Expense increase (debit)\n3. Notes receivable derecognized = Asset decrease (credit)\n\nThe initial debit tuple (1,0,1,0,0,0) shows 1 asset increase and 1 expense increase, which captures the cash received and the discount expense. However, it's missing the derecognition of the notes receivable asset.\n\nUnder IFRS 9, when a financial asset is derecognized (transfer qualifies for derecognition), the carrying amount of the asset must be removed from the books. The notes receivable was itself an asset (originally a trade receivable, now a note). When Ford discounts the note and it qualifies for derecognition, Ford must:\n- Remove the notes receivable (asset decrease - this goes on the CREDIT side)\n- Record cash received (asset increase - debit)\n- Record the discount charge as expense (expense increase - debit)\n\nThe credit tuple shows (0,0,0,1,0,0) = 1 asset decrease, which correctly represents the derecognition of the notes receivable.\n\nHowever, looking more carefully: the debit side should also reflect that we're giving up one asset (the note) to receive another asset (cash). The net effect is we're decreasing one asset and increasing another, but the discount creates an expense.\n\nActually, reconsidering: the debit tuple should show what increases on the debit side. We have:\n- Cash (asset) increases\n- Discount expense increases\n- Notes receivable decreases (but a decrease in an asset is a CREDIT, not a debit)\n\nWait - I need to reconsider the structure. If notes receivable decreases, that's accomplished by CREDITING notes receivable, not debiting it. So the debit side should NOT show an asset decrease.\n\nRe-examining: The initial tuple (1,0,1,0,0,0) shows 1 asset increase (cash) and 1 expense increase (discount charges). This is correct for the debit side. The credit side correctly shows 1 asset decrease (notes receivable).\n\nActually, I need to reconsider once more. The transaction states this is settlement of a trade receivable that became a note. When discounting:\n- Dr. Cash (net amount)\n- Dr. Interest Expense (discount)\n- Cr. Notes Receivable (face value)\n\nBut wait - if the note had a face value of $100,000 and we're receiving less than that (due to the discount), we need to check if there's a loss component or if it's purely the time-value discount.\n\nGiven the facts: 90-day note, discounted after 50 days, so 40 days remaining. Discount = $100,000 \u00d7 15% \u00d7 (40/365) \u2248 $1,644.\n\nThe journal entry should be:\nDr. Cash (proceeds)\nDr. Interest Expense (discount)\nCr. Notes Receivable ($100,000)\n\nThis gives us 1 asset increase (cash), 1 expense increase (interest), and 1 asset decrease (notes receivable on credit side).\n\nThe initial debit tuple (1,0,1,0,0,0) is correct - it shows the two debit entries. The notes receivable decrease appears on the credit side, which is correct.",
+        "tuple": [
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves discounting a note receivable at the bank. Let me break down the economics:\n\n1. Ford originally held a note receivable (asset) with face value $100,000\n2. The note is discounted at the bank with 40 days remaining (90 - 50 = 40 days)\n3. The bank charges a discount fee based on 15% annual rate for 40 days\n4. Ford receives net cash proceeds (face value minus discount charges)\n5. This qualifies as derecognition under IFRS 9\n\nThe journal entry should be:\n- Debit: Cash (asset increase) for net proceeds\n- Debit: Loss on discounting (expense increase) for the discount charges\n- Credit: Notes Receivable (asset decrease) for $100,000\n\nThe debit tuple (1,0,1,0,0,0) correctly shows: asset increase (cash) + expense increase (discount loss).\n\nThe initial credit tuple (0,0,0,1,0,0) shows only one asset decrease, but this is incomplete. When a note is discounted and derecognized, we need:\n- Asset decrease for the note receivable being removed\n- Expense decrease is NOT correct here\n\nHowever, looking more carefully: the discount charge is a loss/expense that reduces the cash received. The credit side should show the asset being given up (the note receivable). The expense is on the debit side.\n\nActually, the initial credit tuple (0,0,0,1,0,0) showing one asset decrease is correct for the note receivable being derecognized. But wait - I need to reconsider if there's a contra-revenue or other element.\n\nUpon reflection: The discount charge creates an expense (debit), cash comes in (debit), and the note receivable goes out (credit). The initial tuple shows only the note receivable decrease, which matches the single credit line needed. However, the transaction describes \"discount charges\" which represents a financing cost/expense that should be recorded.\n\nCorrection: The credit side should show (0,0,0,1,0,1) - the note receivable decrease (asset decrease) PLUS an expense decrease is wrong. Let me reconsider.\n\nActually, discount charges are deducted from proceeds, creating an expense on the debit side. The credit side should only show the asset (note receivable) being removed. Initial tuple (0,0,0,1,0,0) appears correct.\n\nWait - reviewing again: if there's a loss on discounting, that's an expense increase (debit side, already captured). The credit side removes the note receivable. But could there be interest income previously accrued that needs reversing? No - the note is non-interest-bearing.\n\nFinal analysis: The debit shows asset increase + expense increase. The credit should show asset decrease for the note. Initial tuple is correct at (0,0,0,1,0,0).\n\nActually, I need to reconsider one more time: Could there be accrued interest receivable that was previously recorded? No, it's non-interest-bearing. The initial credit tuple (0,0,0,1,0,0) is correct - it shows the note receivable being removed from the books.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          1
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2024-01-01",
+        "description": "Discounted 90-day non-interest-bearing note receivable at bank, 15% annual discount rate, 40 days remaining",
+        "rationale": "Ford discounted a $100,000 note with 40 days remaining at 15% annual rate. Discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds = $100,000 - $1,643.84 = $98,356.16. Since management determined this qualifies as derecognition under IFRS 9 (transfer of risks and rewards), the note receivable is removed from the books. The difference between the carrying amount ($100,000, which replaced the original trade receivable) and the proceeds ($98,356.16) is recognized as a loss on discounting ($1,643.84). Debit Cash for proceeds received, debit Loss on Note Discounting for the discount charge, and credit Notes Receivable to derecognize the asset. This matches the tuple structure: 1 asset increase (cash), 1 expense increase (loss), 1 liability decrease (actually asset decrease - notes receivable), and 1 asset decrease on credit side, 1 expense decrease (reversal pattern). The credit tuple f=1 appears to be a misclassification; the correct structure is asset decrease for notes receivable removal.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98356.16
+          },
+          {
+            "account_name": "Loss on Note Discounting",
+            "type": "debit",
+            "amount": 1643.84
+          },
+          {
+            "account_name": "Notes Receivable",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry correctly records note receivable discounting with derecognition. Balance verified: debits ($98,356.16 + $1,643.84 = $100,000) equal credits ($100,000). Calculation correct: 40 days remaining (90-50), discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84, net proceeds = $98,356.16. Accounts appropriate: Cash (asset increase), Loss on Note Discounting (expense increase), Notes Receivable (asset decrease). Directionality correct for all account types. Transaction is not taxable (financial instrument transfer). IFRS 9 derecognition treatment properly applied per management determination.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 601,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 576,
+        "output_tokens": 170,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 574,
+        "output_tokens": 267,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 744,
+        "output_tokens": 790,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 744,
+        "output_tokens": 877,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 833,
+        "output_tokens": 502,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 3689,
+        "output_tokens": 230,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

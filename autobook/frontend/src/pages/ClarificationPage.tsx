@@ -6,6 +6,13 @@ import type { ClarificationItem, JournalLine } from "../api/types";
 import { ClarificationList } from "../components/ClarificationList";
 import { FreshnessStatus } from "../components/FreshnessStatus";
 
+const EMPTY_LINE: JournalLine = {
+  account_code: "",
+  account_name: "",
+  type: "debit",
+  amount: 0,
+};
+
 export function ClarificationPage() {
   const navigate = useNavigate();
   const [items, setItems] = useState<ClarificationItem[]>([]);
@@ -35,7 +42,11 @@ export function ClarificationPage() {
   }, []);
 
   useEffect(() => {
-    setDraftLines(selectedItem ? cloneLines(selectedItem.proposed_entry.lines) : []);
+    setDraftLines(
+      selectedItem?.proposed_entry
+        ? cloneLines(selectedItem.proposed_entry.lines)
+        : [createEmptyLine("debit"), createEmptyLine("credit")],
+    );
   }, [selectedItem]);
 
   async function loadClarifications(isMounted = true) {
@@ -70,24 +81,34 @@ export function ClarificationPage() {
       return;
     }
 
-    setIsResolving(true);
-    const currentItem = selectedItem;
-    const hasDraftChanges = linesHaveChanged(currentItem.proposed_entry.lines, draftLines);
-    const response = await resolveClarification(selectedItem.clarification_id, {
-      action: action === "approve" && hasDraftChanges ? "edit" : action,
-      edited_entry: action === "approve" && hasDraftChanges ? { lines: cloneLines(draftLines) } : undefined,
-    });
-    await loadClarifications();
-    setMessage({
-      tone: response.status === "resolved" ? "success" : "warning",
-      text:
-        response.status === "resolved"
-          ? hasDraftChanges
-            ? `Clarification for "${currentItem.source_text}" was updated and posted.`
-            : `Clarification for "${currentItem.source_text}" was approved and posted.`
-          : `Clarification for "${currentItem.source_text}" was rejected and removed from the queue.`,
-    });
-    setIsResolving(false);
+    try {
+      setIsResolving(true);
+      const currentItem = selectedItem;
+      const hasDraftChanges = currentItem.proposed_entry
+        ? linesHaveChanged(currentItem.proposed_entry.lines, draftLines)
+        : linesContainUserInput(draftLines);
+      const response = await resolveClarification(selectedItem.clarification_id, {
+        action: action === "approve" && hasDraftChanges ? "edit" : action,
+        edited_entry: action === "approve" && hasDraftChanges ? { lines: cloneLines(draftLines) } : undefined,
+      });
+      await loadClarifications();
+      setMessage({
+        tone: response.status === "resolved" ? "success" : "warning",
+        text:
+          response.status === "resolved"
+            ? hasDraftChanges
+              ? `Clarification for "${currentItem.source_text}" was updated and posted.`
+              : `Clarification for "${currentItem.source_text}" was approved and posted.`
+            : `Clarification for "${currentItem.source_text}" was rejected and removed from the queue.`,
+      });
+    } catch (error) {
+      setMessage({
+        tone: "warning",
+        text: error instanceof Error ? error.message : "Unable to resolve clarification.",
+      });
+    } finally {
+      setIsResolving(false);
+    }
   }
 
   function handleSelect(item: ClarificationItem) {
@@ -133,12 +154,28 @@ export function ClarificationPage() {
     if (!selectedItem) {
       return;
     }
-    setDraftLines(cloneLines(selectedItem.proposed_entry.lines));
+    setDraftLines(
+      selectedItem.proposed_entry
+        ? cloneLines(selectedItem.proposed_entry.lines)
+        : [createEmptyLine("debit"), createEmptyLine("credit")],
+    );
   }
 
-  const hasDraftChanges = selectedItem
+  function addDraftLine() {
+    setDraftLines((currentLines) => [
+      ...currentLines,
+      createEmptyLine(currentLines.length % 2 === 0 ? "debit" : "credit"),
+    ]);
+  }
+
+  function removeDraftLine(index: number) {
+    setDraftLines((currentLines) => currentLines.filter((_, lineIndex) => lineIndex !== index));
+  }
+
+  const hasDraftChanges = selectedItem?.proposed_entry
     ? linesHaveChanged(selectedItem.proposed_entry.lines, draftLines)
-    : false;
+    : linesContainUserInput(draftLines);
+  const canApprove = canApproveDraft(draftLines);
 
   return (
     <div className="two-column-grid">
@@ -198,7 +235,9 @@ export function ClarificationPage() {
             <p className="review-title">{selectedItem.source_text}</p>
             <p className="body-copy">{selectedItem.explanation}</p>
             <div className="review-note">
-              Review the proposed journal lines, then edit any incorrect account mapping before posting to the ledger.
+              {selectedItem.proposed_entry
+                ? "Review the proposed journal lines, then edit any incorrect account mapping before posting to the ledger."
+                : "No journal entry was generated. Build the debit and credit lines manually, then approve to post it."}
             </div>
 
             <div className="table-wrapper">
@@ -209,6 +248,7 @@ export function ClarificationPage() {
                     <th>Account</th>
                     <th>Type</th>
                     <th>Amount</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -252,17 +292,33 @@ export function ClarificationPage() {
                           onChange={(event) => updateDraftLine(index, "amount", event.target.value)}
                         />
                       </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="secondary-button"
+                          onClick={() => removeDraftLine(index)}
+                          disabled={isResolving || draftLines.length <= 2}
+                        >
+                          Remove
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
+            {!canApprove ? (
+              <div className="review-note">
+                Enter at least one balanced debit and credit line with valid account codes before posting.
+              </div>
+            ) : null}
+
             <div className="panel-actions">
               <button
                 className="primary-button"
                 onClick={() => void handleResolve("approve")}
-                disabled={isResolving}
+                disabled={isResolving || !canApprove}
               >
                 {isResolving ? "Saving..." : hasDraftChanges ? "Save Changes & Post" : "Approve & Post"}
               </button>
@@ -272,6 +328,13 @@ export function ClarificationPage() {
                 disabled={isResolving || !hasDraftChanges}
               >
                 Reset Draft
+              </button>
+              <button
+                className="secondary-button"
+                onClick={addDraftLine}
+                disabled={isResolving}
+              >
+                Add Line
               </button>
               <button
                 className="secondary-button"
@@ -300,4 +363,39 @@ function cloneLines(lines: JournalLine[]): JournalLine[] {
 
 function linesHaveChanged(originalLines: JournalLine[], draftLines: JournalLine[]): boolean {
   return JSON.stringify(originalLines) !== JSON.stringify(draftLines);
+}
+
+function linesContainUserInput(lines: JournalLine[]): boolean {
+  return lines.some((line) =>
+    line.account_code.trim() ||
+    line.account_name.trim() ||
+    line.amount > 0,
+  );
+}
+
+function canApproveDraft(lines: JournalLine[]): boolean {
+  if (lines.length < 2) {
+    return false;
+  }
+
+  let debitTotal = 0;
+  let creditTotal = 0;
+
+  for (const line of lines) {
+    if (!line.account_code.trim() || !line.account_name.trim() || line.amount <= 0) {
+      return false;
+    }
+
+    if (line.type === "debit") {
+      debitTotal += line.amount;
+    } else {
+      creditTotal += line.amount;
+    }
+  }
+
+  return Math.abs(debitTotal - creditTotal) < 0.0001;
+}
+
+function createEmptyLine(type: JournalLine["type"]): JournalLine {
+  return { ...EMPTY_LINE, type };
 }

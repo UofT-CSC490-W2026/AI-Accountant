@@ -42,6 +42,26 @@ describe("api client auth contract", () => {
     expect(calls[3].url).toBe("http://localhost:8000/api/v1/statements");
   });
 
+  test("surfaces backend detail text for failed clarification requests", async () => {
+    vi.stubEnv("VITE_USE_MOCK_API", "false");
+    vi.stubEnv("VITE_API_BASE_URL", "http://localhost:8000/api/v1");
+    localStorage.setItem("autobook_access_token", "token-123");
+
+    globalThis.fetch = vi.fn(async () =>
+      new Response('{"detail":"journal entry does not balance: debits=100 credits=50"}', {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      }),
+    ) as typeof fetch;
+
+    vi.resetModules();
+    const client = await import("./client");
+
+    await expect(
+      client.resolveClarification("cl_123", { action: "approve" }),
+    ).rejects.toThrow("Request failed: 400 - journal entry does not balance: debits=100 credits=50");
+  });
+
   test("includes upload source and bearer token in file upload requests", async () => {
     vi.stubEnv("VITE_USE_MOCK_API", "false");
     vi.stubEnv("VITE_API_BASE_URL", "http://localhost:8000/api/v1");

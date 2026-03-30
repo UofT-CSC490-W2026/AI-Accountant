@@ -1,0 +1,415 @@
+{
+  "test_case_id": "int_31_vehicle_nonrecoverable_tax",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Purchase of sedan from Ford, financed through 3-month dealer payment plan",
+    "rationale": "Vehicle is a capital asset. The $48,000 base cost plus $4,800 non-recoverable sales tax (10% \u00d7 $48,000) totals $52,800, which is capitalized to the vehicle asset account per IAS 16 (cost includes purchase price and non-refundable taxes). The entire amount is financed through a dealer payment plan, creating a liability. The disambiguator flagged personal vs. business use allocation, but this does not affect the initial acquisition entry \u2014 the vehicle is recorded at full cost regardless of use mix. Personal use tracking affects subsequent taxable benefit calculations (an HR/payroll matter), not the asset acquisition entry structure or amounts. Debit tuple calls for 2 asset increases, but only one asset (vehicle) is acquired; the non-recoverable tax is capitalized into that same asset per IFRS, not recorded separately. Override to single asset line.",
+    "lines": [
+      {
+        "account_name": "Vehicles",
+        "type": "debit",
+        "amount": 52800.0
+      },
+      {
+        "account_name": "Accounts Payable - Ford",
+        "type": "credit",
+        "amount": 52800.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "personal vs. business use allocation",
+        "action": "proceed",
+        "reason": "The initial acquisition entry records the vehicle at its full cost ($52,800) regardless of personal vs. business use split. Personal use affects ongoing taxable benefit calculations (a payroll matter), not the purchase entry structure or amounts. Both 100% business and mixed-use scenarios produce identical acquisition entries."
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.031410600000000004,
+  "raw_cost_usd": 0.053313,
+  "total_latency_ms": 26707,
+  "total_input_tokens": 11156,
+  "total_output_tokens": 1323,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 561,
+      "output_tokens": 425,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2956,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0087765,
+      "raw_cost_usd": 0.015243,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "asset vs. expense treatment for vehicle",
+            "resolved": true,
+            "resolution": "Vehicle purchase of $48,000 is clearly a capital asset acquisition \u2014 vehicles are depreciable property, not period expenses",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "sales tax treatment",
+            "resolved": true,
+            "resolution": "Transaction explicitly states '10% non-recoverable sales tax' \u2014 tax is capitalized to asset cost, not recoverable as input tax credit",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "financing arrangement nature",
+            "resolved": true,
+            "resolution": "'3-month dealer payment plan' is a short-term financing liability \u2014 creates accounts payable or notes payable to dealer",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "personal vs. business use allocation",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "100% business use \u2014 full asset capitalization",
+              "Mixed use \u2014 requires standby charge tracking and taxable benefit to executive",
+              "Primarily personal \u2014 different tax implications"
+            ],
+            "clarification_question": "What percentage of the vehicle's use is for business purposes vs. personal commuting by the executive?",
+            "why_entry_differs": "If mixed-use, the company must track and record taxable benefits to the executive for personal use portion. Pure business use has no benefit component. The initial entry structure (asset and liability amounts) remains the same, but ongoing treatment differs significantly.",
+            "why_not_resolved": "Transaction states 'executive's commuting and business use' which explicitly indicates mixed usage, but does not provide the allocation percentage needed for CRA compliance and taxable benefit calculations"
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 534,
+      "output_tokens": 176,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1775,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0046143,
+      "raw_cost_usd": 0.007965,
+      "output": {
+        "reason": "The transaction involves financing the purchase of a vehicle. On the credit side: (1) The dealer payment plan creates a liability increase of $52,800 (the financed amount including tax). This is a single financing arrangement covering both the vehicle cost and the non-recoverable sales tax. No cash is paid, so there is no asset decrease. The debit side would record the vehicle asset at $48,000 and the non-recoverable sales tax as an expense of $4,800, but we only classify credits here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves financing the purchase of a vehicle. On the credit side: (1) The dealer payment plan creates a liability increase of $52,800 (the financed amount including tax). This is a single financing arrangement covering both the vehicle cost and the non-recoverable sales tax. No cash is paid, so there is no asset decrease. The debit side would record the vehicle asset at $48,000 and the non-recoverable sales tax as an expense of $4,800, but we only classify credits here."
+    },
+    "debit_classifier": {
+      "input_tokens": 536,
+      "output_tokens": 208,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1798,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051066,
+      "raw_cost_usd": 0.008514,
+      "output": {
+        "reason": "Two distinct asset increases: (1) Vehicle asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset when it relates to a capital purchase. However, since the transaction explicitly separates the vehicle cost from the sales tax amount, they represent two economically distinct components that would typically be recorded in separate asset accounts (Vehicle and potentially a tax asset or added to vehicle cost). The financing through the dealer payment plan is the credit side (liability increase), not part of the debit classification.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two distinct asset increases: (1) Vehicle asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset when it relates to a capital purchase. However, since the transaction explicitly separates the vehicle cost from the sales tax amount, they represent two economically distinct components that would typically be recorded in separate asset accounts (Vehicle and potentially a tax asset or added to vehicle cost). The financing through the dealer payment plan is the credit side (liability increase), not part of the debit classification."
+    },
+    "entry_builder": {
+      "input_tokens": 1413,
+      "output_tokens": 514,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4627,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.012913200000000001,
+      "raw_cost_usd": 0.021591,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Purchase of sedan from Ford, financed through 3-month dealer payment plan",
+        "rationale": "Vehicle is a capital asset. The $48,000 base cost plus $4,800 non-recoverable sales tax (10% \u00d7 $48,000) totals $52,800, which is capitalized to the vehicle asset account per IAS 16 (cost includes purchase price and non-refundable taxes). The entire amount is financed through a dealer payment plan, creating a liability. The disambiguator flagged personal vs. business use allocation, but this does not affect the initial acquisition entry \u2014 the vehicle is recorded at full cost regardless of use mix. Personal use tracking affects subsequent taxable benefit calculations (an HR/payroll matter), not the asset acquisition entry structure or amounts. Debit tuple calls for 2 asset increases, but only one asset (vehicle) is acquired; the non-recoverable tax is capitalized into that same asset per IFRS, not recorded separately. Override to single asset line.",
+        "lines": [
+          {
+            "account_name": "Vehicles",
+            "type": "debit",
+            "amount": 52800.0
+          },
+          {
+            "account_name": "Accounts Payable - Ford",
+            "type": "credit",
+            "amount": 52800.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "personal vs. business use allocation",
+            "action": "proceed",
+            "reason": "The initial acquisition entry records the vehicle at its full cost ($52,800) regardless of personal vs. business use split. Personal use affects ongoing taxable benefit calculations (a payroll matter), not the purchase entry structure or amounts. Both 100% business and mixed-use scenarios produce identical acquisition entries."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "asset vs. expense treatment for vehicle",
+            "resolved": true,
+            "resolution": "Vehicle purchase of $48,000 is clearly a capital asset acquisition \u2014 vehicles are depreciable property, not period expenses",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "sales tax treatment",
+            "resolved": true,
+            "resolution": "Transaction explicitly states '10% non-recoverable sales tax' \u2014 tax is capitalized to asset cost, not recoverable as input tax credit",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "financing arrangement nature",
+            "resolved": true,
+            "resolution": "'3-month dealer payment plan' is a short-term financing liability \u2014 creates accounts payable or notes payable to dealer",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "personal vs. business use allocation",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "100% business use \u2014 full asset capitalization",
+              "Mixed use \u2014 requires standby charge tracking and taxable benefit to executive",
+              "Primarily personal \u2014 different tax implications"
+            ],
+            "clarification_question": "What percentage of the vehicle's use is for business purposes vs. personal commuting by the executive?",
+            "why_entry_differs": "If mixed-use, the company must track and record taxable benefits to the executive for personal use portion. Pure business use has no benefit component. The initial entry structure (asset and liability amounts) remains the same, but ongoing treatment differs significantly.",
+            "why_not_resolved": "Transaction states 'executive's commuting and business use' which explicitly indicates mixed usage, but does not provide the allocation percentage needed for CRA compliance and taxable benefit calculations"
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Two distinct asset increases: (1) Vehicle asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset when it relates to a capital purchase. However, since the transaction explicitly separates the vehicle cost from the sales tax amount, they represent two economically distinct components that would typically be recorded in separate asset accounts (Vehicle and potentially a tax asset or added to vehicle cost). The financing through the dealer payment plan is the credit side (liability increase), not part of the debit classification.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction involves financing the purchase of a vehicle. On the credit side: (1) The dealer payment plan creates a liability increase of $52,800 (the financed amount including tax). This is a single financing arrangement covering both the vehicle cost and the non-recoverable sales tax. No cash is paid, so there is no asset decrease. The debit side would record the vehicle asset at $48,000 and the non-recoverable sales tax as an expense of $4,800, but we only classify credits here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Two distinct asset increases: (1) Vehicle asset increase of $48,000 for the sedan, and (2) Sales tax asset increase of $4,800 for the non-recoverable sales tax. Under IFRS, non-recoverable sales tax is capitalized as part of the cost of the asset when it relates to a capital purchase. However, since the transaction explicitly separates the vehicle cost from the sales tax amount, they represent two economically distinct components that would typically be recorded in separate asset accounts (Vehicle and potentially a tax asset or added to vehicle cost). The financing through the dealer payment plan is the credit side (liability increase), not part of the debit classification.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves financing the purchase of a vehicle. On the credit side: (1) The dealer payment plan creates a liability increase of $52,800 (the financed amount including tax). This is a single financing arrangement covering both the vehicle cost and the non-recoverable sales tax. No cash is paid, so there is no asset decrease. The debit side would record the vehicle asset at $48,000 and the non-recoverable sales tax as an expense of $4,800, but we only classify credits here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Purchase of sedan from Ford, financed through 3-month dealer payment plan",
+        "rationale": "Vehicle is a capital asset. The $48,000 base cost plus $4,800 non-recoverable sales tax (10% \u00d7 $48,000) totals $52,800, which is capitalized to the vehicle asset account per IAS 16 (cost includes purchase price and non-refundable taxes). The entire amount is financed through a dealer payment plan, creating a liability. The disambiguator flagged personal vs. business use allocation, but this does not affect the initial acquisition entry \u2014 the vehicle is recorded at full cost regardless of use mix. Personal use tracking affects subsequent taxable benefit calculations (an HR/payroll matter), not the asset acquisition entry structure or amounts. Debit tuple calls for 2 asset increases, but only one asset (vehicle) is acquired; the non-recoverable tax is capitalized into that same asset per IFRS, not recorded separately. Override to single asset line.",
+        "lines": [
+          {
+            "account_name": "Vehicles",
+            "type": "debit",
+            "amount": 52800.0
+          },
+          {
+            "account_name": "Accounts Payable - Ford",
+            "type": "credit",
+            "amount": 52800.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "personal vs. business use allocation",
+            "action": "proceed",
+            "reason": "The initial acquisition entry records the vehicle at its full cost ($52,800) regardless of personal vs. business use split. Personal use affects ongoing taxable benefit calculations (a payroll matter), not the purchase entry structure or amounts. Both 100% business and mixed-use scenarios produce identical acquisition entries."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 561,
+        "output_tokens": 425,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 534,
+        "output_tokens": 176,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 536,
+        "output_tokens": 208,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1413,
+        "output_tokens": 514,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

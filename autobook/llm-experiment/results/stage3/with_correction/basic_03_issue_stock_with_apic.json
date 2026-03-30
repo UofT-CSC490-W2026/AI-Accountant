@@ -1,0 +1,367 @@
+{
+  "test_case_id": "basic_03_issue_stock_with_apic",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    2,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Issue common stock for cash ($100 par, $80 additional paid-in capital)",
+    "rationale": "Stock issuance increases cash (asset) and equity. The $100 par value is credited to Common Stock, and the $80 excess over par is credited to Additional Paid-In Capital (APIC). The transaction text explicitly states the allocation between par and APIC, so we follow it exactly. This is a non-taxable equity transaction.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 180.0
+      },
+      {
+        "account_name": "Common Stock",
+        "type": "credit",
+        "amount": 100.0
+      },
+      {
+        "account_name": "Additional Paid-In Capital",
+        "type": "credit",
+        "amount": 80.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0271794,
+  "raw_cost_usd": 0.051798,
+  "total_latency_ms": 18323,
+  "total_input_tokens": 12221,
+  "total_output_tokens": 1009,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 494,
+      "output_tokens": 123,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1756,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037056,
+      "raw_cost_usd": 0.007113,
+      "output": {
+        "reason": "Issuing common stock for cash means the company receives cash. Cash is an asset, and receiving cash increases the asset. Therefore, we debit Cash (asset increase). This is 1 debit line regardless of how the credit side splits between Common Stock and APIC.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Issuing common stock for cash means the company receives cash. Cash is an asset, and receiving cash increases the asset. Therefore, we debit Cash (asset increase). This is 1 debit line regardless of how the credit side splits between Common Stock and APIC."
+    },
+    "credit_classifier": {
+      "input_tokens": 492,
+      "output_tokens": 132,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1733,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038283,
+      "raw_cost_usd": 0.007179,
+      "output": {
+        "reason": "Issuing common stock creates two equity increases: (1) Common Stock account credited for $100 par value = equity increase, and (2) Additional Paid-In Capital (APIC) account credited for $80 premium = equity increase. Both are equity increases, counted as 2 separate credit lines.",
+        "tuple": [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Issuing common stock creates two equity increases: (1) Common Stock account credited for $100 par value = equity increase, and (2) Additional Paid-In Capital (APIC) account credited for $80 premium = equity increase. Both are equity increases, counted as 2 separate credit lines."
+    },
+    "credit_corrector": {
+      "input_tokens": 662,
+      "output_tokens": 191,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2416,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053771999999999995,
+      "raw_cost_usd": 0.010113,
+      "output": {
+        "reason": "The initial credit tuple is correct. Issuing common stock for cash creates two equity increases on the credit side: (1) Common Stock at par value ($100) and (2) Additional Paid-In Capital (APIC) for the excess over par ($80). Both are equity accounts being increased, requiring two separate credit lines. The debit side shows one asset increase (Cash $180), which is consistent with receiving the total proceeds. The credit tuple correctly reflects b=2 (two equity increases), representing the proper accounting treatment under IFRS for stock issuance with a par value structure.",
+        "tuple": [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. Issuing common stock for cash creates two equity increases on the credit side: (1) Common Stock at par value ($100) and (2) Additional Paid-In Capital (APIC) for the excess over par ($80). Both are equity accounts being increased, requiring two separate credit lines. The debit side shows one asset increase (Cash $180), which is consistent with receiving the total proceeds. The credit tuple correctly reflects b=2 (two equity increases), representing the proper accounting treatment under IFRS for stock issuance with a par value structure."
+    },
+    "debit_corrector": {
+      "input_tokens": 662,
+      "output_tokens": 256,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2408,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063498,
+      "raw_cost_usd": 0.011064,
+      "output": {
+        "reason": "The transaction is issuing common stock for $180 cash, split into $100 par value and $80 additional paid-in capital (APIC). \n\nDebit side: Cash received increases an asset account (Cash). The initial debit tuple (1,0,0,0,0,0) correctly shows 1 asset increase line.\n\nCredit side: The credit tuple shows (0,2,0,0,0,0) = 2 equity increase lines, which is consistent with the transaction structure: one line for Common Stock at par ($100) and one line for APIC ($80). Both are equity accounts being increased.\n\nThe debit and credit sides tell a consistent story: cash comes in (asset increase) and equity accounts are increased through stock issuance. The debit side correctly records the single cash receipt as one asset increase line. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is issuing common stock for $180 cash, split into $100 par value and $80 additional paid-in capital (APIC). \n\nDebit side: Cash received increases an asset account (Cash). The initial debit tuple (1,0,0,0,0,0) correctly shows 1 asset increase line.\n\nCredit side: The credit tuple shows (0,2,0,0,0,0) = 2 equity increase lines, which is consistent with the transaction structure: one line for Common Stock at par ($100) and one line for APIC ($80). Both are equity accounts being increased.\n\nThe debit and credit sides tell a consistent story: cash comes in (asset increase) and equity accounts are increased through stock issuance. The debit side correctly records the single cash receipt as one asset increase line. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 793,
+      "output_tokens": 307,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3908,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0079185,
+      "raw_cost_usd": 0.016329,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Issue common stock for cash ($100 par, $80 additional paid-in capital)",
+        "rationale": "Stock issuance increases cash (asset) and equity. The $100 par value is credited to Common Stock, and the $80 excess over par is credited to Additional Paid-In Capital (APIC). The transaction text explicitly states the allocation between par and APIC, so we follow it exactly. This is a non-taxable equity transaction.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 180.0
+          },
+          {
+            "account_name": "Common Stock",
+            "type": "credit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Additional Paid-In Capital",
+            "type": "credit",
+            "amount": 80.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Issuing common stock for cash means the company receives cash. Cash is an asset, and receiving cash increases the asset. Therefore, we debit Cash (asset increase). This is 1 debit line regardless of how the credit side splits between Common Stock and APIC.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Issuing common stock creates two equity increases: (1) Common Stock account credited for $100 par value = equity increase, and (2) Additional Paid-In Capital (APIC) account credited for $80 premium = equity increase. Both are equity increases, counted as 2 separate credit lines.",
+        "tuple": [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is issuing common stock for $180 cash, split into $100 par value and $80 additional paid-in capital (APIC). \n\nDebit side: Cash received increases an asset account (Cash). The initial debit tuple (1,0,0,0,0,0) correctly shows 1 asset increase line.\n\nCredit side: The credit tuple shows (0,2,0,0,0,0) = 2 equity increase lines, which is consistent with the transaction structure: one line for Common Stock at par ($100) and one line for APIC ($80). Both are equity accounts being increased.\n\nThe debit and credit sides tell a consistent story: cash comes in (asset increase) and equity accounts are increased through stock issuance. The debit side correctly records the single cash receipt as one asset increase line. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. Issuing common stock for cash creates two equity increases on the credit side: (1) Common Stock at par value ($100) and (2) Additional Paid-In Capital (APIC) for the excess over par ($80). Both are equity accounts being increased, requiring two separate credit lines. The debit side shows one asset increase (Cash $180), which is consistent with receiving the total proceeds. The credit tuple correctly reflects b=2 (two equity increases), representing the proper accounting treatment under IFRS for stock issuance with a par value structure.",
+        "tuple": [
+          0,
+          2,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Issue common stock for cash ($100 par, $80 additional paid-in capital)",
+        "rationale": "Stock issuance increases cash (asset) and equity. The $100 par value is credited to Common Stock, and the $80 excess over par is credited to Additional Paid-In Capital (APIC). The transaction text explicitly states the allocation between par and APIC, so we follow it exactly. This is a non-taxable equity transaction.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 180.0
+          },
+          {
+            "account_name": "Common Stock",
+            "type": "credit",
+            "amount": 100.0
+          },
+          {
+            "account_name": "Additional Paid-In Capital",
+            "type": "credit",
+            "amount": 80.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 494,
+        "output_tokens": 123,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 492,
+        "output_tokens": 132,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 662,
+        "output_tokens": 191,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 662,
+        "output_tokens": 256,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 793,
+        "output_tokens": 307,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,430 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "v3_simple",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    3,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    2,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Land and building acquired with fair value allocation; 50% paid now plus recoverable sales tax on building, 50% deferred",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Land",
+        "amount": 6000000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Buildings",
+        "amount": 3000000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Input Tax Credit Receivable",
+        "amount": 300000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Trade Payables",
+        "amount": 4500000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash and Cash Equivalents",
+        "amount": 4800000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0567246,
+  "raw_cost_usd": 0.08452799999999999,
+  "total_latency_ms": 23900,
+  "total_input_tokens": 21946,
+  "total_output_tokens": 1246,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 563,
+      "output_tokens": 206,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4330,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059091000000000005,
+      "raw_cost_usd": 0.01608,
+      "output": {
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for 50% of purchase price ($4,500,000) plus sales tax on building portion ($300,000)",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "liability_increase": [
+          {
+            "reason": "Deferred payment obligation for remaining 50% of purchase price due in 6 months",
+            "category": "Trade payables",
+            "count": 1
+          },
+          {
+            "reason": "Sales tax payable on building component (recoverable input tax)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "_parse_error": "1 validation error for CreditClassifierOutput\nliability_increase.1.category\n  Input should be 'Trade payables', 'Accrued liabilities', 'Employee benefits payable', 'Warranty provisions', 'Legal and restructuring provisions', 'Tax liabilities', 'Short-term borrowings', 'Current lease liabilities', 'Deferred income', 'Contract liabilities', 'Dividends payable', 'Long-term borrowings', 'Non-current lease liabilities', 'Pension obligations', 'Decommissioning provisions' or 'Deferred tax liabilities' [type=literal_error, input_value='Tax assets', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 564,
+      "output_tokens": 284,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4529,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0071415,
+      "raw_cost_usd": 0.017847,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Land component allocated based on relative fair value ($8M / $12M \u00d7 $9M = $6M)",
+            "category": "Land",
+            "count": 1
+          },
+          {
+            "reason": "Building component allocated based on relative fair value ($4M / $12M \u00d7 $9M = $3M)",
+            "category": "Buildings",
+            "count": 1
+          },
+          {
+            "reason": "Sales tax on building component is recoverable input tax ($3M \u00d7 10% = $300K)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "tax_specialist": {
+      "input_tokens": 588,
+      "output_tokens": 260,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3604,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0065688000000000005,
+      "raw_cost_usd": 0.014712,
+      "output": {
+        "reasoning": "Text explicitly states \"10% sales tax on the building\" paid with the balance. Land is not taxable (exempt supply in Canada). Building portion is taxable. Fair value allocation: building = $4,000,000 / $12,000,000 = 1/3 of $9,000,000 = $3,000,000. Tax = $3,000,000 \u00d7 10% = $300,000. Only the tax on the portion paid now is included in the cheque payment.",
+        "tax_mentioned": true,
+        "taxable": true,
+        "add_tax_lines": true,
+        "tax_rate": 0.1,
+        "tax_amount": 300000.0,
+        "treatment": "recoverable"
+      },
+      "reason": null
+    },
+    "entry_drafter": {
+      "input_tokens": 2420,
+      "output_tokens": 496,
+      "cache_read_tokens": 3504,
+      "cache_write_tokens": 3559,
+      "total_input_tokens": 9483,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.037105200000000005,
+      "raw_cost_usd": 0.035889,
+      "output": {
+        "reason": "Land and building acquired with fair value allocation; 50% paid now plus recoverable sales tax on building, 50% deferred",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Land",
+            "amount": 6000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Buildings",
+            "amount": 3000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Input Tax Credit Receivable",
+            "amount": 300000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Trade Payables",
+            "amount": 4500000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash and Cash Equivalents",
+            "amount": 4800000.0
+          }
+        ]
+      },
+      "reason": "Land and building acquired with fair value allocation; 50% paid now plus recoverable sales tax on building, 50% deferred"
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [],
+    "output_complexity_detector": [],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Text explicitly states \"10% sales tax on the building\" paid with the balance. Land is not taxable (exempt supply in Canada). Building portion is taxable. Fair value allocation: building = $4,000,000 / $12,000,000 = 1/3 of $9,000,000 = $3,000,000. Tax = $3,000,000 \u00d7 10% = $300,000. Only the tax on the portion paid now is included in the cheque payment.",
+        "tax_mentioned": true,
+        "taxable": true,
+        "add_tax_lines": true,
+        "tax_rate": 0.1,
+        "tax_amount": 300000.0,
+        "treatment": "recoverable"
+      }
+    ],
+    "output_decision_maker": [],
+    "output_entry_drafter": [
+      {
+        "reason": "Land and building acquired with fair value allocation; 50% paid now plus recoverable sales tax on building, 50% deferred",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Land",
+            "amount": 6000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Buildings",
+            "amount": 3000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Input Tax Credit Receivable",
+            "amount": 300000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Trade Payables",
+            "amount": 4500000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash and Cash Equivalents",
+            "amount": 4800000.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Land component allocated based on relative fair value ($8M / $12M \u00d7 $9M = $6M)",
+            "category": "Land",
+            "count": 1
+          },
+          {
+            "reason": "Building component allocated based on relative fair value ($4M / $12M \u00d7 $9M = $3M)",
+            "category": "Buildings",
+            "count": 1
+          },
+          {
+            "reason": "Sales tax on building component is recoverable input tax ($3M \u00d7 10% = $300K)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for 50% of purchase price ($4,500,000) plus sales tax on building portion ($300,000)",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "liability_increase": [
+          {
+            "reason": "Deferred payment obligation for remaining 50% of purchase price due in 6 months",
+            "category": "Trade payables",
+            "count": 1
+          },
+          {
+            "reason": "Sales tax payable on building component (recoverable input tax)",
+            "category": "Tax assets",
+            "count": 1
+          }
+        ],
+        "_parse_error": "1 validation error for CreditClassifierOutput\nliability_increase.1.category\n  Input should be 'Trade payables', 'Accrued liabilities', 'Employee benefits payable', 'Warranty provisions', 'Legal and restructuring provisions', 'Tax liabilities', 'Short-term borrowings', 'Current lease liabilities', 'Deferred income', 'Contract liabilities', 'Dividends payable', 'Long-term borrowings', 'Non-current lease liabilities', 'Pension obligations', 'Decommissioning provisions' or 'Deferred tax liabilities' [type=literal_error, input_value='Tax assets', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.12/v/literal_error",
+        "tuple": [
+          2,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 0,
+    "status_complexity_detector": 0,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 0,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 563,
+        "output_tokens": 206,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 564,
+        "output_tokens": 284,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 588,
+        "output_tokens": 260,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 1138,
+        "output_tokens": 228,
+        "input_token_details": {
+          "cache_read": 0,
+          "cache_creation": 3559
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 1282,
+        "output_tokens": 268,
+        "input_token_details": {
+          "cache_read": 3504,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "tax_specialist": "tool_use",
+      "entry_drafter": "tool_use"
+    }
+  }
+}

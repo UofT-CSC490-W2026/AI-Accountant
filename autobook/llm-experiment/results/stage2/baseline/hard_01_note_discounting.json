@@ -1,0 +1,303 @@
+{
+  "test_case_id": "hard_01_note_discounting",
+  "variant_name": "baseline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Discounting of 90-day non-interest-bearing note receivable at bank",
+    "rationale": "Ford discounted a $100,000 non-interest-bearing note at the bank 50 days after issue, with 40 days remaining to maturity. The bank applied a 15% annual discount rate to the face value for the remaining period. Discount calculation: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds: $100,000 - $1,643.84 = $98,356.16. Under IFRS 9, discounting with recourse is treated as a secured borrowing (liability), while discounting without recourse is derecognition of the receivable. The transaction states Ford 'discounted the note at the bank' and 'received net proceeds after deducting discount charges,' which is the typical language for factoring/discounting without recourse (sale of the note). The debit tuple (1,0,1,0,0,0) indicates one asset increase (cash) and one expense increase (financing cost), while the credit tuple (0,0,0,1,0,0) indicates one asset decrease (notes receivable). This structure is consistent with derecognition treatment where the discount charge is recognized as an expense and the note is removed from assets.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 98356.16
+      },
+      {
+        "account_name": "Financing Expense",
+        "type": "debit",
+        "amount": 1643.84
+      },
+      {
+        "account_name": "Notes Receivable",
+        "type": "credit",
+        "amount": 100000.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0219114,
+  "raw_cost_usd": 0.03708,
+  "total_latency_ms": 17929,
+  "total_input_tokens": 7565,
+  "total_output_tokens": 959,
+  "total_llm_calls": 3,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 550,
+      "output_tokens": 195,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1812,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004953600000000001,
+      "raw_cost_usd": 0.008361,
+      "output": {
+        "reason": "This transaction involves Ford discounting (selling) the note receivable to the bank. On the debit side: (1) Cash increases for the net proceeds received (asset increase), and (2) Loss on discounting increases as an expense for the discount charges deducted by the bank (expense increase). The discount charge represents the difference between the note's face value and the present value at the bank's discount rate, recorded as a financing cost/expense. Therefore: 1 asset increase (cash) + 1 expense increase (discount loss) = tuple [1,0,1,0,0,0].",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This transaction involves Ford discounting (selling) the note receivable to the bank. On the debit side: (1) Cash increases for the net proceeds received (asset increase), and (2) Loss on discounting increases as an expense for the discount charges deducted by the bank (expense increase). The discount charge represents the difference between the note's face value and the present value at the bank's discount rate, recorded as a financing cost/expense. Therefore: 1 asset increase (cash) + 1 expense increase (discount loss) = tuple [1,0,1,0,0,0]."
+    },
+    "credit_classifier": {
+      "input_tokens": 548,
+      "output_tokens": 254,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1789,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058263,
+      "raw_cost_usd": 0.009177,
+      "output": {
+        "reason": "On the credit side: (1) The original trade receivable is eliminated = asset decrease (the note receivable replaces it, but that's the debit side). (2) The discount charges represent a financing expense incurred = expense increase, which when credited means expense decrease. However, the discount is deducted from proceeds, meaning Ford recognizes a loss/expense. Under IFRS, the discount charge is an expense that reduces the net proceeds. Since we're looking at credits: the receivable (note) is credited (asset decrease), and if we separately track the discount as a contra or direct expense recognition, it would be debited (expense increase). On the credit side we have: the Notes Receivable account being credited (asset decrease). The discount charge is debited to expense, not credited. Therefore, credit side shows: 1 line for asset decrease (Notes Receivable).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "On the credit side: (1) The original trade receivable is eliminated = asset decrease (the note receivable replaces it, but that's the debit side). (2) The discount charges represent a financing expense incurred = expense increase, which when credited means expense decrease. However, the discount is deducted from proceeds, meaning Ford recognizes a loss/expense. Under IFRS, the discount charge is an expense that reduces the net proceeds. Since we're looking at credits: the receivable (note) is credited (asset decrease), and if we separately track the discount as a contra or direct expense recognition, it would be debited (expense increase). On the credit side we have: the Notes Receivable account being credited (asset decrease). The discount charge is debited to expense, not credited. Therefore, credit side shows: 1 line for asset decrease (Notes Receivable)."
+    },
+    "entry_builder": {
+      "input_tokens": 849,
+      "output_tokens": 510,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3964,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0111315,
+      "raw_cost_usd": 0.019542,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Discounting of 90-day non-interest-bearing note receivable at bank",
+        "rationale": "Ford discounted a $100,000 non-interest-bearing note at the bank 50 days after issue, with 40 days remaining to maturity. The bank applied a 15% annual discount rate to the face value for the remaining period. Discount calculation: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds: $100,000 - $1,643.84 = $98,356.16. Under IFRS 9, discounting with recourse is treated as a secured borrowing (liability), while discounting without recourse is derecognition of the receivable. The transaction states Ford 'discounted the note at the bank' and 'received net proceeds after deducting discount charges,' which is the typical language for factoring/discounting without recourse (sale of the note). The debit tuple (1,0,1,0,0,0) indicates one asset increase (cash) and one expense increase (financing cost), while the credit tuple (0,0,0,1,0,0) indicates one asset decrease (notes receivable). This structure is consistent with derecognition treatment where the discount charge is recognized as an expense and the note is removed from assets.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98356.16
+          },
+          {
+            "account_name": "Financing Expense",
+            "type": "debit",
+            "amount": 1643.84
+          },
+          {
+            "account_name": "Notes Receivable",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "This transaction involves Ford discounting (selling) the note receivable to the bank. On the debit side: (1) Cash increases for the net proceeds received (asset increase), and (2) Loss on discounting increases as an expense for the discount charges deducted by the bank (expense increase). The discount charge represents the difference between the note's face value and the present value at the bank's discount rate, recorded as a financing cost/expense. Therefore: 1 asset increase (cash) + 1 expense increase (discount loss) = tuple [1,0,1,0,0,0]."
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "This transaction involves Ford discounting (selling) the note receivable to the bank. On the debit side: (1) Cash increases for the net proceeds received (asset increase), and (2) Loss on discounting increases as an expense for the discount charges deducted by the bank (expense increase). The discount charge represents the difference between the note's face value and the present value at the bank's discount rate, recorded as a financing cost/expense. Therefore: 1 asset increase (cash) + 1 expense increase (discount loss) = tuple [1,0,1,0,0,0].",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "On the credit side: (1) The original trade receivable is eliminated = asset decrease (the note receivable replaces it, but that's the debit side). (2) The discount charges represent a financing expense incurred = expense increase, which when credited means expense decrease. However, the discount is deducted from proceeds, meaning Ford recognizes a loss/expense. Under IFRS, the discount charge is an expense that reduces the net proceeds. Since we're looking at credits: the receivable (note) is credited (asset decrease), and if we separately track the discount as a contra or direct expense recognition, it would be debited (expense increase). On the credit side we have: the Notes Receivable account being credited (asset decrease). The discount charge is debited to expense, not credited. Therefore, credit side shows: 1 line for asset decrease (Notes Receivable).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "This transaction involves Ford discounting (selling) the note receivable to the bank. On the debit side: (1) Cash increases for the net proceeds received (asset increase), and (2) Loss on discounting increases as an expense for the discount charges deducted by the bank (expense increase). The discount charge represents the difference between the note's face value and the present value at the bank's discount rate, recorded as a financing cost/expense. Therefore: 1 asset increase (cash) + 1 expense increase (discount loss) = tuple [1,0,1,0,0,0].",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "On the credit side: (1) The original trade receivable is eliminated = asset decrease (the note receivable replaces it, but that's the debit side). (2) The discount charges represent a financing expense incurred = expense increase, which when credited means expense decrease. However, the discount is deducted from proceeds, meaning Ford recognizes a loss/expense. Under IFRS, the discount charge is an expense that reduces the net proceeds. Since we're looking at credits: the receivable (note) is credited (asset decrease), and if we separately track the discount as a contra or direct expense recognition, it would be debited (expense increase). On the credit side we have: the Notes Receivable account being credited (asset decrease). The discount charge is debited to expense, not credited. Therefore, credit side shows: 1 line for asset decrease (Notes Receivable).",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Discounting of 90-day non-interest-bearing note receivable at bank",
+        "rationale": "Ford discounted a $100,000 non-interest-bearing note at the bank 50 days after issue, with 40 days remaining to maturity. The bank applied a 15% annual discount rate to the face value for the remaining period. Discount calculation: $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Net proceeds: $100,000 - $1,643.84 = $98,356.16. Under IFRS 9, discounting with recourse is treated as a secured borrowing (liability), while discounting without recourse is derecognition of the receivable. The transaction states Ford 'discounted the note at the bank' and 'received net proceeds after deducting discount charges,' which is the typical language for factoring/discounting without recourse (sale of the note). The debit tuple (1,0,1,0,0,0) indicates one asset increase (cash) and one expense increase (financing cost), while the credit tuple (0,0,0,1,0,0) indicates one asset decrease (notes receivable). This structure is consistent with derecognition treatment where the discount charge is recognized as an expense and the note is removed from assets.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98356.16
+          },
+          {
+            "account_name": "Financing Expense",
+            "type": "debit",
+            "amount": 1643.84
+          },
+          {
+            "account_name": "Notes Receivable",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 550,
+        "output_tokens": 195,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 548,
+        "output_tokens": 254,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 849,
+        "output_tokens": 510,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

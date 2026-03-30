@@ -1,0 +1,682 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Under IFRS, the $9,000,000 purchase price must be allocated to land and building based on their relative fair values. Total fair value = $8,000,000 + $4,000,000 = $12,000,000. Land allocation = $9,000,000 \u00d7 ($8,000,000 / $12,000,000) = $6,000,000. Building allocation = $9,000,000 \u00d7 ($4,000,000 / $12,000,000) = $3,000,000. Sales tax of 10% applies only to the building: $3,000,000 \u00d7 10% = $300,000 (recoverable input tax, debit Tax Receivable). Payment structure: 50% of $9,000,000 = $4,500,000 is deferred (credit Accounts Payable). Balance paid by cheque = $9,000,000 - $4,500,000 = $4,500,000 plus $300,000 tax = $4,800,000 (credit Cash). Total debits: $6,000,000 + $3,000,000 + $300,000 = $9,300,000. Total credits: $4,500,000 + $4,800,000 = $9,300,000. Entry balances.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Land",
+        "amount": 6000000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Building",
+        "amount": 3000000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Tax Receivable",
+        "amount": 300000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Accounts Payable",
+        "amount": 4500000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 4800000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0656907,
+  "raw_cost_usd": 0.093066,
+  "total_latency_ms": 51403,
+  "total_input_tokens": 12782,
+  "total_output_tokens": 3648,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 600,
+      "output_tokens": 634,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2947,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0120141,
+      "raw_cost_usd": 0.018351,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "resolution": "Fair values provided ($8,000,000 land, $4,000,000 building) establish allocation basis under IFRS 3 and IAS 16 \u2014 allocate proportionally: land $6,000,000 (8/12), building $3,000,000 (4/12)"
+          },
+          {
+            "aspect": "which component the 10% sales tax applies to",
+            "resolution": "Transaction explicitly states '10% sales tax on the building' \u2014 tax applies only to building component"
+          },
+          {
+            "aspect": "payment method for amount paid immediately",
+            "resolution": "Transaction states 'paid by cheque' \u2014 cash payment via cheque"
+          },
+          {
+            "aspect": "treatment of deferred payment (50% due in 6 months)",
+            "resolution": "Standard convention: short-term payable (6 months) with no stated interest is recorded at face value as accounts payable or notes payable"
+          },
+          {
+            "aspect": "capitalization of sales tax on building",
+            "resolution": "IFRS convention: sales tax paid on asset acquisition is capitalized as part of asset cost when not recoverable (general business in ON suggests HST may be recoverable, but if paid and not mentioned as recoverable input tax credit, capitalize to building cost)"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "HST recoverability status",
+            "options": [
+              "HST is recoverable as input tax credit (ITC) \u2014 record as HST Recoverable asset",
+              "HST is not recoverable \u2014 capitalize as part of building cost"
+            ],
+            "clarification_question": "Is Mondelez registered for HST and able to claim input tax credits on this building purchase?",
+            "why_entry_differs": "If recoverable: debit HST Recoverable (current asset), credit Cash for tax amount. If not recoverable: capitalize tax into Building cost (increases depreciable base). Different accounts and different depreciation impact.",
+            "why_not_resolved": "Transaction states tax was 'paid' but does not indicate whether it's recoverable. In Ontario, corporations are typically HST-registered and can recover input tax on commercial property, but this depends on the entity's registration status and the nature of use. The text provides no information about HST registration or recovery intent."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 575,
+      "output_tokens": 499,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2121,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0096738,
+      "raw_cost_usd": 0.013848,
+      "output": {
+        "asset_increase_reason": "Two distinct assets increase: (1) Land increases by its allocated fair value of $6,000,000 (non-depreciable), and (2) Building increases by its allocated fair value of $3,000,000 (depreciable). The $9,000,000 purchase price is allocated based on relative fair values: Land = $9M \u00d7 ($8M/$12M) = $6M; Building = $9M \u00d7 ($4M/$12M) = $3M. These are economically distinct assets requiring separate accounts, so they count as 2 lines.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Sales tax on the building ($3,000,000 \u00d7 10% = $300,000) is expensed as it is non-recoverable and represents a period cost under IFRS when the entity cannot reclaim the tax.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or decreased. The 50% payable creates a liability on the credit side, not a decrease on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this asset acquisition transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected in this purchase transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 573,
+      "output_tokens": 491,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2089,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0095388,
+      "raw_cost_usd": 0.013632,
+      "output": {
+        "liability_increase_reason": "The 50% of purchase price ($4,500,000) due in 6 months creates a liability (accounts payable or note payable) increase.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity is being increased; this is a purchase transaction, not a capital contribution or retained earnings increase.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is an asset acquisition, not a sale or service delivery.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash/bank account decreases for the payment made by cheque. This payment covers 50% of purchase price ($4,500,000) plus 10% sales tax on the building portion allocated to the payment. The building's allocated value is $3,000,000 (building is 1/3 of total fair value, so 1/3 of $9,000,000), and 10% tax on this is $300,000, for a total cash outflow of $4,800,000.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner drawings are being reversed; this is an asset purchase transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or reduced; the sales tax is capitalized as part of the building cost under IFRS, not expensed and then reversed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 895,
+      "output_tokens": 2024,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5625,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.034464,
+      "raw_cost_usd": 0.047235,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Purchase price allocation",
+            "reason": "The transaction states the purchase price is $9,000,000 exclusive of sales tax, but the fair values of land ($8,000,000) and building ($4,000,000) total $12,000,000. Under IFRS, the purchase price should be allocated based on relative fair values. The allocation is determinable from the transaction text.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Sales tax applicability",
+            "reason": "The transaction states 10% sales tax applies only to the building component, not the land. This is consistent with typical tax treatment where land is exempt. The tax base and rate are stated.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Payment terms",
+            "reason": "50% due in 6 months (deferred payment liability), balance paid by cheque. The amounts and timing are clear from the transaction text.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Override the upstream count of 2. The transaction involves acquiring land and building, which are two distinct asset accounts. Land is non-depreciable and building is depreciable, so they must be recorded separately. Count: 2 lines (Land, Building).",
+          "action": "accept",
+          "count": 2,
+          "accounts": [
+            "Land",
+            "Building"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Override the upstream count of 1. The classifier incorrectly identified an expense. This is a capital asset acquisition, not an expense. The purchase price is capitalized to assets (land and building), not expensed. Count: 0 lines.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being paid down or decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept the upstream count of 1. Fifty percent of the purchase price is due in 6 months, creating a deferred payment liability. Count: 1 line (Accounts Payable or Note Payable).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Accounts Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Override the upstream count of 1. The balance was paid by cheque, and 10% sales tax on the building was also paid. However, the tax is recoverable input tax (debit Tax Receivable), not an additional cash payment. We need to credit Cash for: (1) the immediate payment portion of the purchase price, and (2) the sales tax paid. But these are combined into a single Cash credit line. Count: 1 line (Cash).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS, the $9,000,000 purchase price must be allocated to land and building based on their relative fair values. Total fair value = $8,000,000 + $4,000,000 = $12,000,000. Land allocation = $9,000,000 \u00d7 ($8,000,000 / $12,000,000) = $6,000,000. Building allocation = $9,000,000 \u00d7 ($4,000,000 / $12,000,000) = $3,000,000. Sales tax of 10% applies only to the building: $3,000,000 \u00d7 10% = $300,000 (recoverable input tax, debit Tax Receivable). Payment structure: 50% of $9,000,000 = $4,500,000 is deferred (credit Accounts Payable). Balance paid by cheque = $9,000,000 - $4,500,000 = $4,500,000 plus $300,000 tax = $4,800,000 (credit Cash). Total debits: $6,000,000 + $3,000,000 + $300,000 = $9,300,000. Total credits: $4,500,000 + $4,800,000 = $9,300,000. Entry balances.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Land",
+              "amount": 6000000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Building",
+              "amount": 3000000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Tax Receivable",
+              "amount": 300000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Accounts Payable",
+              "amount": 4500000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 4800000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is a capital asset acquisition with clear allocation methodology under IFRS. The purchase price of $9,000,000 is allocated to land and building based on relative fair values ($6,000,000 and $3,000,000 respectively). Sales tax of 10% on the building ($300,000) is recoverable input tax. Payment terms are explicit: 50% deferred ($4,500,000 liability), balance plus tax paid by cheque ($4,800,000 cash). All amounts are determinable from the transaction text and IFRS standards. The entry balances (debits $9,300,000 = credits $9,300,000). I overrode the classifier's expense line as this is asset capitalization, not an expense. All information needed to construct the entry is present.",
+        "decision": "APPROVED"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "allocation of $9,000,000 purchase price between land and building",
+            "resolution": "Fair values provided ($8,000,000 land, $4,000,000 building) establish allocation basis under IFRS 3 and IAS 16 \u2014 allocate proportionally: land $6,000,000 (8/12), building $3,000,000 (4/12)"
+          },
+          {
+            "aspect": "which component the 10% sales tax applies to",
+            "resolution": "Transaction explicitly states '10% sales tax on the building' \u2014 tax applies only to building component"
+          },
+          {
+            "aspect": "payment method for amount paid immediately",
+            "resolution": "Transaction states 'paid by cheque' \u2014 cash payment via cheque"
+          },
+          {
+            "aspect": "treatment of deferred payment (50% due in 6 months)",
+            "resolution": "Standard convention: short-term payable (6 months) with no stated interest is recorded at face value as accounts payable or notes payable"
+          },
+          {
+            "aspect": "capitalization of sales tax on building",
+            "resolution": "IFRS convention: sales tax paid on asset acquisition is capitalized as part of asset cost when not recoverable (general business in ON suggests HST may be recoverable, but if paid and not mentioned as recoverable input tax credit, capitalize to building cost)"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "HST recoverability status",
+            "options": [
+              "HST is recoverable as input tax credit (ITC) \u2014 record as HST Recoverable asset",
+              "HST is not recoverable \u2014 capitalize as part of building cost"
+            ],
+            "clarification_question": "Is Mondelez registered for HST and able to claim input tax credits on this building purchase?",
+            "why_entry_differs": "If recoverable: debit HST Recoverable (current asset), credit Cash for tax amount. If not recoverable: capitalize tax into Building cost (increases depreciable base). Different accounts and different depreciation impact.",
+            "why_not_resolved": "Transaction states tax was 'paid' but does not indicate whether it's recoverable. In Ontario, corporations are typically HST-registered and can recover input tax on commercial property, but this depends on the entity's registration status and the nature of use. The text provides no information about HST registration or recovery intent."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Two distinct assets increase: (1) Land increases by its allocated fair value of $6,000,000 (non-depreciable), and (2) Building increases by its allocated fair value of $3,000,000 (depreciable). The $9,000,000 purchase price is allocated based on relative fair values: Land = $9M \u00d7 ($8M/$12M) = $6M; Building = $9M \u00d7 ($4M/$12M) = $3M. These are economically distinct assets requiring separate accounts, so they count as 2 lines.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Sales tax on the building ($3,000,000 \u00d7 10% = $300,000) is expensed as it is non-recoverable and represents a period cost under IFRS when the entity cannot reclaim the tax.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or decreased. The 50% payable creates a liability on the credit side, not a decrease on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this asset acquisition transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected in this purchase transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "The 50% of purchase price ($4,500,000) due in 6 months creates a liability (accounts payable or note payable) increase.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity is being increased; this is a purchase transaction, not a capital contribution or retained earnings increase.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is an asset acquisition, not a sale or service delivery.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash/bank account decreases for the payment made by cheque. This payment covers 50% of purchase price ($4,500,000) plus 10% sales tax on the building portion allocated to the payment. The building's allocated value is $3,000,000 (building is 1/3 of total fair value, so 1/3 of $9,000,000), and 10% tax on this is $300,000, for a total cash outflow of $4,800,000.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner drawings are being reversed; this is an asset purchase transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or reduced; the sales tax is capitalized as part of the building cost under IFRS, not expensed and then reversed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Two distinct assets increase: (1) Land increases by its allocated fair value of $6,000,000 (non-depreciable), and (2) Building increases by its allocated fair value of $3,000,000 (depreciable). The $9,000,000 purchase price is allocated based on relative fair values: Land = $9M \u00d7 ($8M/$12M) = $6M; Building = $9M \u00d7 ($4M/$12M) = $3M. These are economically distinct assets requiring separate accounts, so they count as 2 lines.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "Sales tax on the building ($3,000,000 \u00d7 10% = $300,000) is expensed as it is non-recoverable and represents a period cost under IFRS when the entity cannot reclaim the tax.",
+        "expense_increase_count": 1,
+        "liability_decrease_reason": "No liabilities are being paid down or decreased. The 50% payable creates a liability on the credit side, not a decrease on the debit side.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are decreased in this asset acquisition transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected in this purchase transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "The 50% of purchase price ($4,500,000) due in 6 months creates a liability (accounts payable or note payable) increase.",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity is being increased; this is a purchase transaction, not a capital contribution or retained earnings increase.",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue is generated; this is an asset acquisition, not a sale or service delivery.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash/bank account decreases for the payment made by cheque. This payment covers 50% of purchase price ($4,500,000) plus 10% sales tax on the building portion allocated to the payment. The building's allocated value is $3,000,000 (building is 1/3 of total fair value, so 1/3 of $9,000,000), and 10% tax on this is $300,000, for a total cash outflow of $4,800,000.",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividends or owner drawings are being reversed; this is an asset purchase transaction.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses are being reversed or reduced; the sales tax is capitalized as part of the building cost under IFRS, not expensed and then reversed.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Purchase price allocation",
+            "reason": "The transaction states the purchase price is $9,000,000 exclusive of sales tax, but the fair values of land ($8,000,000) and building ($4,000,000) total $12,000,000. Under IFRS, the purchase price should be allocated based on relative fair values. The allocation is determinable from the transaction text.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Sales tax applicability",
+            "reason": "The transaction states 10% sales tax applies only to the building component, not the land. This is consistent with typical tax treatment where land is exempt. The tax base and rate are stated.",
+            "sufficient": true
+          },
+          {
+            "aspect": "Payment terms",
+            "reason": "50% due in 6 months (deferred payment liability), balance paid by cheque. The amounts and timing are clear from the transaction text.",
+            "sufficient": true
+          }
+        ],
+        "clarification_questions": [],
+        "incomplete_decision": "proceed",
+        "debit_asset_increase": {
+          "reason": "Override the upstream count of 2. The transaction involves acquiring land and building, which are two distinct asset accounts. Land is non-depreciable and building is depreciable, so they must be recorded separately. Count: 2 lines (Land, Building).",
+          "action": "accept",
+          "count": 2,
+          "accounts": [
+            "Land",
+            "Building"
+          ]
+        },
+        "debit_dividend_increase": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "Override the upstream count of 1. The classifier incorrectly identified an expense. This is a capital asset acquisition, not an expense. The purchase price is capitalized to assets (land and building), not expensed. Count: 0 lines.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "No liability is being paid down or decreased in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_equity_decrease": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "Accept the upstream count of 1. Fifty percent of the purchase price is due in 6 months, creating a deferred payment liability. Count: 1 line (Accounts Payable or Note Payable).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Accounts Payable"
+          ]
+        },
+        "credit_equity_increase": {
+          "reason": "No equity transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "No revenue transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "Override the upstream count of 1. The balance was paid by cheque, and 10% sales tax on the building was also paid. However, the tax is recoverable input tax (debit Tax Receivable), not an additional cash payment. We need to credit Cash for: (1) the immediate payment portion of the purchase price, and (2) the sales tax paid. But these are combined into a single Cash credit line. Count: 1 line (Cash).",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Cash"
+          ]
+        },
+        "credit_dividend_decrease": {
+          "reason": "No dividend transaction in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "No expense decrease in this entry.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Under IFRS, the $9,000,000 purchase price must be allocated to land and building based on their relative fair values. Total fair value = $8,000,000 + $4,000,000 = $12,000,000. Land allocation = $9,000,000 \u00d7 ($8,000,000 / $12,000,000) = $6,000,000. Building allocation = $9,000,000 \u00d7 ($4,000,000 / $12,000,000) = $3,000,000. Sales tax of 10% applies only to the building: $3,000,000 \u00d7 10% = $300,000 (recoverable input tax, debit Tax Receivable). Payment structure: 50% of $9,000,000 = $4,500,000 is deferred (credit Accounts Payable). Balance paid by cheque = $9,000,000 - $4,500,000 = $4,500,000 plus $300,000 tax = $4,800,000 (credit Cash). Total debits: $6,000,000 + $3,000,000 + $300,000 = $9,300,000. Total credits: $4,500,000 + $4,800,000 = $9,300,000. Entry balances.",
+          "lines": [
+            {
+              "type": "debit",
+              "account_name": "Land",
+              "amount": 6000000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Building",
+              "amount": 3000000.0
+            },
+            {
+              "type": "debit",
+              "account_name": "Tax Receivable",
+              "amount": 300000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Accounts Payable",
+              "amount": 4500000.0
+            },
+            {
+              "type": "credit",
+              "account_name": "Cash",
+              "amount": 4800000.0
+            }
+          ]
+        },
+        "decision_rationale": "The transaction is a capital asset acquisition with clear allocation methodology under IFRS. The purchase price of $9,000,000 is allocated to land and building based on relative fair values ($6,000,000 and $3,000,000 respectively). Sales tax of 10% on the building ($300,000) is recoverable input tax. Payment terms are explicit: 50% deferred ($4,500,000 liability), balance plus tax paid by cheque ($4,800,000 cash). All amounts are determinable from the transaction text and IFRS standards. The entry balances (debits $9,300,000 = credits $9,300,000). I overrode the classifier's expense line as this is asset capitalization, not an expense. All information needed to construct the entry is present.",
+        "decision": "APPROVED"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 600,
+        "output_tokens": 634,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 575,
+        "output_tokens": 499,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 573,
+        "output_tokens": 491,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 895,
+        "output_tokens": 2024,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

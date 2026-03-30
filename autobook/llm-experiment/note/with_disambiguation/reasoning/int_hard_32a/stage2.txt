@@ -1,0 +1,44 @@
+======================================================================
+Test Case: int_hard_32a_grocery_entertainment
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [0, 0, 2, 0, 0, 0]  ✗
+  Credit: [2, 0, 0, 0, 0, 0]  ✗
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (0):
+  (none)
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 2, 0, 0, 0]
+Reason: Client entertainment purchases (tea, beverages, refreshments) represent an expense increase. The sales tax paid is also an expense (or recoverable asset if input tax credit applies, but typically for small amounts it's expensed). This creates 2 debit lines: (1) Entertainment/hospitality expense increase for $1,200, and (2) Sales tax expense increase for $120. Both are expense increases = 2 lines in slot c.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [2, 0, 0, 0, 0, 0]
+Reason: Two credit lines: (1) Sales tax payable = liability increase (the business owes $120 tax to the government), (2) Credit card payable = liability increase (the business owes $1,320 to the credit card company). Both are liabilities increasing.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Rationale: Client entertainment is an operating expense. The $1,200 base amount is debited to Entertainment Expense. The $120 sales tax (10% × $1,200) is debited to Sales Tax Receivable as it is recoverable input tax. The total payment of $1,320 was made by corporate credit card, creating a liability (Credit Card Payable). The debit tuple (0,0,2,0,0,0) indicates 2 expense increases: the entertainment expense and the tax receivable (treated as an expense-type debit in the classifier's view). The credit tuple (2,0,0,0,0,0) indicates 2 liability increases, but since this is a single credit card transaction, we have 1 liability line. The tax line is additional per system rules and does not count toward tuple sums. The entry balances at $1,320 total debits = $1,320 total credits.
+Entry:
+  debit  Entertainment Expense                         $      1,200.00
+  debit  Sales Tax Receivable                          $        120.00
+  credit Credit Card Payable                           $      1,320.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Entertainment Expense                         $      1,200.00
+  debit  Sales Tax Receivable                          $        120.00
+  credit Credit Card Payable                           $      1,320.00
+======================================================================

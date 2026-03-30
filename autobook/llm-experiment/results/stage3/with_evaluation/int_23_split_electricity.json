@@ -1,0 +1,511 @@
+{
+  "test_case_id": "int_23_split_electricity",
+  "variant_name": "with_evaluation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.6666666666666666,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2024-01-01",
+    "description": "Factory and office electricity charges paid by corporate credit card",
+    "rationale": "Electricity is an operating expense split between factory (manufacturing overhead) and office (administrative expense). Per fix context, electricity is taxable in Canada requiring HST treatment. The stated amounts ($15,000 factory, $5,500 office) are pre-tax. HST at 13% (Ontario assumed) = $2,665 on total $20,500. Credit card liability increases by total amount including tax ($23,165).",
+    "lines": [
+      {
+        "account_name": "Manufacturing Overhead",
+        "type": "debit",
+        "amount": 15000.0
+      },
+      {
+        "account_name": "Office Expense",
+        "type": "debit",
+        "amount": 5500.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 2665.0
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 23165.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0540456,
+  "raw_cost_usd": 0.093714,
+  "total_latency_ms": 40203,
+  "total_input_tokens": 22233,
+  "total_output_tokens": 1801,
+  "total_llm_calls": 7,
+  "iteration_count": 2,
+  "final_decision": "APPROVED",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 504,
+      "output_tokens": 118,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1766,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036606,
+      "raw_cost_usd": 0.007068,
+      "output": {
+        "reason": "Factory electricity ($15,000) = expense increase (manufacturing overhead/cost of production), Office electricity ($5,500) = expense increase (administrative expense). Two distinct debit lines, both are expense increases, so count = 2 in slot c.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Factory electricity ($15,000) = expense increase (manufacturing overhead/cost of production), Office electricity ($5,500) = expense increase (administrative expense). Two distinct debit lines, both are expense increases, so count = 2 in slot c."
+    },
+    "credit_classifier": {
+      "input_tokens": 502,
+      "output_tokens": 117,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1743,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036333000000000003,
+      "raw_cost_usd": 0.006984,
+      "output": {
+        "reason": "Payment made using corporate credit card creates a liability increase (credit card payable). The factory electricity ($15,000) and office electricity ($5,500) are expenses being incurred, not decreased. The credit side records only the credit card liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Payment made using corporate credit card creates a liability increase (credit card payable). The factory electricity ($15,000) and office electricity ($5,500) are expenses being incurred, not decreased. The credit side records only the credit card liability increase."
+    },
+    "entry_builder": {
+      "input_tokens": 1591,
+      "output_tokens": 642,
+      "cache_read_tokens": 6230,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7821,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.016272000000000002,
+      "raw_cost_usd": 0.033093,
+      "output": {
+        "date": "2024-01-01",
+        "description": "Factory and office electricity charges paid by corporate credit card",
+        "rationale": "Electricity is an operating expense split between factory (manufacturing overhead) and office (administrative expense). Per fix context, electricity is taxable in Canada requiring HST treatment. The stated amounts ($15,000 factory, $5,500 office) are pre-tax. HST at 13% (Ontario assumed) = $2,665 on total $20,500. Credit card liability increases by total amount including tax ($23,165).",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 15000.0
+          },
+          {
+            "account_name": "Office Expense",
+            "type": "debit",
+            "amount": 5500.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 2665.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 23165.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3632,
+      "output_tokens": 363,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7736,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0175722,
+      "raw_cost_usd": 0.028653,
+      "output": {
+        "reason": "Entry correctly records electricity expense split between factory (Manufacturing Overhead $15,000) and office (Office Expense $5,500). Utilities are taxable in Canada, HST at 13% correctly calculated: $20,500 \u00d7 13% = $2,665. Total debits ($15,000 + $5,500 + $2,665 = $23,165) equal total credits ($23,165). All accounts appropriate, amounts match transaction, tax treatment correct, directionality proper.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records electricity expense split between factory (Manufacturing Overhead $15,000) and office (Office Expense $5,500). Utilities are taxable in Canada, HST at 13% correctly calculated: $20,500 \u00d7 13% = $2,665. Total debits ($15,000 + $5,500 + $2,665 = $23,165) equal total credits ($23,165). All accounts appropriate, amounts match transaction, tax treatment correct, directionality proper."
+    },
+    "diagnostician": {
+      "input_tokens": 1312,
+      "output_tokens": 561,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3167,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0129075,
+      "raw_cost_usd": 0.017916,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    0,
+    0,
+    2,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Electricity charges are taxable purchases in Canada and require HST treatment. The transaction states amounts of $15,000 and $5,500, but does not specify whether these are tax-inclusive or tax-exclusive. The entry records no tax lines at all. Utilities are taxable services under Canadian tax law and must include HST Receivable (input tax credit). The rationale incorrectly states that electricity charges include embedded taxes - this is wrong; electricity is subject to HST like other utility services. Tax lines are missing.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Factory electricity ($15,000) = expense increase (manufacturing overhead/cost of production), Office electricity ($5,500) = expense increase (administrative expense). Two distinct debit lines, both are expense increases, so count = 2 in slot c.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Factory electricity ($15,000) = expense increase (manufacturing overhead/cost of production), Office electricity ($5,500) = expense increase (administrative expense). Two distinct debit lines, both are expense increases, so count = 2 in slot c.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Payment made using corporate credit card creates a liability increase (credit card payable). The factory electricity ($15,000) and office electricity ($5,500) are expenses being incurred, not decreased. The credit side records only the credit card liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Payment made using corporate credit card creates a liability increase (credit card payable). The factory electricity ($15,000) and office electricity ($5,500) are expenses being incurred, not decreased. The credit side records only the credit card liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Factory electricity ($15,000) = expense increase (manufacturing overhead/cost of production), Office electricity ($5,500) = expense increase (administrative expense). Two distinct debit lines, both are expense increases, so count = 2 in slot c.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Factory electricity ($15,000) = expense increase (manufacturing overhead/cost of production), Office electricity ($5,500) = expense increase (administrative expense). Two distinct debit lines, both are expense increases, so count = 2 in slot c.",
+        "tuple": [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Payment made using corporate credit card creates a liability increase (credit card payable). The factory electricity ($15,000) and office electricity ($5,500) are expenses being incurred, not decreased. The credit side records only the credit card liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Payment made using corporate credit card creates a liability increase (credit card payable). The factory electricity ($15,000) and office electricity ($5,500) are expenses being incurred, not decreased. The credit side records only the credit card liability increase.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2024-01-01",
+        "description": "Factory and office electricity charges paid via corporate credit card",
+        "rationale": "Factory electricity of $15,000 is classified as manufacturing overhead (cost of production), while office electricity of $5,500 is an administrative expense. Both are paid using corporate credit card, creating a liability (credit card payable). The tuple guidance of 2 expense debits and 1 liability credit is appropriate. No tax is applied as electricity charges typically include embedded taxes already paid by the utility provider.",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 15000.0
+          },
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 5500.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 20500.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2024-01-01",
+        "description": "Factory and office electricity charges paid by corporate credit card",
+        "rationale": "Electricity is an operating expense split between factory (manufacturing overhead) and office (administrative expense). Per fix context, electricity is taxable in Canada requiring HST treatment. The stated amounts ($15,000 factory, $5,500 office) are pre-tax. HST at 13% (Ontario assumed) = $2,665 on total $20,500. Credit card liability increases by total amount including tax ($23,165).",
+        "lines": [
+          {
+            "account_name": "Manufacturing Overhead",
+            "type": "debit",
+            "amount": 15000.0
+          },
+          {
+            "account_name": "Office Expense",
+            "type": "debit",
+            "amount": 5500.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 2665.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 23165.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Electricity charges are taxable purchases in Canada and require HST treatment. The transaction states amounts of $15,000 and $5,500, but does not specify whether these are tax-inclusive or tax-exclusive. The entry records no tax lines at all. Utilities are taxable services under Canadian tax law and must include HST Receivable (input tax credit). The rationale incorrectly states that electricity charges include embedded taxes - this is wrong; electricity is subject to HST like other utility services. Tax lines are missing.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Entry correctly records electricity expense split between factory (Manufacturing Overhead $15,000) and office (Office Expense $5,500). Utilities are taxable in Canada, HST at 13% correctly calculated: $20,500 \u00d7 13% = $2,665. Total debits ($15,000 + $5,500 + $2,665 = $23,165) equal total credits ($23,165). All accounts appropriate, amounts match transaction, tax treatment correct, directionality proper.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because HST lines are missing on a taxable utility purchase. The transaction involves electricity charges totaling $20,500, which are taxable services in Canada requiring HST treatment with HST Receivable (input tax credit).\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier): Correctly identified 2 expense increases (factory and office electricity)\n- Agent 2 (Credit Classifier): Correctly identified 1 liability increase (credit card payable)\n- Agent 3 (Debit Corrector): Validated the debit tuple, no changes\n- Agent 4 (Credit Corrector): Validated the credit tuple, no changes\n- Agent 5 (Entry Builder): Built the entry from the tuples but failed to add HST lines. The rationale incorrectly states \"electricity charges typically include embedded taxes already paid by the utility provider\" which is wrong \u2014 electricity is subject to HST like other utility services.\n\nThe classifiers and correctors did their job correctly \u2014 they classified the core economic substance (expenses and liability). The root cause is Agent 5 (Entry Builder), which is responsible for adding tax lines to taxable transactions. Agent 5 made two errors: (1) failed to add HST Receivable debit and adjust the Credit Card Payable credit to include HST, and (2) provided incorrect reasoning about embedded taxes.\n\nThe Approver also notes ambiguity about whether amounts are tax-inclusive or tax-exclusive. However, in Canadian business practice, utility bills typically show amounts before tax with HST added separately. The standard interpretation would be that $15,000 and $5,500 are pre-tax amounts unless explicitly stated otherwise. This is a fixable assumption.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Electricity is a taxable service in Canada requiring HST treatment. Add HST Receivable debit (13% of $20,500 = $2,665 assuming Ontario) and increase Credit Card Payable credit to $23,165. The stated amounts ($15,000 and $5,500) should be treated as pre-tax unless explicitly stated as tax-inclusive."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Electricity is a taxable service in Canada requiring HST treatment. Add HST Receivable debit (13% of $20,500 = $2,665 assuming Ontario) and increase Credit Card Payable credit to $23,165. The stated amounts ($15,000 and $5,500) should be treated as pre-tax unless explicitly stated as tax-inclusive."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 504,
+        "output_tokens": 118,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 502,
+        "output_tokens": 117,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 740,
+        "output_tokens": 298,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1455,
+        "output_tokens": 182,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1312,
+        "output_tokens": 561,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 851,
+        "output_tokens": 344,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2177,
+        "output_tokens": 181,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

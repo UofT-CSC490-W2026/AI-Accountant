@@ -129,6 +129,20 @@ def test_je_compute_balances(db_session):
     assert len(balances) >= 2
     equipment = next(b for b in balances if b["account_code"] == "1500")
     assert equipment["balance"] == Decimal("1000")
+    assert equipment["account_type"] == "asset"
+
+
+def test_je_compute_balances_honors_date_filters(db_session):
+    user = _make_user(db_session)
+    _post_entry(db_session, user, entry_date=date(2026, 3, 1), amount=1000)
+    _post_entry(db_session, user, entry_date=date(2026, 4, 1), amount=500)
+    balances = JournalEntryDAO.compute_balances(
+        db_session,
+        user.id,
+        filters={"date_to": date(2026, 3, 15)},
+    )
+    equipment = next(b for b in balances if b["account_code"] == "1500")
+    assert equipment["balance"] == Decimal("1000")
 
 
 def test_je_compute_summary(db_session):

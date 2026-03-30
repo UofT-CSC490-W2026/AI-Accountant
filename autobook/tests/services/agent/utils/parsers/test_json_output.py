@@ -14,7 +14,6 @@ class TestDisambiguatorOutput:
                 {
                     "aspect": "payment method",
                     "resolved": True,
-                    "resolution": "Cash payment",
                 }
             ]
         })
@@ -37,8 +36,8 @@ class TestDisambiguatorOutput:
                     "resolved": False,
                     "options": ["HST included", "HST excluded"],
                     "clarification_question": "Is HST included?",
-                    "why_entry_differs": "Tax line amounts change",
-                    "why_not_resolved": "No explicit mention in description",
+                    "why_entry_depends_on_clarification": "Tax line amounts change",
+                    "why_ambiguity_not_resolved_by_given_info": "No explicit mention",
                 }
             ]
         })
@@ -48,27 +47,48 @@ class TestDisambiguatorOutput:
 
 
 class TestDebitClassifierOutput:
-    """parse_json_output for agent 'debit_classifier'."""
+    """parse_json_output for agent 'debit_classifier' — V3 per-slot list format."""
 
     def test_valid(self):
         raw = json.dumps({
-            "reason": "Office supplies is an expense",
-            "tuple": [0, 0, 1, 0, 0, 0],
+            "asset_increase": [],
+            "dividend_increase": [],
+            "expense_increase": [
+                {"reason": "Office supplies is an expense",
+                 "category": "Advertising expense",
+                 "count": 1}
+            ],
+            "liability_decrease": [],
+            "equity_decrease": [],
+            "revenue_decrease": [],
         })
         result = parse_json_output("debit_classifier", raw)
         assert result is not None
-        assert result["reason"] == "Office supplies is an expense"
-        assert result["tuple"] == (0, 0, 1, 0, 0, 0)
+        assert len(result["expense_increase"]) == 1
+        assert result["expense_increase"][0]["count"] == 1
 
-    def test_missing_reason_fails(self):
-        raw = json.dumps({"tuple": [0, 0, 1, 0, 0, 0]})
+    def test_empty_slots_valid(self):
+        raw = json.dumps({
+            "asset_increase": [],
+            "dividend_increase": [],
+            "expense_increase": [],
+            "liability_decrease": [],
+            "equity_decrease": [],
+            "revenue_decrease": [],
+        })
         result = parse_json_output("debit_classifier", raw)
-        assert result is None
+        assert result is not None
 
-    def test_wrong_tuple_length_fails(self):
-        raw = json.dumps({"reason": "test", "tuple": [1, 0, 1]})
+    def test_defaults_fill_missing_slots(self):
+        """Missing slots get default empty lists via Pydantic defaults."""
+        raw = json.dumps({
+            "expense_increase": [
+                {"reason": "test", "category": "Advertising expense", "count": 1}
+            ],
+        })
         result = parse_json_output("debit_classifier", raw)
-        assert result is None
+        assert result is not None
+        assert result["asset_increase"] == []
 
 
 class TestApproverOutput:
@@ -105,28 +125,23 @@ class TestApproverOutput:
 
 
 class TestEntryBuilderOutput:
-    """parse_json_output for agent 'entry_builder'."""
+    """parse_json_output for agent 'entry_builder' — V3 EntryDrafterOutput format."""
 
     def test_valid_minimal(self):
         raw = json.dumps({
-            "date": "2026-03-01",
-            "description": "Office supplies purchase",
-            "rationale": "Expense account for supplies",
+            "reason": "Rent is operating expense",
             "lines": [
-                {"account_name": "Office Supplies", "type": "debit", "amount": 100.0},
-                {"account_name": "Cash", "type": "credit", "amount": 100.0},
+                {"account_name": "Rent Expense", "type": "debit", "amount": 2000.0},
+                {"account_name": "Cash", "type": "credit", "amount": 2000.0},
             ],
         })
         result = parse_json_output("entry_builder", raw)
         assert result is not None
         assert len(result["lines"]) == 2
-        assert result["date"] == "2026-03-01"
 
     def test_missing_lines_fails(self):
         raw = json.dumps({
-            "date": "2026-03-01",
-            "description": "test",
-            "rationale": "test",
+            "reason": "test",
         })
         result = parse_json_output("entry_builder", raw)
         assert result is None
@@ -189,17 +204,36 @@ class TestEdgeCases:
 
     def test_credit_classifier_valid(self):
         raw = json.dumps({
-            "reason": "Cash is an asset decrease",
-            "tuple": [0, 0, 0, 1, 0, 0],
+            "liability_increase": [],
+            "equity_increase": [],
+            "revenue_increase": [],
+            "asset_decrease": [
+                {"reason": "Cash is an asset decrease",
+                 "category": "Cash and cash equivalents",
+                 "count": 1}
+            ],
+            "dividend_decrease": [],
+            "expense_decrease": [],
         })
         result = parse_json_output("credit_classifier", raw)
         assert result is not None
-        assert result["tuple"] == (0, 0, 0, 1, 0, 0)
+        assert len(result["asset_decrease"]) == 1
 
     def test_debit_corrector_valid(self):
         raw = json.dumps({
             "reason": "Tuple was already correct",
-            "tuple": [0, 0, 1, 0, 0, 0],
+            "asset_increase_reason": "No change needed",
+            "asset_increase_count": 0,
+            "dividend_increase_reason": "",
+            "dividend_increase_count": 0,
+            "expense_increase_reason": "Confirmed as expense",
+            "expense_increase_count": 1,
+            "liability_decrease_reason": "",
+            "liability_decrease_count": 0,
+            "equity_decrease_reason": "",
+            "equity_decrease_count": 0,
+            "revenue_decrease_reason": "",
+            "revenue_decrease_count": 0,
         })
         result = parse_json_output("debit_corrector", raw)
         assert result is not None
@@ -207,7 +241,18 @@ class TestEdgeCases:
     def test_credit_corrector_valid(self):
         raw = json.dumps({
             "reason": "Fixed asset slot",
-            "tuple": [0, 0, 0, 1, 0, 0],
+            "liability_increase_reason": "",
+            "liability_increase_count": 0,
+            "equity_increase_reason": "",
+            "equity_increase_count": 0,
+            "revenue_increase_reason": "",
+            "revenue_increase_count": 0,
+            "asset_decrease_reason": "Cash decreases",
+            "asset_decrease_count": 1,
+            "dividend_decrease_reason": "",
+            "dividend_decrease_count": 0,
+            "expense_decrease_reason": "",
+            "expense_decrease_count": 0,
         })
         result = parse_json_output("credit_corrector", raw)
         assert result is not None

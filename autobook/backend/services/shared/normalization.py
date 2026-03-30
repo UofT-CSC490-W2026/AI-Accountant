@@ -1,3 +1,22 @@
+"""Normalization helpers for the ingest path.
+
+A5 part 4 focuses on this module because it performs the regex-heavy extraction
+that every parse request depends on before downstream classification and posting.
+The targeted tests in `tests/services/shared/test_normalization.py` cover:
+
+- duplicate amount matches and date scrubbing, because false positives here can
+  turn a date or repeated token into the transaction amount
+- explicit message overrides and invalid explicit values, because upstream
+  routes may provide partially-normalized payloads
+- slash-format and invalid dates, because uploaded bank text mixes formats
+- party-token filtering and explicit counterparty precedence, because routing
+  should not treat generic nouns like "cash" as vendors
+- quantity-unit filtering, because numeric mentions often include currencies or
+  invoice references that should not become item counts
+- fallback description/currency/date behavior, because uploads may arrive with
+  filenames instead of free-form text
+"""
+
 from __future__ import annotations
 
 import re
@@ -28,9 +47,33 @@ CANONICAL_SOURCE_ALIASES = {
     "bank_feed": "bank_feed",
 }
 
+AMOUNT_REGEXES = tuple(re.compile(pattern, re.IGNORECASE) for pattern in AMOUNT_PATTERNS)
+DATE_REGEXES = tuple(re.compile(pattern) for pattern in DATE_PATTERNS)
+DATE_SCRUB_REGEX = re.compile("|".join(f"(?:{pattern})" for pattern in DATE_PATTERNS))
+NUMERIC_TOKEN_REGEX = re.compile(r"\b[\d,]+(?:\.\d+)?\b")
+YEAR_TOKEN_REGEX = re.compile(r"(19|20)\d{2}")
+PARTY_REGEXES = tuple(
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in (
+        r"\bfrom\s+([a-z][a-z0-9&.' -]+?)(?:\s+for|\s+and|\s*$)",
+        r"\bpaid\s+([a-z][a-z0-9&.' -]+?)(?:\s+\d|\s+for|\s+and|\s*$)",
+        r"\bto\s+([a-z][a-z0-9&.' -]+?)(?:\s+for|\s+and|\s*$)",
+    )
+)
+QUANTITY_REGEX = re.compile(r"\b(\d+)\s+([a-z][a-z0-9-]*)\b", re.IGNORECASE)
+
 
 def _normalize_party_value(candidate: str) -> str:
     return " ".join(token[:1].upper() + token[1:].lower() for token in candidate.split())
+
+
+def _normalize_date_string(raw: str) -> str:
+    try:
+        if "/" in raw:
+            return datetime.strptime(raw, "%m/%d/%Y").date().isoformat()
+        return date.fromisoformat(raw).isoformat()
+    except ValueError:
+        return raw
 
 
 @dataclass(frozen=True)
@@ -55,13 +98,13 @@ class NormalizationService:
         return CANONICAL_SOURCE_ALIASES.get(normalized, normalized or "manual_text")
 
     def normalize_text(self, text: str) -> str:
-        return re.sub(r"\s+", " ", text.strip().lower())
+        return " ".join(text.lower().split())
 
     def extract_amount_mentions(self, text: str) -> list[dict]:
         mentions: list[dict] = []
         seen: set[float] = set()
-        for pattern in AMOUNT_PATTERNS:
-            for match in re.finditer(pattern, text, re.IGNORECASE):
+        for pattern in AMOUNT_REGEXES:
+            for match in pattern.finditer(text):
                 value = float(match.group(1).replace(",", ""))
                 raw_value = match.group(1).strip()
                 normalized_text = f"${raw_value}" if "$" in match.group(0) else raw_value
@@ -74,13 +117,10 @@ class NormalizationService:
                         }
                     )
 
-        scrubbed = text
-        for pattern in DATE_PATTERNS:
-            scrubbed = re.sub(pattern, " ", scrubbed)
-
-        for token in re.findall(r"\b[\d,]+(?:\.\d+)?\b", scrubbed):
+        scrubbed = DATE_SCRUB_REGEX.sub(" ", text)
+        for token in NUMERIC_TOKEN_REGEX.findall(scrubbed):
             normalized = token.replace(",", "")
-            if re.fullmatch(r"(19|20)\d{2}", normalized):
+            if YEAR_TOKEN_REGEX.fullmatch(normalized):
                 continue
             value = float(normalized)
             if value not in seen:
@@ -92,33 +132,20 @@ class NormalizationService:
     def extract_date_mentions(self, text: str) -> list[dict]:
         mentions: list[dict] = []
         seen: set[str] = set()
-        for pattern in DATE_PATTERNS:
-            for match in re.finditer(pattern, text):
+        for pattern in DATE_REGEXES:
+            for match in pattern.finditer(text):
                 raw = match.group(1)
                 if raw in seen:
                     continue
                 seen.add(raw)
-                try:
-                    normalized = (
-                        datetime.strptime(raw, "%m/%d/%Y").date().isoformat()
-                        if "/" in raw
-                        else date.fromisoformat(raw).isoformat()
-                    )
-                except ValueError:
-                    normalized = raw
-                mentions.append({"text": raw, "value": normalized})
+                mentions.append({"text": raw, "value": _normalize_date_string(raw)})
         return mentions
 
     def extract_party_mentions(self, text: str) -> list[dict]:
-        patterns = [
-            r"\bfrom\s+([a-z][a-z0-9&.' -]+?)(?:\s+for|\s+and|\s*$)",
-            r"\bpaid\s+([a-z][a-z0-9&.' -]+?)(?:\s+\d|\s+for|\s+and|\s*$)",
-            r"\bto\s+([a-z][a-z0-9&.' -]+?)(?:\s+for|\s+and|\s*$)",
-        ]
         mentions: list[dict] = []
         seen: set[str] = set()
-        for pattern in patterns:
-            for match in re.finditer(pattern, text, re.IGNORECASE):
+        for pattern in PARTY_REGEXES:
+            for match in pattern.finditer(text):
                 candidate = match.group(1).strip(" .")
                 normalized = _normalize_party_value(candidate)
                 if normalized.lower() in NON_PARTY_TOKENS:
@@ -132,7 +159,7 @@ class NormalizationService:
     def extract_quantity_mentions(self, text: str) -> list[dict]:
         mentions: list[dict] = []
         seen: set[tuple[int, str]] = set()
-        for match in re.finditer(r"\b(\d+)\s+([a-z][a-z0-9-]*)\b", text, re.IGNORECASE):
+        for match in QUANTITY_REGEX.finditer(text):
             quantity = int(match.group(1))
             noun = match.group(2).lower()
             if noun in NON_QUANTITY_UNITS:
@@ -178,21 +205,23 @@ class NormalizationService:
             return str(party_mentions[0]["value"])
         return None
 
-    def extract_transaction_date(self, message: dict, text: str) -> str:
+    def extract_transaction_date(
+        self,
+        message: dict,
+        text: str,
+        date_mentions: list[dict] | None = None,
+    ) -> str:
         existing = message.get("transaction_date")
         if existing:
             return str(existing)
 
-        for pattern in DATE_PATTERNS:
-            match = re.search(pattern, text)
+        if date_mentions:
+            return str(date_mentions[0]["value"])
+
+        for pattern in DATE_REGEXES:
+            match = pattern.search(text)
             if match is not None:
-                raw = match.group(1)
-                try:
-                    if "/" in raw:
-                        return datetime.strptime(raw, "%m/%d/%Y").date().isoformat()
-                    return date.fromisoformat(raw).isoformat()
-                except ValueError:
-                    return raw
+                return _normalize_date_string(match.group(1))
         return str(date.today())
 
     def normalize(self, message: dict) -> NormalizedTransactionCandidate:
@@ -215,7 +244,7 @@ class NormalizationService:
             amount=amount,
             amount_confident=amount_confident,
             currency=str(message.get("currency") or "CAD"),
-            transaction_date=self.extract_transaction_date(message, description),
+            transaction_date=self.extract_transaction_date(message, description, date_mentions),
             source=source,
             counterparty=self.extract_counterparty(message, party_mentions),
             amount_mentions=amount_mentions,

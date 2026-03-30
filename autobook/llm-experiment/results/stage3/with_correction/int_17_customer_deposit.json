@@ -1,0 +1,352 @@
+{
+  "test_case_id": "int_17_customer_deposit",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Customer deposit received for moving services to be performed in one month",
+    "rationale": "Under IFRS 15, revenue is recognized when performance obligations are satisfied. Since the moving services will be performed in one month, the $5,000 deposit received represents a contract liability (unearned revenue/customer deposit). The cash received increases the asset (debit), and the obligation to perform services in the future creates a liability (credit). No revenue is recognized at this time because the performance obligation has not been satisfied. The tuples correctly identify one asset increase (cash) and one liability increase (unearned revenue).",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 5000.0
+      },
+      {
+        "account_name": "Unearned Revenue",
+        "type": "credit",
+        "amount": 5000.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0277944,
+  "raw_cost_usd": 0.052413,
+  "total_latency_ms": 20195,
+  "total_input_tokens": 12376,
+  "total_output_tokens": 1019,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 525,
+      "output_tokens": 117,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1787,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037086,
+      "raw_cost_usd": 0.007116,
+      "output": {
+        "reason": "Upon receiving the $5,000 deposit, Atlas debits its bank/chequing account (asset increase). The deposit creates a liability (unearned revenue/customer deposit) which is credited, but we only classify the debit side here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Upon receiving the $5,000 deposit, Atlas debits its bank/chequing account (asset increase). The deposit creates a liability (unearned revenue/customer deposit) which is credited, but we only classify the debit side here."
+    },
+    "credit_classifier": {
+      "input_tokens": 523,
+      "output_tokens": 176,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1764,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0045813,
+      "raw_cost_usd": 0.007932,
+      "output": {
+        "reason": "Upon receiving the $5,000 deposit, Atlas has two credit-side effects: (1) Cash/chequing account increases = asset increase, which is NOT a credit-side event (assets are debited when increased). Actually, the deposit creates a liability because Atlas owes the customer moving services in the future. The $5,000 received creates an unearned revenue/customer deposit liability = liability increase (1 line). No revenue is recognized yet because the services will be performed in one month, not at signing.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Upon receiving the $5,000 deposit, Atlas has two credit-side effects: (1) Cash/chequing account increases = asset increase, which is NOT a credit-side event (assets are debited when increased). Actually, the deposit creates a liability because Atlas owes the customer moving services in the future. The $5,000 received creates an unearned revenue/customer deposit liability = liability increase (1 line). No revenue is recognized yet because the services will be performed in one month, not at signing."
+    },
+    "credit_corrector": {
+      "input_tokens": 693,
+      "output_tokens": 170,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2447,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051551999999999995,
+      "raw_cost_usd": 0.009891,
+      "output": {
+        "reason": "The initial credit tuple is correct. Atlas received $5,000 as a deposit for services to be performed in the future. Under IFRS 15, revenue is recognized when performance obligations are satisfied. Since the moving services have not yet been provided, this deposit creates a liability (unearned revenue/deferred revenue). The credit side correctly shows one liability increase (slot a=1). The debit side shows one asset increase (cash in chequing account), which is consistent. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The initial credit tuple is correct. Atlas received $5,000 as a deposit for services to be performed in the future. Under IFRS 15, revenue is recognized when performance obligations are satisfied. Since the moving services have not yet been provided, this deposit creates a liability (unearned revenue/deferred revenue). The credit side correctly shows one liability increase (slot a=1). The debit side shows one asset increase (cash in chequing account), which is consistent. No correction needed."
+    },
+    "debit_corrector": {
+      "input_tokens": 693,
+      "output_tokens": 253,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2439,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063978,
+      "raw_cost_usd": 0.011112,
+      "output": {
+        "reason": "The transaction describes Atlas receiving a $5,000 deposit for services to be performed in the future. This creates two accounting effects: (1) Cash (asset) increases by $5,000, and (2) Unearned revenue/deferred revenue (liability) increases by $5,000, since Atlas has an obligation to perform the service or return the money.\n\nThe debit side should record the asset increase (cash received), which is correctly classified as (1,0,0,0,0,0) - one asset increase.\n\nThe credit side shows (1,0,0,0,0,0) which represents one liability increase - this is consistent with recording unearned revenue as a liability.\n\nBoth sides tell a consistent story: debit cash (asset increase), credit unearned revenue (liability increase). The initial debit tuple is correct and requires no correction.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes Atlas receiving a $5,000 deposit for services to be performed in the future. This creates two accounting effects: (1) Cash (asset) increases by $5,000, and (2) Unearned revenue/deferred revenue (liability) increases by $5,000, since Atlas has an obligation to perform the service or return the money.\n\nThe debit side should record the asset increase (cash received), which is correctly classified as (1,0,0,0,0,0) - one asset increase.\n\nThe credit side shows (1,0,0,0,0,0) which represents one liability increase - this is consistent with recording unearned revenue as a liability.\n\nBoth sides tell a consistent story: debit cash (asset increase), credit unearned revenue (liability increase). The initial debit tuple is correct and requires no correction."
+    },
+    "entry_builder": {
+      "input_tokens": 824,
+      "output_tokens": 303,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3939,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0079515,
+      "raw_cost_usd": 0.016362,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Customer deposit received for moving services to be performed in one month",
+        "rationale": "Under IFRS 15, revenue is recognized when performance obligations are satisfied. Since the moving services will be performed in one month, the $5,000 deposit received represents a contract liability (unearned revenue/customer deposit). The cash received increases the asset (debit), and the obligation to perform services in the future creates a liability (credit). No revenue is recognized at this time because the performance obligation has not been satisfied. The tuples correctly identify one asset increase (cash) and one liability increase (unearned revenue).",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 5000.0
+          },
+          {
+            "account_name": "Unearned Revenue",
+            "type": "credit",
+            "amount": 5000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Upon receiving the $5,000 deposit, Atlas debits its bank/chequing account (asset increase). The deposit creates a liability (unearned revenue/customer deposit) which is credited, but we only classify the debit side here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Upon receiving the $5,000 deposit, Atlas has two credit-side effects: (1) Cash/chequing account increases = asset increase, which is NOT a credit-side event (assets are debited when increased). Actually, the deposit creates a liability because Atlas owes the customer moving services in the future. The $5,000 received creates an unearned revenue/customer deposit liability = liability increase (1 line). No revenue is recognized yet because the services will be performed in one month, not at signing.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction describes Atlas receiving a $5,000 deposit for services to be performed in the future. This creates two accounting effects: (1) Cash (asset) increases by $5,000, and (2) Unearned revenue/deferred revenue (liability) increases by $5,000, since Atlas has an obligation to perform the service or return the money.\n\nThe debit side should record the asset increase (cash received), which is correctly classified as (1,0,0,0,0,0) - one asset increase.\n\nThe credit side shows (1,0,0,0,0,0) which represents one liability increase - this is consistent with recording unearned revenue as a liability.\n\nBoth sides tell a consistent story: debit cash (asset increase), credit unearned revenue (liability increase). The initial debit tuple is correct and requires no correction.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The initial credit tuple is correct. Atlas received $5,000 as a deposit for services to be performed in the future. Under IFRS 15, revenue is recognized when performance obligations are satisfied. Since the moving services have not yet been provided, this deposit creates a liability (unearned revenue/deferred revenue). The credit side correctly shows one liability increase (slot a=1). The debit side shows one asset increase (cash in chequing account), which is consistent. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Customer deposit received for moving services to be performed in one month",
+        "rationale": "Under IFRS 15, revenue is recognized when performance obligations are satisfied. Since the moving services will be performed in one month, the $5,000 deposit received represents a contract liability (unearned revenue/customer deposit). The cash received increases the asset (debit), and the obligation to perform services in the future creates a liability (credit). No revenue is recognized at this time because the performance obligation has not been satisfied. The tuples correctly identify one asset increase (cash) and one liability increase (unearned revenue).",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 5000.0
+          },
+          {
+            "account_name": "Unearned Revenue",
+            "type": "credit",
+            "amount": 5000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 525,
+        "output_tokens": 117,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 523,
+        "output_tokens": 176,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 693,
+        "output_tokens": 170,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 693,
+        "output_tokens": 253,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 824,
+        "output_tokens": 303,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

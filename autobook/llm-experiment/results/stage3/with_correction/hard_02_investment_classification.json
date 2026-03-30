@@ -1,0 +1,369 @@
+{
+  "test_case_id": "hard_02_investment_classification",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.0,
+  "credit_tuple_slot_accuracy": 0.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    2,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Acquisition of 10% equity stake in Ford common shares and transaction fees",
+    "rationale": "Under IFRS 9, the investment in Ford shares is classified as a financial asset. Since BlackRock acquired 10% of outstanding shares, this does not give significant influence (typically requires 20%+), so the investment is measured at fair value through profit or loss or fair value through OCI, depending on management's election. The $3,000,000 purchase price is capitalized as the investment cost. The $100,000 transaction fee is directly attributable to the acquisition and must be capitalized as part of the investment cost under IFRS 9 (transaction costs are included in initial measurement for investments not at FVTPL, but expensed immediately for FVTPL). However, the transaction does not specify management's classification election. Given this is a 10% stake in a public company (Ford), the default treatment would typically be FVTPL for such investments, meaning transaction costs should be expensed. But this creates ambiguity: if management elected FVOCI, costs are capitalized; if FVTPL, costs are expensed. The tuple suggests one asset increase and one expense increase on the debit side, with two asset decreases on credit (likely cash for shares and cash for fees). This implies the fee is being expensed, consistent with FVTPL treatment. I will proceed with this interpretation as the most common treatment for minority stakes in public companies.",
+    "lines": [
+      {
+        "account_name": "Investment in Equity Securities",
+        "type": "debit",
+        "amount": 3000000.0
+      },
+      {
+        "account_name": "Transaction Fees Expense",
+        "type": "debit",
+        "amount": 100000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 3100000.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0339894,
+  "raw_cost_usd": 0.058608,
+  "total_latency_ms": 25495,
+  "total_input_tokens": 12301,
+  "total_output_tokens": 1447,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 510,
+      "output_tokens": 154,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1772,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0042186,
+      "raw_cost_usd": 0.007626,
+      "output": {
+        "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction costs capitalized into the investment = asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are typically capitalized as part of the initial cost of the investment. Both debits increase asset accounts, resulting in 2 asset increase lines.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction costs capitalized into the investment = asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are typically capitalized as part of the initial cost of the investment. Both debits increase asset accounts, resulting in 2 asset increase lines."
+    },
+    "credit_classifier": {
+      "input_tokens": 508,
+      "output_tokens": 129,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1749,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038313,
+      "raw_cost_usd": 0.007182,
+      "output": {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both represent cash leaving the business via cheque payment.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both represent cash leaving the business via cheque payment."
+    },
+    "debit_corrector": {
+      "input_tokens": 678,
+      "output_tokens": 256,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2424,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0063978,
+      "raw_cost_usd": 0.011112,
+      "output": {
+        "reason": "The transaction involves two distinct economic events: (1) acquiring an investment in Ford shares for $3,000,000, and (2) paying a transaction fee of $100,000. The investment in Ford shares is a financial asset (investment) increase. The transaction fee is an expense - it is a cost incurred to complete the acquisition and should be expensed under IFRS, not capitalized as part of the investment cost (transaction costs on financial assets at FVTPL are expensed). The initial tuple (2,0,0,0,0,0) incorrectly treated both amounts as asset increases. Corrected to (1,0,1,0,0,0): one asset increase for the investment, one expense increase for the transaction fee. This is consistent with the credit tuple showing 2 asset decreases (cash paid for both the investment and the fee).",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves two distinct economic events: (1) acquiring an investment in Ford shares for $3,000,000, and (2) paying a transaction fee of $100,000. The investment in Ford shares is a financial asset (investment) increase. The transaction fee is an expense - it is a cost incurred to complete the acquisition and should be expensed under IFRS, not capitalized as part of the investment cost (transaction costs on financial assets at FVTPL are expensed). The initial tuple (2,0,0,0,0,0) incorrectly treated both amounts as asset increases. Corrected to (1,0,1,0,0,0): one asset increase for the investment, one expense increase for the transaction fee. This is consistent with the credit tuple showing 2 asset decreases (cash paid for both the investment and the fee)."
+    },
+    "credit_corrector": {
+      "input_tokens": 678,
+      "output_tokens": 367,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2432,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0080652,
+      "raw_cost_usd": 0.012801,
+      "output": {
+        "reason": "The transaction involves BlackRock (the investor) acquiring shares of Ford. From BlackRock's perspective:\n\n1. They paid $3,000,000 for the investment in Ford shares - this is an asset increase (investment/financial asset) debited, and cash decrease credited (asset decrease).\n\n2. They paid $100,000 transaction fee - this is an expense increase debited, and cash decrease credited (asset decrease).\n\nThe debit tuple shows (2,0,0,0,0,0) = 2 asset increases, which correctly captures:\n- Investment in Ford shares (asset increase)\n- Transaction fee expense (wait, this should be expense increase, not asset increase)\n\nActually, looking more carefully: the debit should show 1 asset increase (investment) + 1 expense increase (fee), but it shows 2 asset increases. However, my job is to review the CREDIT side only.\n\nThe credit side should show:\n- Cash decrease of $3,000,000 (asset decrease)\n- Cash decrease of $100,000 (asset decrease)\n= 2 asset decreases total\n\nThe initial credit tuple (0,0,0,2,0,0) correctly shows 2 asset decreases (cash paid out). This is correct. The transaction involves two separate cash outflows that both result in asset decreases on the credit side.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves BlackRock (the investor) acquiring shares of Ford. From BlackRock's perspective:\n\n1. They paid $3,000,000 for the investment in Ford shares - this is an asset increase (investment/financial asset) debited, and cash decrease credited (asset decrease).\n\n2. They paid $100,000 transaction fee - this is an expense increase debited, and cash decrease credited (asset decrease).\n\nThe debit tuple shows (2,0,0,0,0,0) = 2 asset increases, which correctly captures:\n- Investment in Ford shares (asset increase)\n- Transaction fee expense (wait, this should be expense increase, not asset increase)\n\nActually, looking more carefully: the debit should show 1 asset increase (investment) + 1 expense increase (fee), but it shows 2 asset increases. However, my job is to review the CREDIT side only.\n\nThe credit side should show:\n- Cash decrease of $3,000,000 (asset decrease)\n- Cash decrease of $100,000 (asset decrease)\n= 2 asset decreases total\n\nThe initial credit tuple (0,0,0,2,0,0) correctly shows 2 asset decreases (cash paid out). This is correct. The transaction involves two separate cash outflows that both result in asset decreases on the credit side."
+    },
+    "entry_builder": {
+      "input_tokens": 809,
+      "output_tokens": 541,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3924,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0114765,
+      "raw_cost_usd": 0.019887,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity stake in Ford common shares and transaction fees",
+        "rationale": "Under IFRS 9, the investment in Ford shares is classified as a financial asset. Since BlackRock acquired 10% of outstanding shares, this does not give significant influence (typically requires 20%+), so the investment is measured at fair value through profit or loss or fair value through OCI, depending on management's election. The $3,000,000 purchase price is capitalized as the investment cost. The $100,000 transaction fee is directly attributable to the acquisition and must be capitalized as part of the investment cost under IFRS 9 (transaction costs are included in initial measurement for investments not at FVTPL, but expensed immediately for FVTPL). However, the transaction does not specify management's classification election. Given this is a 10% stake in a public company (Ford), the default treatment would typically be FVTPL for such investments, meaning transaction costs should be expensed. But this creates ambiguity: if management elected FVOCI, costs are capitalized; if FVTPL, costs are expensed. The tuple suggests one asset increase and one expense increase on the debit side, with two asset decreases on credit (likely cash for shares and cash for fees). This implies the fee is being expensed, consistent with FVTPL treatment. I will proceed with this interpretation as the most common treatment for minority stakes in public companies.",
+        "lines": [
+          {
+            "account_name": "Investment in Equity Securities",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "Transaction Fees Expense",
+            "type": "debit",
+            "amount": 100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": false,
+  "clarification_correct": null,
+  "clarification_questions": [
+    "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction costs capitalized into the investment = asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are typically capitalized as part of the initial cost of the investment. Both debits increase asset accounts, resulting in 2 asset increase lines."
+  ],
+  "ambiguous": true,
+  "tier": "hard",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Two distinct asset increases: (1) Investment in Ford shares = financial asset increase of $3,000,000, and (2) Transaction costs capitalized into the investment = asset increase of $100,000. Under IFRS, transaction costs directly attributable to acquiring a financial asset are typically capitalized as part of the initial cost of the investment. Both debits increase asset accounts, resulting in 2 asset increase lines.",
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Two credit lines: (1) Cash/bank account decreases by $3,000,000 for the share acquisition = asset decrease, and (2) Cash/bank account decreases by $100,000 for the transaction fee = asset decrease. Both represent cash leaving the business via cheque payment.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves two distinct economic events: (1) acquiring an investment in Ford shares for $3,000,000, and (2) paying a transaction fee of $100,000. The investment in Ford shares is a financial asset (investment) increase. The transaction fee is an expense - it is a cost incurred to complete the acquisition and should be expensed under IFRS, not capitalized as part of the investment cost (transaction costs on financial assets at FVTPL are expensed). The initial tuple (2,0,0,0,0,0) incorrectly treated both amounts as asset increases. Corrected to (1,0,1,0,0,0): one asset increase for the investment, one expense increase for the transaction fee. This is consistent with the credit tuple showing 2 asset decreases (cash paid for both the investment and the fee).",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves BlackRock (the investor) acquiring shares of Ford. From BlackRock's perspective:\n\n1. They paid $3,000,000 for the investment in Ford shares - this is an asset increase (investment/financial asset) debited, and cash decrease credited (asset decrease).\n\n2. They paid $100,000 transaction fee - this is an expense increase debited, and cash decrease credited (asset decrease).\n\nThe debit tuple shows (2,0,0,0,0,0) = 2 asset increases, which correctly captures:\n- Investment in Ford shares (asset increase)\n- Transaction fee expense (wait, this should be expense increase, not asset increase)\n\nActually, looking more carefully: the debit should show 1 asset increase (investment) + 1 expense increase (fee), but it shows 2 asset increases. However, my job is to review the CREDIT side only.\n\nThe credit side should show:\n- Cash decrease of $3,000,000 (asset decrease)\n- Cash decrease of $100,000 (asset decrease)\n= 2 asset decreases total\n\nThe initial credit tuple (0,0,0,2,0,0) correctly shows 2 asset decreases (cash paid out). This is correct. The transaction involves two separate cash outflows that both result in asset decreases on the credit side.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity stake in Ford common shares and transaction fees",
+        "rationale": "Under IFRS 9, the investment in Ford shares is classified as a financial asset. Since BlackRock acquired 10% of outstanding shares, this does not give significant influence (typically requires 20%+), so the investment is measured at fair value through profit or loss or fair value through OCI, depending on management's election. The $3,000,000 purchase price is capitalized as the investment cost. The $100,000 transaction fee is directly attributable to the acquisition and must be capitalized as part of the investment cost under IFRS 9 (transaction costs are included in initial measurement for investments not at FVTPL, but expensed immediately for FVTPL). However, the transaction does not specify management's classification election. Given this is a 10% stake in a public company (Ford), the default treatment would typically be FVTPL for such investments, meaning transaction costs should be expensed. But this creates ambiguity: if management elected FVOCI, costs are capitalized; if FVTPL, costs are expensed. The tuple suggests one asset increase and one expense increase on the debit side, with two asset decreases on credit (likely cash for shares and cash for fees). This implies the fee is being expensed, consistent with FVTPL treatment. I will proceed with this interpretation as the most common treatment for minority stakes in public companies.",
+        "lines": [
+          {
+            "account_name": "Investment in Equity Securities",
+            "type": "debit",
+            "amount": 3000000.0
+          },
+          {
+            "account_name": "Transaction Fees Expense",
+            "type": "debit",
+            "amount": 100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 510,
+        "output_tokens": 154,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 129,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 678,
+        "output_tokens": 256,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 678,
+        "output_tokens": 367,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 809,
+        "output_tokens": 541,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

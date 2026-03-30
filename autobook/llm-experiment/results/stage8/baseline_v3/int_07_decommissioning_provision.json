@@ -1,0 +1,451 @@
+{
+  "test_case_id": "int_07_decommissioning_provision",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Offshore marine structure acquired on account with decommissioning obligation capitalized at present value per IAS 16 and IAS 37",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Offshore Marine Structure",
+        "amount": 4000000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Decommissioning Asset",
+        "amount": 1950000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Trade Payables",
+        "amount": 4000000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Decommissioning Provision",
+        "amount": 1950000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.061983,
+  "raw_cost_usd": 0.127836,
+  "total_latency_ms": 47380,
+  "total_input_tokens": 30442,
+  "total_output_tokens": 2434,
+  "total_llm_calls": 8,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "unknown": {
+      "input_tokens": 4989,
+      "output_tokens": 2004,
+      "cache_read_tokens": 17370,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 22359,
+      "llm_calls": 6,
+      "actual_cost_usd": 0.050238000000000005,
+      "raw_cost_usd": 0.097137,
+      "output": null,
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 532,
+      "output_tokens": 213,
+      "cache_read_tokens": 3554,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4086,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058572,
+      "raw_cost_usd": 0.015453,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Offshore marine structure acquired",
+            "category": "Machinery",
+            "count": 1
+          },
+          {
+            "reason": "Present value of decommissioning obligation capitalized to asset cost under IAS 16",
+            "category": "Machinery",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 531,
+      "output_tokens": 217,
+      "cache_read_tokens": 3466,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3997,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058878,
+      "raw_cost_usd": 0.015246,
+      "output": {
+        "liability_increase": [
+          {
+            "reason": "Accounts payable for marine structure purchased on account",
+            "category": "Trade payables",
+            "count": 1
+          },
+          {
+            "reason": "Present value of decommissioning obligation for future site restoration",
+            "category": "Decommissioning provisions",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "offshore marine structure acquisition",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "decommissioning provision at present value",
+            "why_llm_cannot_do_this": "Requires capitalizing the present value of the restoration obligation as part of the asset cost under IAS 37 and IFRIC 1, creating both an asset addition and a provision liability. The system must understand that decommissioning costs are added to the carrying amount of the related asset (not expensed), and that subsequent unwinding of the discount creates interest expense over the permit term.",
+            "what_is_best_llm_can_do": "Record the structure at $4,000,000 only, potentially treating the restoration cost as a separate expense or omitting the provision entirely",
+            "skeptical": true
+          },
+          {
+            "aspect": "future accretion of decommissioning provision",
+            "why_llm_cannot_do_this": "The provision will need to be accreted over 10 years using the discount rate implicit in the present value calculation, creating periodic interest expense entries. The system lacks the capability to set up multi-period accretion schedules or calculate the implicit discount rate from the present value.",
+            "what_is_best_llm_can_do": "Record only the initial entry without establishing any mechanism for future accretion expense recognition",
+            "skeptical": true
+          },
+          {
+            "aspect": "depreciation of capitalized decommissioning cost",
+            "why_llm_cannot_do_this": "The $1,950,000 restoration cost component must be depreciated over the 10-year permit term along with the structure's acquisition cost. The system must understand that the total depreciable base is $5,950,000 ($4,000,000 + $1,950,000), not just the purchase price.",
+            "what_is_best_llm_can_do": "Set up depreciation based only on the $4,000,000 acquisition cost, omitting the capitalized restoration component",
+            "skeptical": true
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Transaction involves acquisition of an offshore marine structure (capital asset) with a decommissioning provision. No tax is mentioned in the transaction text. Capital asset acquisitions are typically taxable supplies, but since tax is not mentioned, no tax lines should be added per system rules.",
+        "tax_mentioned": false,
+        "taxable": true,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged by upstream detector. Transaction is clear: offshore marine structure acquired on account with decommissioning obligation.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "Three skeptical flags raised:\n\n1. \"Decommissioning provision at present value\" - Skeptical flag claims system cannot capitalize PV of restoration as asset cost. However, this is standard IFRS treatment under IAS 16.16(c) and IFRIC 1. The entry is straightforward: debit asset for $1,950,000, credit provision for $1,950,000. The system CAN handle this - it's a simple double-entry with no complex calculations required for the INITIAL recognition.\n\n2. \"Future accretion of decommissioning provision\" - This flag concerns FUTURE entries (periodic interest expense over 10 years), not the current acquisition entry. Out of scope for this transaction. The current entry does not require accretion calculations.\n\n3. \"Depreciation of capitalized decommissioning cost\" - This flag concerns FUTURE depreciation entries, not the current acquisition entry. Out of scope for this transaction. The current entry does not require depreciation calculations.\n\nAll three flags are overly cautious. The CURRENT transaction only requires recording the initial acquisition and provision recognition, which are within standard IFRS knowledge and system capabilities. Future period entries are separate transactions.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classifier: Correctly identifies two asset increases to Machinery - one for the $4,000,000 structure purchase and one for the $1,950,000 capitalized decommissioning cost. Both correctly classified as Machinery (offshore marine structure is operating equipment). Reasoning is valid and follows IAS 16.16(c) and IFRIC 1.\n\nCredit classifier: Correctly identifies two liability increases - Trade payables for $4,000,000 (purchased on account) and Decommissioning provisions for $1,950,000 (PV of restoration obligation). Categories are correct and specific. Reasoning is valid.\n\nBoth classifications are accurate. The entry balances: Debits $5,950,000 = Credits $5,950,000. No override needed.",
+        "debit_approved": true,
+        "override_debit": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "credit_approved": true,
+        "override_credit": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "decision_rationale": "All complexity flags concern future period entries (accretion, depreciation), not the current acquisition transaction. The initial recognition of decommissioning provision capitalized to asset cost is standard IFRS treatment that the system can handle. No ambiguities flagged. Classifications are correct with proper account categories and amounts. Entry is complete and balanced.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Offshore marine structure acquired on account with decommissioning obligation capitalized at present value per IAS 16 and IAS 37",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Offshore Marine Structure",
+            "amount": 4000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Decommissioning Asset",
+            "amount": 1950000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Trade Payables",
+            "amount": 4000000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Decommissioning Provision",
+            "amount": 1950000.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Offshore marine structure acquired",
+            "category": "Machinery",
+            "count": 1
+          },
+          {
+            "reason": "Present value of decommissioning obligation capitalized to asset cost under IAS 16",
+            "category": "Machinery",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [
+          {
+            "reason": "Accounts payable for marine structure purchased on account",
+            "category": "Trade payables",
+            "count": 1
+          },
+          {
+            "reason": "Present value of decommissioning obligation for future site restoration",
+            "category": "Decommissioning provisions",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 570,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2996,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 556,
+        "output_tokens": 164,
+        "input_token_details": {
+          "cache_read": 2727,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 532,
+        "output_tokens": 213,
+        "input_token_details": {
+          "cache_read": 3554,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 546,
+        "output_tokens": 531,
+        "input_token_details": {
+          "cache_read": 2389,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 531,
+        "output_tokens": 217,
+        "input_token_details": {
+          "cache_read": 3466,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 1640,
+        "output_tokens": 813,
+        "input_token_details": {
+          "cache_read": 3445,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 769,
+        "output_tokens": 222,
+        "input_token_details": {
+          "cache_read": 2934,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 908,
+        "output_tokens": 239,
+        "input_token_details": {
+          "cache_read": 2879,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "unknown": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use"
+    }
+  }
+}

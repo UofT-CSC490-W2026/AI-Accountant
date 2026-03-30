@@ -1,0 +1,434 @@
+{
+  "test_case_id": "int_hard_01b_note_collateralized",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Discounting of 90-day promissory note at bank (collateralized borrowing)",
+    "rationale": "Management has determined this is a collateralized borrowing, so the note receivable remains on the books. The transaction involves two events: (1) initial receipt of the note settling the trade receivable, and (2) discounting at the bank 50 days later. For the discounting event: Cash is received for net proceeds after discount charges. The discount amount is calculated as $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Since this is a collateralized borrowing (not derecognition), we record a liability for the amount received and recognize the discount charge as interest expense. The note receivable stays on the books. However, the transaction text describes the complete sequence, so we need to record both: (1) the original receipt of the note (debit Note Receivable, credit Accounts Receivable for $100,000), and (2) the discounting (debit Cash for $98,356.16, debit Interest Expense for $1,643.84, credit Note Payable - Bank for $100,000). The tuples indicate 1 asset increase (cash from bank), 1 expense increase (discount charge), and 1 liability increase (borrowing), which matches the discounting event only. Since the transaction emphasizes the discounting event ('Ford discounted the note at the bank'), I will record only the discounting transaction, assuming the initial note receipt was recorded previously.",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 98356.16
+      },
+      {
+        "account_name": "Interest Expense",
+        "type": "debit",
+        "amount": 1643.84
+      },
+      {
+        "account_name": "Note Payable - Bank",
+        "type": "credit",
+        "amount": 100000.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "discounting treatment (derecognition vs collateralized borrowing)",
+        "action": "proceed",
+        "reason": "Transaction explicitly states management determined this is a collateralized borrowing, so note receivable stays on books and we record a liability"
+      },
+      {
+        "aspect": "calculation of discount amount",
+        "action": "proceed",
+        "reason": "All facts provided: $100,000 face value, 40 days remaining (90-50), 15% annual rate. Discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84"
+      },
+      {
+        "aspect": "original trade receivable amount",
+        "action": "proceed",
+        "reason": "The discounting transaction does not require recording the original receivable settlement, which would have been recorded when the note was first received. The tuples indicate only the discounting event."
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0327186,
+  "raw_cost_usd": 0.054621,
+  "total_latency_ms": 27695,
+  "total_input_tokens": 11132,
+  "total_output_tokens": 1415,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 595,
+      "output_tokens": 275,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2990,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0066285,
+      "raw_cost_usd": 0.013095,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "discounting treatment (derecognition vs collateralized borrowing)",
+            "resolved": true,
+            "resolution": "Transaction explicitly states 'Management has determined that this is a collateralized borrowing (risks and rewards not transferred)' \u2014 this resolves the typical ambiguity around note discounting",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "calculation of discount amount",
+            "resolved": true,
+            "resolution": "All necessary facts provided: face value $100,000, 90-day note, discounted after 50 days (40 days remaining), annual discount rate 15% \u2014 discount = $100,000 \u00d7 15% \u00d7 (40/365)",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "original trade receivable amount",
+            "resolved": true,
+            "resolution": "Note received 'as settlement of a trade receivable' with face value $100,000 \u2014 implies the receivable was settled at face value, so original receivable was $100,000",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 570,
+      "output_tokens": 160,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1832,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.004488600000000001,
+      "raw_cost_usd": 0.007896,
+      "output": {
+        "reason": "This is a collateralized borrowing (not a sale of the receivable). On the debit side: (1) Cash = asset increase (receiving net proceeds from bank), and (2) Interest expense = expense increase (the discount charge represents interest cost on the borrowing). The note receivable remains on Ford's books since risks and rewards were not transferred. Two distinct debit lines: one for the cash received and one for the financing cost incurred.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "This is a collateralized borrowing (not a sale of the receivable). On the debit side: (1) Cash = asset increase (receiving net proceeds from bank), and (2) Interest expense = expense increase (the discount charge represents interest cost on the borrowing). The note receivable remains on Ford's books since risks and rewards were not transferred. Two distinct debit lines: one for the cash received and one for the financing cost incurred."
+    },
+    "credit_classifier": {
+      "input_tokens": 568,
+      "output_tokens": 185,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1809,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0048513,
+      "raw_cost_usd": 0.008202,
+      "output": {
+        "reason": "The transaction involves discounting a note receivable at the bank, treated as a collateralized borrowing under IFRS. On the credit side: (1) The note receivable remains on Ford's books (no asset decrease) because risks and rewards are not transferred - this is a borrowing, not a sale. (2) Ford receives cash from the bank, which represents a liability increase (loan payable/note payable to bank). The discount charges represent interest expense but are on the debit side. Therefore, credit side shows only the liability increase from the bank financing.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves discounting a note receivable at the bank, treated as a collateralized borrowing under IFRS. On the credit side: (1) The note receivable remains on Ford's books (no asset decrease) because risks and rewards are not transferred - this is a borrowing, not a sale. (2) Ford receives cash from the bank, which represents a liability increase (loan payable/note payable to bank). The discount charges represent interest expense but are on the debit side. Therefore, credit side shows only the liability increase from the bank financing."
+    },
+    "entry_builder": {
+      "input_tokens": 1287,
+      "output_tokens": 795,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4501,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0167502,
+      "raw_cost_usd": 0.025428,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Discounting of 90-day promissory note at bank (collateralized borrowing)",
+        "rationale": "Management has determined this is a collateralized borrowing, so the note receivable remains on the books. The transaction involves two events: (1) initial receipt of the note settling the trade receivable, and (2) discounting at the bank 50 days later. For the discounting event: Cash is received for net proceeds after discount charges. The discount amount is calculated as $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Since this is a collateralized borrowing (not derecognition), we record a liability for the amount received and recognize the discount charge as interest expense. The note receivable stays on the books. However, the transaction text describes the complete sequence, so we need to record both: (1) the original receipt of the note (debit Note Receivable, credit Accounts Receivable for $100,000), and (2) the discounting (debit Cash for $98,356.16, debit Interest Expense for $1,643.84, credit Note Payable - Bank for $100,000). The tuples indicate 1 asset increase (cash from bank), 1 expense increase (discount charge), and 1 liability increase (borrowing), which matches the discounting event only. Since the transaction emphasizes the discounting event ('Ford discounted the note at the bank'), I will record only the discounting transaction, assuming the initial note receipt was recorded previously.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98356.16
+          },
+          {
+            "account_name": "Interest Expense",
+            "type": "debit",
+            "amount": 1643.84
+          },
+          {
+            "account_name": "Note Payable - Bank",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "discounting treatment (derecognition vs collateralized borrowing)",
+            "action": "proceed",
+            "reason": "Transaction explicitly states management determined this is a collateralized borrowing, so note receivable stays on books and we record a liability"
+          },
+          {
+            "aspect": "calculation of discount amount",
+            "action": "proceed",
+            "reason": "All facts provided: $100,000 face value, 40 days remaining (90-50), 15% annual rate. Discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84"
+          },
+          {
+            "aspect": "original trade receivable amount",
+            "action": "proceed",
+            "reason": "The discounting transaction does not require recording the original receivable settlement, which would have been recorded when the note was first received. The tuples indicate only the discounting event."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "discounting treatment (derecognition vs collateralized borrowing)",
+            "resolved": true,
+            "resolution": "Transaction explicitly states 'Management has determined that this is a collateralized borrowing (risks and rewards not transferred)' \u2014 this resolves the typical ambiguity around note discounting",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "calculation of discount amount",
+            "resolved": true,
+            "resolution": "All necessary facts provided: face value $100,000, 90-day note, discounted after 50 days (40 days remaining), annual discount rate 15% \u2014 discount = $100,000 \u00d7 15% \u00d7 (40/365)",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "original trade receivable amount",
+            "resolved": true,
+            "resolution": "Note received 'as settlement of a trade receivable' with face value $100,000 \u2014 implies the receivable was settled at face value, so original receivable was $100,000",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "This is a collateralized borrowing (not a sale of the receivable). On the debit side: (1) Cash = asset increase (receiving net proceeds from bank), and (2) Interest expense = expense increase (the discount charge represents interest cost on the borrowing). The note receivable remains on Ford's books since risks and rewards were not transferred. Two distinct debit lines: one for the cash received and one for the financing cost incurred.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction involves discounting a note receivable at the bank, treated as a collateralized borrowing under IFRS. On the credit side: (1) The note receivable remains on Ford's books (no asset decrease) because risks and rewards are not transferred - this is a borrowing, not a sale. (2) Ford receives cash from the bank, which represents a liability increase (loan payable/note payable to bank). The discount charges represent interest expense but are on the debit side. Therefore, credit side shows only the liability increase from the bank financing.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "This is a collateralized borrowing (not a sale of the receivable). On the debit side: (1) Cash = asset increase (receiving net proceeds from bank), and (2) Interest expense = expense increase (the discount charge represents interest cost on the borrowing). The note receivable remains on Ford's books since risks and rewards were not transferred. Two distinct debit lines: one for the cash received and one for the financing cost incurred.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves discounting a note receivable at the bank, treated as a collateralized borrowing under IFRS. On the credit side: (1) The note receivable remains on Ford's books (no asset decrease) because risks and rewards are not transferred - this is a borrowing, not a sale. (2) Ford receives cash from the bank, which represents a liability increase (loan payable/note payable to bank). The discount charges represent interest expense but are on the debit side. Therefore, credit side shows only the liability increase from the bank financing.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Discounting of 90-day promissory note at bank (collateralized borrowing)",
+        "rationale": "Management has determined this is a collateralized borrowing, so the note receivable remains on the books. The transaction involves two events: (1) initial receipt of the note settling the trade receivable, and (2) discounting at the bank 50 days later. For the discounting event: Cash is received for net proceeds after discount charges. The discount amount is calculated as $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84. Since this is a collateralized borrowing (not derecognition), we record a liability for the amount received and recognize the discount charge as interest expense. The note receivable stays on the books. However, the transaction text describes the complete sequence, so we need to record both: (1) the original receipt of the note (debit Note Receivable, credit Accounts Receivable for $100,000), and (2) the discounting (debit Cash for $98,356.16, debit Interest Expense for $1,643.84, credit Note Payable - Bank for $100,000). The tuples indicate 1 asset increase (cash from bank), 1 expense increase (discount charge), and 1 liability increase (borrowing), which matches the discounting event only. Since the transaction emphasizes the discounting event ('Ford discounted the note at the bank'), I will record only the discounting transaction, assuming the initial note receipt was recorded previously.",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 98356.16
+          },
+          {
+            "account_name": "Interest Expense",
+            "type": "debit",
+            "amount": 1643.84
+          },
+          {
+            "account_name": "Note Payable - Bank",
+            "type": "credit",
+            "amount": 100000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "discounting treatment (derecognition vs collateralized borrowing)",
+            "action": "proceed",
+            "reason": "Transaction explicitly states management determined this is a collateralized borrowing, so note receivable stays on books and we record a liability"
+          },
+          {
+            "aspect": "calculation of discount amount",
+            "action": "proceed",
+            "reason": "All facts provided: $100,000 face value, 40 days remaining (90-50), 15% annual rate. Discount = $100,000 \u00d7 15% \u00d7 (40/365) = $1,643.84"
+          },
+          {
+            "aspect": "original trade receivable amount",
+            "action": "proceed",
+            "reason": "The discounting transaction does not require recording the original receivable settlement, which would have been recorded when the note was first received. The tuples indicate only the discounting event."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 595,
+        "output_tokens": 275,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 570,
+        "output_tokens": 160,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 568,
+        "output_tokens": 185,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1287,
+        "output_tokens": 795,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

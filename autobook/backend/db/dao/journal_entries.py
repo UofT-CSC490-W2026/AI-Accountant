@@ -7,7 +7,7 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
-from db.dao.chart_of_accounts import ChartOfAccountsDAO
+from db.dao.chart_of_accounts import ChartOfAccountsDAO, DEFAULT_COA
 from db.connection import set_current_user_context
 from db.models.account import ChartOfAccounts
 from db.models.journal import JournalEntry, JournalLine
@@ -15,6 +15,19 @@ from db.models.journal import JournalEntry, JournalLine
 
 def _to_decimal(value) -> Decimal:
     return value if isinstance(value, Decimal) else Decimal(str(value))
+
+
+def _infer_account_type(account_code: str) -> str:
+    for default_code, _, account_type in DEFAULT_COA:
+        if default_code == account_code:
+            return account_type
+    prefix = (account_code or "")[:1]
+    return {
+        "1": "asset",
+        "2": "liability",
+        "3": "equity",
+        "4": "revenue",
+    }.get(prefix, "expense")
 
 
 class JournalEntryDAO:
@@ -132,52 +145,63 @@ class JournalEntryDAO:
         return db.execute(stmt).scalar_one_or_none()
 
     @staticmethod
-    def compute_balances(db: Session, user_id) -> list[dict[str, object]]:
+    def compute_balances(
+        db: Session,
+        user_id,
+        filters: Mapping[str, object] | None = None,
+    ) -> list[dict[str, object]]:
         set_current_user_context(db, user_id)
+        filters = {"status": "posted", **(filters or {})}
+        account_lookup = {
+            account.account_code: account
+            for account in ChartOfAccountsDAO.list_by_user(db, user_id)
+        }
         stmt = (
             select(
-                ChartOfAccounts.account_code,
-                ChartOfAccounts.account_name,
-                ChartOfAccounts.account_type,
+                JournalLine.account_code,
+                func.max(JournalLine.account_name),
                 JournalLine.type,
                 func.sum(JournalLine.amount),
             )
-            .join(
-                JournalLine,
-                ChartOfAccounts.account_code == JournalLine.account_code,
-            )
             .join(JournalEntry, JournalEntry.id == JournalLine.journal_entry_id)
             .where(
-                ChartOfAccounts.user_id == user_id,
                 JournalEntry.user_id == user_id,
-                JournalEntry.status == "posted",
             )
             .group_by(
-                ChartOfAccounts.account_code,
-                ChartOfAccounts.account_name,
-                ChartOfAccounts.account_type,
+                JournalLine.account_code,
                 JournalLine.type,
             )
         )
+        if filters.get("date_from") is not None:
+            stmt = stmt.where(JournalEntry.date >= filters["date_from"])
+        if filters.get("date_to") is not None:
+            stmt = stmt.where(JournalEntry.date <= filters["date_to"])
+        if filters.get("status") is not None:
+            stmt = stmt.where(JournalEntry.status == filters["status"])
         grouped: dict[str, dict[str, object]] = {}
-        for account_code, account_name, account_type, line_type, total in db.execute(stmt):
+        for account_code, account_name, line_type, total in db.execute(stmt):
+            normalized_line_type = str(line_type or "").strip().lower()
+            if normalized_line_type not in {"debit", "credit"}:
+                continue
+            account = account_lookup.get(account_code)
             bucket = grouped.setdefault(
                 account_code,
                 {
                     "account_code": account_code,
-                    "account_name": account_name,
-                    "account_type": account_type,
+                    "account_name": (account.account_name if account is not None else account_name) or account_code,
+                    "account_type": account.account_type if account is not None else _infer_account_type(str(account_code)),
                     "debit_total": Decimal("0"),
                     "credit_total": Decimal("0"),
                 },
             )
-            bucket[f"{line_type}_total"] = _to_decimal(total or 0)
+            bucket[f"{normalized_line_type}_total"] = _to_decimal(total or 0)
 
         balances: list[dict[str, object]] = []
         for account in grouped.values():
-            debit_total = account["debit_total"]
-            credit_total = account["credit_total"]
-            if account["account_type"] in {"asset", "expense"}:
+            debit_total = _to_decimal(account["debit_total"])
+            credit_total = _to_decimal(account["credit_total"])
+            account_type = str(account["account_type"]).strip().lower()
+            if account_type in {"asset", "expense"}:
                 balance = debit_total - credit_total
             else:
                 balance = credit_total - debit_total
@@ -185,22 +209,39 @@ class JournalEntryDAO:
                 {
                     "account_code": account["account_code"],
                     "account_name": account["account_name"],
+                    "account_type": account_type,
+                    "debit_total": debit_total,
+                    "credit_total": credit_total,
                     "balance": balance,
                 }
             )
         return sorted(balances, key=lambda item: str(item["account_code"]))
 
     @staticmethod
-    def compute_summary(db: Session, user_id) -> dict[str, Decimal]:
+    def compute_summary(
+        db: Session,
+        user_id,
+        filters: Mapping[str, object] | None = None,
+    ) -> dict[str, Decimal]:
         set_current_user_context(db, user_id)
+        filters = {"status": "posted", **(filters or {})}
         stmt = (
             select(JournalLine.type, func.sum(JournalLine.amount))
             .join(JournalEntry, JournalEntry.id == JournalLine.journal_entry_id)
-            .where(JournalEntry.user_id == user_id, JournalEntry.status == "posted")
+            .where(JournalEntry.user_id == user_id)
             .group_by(JournalLine.type)
         )
+        if filters.get("date_from") is not None:
+            stmt = stmt.where(JournalEntry.date >= filters["date_from"])
+        if filters.get("date_to") is not None:
+            stmt = stmt.where(JournalEntry.date <= filters["date_to"])
+        if filters.get("status") is not None:
+            stmt = stmt.where(JournalEntry.status == filters["status"])
         totals = {"total_debits": Decimal("0"), "total_credits": Decimal("0")}
         for line_type, amount in db.execute(stmt):
-            key = "total_debits" if line_type == "debit" else "total_credits"
+            normalized_line_type = str(line_type or "").strip().lower()
+            if normalized_line_type not in {"debit", "credit"}:
+                continue
+            key = "total_debits" if normalized_line_type == "debit" else "total_credits"
             totals[key] = _to_decimal(amount or 0)
         return totals

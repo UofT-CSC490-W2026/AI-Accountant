@@ -1,0 +1,44 @@
+======================================================================
+Test Case: int_23_split_electricity
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [0, 0, 2, 0, 0, 0]  ✗
+  Credit: [1, 0, 0, 0, 0, 0]  ✓
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (0):
+  (none)
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 2, 0, 0, 0]
+Reason: Factory electricity ($15,000) = manufacturing overhead expense increase (cost of production). Office electricity ($5,500) = administrative/operating expense increase. Two distinct expense accounts are debited because they serve different business purposes: factory electricity is a production cost while office electricity is an administrative cost. Both are expense increases.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [1, 0, 0, 0, 0, 0]
+Reason: Payment made using corporate credit card creates a liability increase (credit card payable). The factory electricity ($15,000) and office electricity ($5,500) are expenses being incurred, not decreased. The credit side records only the credit card liability increase.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Rationale: Factory electricity ($15,000) is a manufacturing overhead cost that should be capitalized to inventory or expensed as cost of goods sold depending on production activity. Office electricity ($5,500) is an administrative expense. Both are paid via corporate credit card, creating a liability. The debit tuple (0,0,2,0,0,0) indicates two expense increases, and credit tuple (1,0,0,0,0,0) indicates one liability increase. Factory electricity is properly classified as Manufacturing Overhead or Factory Overhead (an expense account that feeds into cost of goods manufactured), and office electricity is an administrative expense. Credit card payable increases as a liability.
+Entry:
+  debit  Factory Overhead                              $     15,000.00
+  debit  Utilities Expense                             $      5,500.00
+  credit Credit Card Payable                           $     20,500.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Factory Overhead                              $     15,000.00
+  debit  Utilities Expense                             $      5,500.00
+  credit Credit Card Payable                           $     20,500.00
+======================================================================

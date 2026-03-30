@@ -1,0 +1,48 @@
+======================================================================
+Test Case: int_11_land_instalment_discount
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [1, 0, 0, 0, 0, 0]  ✗
+  Credit: [1, 0, 0, 1, 0, 0]  ✗
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (0):
+  (none)
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [1, 0, 0, 0, 0, 0]
+Reason: Ford acquires land for factory construction. Under IFRS, the land (including demolition of existing building as part of site preparation) is recorded at present value of the payment obligation. This is 1 asset increase (Land). The debit is to Land asset at present value of $60,000,000 discounted at 6% market rate. The difference between face value of instalments ($60M) and present value creates a financing component handled on the credit side. Only the asset acquisition is debited here.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [1, 0, 0, 1, 0, 0]
+Reason: This transaction involves acquiring land for $60,000,000 to be paid in instalments. On the credit side:
+
+1. **Asset decrease (Cash)**: $10,000,000 - The first instalment payment made at the end of the year of acquisition represents cash leaving the business.
+
+2. **Liability increase (Long-term payable)**: The remaining 5 instalments totaling $50,000,000 create a financial liability. Under IFRS, when payment terms differ from immediate settlement, the liability must be recorded at present value (discounted at 6% market rate). This represents a liability increase.
+
+The existing building to be demolished is not separately recognized - its value is included in the land cost as site preparation under IAS 16. The credit side shows: one asset decrease (cash payment) and one liability increase (present value of future instalments).
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Rationale: Under IFRS, land acquired for construction purposes is capitalized at cost. The purchase price of $60,000,000 is financed through 6 annual instalments of $10,000,000. Since payment is deferred, the liability must be recorded at present value using the market interest rate of 6% per IAS 2 and IFRS 9. The present value of 6 annual payments of $10,000,000 at 6% is $49,173,240 (using PV annuity factor of 4.917324). The land is recorded at this present value, which represents the cash price equivalent. The existing building has no separate value since it will be demolished immediately - its cost is included in the land cost as part of site preparation. The difference between the nominal amount ($60,000,000) and present value ($49,173,240) represents future interest expense that will be recognized over the payment period. Debit tuple (1,0,0,0,0,0) indicates one asset increase; credit tuple (1,0,0,1,0,0) indicates one liability increase and one asset decrease - however, there is no asset decrease in this transaction. The credit tuple appears incorrect; this is a straightforward asset acquisition financed by liability. The entry records Land (debit) and Note Payable at present value (credit). No tax applies to land purchases in Canada (exempt from HST/GST per Excise Tax Act Schedule V, Part I).
+Entry:
+  debit  Land                                          $ 49,173,240.00
+  credit Note Payable                                  $ 49,173,240.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Land                                          $ 49,173,240.00
+  credit Note Payable                                  $ 49,173,240.00
+======================================================================

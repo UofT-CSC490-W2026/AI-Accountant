@@ -1,0 +1,359 @@
+{
+  "test_case_id": "basic_07_loan_to_equity",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Conversion of bank loan to equity by issuing 400 common shares",
+    "rationale": "The transaction converts a $200 loan liability to equity. The debit tuple (0,0,0,1,0,0) correctly indicates one liability decrease line. The credit tuple (0,1,0,0,0,0) correctly indicates one equity increase line. The transaction states both the loan amount ($200) and the number of shares issued (400), which arithmetically implies $0.50 per share. Under IFRS, when debt is settled by issuing equity instruments, the equity instruments are measured at fair value (IFRS 9), and any difference between the carrying amount of the debt and the fair value of equity issued results in a gain or loss. However, the transaction text provides both amounts that match exactly, strongly suggesting this was the agreed conversion price with no gain or loss. In the absence of explicit information indicating a difference between carrying amount and fair value, and given that the amounts align perfectly, the most reasonable interpretation is that the 400 shares were issued at $0.50 per share to settle the $200 loan with no gain or loss. The entry records the extinguishment of the loan (debit Loan Payable) and the issuance of common shares (credit Common Shares). If the entity has a stated par value per share that differs from $0.50, the difference would go to Additional Paid-in Capital, but without that information, the full amount is credited to Common Shares.",
+    "lines": [
+      {
+        "account_name": "Loan Payable",
+        "type": "debit",
+        "amount": 200.0
+      },
+      {
+        "account_name": "Common Shares",
+        "type": "credit",
+        "amount": 200.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "conversion terms and share valuation",
+        "action": "proceed",
+        "reason": "The transaction explicitly states both the loan amount ($200) and the number of shares issued (400), which arithmetically yields $0.50 per share. The fact that both amounts are provided and align perfectly indicates this was the agreed conversion price. While IFRS technically requires fair value measurement, the transaction text provides sufficient information to conclude the conversion was at $0.50 per share with no gain or loss. If there were a material difference between carrying amount and fair value requiring gain/loss recognition, this would typically be explicitly stated in the transaction description. The debit/credit structure remains the same (liability decrease, equity increase) regardless of whether there's a small gain/loss, so this ambiguity does not prevent entry construction."
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.030156600000000002,
+  "raw_cost_usd": 0.052059,
+  "total_latency_ms": 25452,
+  "total_input_tokens": 10773,
+  "total_output_tokens": 1316,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 518,
+      "output_tokens": 345,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2913,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0074475,
+      "raw_cost_usd": 0.013914,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "conversion terms and share valuation",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Shares issued at $0.50 per share (400 shares \u00d7 $0.50 = $200, matching loan amount exactly)",
+              "Shares issued at a different fair value with gain/loss on debt settlement"
+            ],
+            "clarification_question": "Were the 400 shares issued at $0.50 per share (matching the $200 loan amount exactly), or was there a difference between the loan carrying amount and the fair value of shares issued?",
+            "why_entry_differs": "If shares = $200 exactly, entry is: Dr. Loan Payable $200, Cr. Common Shares (at par/stated) + Cr. Additional Paid-in Capital (if applicable). If fair value differs from $200, a gain or loss on debt settlement must be recognized.",
+            "why_not_resolved": "The transaction states both the loan amount ($200) and number of shares (400), which arithmetically suggests $0.50 per share, but does not explicitly confirm whether this represents the agreed conversion price or if there's a difference between carrying amount and fair value requiring gain/loss recognition. IFRS requires debt settlement to be measured at fair value of consideration given, which may differ from carrying amount."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 129,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1755,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037925999999999997,
+      "raw_cost_usd": 0.0072,
+      "output": {
+        "reason": "Converting a bank loan to equity means the liability (loan payable) is being extinguished. On the debit side, we record 1 liability decrease (the $200 loan is eliminated). The credit side would record the equity increase from issuing common shares, but we only classify debits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Converting a bank loan to equity means the liability (loan payable) is being extinguished. On the debit side, we record 1 liability decrease (the $200 loan is eliminated). The credit side would record the equity increase from issuing common shares, but we only classify debits here."
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 133,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1732,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038403,
+      "raw_cost_usd": 0.007191,
+      "output": {
+        "reason": "The transaction converts a bank loan into equity. On the credit side: (1) The loan liability is extinguished = liability decrease, which is recorded as a DEBIT (not credit), and (2) Common shares are issued = equity increase. Therefore, the credit side has one line: equity increase from issuing shares.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction converts a bank loan into equity. On the credit side: (1) The loan liability is extinguished = liability decrease, which is recorded as a DEBIT (not credit), and (2) Common shares are issued = equity increase. Therefore, the credit side has one line: equity increase from issuing shares."
+    },
+    "entry_builder": {
+      "input_tokens": 1159,
+      "output_tokens": 709,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4373,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.015076200000000001,
+      "raw_cost_usd": 0.023754,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Conversion of bank loan to equity by issuing 400 common shares",
+        "rationale": "The transaction converts a $200 loan liability to equity. The debit tuple (0,0,0,1,0,0) correctly indicates one liability decrease line. The credit tuple (0,1,0,0,0,0) correctly indicates one equity increase line. The transaction states both the loan amount ($200) and the number of shares issued (400), which arithmetically implies $0.50 per share. Under IFRS, when debt is settled by issuing equity instruments, the equity instruments are measured at fair value (IFRS 9), and any difference between the carrying amount of the debt and the fair value of equity issued results in a gain or loss. However, the transaction text provides both amounts that match exactly, strongly suggesting this was the agreed conversion price with no gain or loss. In the absence of explicit information indicating a difference between carrying amount and fair value, and given that the amounts align perfectly, the most reasonable interpretation is that the 400 shares were issued at $0.50 per share to settle the $200 loan with no gain or loss. The entry records the extinguishment of the loan (debit Loan Payable) and the issuance of common shares (credit Common Shares). If the entity has a stated par value per share that differs from $0.50, the difference would go to Additional Paid-in Capital, but without that information, the full amount is credited to Common Shares.",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "conversion terms and share valuation",
+            "action": "proceed",
+            "reason": "The transaction explicitly states both the loan amount ($200) and the number of shares issued (400), which arithmetically yields $0.50 per share. The fact that both amounts are provided and align perfectly indicates this was the agreed conversion price. While IFRS technically requires fair value measurement, the transaction text provides sufficient information to conclude the conversion was at $0.50 per share with no gain or loss. If there were a material difference between carrying amount and fair value requiring gain/loss recognition, this would typically be explicitly stated in the transaction description. The debit/credit structure remains the same (liability decrease, equity increase) regardless of whether there's a small gain/loss, so this ambiguity does not prevent entry construction."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "conversion terms and share valuation",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Shares issued at $0.50 per share (400 shares \u00d7 $0.50 = $200, matching loan amount exactly)",
+              "Shares issued at a different fair value with gain/loss on debt settlement"
+            ],
+            "clarification_question": "Were the 400 shares issued at $0.50 per share (matching the $200 loan amount exactly), or was there a difference between the loan carrying amount and the fair value of shares issued?",
+            "why_entry_differs": "If shares = $200 exactly, entry is: Dr. Loan Payable $200, Cr. Common Shares (at par/stated) + Cr. Additional Paid-in Capital (if applicable). If fair value differs from $200, a gain or loss on debt settlement must be recognized.",
+            "why_not_resolved": "The transaction states both the loan amount ($200) and number of shares (400), which arithmetically suggests $0.50 per share, but does not explicitly confirm whether this represents the agreed conversion price or if there's a difference between carrying amount and fair value requiring gain/loss recognition. IFRS requires debt settlement to be measured at fair value of consideration given, which may differ from carrying amount."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Converting a bank loan to equity means the liability (loan payable) is being extinguished. On the debit side, we record 1 liability decrease (the $200 loan is eliminated). The credit side would record the equity increase from issuing common shares, but we only classify debits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction converts a bank loan into equity. On the credit side: (1) The loan liability is extinguished = liability decrease, which is recorded as a DEBIT (not credit), and (2) Common shares are issued = equity increase. Therefore, the credit side has one line: equity increase from issuing shares.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Converting a bank loan to equity means the liability (loan payable) is being extinguished. On the debit side, we record 1 liability decrease (the $200 loan is eliminated). The credit side would record the equity increase from issuing common shares, but we only classify debits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction converts a bank loan into equity. On the credit side: (1) The loan liability is extinguished = liability decrease, which is recorded as a DEBIT (not credit), and (2) Common shares are issued = equity increase. Therefore, the credit side has one line: equity increase from issuing shares.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Conversion of bank loan to equity by issuing 400 common shares",
+        "rationale": "The transaction converts a $200 loan liability to equity. The debit tuple (0,0,0,1,0,0) correctly indicates one liability decrease line. The credit tuple (0,1,0,0,0,0) correctly indicates one equity increase line. The transaction states both the loan amount ($200) and the number of shares issued (400), which arithmetically implies $0.50 per share. Under IFRS, when debt is settled by issuing equity instruments, the equity instruments are measured at fair value (IFRS 9), and any difference between the carrying amount of the debt and the fair value of equity issued results in a gain or loss. However, the transaction text provides both amounts that match exactly, strongly suggesting this was the agreed conversion price with no gain or loss. In the absence of explicit information indicating a difference between carrying amount and fair value, and given that the amounts align perfectly, the most reasonable interpretation is that the 400 shares were issued at $0.50 per share to settle the $200 loan with no gain or loss. The entry records the extinguishment of the loan (debit Loan Payable) and the issuance of common shares (credit Common Shares). If the entity has a stated par value per share that differs from $0.50, the difference would go to Additional Paid-in Capital, but without that information, the full amount is credited to Common Shares.",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "conversion terms and share valuation",
+            "action": "proceed",
+            "reason": "The transaction explicitly states both the loan amount ($200) and the number of shares issued (400), which arithmetically yields $0.50 per share. The fact that both amounts are provided and align perfectly indicates this was the agreed conversion price. While IFRS technically requires fair value measurement, the transaction text provides sufficient information to conclude the conversion was at $0.50 per share with no gain or loss. If there were a material difference between carrying amount and fair value requiring gain/loss recognition, this would typically be explicitly stated in the transaction description. The debit/credit structure remains the same (liability decrease, equity increase) regardless of whether there's a small gain/loss, so this ambiguity does not prevent entry construction."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 345,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 129,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 133,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1159,
+        "output_tokens": 709,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

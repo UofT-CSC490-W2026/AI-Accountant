@@ -1,0 +1,359 @@
+{
+  "test_case_id": "basic_07_loan_to_equity",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Conversion of bank loan to equity by issuing 400 common shares",
+    "rationale": "Under IFRS, debt-to-equity conversion is recorded by derecognizing the liability and recognizing equity. The transaction states $200 loan converted for 400 shares, which implies $0.50 per share. IFRS 9 requires the equity instrument to be measured at fair value, with any difference between the carrying amount of the liability and the fair value of equity recognized as a gain or loss on extinguishment. However, when the conversion is at book value (i.e., fair value of shares equals carrying amount of debt), no gain or loss arises\u2014it is a simple reclassification. The transaction provides the exact amounts that balance ($200 loan = 400 shares \u00d7 $0.50), suggesting the conversion was done at the carrying amount with no gain/loss. This is the most straightforward interpretation absent contrary facts.",
+    "lines": [
+      {
+        "account_name": "Loan Payable",
+        "type": "debit",
+        "amount": 200.0
+      },
+      {
+        "account_name": "Common Shares",
+        "type": "credit",
+        "amount": 200.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "valuation basis for conversion",
+        "action": "proceed",
+        "reason": "The transaction states the loan amount ($200) and the number of shares issued (400), which mathematically implies $0.50 per share. Under IFRS, if the fair value of the shares equals the carrying amount of the debt, no gain or loss arises\u2014the entry is a straightforward reclassification from liability to equity. The transaction provides exact amounts that balance, indicating a book-value conversion. If the shares had a materially different fair value requiring gain/loss recognition, that would typically be stated in the transaction. Proceeding with the reclassification entry is the correct default treatment."
+      }
+    ],
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0277656,
+  "raw_cost_usd": 0.049668,
+  "total_latency_ms": 35141,
+  "total_input_tokens": 10766,
+  "total_output_tokens": 1158,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 518,
+      "output_tokens": 336,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2913,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0073125,
+      "raw_cost_usd": 0.013779,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "valuation basis for conversion",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Shares issued at $0.50 per share (loan amount \u00f7 shares = $200 \u00f7 400)",
+              "Shares issued at fair market value different from $0.50, with gain/loss on extinguishment"
+            ],
+            "clarification_question": "Were the 400 shares issued at their fair market value, or was the conversion done at the carrying amount of the loan ($0.50 per share)?",
+            "why_entry_differs": "If shares are issued at FMV different from $0.50, a gain or loss on debt extinguishment must be recognized. If conversion is at book value ($0.50/share), no gain/loss arises \u2014 just reclassification from liability to equity.",
+            "why_not_resolved": "The transaction states the loan amount and number of shares but does not specify whether the shares were valued at fair market value or whether the conversion was done at the book value of the debt. IFRS requires shares to be recorded at fair value, but if FMV equals the carrying amount, no gain/loss arises. Without knowing the fair value of the shares, cannot determine if gain/loss recognition is required."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 133,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1732,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0038403,
+      "raw_cost_usd": 0.007191,
+      "output": {
+        "reason": "The transaction converts a bank loan into equity. On the credit side: (1) The loan liability is extinguished = liability decrease, which is recorded as a DEBIT (not credit), and (2) Common shares are issued = equity increase. Therefore, the credit side has one line: equity increase from issuing shares.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction converts a bank loan into equity. On the credit side: (1) The loan liability is extinguished = liability decrease, which is recorded as a DEBIT (not credit), and (2) Common shares are issued = equity increase. Therefore, the credit side has one line: equity increase from issuing shares."
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 129,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1755,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037925999999999997,
+      "raw_cost_usd": 0.0072,
+      "output": {
+        "reason": "Converting a bank loan to equity means the liability (loan payable) is being extinguished. On the debit side, we record 1 liability decrease (the $200 loan is eliminated). The credit side would record the equity increase from issuing common shares, but we only classify debits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "Converting a bank loan to equity means the liability (loan payable) is being extinguished. On the debit side, we record 1 liability decrease (the $200 loan is eliminated). The credit side would record the equity increase from issuing common shares, but we only classify debits here."
+    },
+    "entry_builder": {
+      "input_tokens": 1152,
+      "output_tokens": 560,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4366,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0128202,
+      "raw_cost_usd": 0.021498,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Conversion of bank loan to equity by issuing 400 common shares",
+        "rationale": "Under IFRS, debt-to-equity conversion is recorded by derecognizing the liability and recognizing equity. The transaction states $200 loan converted for 400 shares, which implies $0.50 per share. IFRS 9 requires the equity instrument to be measured at fair value, with any difference between the carrying amount of the liability and the fair value of equity recognized as a gain or loss on extinguishment. However, when the conversion is at book value (i.e., fair value of shares equals carrying amount of debt), no gain or loss arises\u2014it is a simple reclassification. The transaction provides the exact amounts that balance ($200 loan = 400 shares \u00d7 $0.50), suggesting the conversion was done at the carrying amount with no gain/loss. This is the most straightforward interpretation absent contrary facts.",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "valuation basis for conversion",
+            "action": "proceed",
+            "reason": "The transaction states the loan amount ($200) and the number of shares issued (400), which mathematically implies $0.50 per share. Under IFRS, if the fair value of the shares equals the carrying amount of the debt, no gain or loss arises\u2014the entry is a straightforward reclassification from liability to equity. The transaction provides exact amounts that balance, indicating a book-value conversion. If the shares had a materially different fair value requiring gain/loss recognition, that would typically be stated in the transaction. Proceeding with the reclassification entry is the correct default treatment."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "valuation basis for conversion",
+            "resolved": false,
+            "resolution": null,
+            "options": [
+              "Shares issued at $0.50 per share (loan amount \u00f7 shares = $200 \u00f7 400)",
+              "Shares issued at fair market value different from $0.50, with gain/loss on extinguishment"
+            ],
+            "clarification_question": "Were the 400 shares issued at their fair market value, or was the conversion done at the carrying amount of the loan ($0.50 per share)?",
+            "why_entry_differs": "If shares are issued at FMV different from $0.50, a gain or loss on debt extinguishment must be recognized. If conversion is at book value ($0.50/share), no gain/loss arises \u2014 just reclassification from liability to equity.",
+            "why_not_resolved": "The transaction states the loan amount and number of shares but does not specify whether the shares were valued at fair market value or whether the conversion was done at the book value of the debt. IFRS requires shares to be recorded at fair value, but if FMV equals the carrying amount, no gain/loss arises. Without knowing the fair value of the shares, cannot determine if gain/loss recognition is required."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Converting a bank loan to equity means the liability (loan payable) is being extinguished. On the debit side, we record 1 liability decrease (the $200 loan is eliminated). The credit side would record the equity increase from issuing common shares, but we only classify debits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction converts a bank loan into equity. On the credit side: (1) The loan liability is extinguished = liability decrease, which is recorded as a DEBIT (not credit), and (2) Common shares are issued = equity increase. Therefore, the credit side has one line: equity increase from issuing shares.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Converting a bank loan to equity means the liability (loan payable) is being extinguished. On the debit side, we record 1 liability decrease (the $200 loan is eliminated). The credit side would record the equity increase from issuing common shares, but we only classify debits here.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction converts a bank loan into equity. On the credit side: (1) The loan liability is extinguished = liability decrease, which is recorded as a DEBIT (not credit), and (2) Common shares are issued = equity increase. Therefore, the credit side has one line: equity increase from issuing shares.",
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Conversion of bank loan to equity by issuing 400 common shares",
+        "rationale": "Under IFRS, debt-to-equity conversion is recorded by derecognizing the liability and recognizing equity. The transaction states $200 loan converted for 400 shares, which implies $0.50 per share. IFRS 9 requires the equity instrument to be measured at fair value, with any difference between the carrying amount of the liability and the fair value of equity recognized as a gain or loss on extinguishment. However, when the conversion is at book value (i.e., fair value of shares equals carrying amount of debt), no gain or loss arises\u2014it is a simple reclassification. The transaction provides the exact amounts that balance ($200 loan = 400 shares \u00d7 $0.50), suggesting the conversion was done at the carrying amount with no gain/loss. This is the most straightforward interpretation absent contrary facts.",
+        "lines": [
+          {
+            "account_name": "Loan Payable",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Common Shares",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "valuation basis for conversion",
+            "action": "proceed",
+            "reason": "The transaction states the loan amount ($200) and the number of shares issued (400), which mathematically implies $0.50 per share. Under IFRS, if the fair value of the shares equals the carrying amount of the debt, no gain or loss arises\u2014the entry is a straightforward reclassification from liability to equity. The transaction provides exact amounts that balance, indicating a book-value conversion. If the shares had a materially different fair value requiring gain/loss recognition, that would typically be stated in the transaction. Proceeding with the reclassification entry is the correct default treatment."
+          }
+        ],
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 336,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 133,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 129,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1152,
+        "output_tokens": 560,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

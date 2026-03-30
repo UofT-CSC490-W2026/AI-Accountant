@@ -1,0 +1,518 @@
+{
+  "test_case_id": "int_29_security_deposit_received",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Security deposit received upon lease signing",
+    "rationale": "Upon signing the lease, Mondelez received a $25,000 security deposit in cash. Under IFRS, a security deposit is a refundable amount that creates a liability (obligation to return the deposit at lease end, subject to any damages or unpaid rent). The deposit is not revenue because it has not been earned. No rent payment was received at signing, so no revenue is recognized at this time. The disambiguator correctly identified that commercial rent in Ontario is generally HST-exempt, and the phrase 'exclusive of sales tax' confirms no HST applies. The tuples (1,0,0,0,0,0) for both debit and credit correctly indicate one asset increase (Cash) and one liability increase (Security Deposit Payable).",
+    "lines": [
+      {
+        "account_name": "Cash",
+        "type": "debit",
+        "amount": 25000.0
+      },
+      {
+        "account_name": "Security Deposit Payable",
+        "type": "credit",
+        "amount": 25000.0
+      }
+    ],
+    "disambiguator_responses": [
+      {
+        "aspect": "sales tax treatment on rent",
+        "action": "proceed",
+        "reason": "The disambiguator correctly resolved that commercial rent is HST-exempt in Ontario. This does not affect the entry structure for the security deposit transaction, which involves no revenue recognition at this time."
+      },
+      {
+        "aspect": "security deposit refundability",
+        "action": "proceed",
+        "reason": "The disambiguator correctly applied standard lease convention: security deposits are refundable unless stated otherwise. This determines the correct account (liability, not revenue), and the transaction text provides no contrary information."
+      },
+      {
+        "aspect": "timing of rent recognition",
+        "action": "proceed",
+        "reason": "The disambiguator correctly identified that only the security deposit was received at signing, not rent. This entry records only the deposit; rent will be recognized monthly as earned per IFRS 16 lessor accounting."
+      }
+    ],
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0489162,
+  "raw_cost_usd": 0.085809,
+  "total_latency_ms": 32549,
+  "total_input_tokens": 20283,
+  "total_output_tokens": 1664,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 559,
+      "output_tokens": 234,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2954,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059055,
+      "raw_cost_usd": 0.012372,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "sales tax treatment on rent",
+            "resolved": true,
+            "resolution": "In Ontario, commercial property rent is generally exempt from HST under the Excise Tax Act. 'Exclusive of sales tax' likely refers to this exemption status rather than indicating HST will be charged separately.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "security deposit refundability",
+            "resolved": true,
+            "resolution": "Standard lease convention treats security deposits as refundable unless explicitly stated otherwise. The deposit creates a liability (Security Deposit Payable), not revenue.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "timing of rent recognition",
+            "resolved": true,
+            "resolution": "No rent payment is mentioned as received at signing, only the security deposit. Rent will be recognized as earned monthly per the lease terms.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 532,
+      "output_tokens": 112,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1773,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0036483,
+      "raw_cost_usd": 0.006999,
+      "output": {
+        "reason": "The transaction involves receiving cash (security deposit). On the credit side: (1) Security deposit received creates a liability (refundable deposit obligation) = liability increase. The cash received is the debit side, not classified here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves receiving cash (security deposit). On the credit side: (1) Security deposit received creates a liability (refundable deposit obligation) = liability increase. The cash received is the debit side, not classified here."
+    },
+    "debit_classifier": {
+      "input_tokens": 534,
+      "output_tokens": 131,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1796,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0039456,
+      "raw_cost_usd": 0.007353,
+      "output": {
+        "reason": "Mondelez receives $25,000 cash security deposit. Cash is an asset, and receiving cash increases the asset. This creates 1 debit line: Asset increase (Cash). The security deposit creates a liability (refundable deposit obligation) on the credit side, but we only classify debits here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Mondelez receives $25,000 cash security deposit. Cash is an asset, and receiving cash increases the asset. This creates 1 debit line: Asset increase (Cash). The security deposit creates a liability (refundable deposit obligation) on the credit side, but we only classify debits here."
+    },
+    "credit_corrector": {
+      "input_tokens": 702,
+      "output_tokens": 194,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2456,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0055422,
+      "raw_cost_usd": 0.010278,
+      "output": {
+        "reason": "The transaction describes receiving a $25,000 security deposit in cash upon lease signing. Under IFRS, a security deposit received from a tenant creates a liability (refundable deposit payable) because Mondelez has an obligation to return this amount to the tenant at the end of the lease term (subject to any damages or unpaid rent). This is not revenue - it's a liability increase. The debit side correctly shows asset increase (cash received), and the credit side correctly shows liability increase. The initial credit tuple (1,0,0,0,0,0) is correct and requires no correction.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction describes receiving a $25,000 security deposit in cash upon lease signing. Under IFRS, a security deposit received from a tenant creates a liability (refundable deposit payable) because Mondelez has an obligation to return this amount to the tenant at the end of the lease term (subject to any damages or unpaid rent). This is not revenue - it's a liability increase. The debit side correctly shows asset increase (cash received), and the credit side correctly shows liability increase. The initial credit tuple (1,0,0,0,0,0) is correct and requires no correction."
+    },
+    "debit_corrector": {
+      "input_tokens": 702,
+      "output_tokens": 222,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2448,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0059598,
+      "raw_cost_usd": 0.010674,
+      "output": {
+        "reason": "The transaction involves receiving $25,000 cash as a security deposit. This creates two effects: (1) Cash increases (asset increase - debit), and (2) Security deposit liability increases (liability increase - credit). The initial debit tuple correctly shows (1,0,0,0,0,0) representing one asset increase line for the cash received. The credit tuple also correctly shows (1,0,0,0,0,0) representing one liability increase line for the security deposit obligation. Under IFRS, a security deposit is a refundable amount that creates a liability until it is either returned to the tenant or applied against damages/unpaid rent. The debit and credit sides are consistent and both correct. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves receiving $25,000 cash as a security deposit. This creates two effects: (1) Cash increases (asset increase - debit), and (2) Security deposit liability increases (liability increase - credit). The initial debit tuple correctly shows (1,0,0,0,0,0) representing one asset increase line for the cash received. The credit tuple also correctly shows (1,0,0,0,0,0) representing one liability increase line for the security deposit obligation. Under IFRS, a security deposit is a refundable amount that creates a liability until it is either returned to the tenant or applied against damages/unpaid rent. The debit and credit sides are consistent and both correct. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1127,
+      "output_tokens": 574,
+      "cache_read_tokens": 3214,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4341,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0129552,
+      "raw_cost_usd": 0.021633,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Security deposit received upon lease signing",
+        "rationale": "Upon signing the lease, Mondelez received a $25,000 security deposit in cash. Under IFRS, a security deposit is a refundable amount that creates a liability (obligation to return the deposit at lease end, subject to any damages or unpaid rent). The deposit is not revenue because it has not been earned. No rent payment was received at signing, so no revenue is recognized at this time. The disambiguator correctly identified that commercial rent in Ontario is generally HST-exempt, and the phrase 'exclusive of sales tax' confirms no HST applies. The tuples (1,0,0,0,0,0) for both debit and credit correctly indicate one asset increase (Cash) and one liability increase (Security Deposit Payable).",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 25000.0
+          },
+          {
+            "account_name": "Security Deposit Payable",
+            "type": "credit",
+            "amount": 25000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "sales tax treatment on rent",
+            "action": "proceed",
+            "reason": "The disambiguator correctly resolved that commercial rent is HST-exempt in Ontario. This does not affect the entry structure for the security deposit transaction, which involves no revenue recognition at this time."
+          },
+          {
+            "aspect": "security deposit refundability",
+            "action": "proceed",
+            "reason": "The disambiguator correctly applied standard lease convention: security deposits are refundable unless stated otherwise. This determines the correct account (liability, not revenue), and the transaction text provides no contrary information."
+          },
+          {
+            "aspect": "timing of rent recognition",
+            "action": "proceed",
+            "reason": "The disambiguator correctly identified that only the security deposit was received at signing, not rent. This entry records only the deposit; rent will be recognized monthly as earned per IFRS 16 lessor accounting."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 2463,
+      "output_tokens": 197,
+      "cache_read_tokens": 2052,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4515,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0109596,
+      "raw_cost_usd": 0.0165,
+      "output": {
+        "reason": "Entry correctly records receipt of $25,000 security deposit. Balance verified: $25,000 debit = $25,000 credit. Accounts appropriate: Cash (asset increase) debited, Security Deposit Payable (liability increase) credited. Amount matches transaction text exactly. No tax treatment required: security deposits are not taxable transactions (they are refundable amounts, not consideration for goods/services). Directionality correct: asset increase debited, liability increase credited. Under IFRS, security deposits create a liability obligation to return funds, not revenue recognition. Entry structure is correct.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records receipt of $25,000 security deposit. Balance verified: $25,000 debit = $25,000 credit. Accounts appropriate: Cash (asset increase) debited, Security Deposit Payable (liability increase) credited. Amount matches transaction text exactly. No tax treatment required: security deposits are not taxable transactions (they are refundable amounts, not consideration for goods/services). Directionality correct: asset increase debited, liability increase credited. Under IFRS, security deposits create a liability obligation to return funds, not revenue recognition. Entry structure is correct."
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "sales tax treatment on rent",
+            "resolved": true,
+            "resolution": "In Ontario, commercial property rent is generally exempt from HST under the Excise Tax Act. 'Exclusive of sales tax' likely refers to this exemption status rather than indicating HST will be charged separately.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "security deposit refundability",
+            "resolved": true,
+            "resolution": "Standard lease convention treats security deposits as refundable unless explicitly stated otherwise. The deposit creates a liability (Security Deposit Payable), not revenue.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          },
+          {
+            "aspect": "timing of rent recognition",
+            "resolved": true,
+            "resolution": "No rent payment is mentioned as received at signing, only the security deposit. Rent will be recognized as earned monthly per the lease terms.",
+            "options": null,
+            "clarification_question": null,
+            "why_entry_differs": null,
+            "why_not_resolved": null
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Mondelez receives $25,000 cash security deposit. Cash is an asset, and receiving cash increases the asset. This creates 1 debit line: Asset increase (Cash). The security deposit creates a liability (refundable deposit obligation) on the credit side, but we only classify debits here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The transaction involves receiving cash (security deposit). On the credit side: (1) Security deposit received creates a liability (refundable deposit obligation) = liability increase. The cash received is the debit side, not classified here.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves receiving $25,000 cash as a security deposit. This creates two effects: (1) Cash increases (asset increase - debit), and (2) Security deposit liability increases (liability increase - credit). The initial debit tuple correctly shows (1,0,0,0,0,0) representing one asset increase line for the cash received. The credit tuple also correctly shows (1,0,0,0,0,0) representing one liability increase line for the security deposit obligation. Under IFRS, a security deposit is a refundable amount that creates a liability until it is either returned to the tenant or applied against damages/unpaid rent. The debit and credit sides are consistent and both correct. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction describes receiving a $25,000 security deposit in cash upon lease signing. Under IFRS, a security deposit received from a tenant creates a liability (refundable deposit payable) because Mondelez has an obligation to return this amount to the tenant at the end of the lease term (subject to any damages or unpaid rent). This is not revenue - it's a liability increase. The debit side correctly shows asset increase (cash received), and the credit side correctly shows liability increase. The initial credit tuple (1,0,0,0,0,0) is correct and requires no correction.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Security deposit received upon lease signing",
+        "rationale": "Upon signing the lease, Mondelez received a $25,000 security deposit in cash. Under IFRS, a security deposit is a refundable amount that creates a liability (obligation to return the deposit at lease end, subject to any damages or unpaid rent). The deposit is not revenue because it has not been earned. No rent payment was received at signing, so no revenue is recognized at this time. The disambiguator correctly identified that commercial rent in Ontario is generally HST-exempt, and the phrase 'exclusive of sales tax' confirms no HST applies. The tuples (1,0,0,0,0,0) for both debit and credit correctly indicate one asset increase (Cash) and one liability increase (Security Deposit Payable).",
+        "lines": [
+          {
+            "account_name": "Cash",
+            "type": "debit",
+            "amount": 25000.0
+          },
+          {
+            "account_name": "Security Deposit Payable",
+            "type": "credit",
+            "amount": 25000.0
+          }
+        ],
+        "disambiguator_responses": [
+          {
+            "aspect": "sales tax treatment on rent",
+            "action": "proceed",
+            "reason": "The disambiguator correctly resolved that commercial rent is HST-exempt in Ontario. This does not affect the entry structure for the security deposit transaction, which involves no revenue recognition at this time."
+          },
+          {
+            "aspect": "security deposit refundability",
+            "action": "proceed",
+            "reason": "The disambiguator correctly applied standard lease convention: security deposits are refundable unless stated otherwise. This determines the correct account (liability, not revenue), and the transaction text provides no contrary information."
+          },
+          {
+            "aspect": "timing of rent recognition",
+            "action": "proceed",
+            "reason": "The disambiguator correctly identified that only the security deposit was received at signing, not rent. This entry records only the deposit; rent will be recognized monthly as earned per IFRS 16 lessor accounting."
+          }
+        ],
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Entry correctly records receipt of $25,000 security deposit. Balance verified: $25,000 debit = $25,000 credit. Accounts appropriate: Cash (asset increase) debited, Security Deposit Payable (liability increase) credited. Amount matches transaction text exactly. No tax treatment required: security deposits are not taxable transactions (they are refundable amounts, not consideration for goods/services). Directionality correct: asset increase debited, liability increase credited. Under IFRS, security deposits create a liability obligation to return funds, not revenue recognition. Entry structure is correct.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 559,
+        "output_tokens": 234,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 532,
+        "output_tokens": 112,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 534,
+        "output_tokens": 131,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 702,
+        "output_tokens": 194,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 702,
+        "output_tokens": 222,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 1127,
+        "output_tokens": 574,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2463,
+        "output_tokens": 197,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,352 @@
+{
+  "test_case_id": "basic_09_repurchase_stock",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Repurchase of 100 common shares from shareholders",
+    "rationale": "Share buyback reduces equity (treasury stock or share capital retirement) and decreases cash. Under IFRS, repurchased shares are typically recorded as treasury stock (contra-equity) or retired immediately. The debit tuple (e=1) correctly indicates equity decrease, and credit tuple (d=1) correctly indicates asset decrease. This is a capital transaction, not subject to sales tax.",
+    "lines": [
+      {
+        "account_name": "Treasury Stock",
+        "type": "debit",
+        "amount": 200.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 200.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0260394,
+  "raw_cost_usd": 0.050658,
+  "total_latency_ms": 16006,
+  "total_input_tokens": 12196,
+  "total_output_tokens": 938,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 489,
+      "output_tokens": 114,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1751,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035556,
+      "raw_cost_usd": 0.006963,
+      "output": {
+        "reason": "Share buyback = treasury stock acquisition, which decreases equity. Under IFRS, repurchasing own shares reduces equity (either through treasury stock or direct capital reduction). This is an equity decrease, debited to reduce shareholders' equity.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": "Share buyback = treasury stock acquisition, which decreases equity. Under IFRS, repurchasing own shares reduces equity (either through treasury stock or direct capital reduction). This is an equity decrease, debited to reduce shareholders' equity."
+    },
+    "credit_classifier": {
+      "input_tokens": 487,
+      "output_tokens": 126,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1728,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0037233,
+      "raw_cost_usd": 0.007074,
+      "output": {
+        "reason": "The company is buying back its own shares (treasury stock transaction). On the credit side: Cash is paid out = asset decrease (1 line). Under IFRS, treasury shares are treated as a reduction in equity, recorded on the debit side, so only the cash outflow is credited.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The company is buying back its own shares (treasury stock transaction). On the credit side: Cash is paid out = asset decrease (1 line). Under IFRS, treasury shares are treated as a reduction in equity, recorded on the debit side, so only the cash outflow is credited."
+    },
+    "debit_corrector": {
+      "input_tokens": 657,
+      "output_tokens": 160,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2403,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0048948,
+      "raw_cost_usd": 0.009609,
+      "output": {
+        "reason": "The transaction is a share buyback (treasury stock transaction). The company is repurchasing its own shares from shareholders for cash. Under IFRS, this is treated as an equity transaction. The debit side correctly shows equity decrease (slot e=1) representing the reduction in equity from buying back shares. The credit side shows asset decrease (cash paid out), which is consistent. This is the proper accounting treatment for a share repurchase. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      },
+      "reason": "The transaction is a share buyback (treasury stock transaction). The company is repurchasing its own shares from shareholders for cash. Under IFRS, this is treated as an equity transaction. The debit side correctly shows equity decrease (slot e=1) representing the reduction in equity from buying back shares. The credit side shows asset decrease (cash paid out), which is consistent. This is the proper accounting treatment for a share repurchase. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 657,
+      "output_tokens": 270,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2411,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0065471999999999995,
+      "raw_cost_usd": 0.011283,
+      "output": {
+        "reason": "The transaction is a share buyback (treasury stock transaction). The company pays $200 cash to repurchase its own shares from shareholders.\n\nUnder IFRS, when a company buys back its own shares:\n- Cash (asset) decreases by $200 \u2192 Credit: asset decrease (slot d)\n- Equity decreases by $200 \u2192 Debit: equity decrease (slot e in debit tuple)\n\nThe debit tuple shows (0,0,0,0,1,0) = equity decrease, which is correct for a share buyback.\n\nThe initial credit tuple shows (0,0,0,1,0,0) = asset decrease, which correctly represents the cash outflow.\n\nBoth sides tell a consistent story: equity is reduced (debit side) and cash is reduced (credit side). This is the proper accounting treatment for a share buyback under IFRS. The initial credit tuple is correct and requires no correction.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction is a share buyback (treasury stock transaction). The company pays $200 cash to repurchase its own shares from shareholders.\n\nUnder IFRS, when a company buys back its own shares:\n- Cash (asset) decreases by $200 \u2192 Credit: asset decrease (slot d)\n- Equity decreases by $200 \u2192 Debit: equity decrease (slot e in debit tuple)\n\nThe debit tuple shows (0,0,0,0,1,0) = equity decrease, which is correct for a share buyback.\n\nThe initial credit tuple shows (0,0,0,1,0,0) = asset decrease, which correctly represents the cash outflow.\n\nBoth sides tell a consistent story: equity is reduced (debit side) and cash is reduced (credit side). This is the proper accounting treatment for a share buyback under IFRS. The initial credit tuple is correct and requires no correction."
+    },
+    "entry_builder": {
+      "input_tokens": 788,
+      "output_tokens": 268,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3903,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0073185,
+      "raw_cost_usd": 0.015729,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Repurchase of 100 common shares from shareholders",
+        "rationale": "Share buyback reduces equity (treasury stock or share capital retirement) and decreases cash. Under IFRS, repurchased shares are typically recorded as treasury stock (contra-equity) or retired immediately. The debit tuple (e=1) correctly indicates equity decrease, and credit tuple (d=1) correctly indicates asset decrease. This is a capital transaction, not subject to sales tax.",
+        "lines": [
+          {
+            "account_name": "Treasury Stock",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Share buyback = treasury stock acquisition, which decreases equity. Under IFRS, repurchasing own shares reduces equity (either through treasury stock or direct capital reduction). This is an equity decrease, debited to reduce shareholders' equity.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "The company is buying back its own shares (treasury stock transaction). On the credit side: Cash is paid out = asset decrease (1 line). Under IFRS, treasury shares are treated as a reduction in equity, recorded on the debit side, so only the cash outflow is credited.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction is a share buyback (treasury stock transaction). The company is repurchasing its own shares from shareholders for cash. Under IFRS, this is treated as an equity transaction. The debit side correctly shows equity decrease (slot e=1) representing the reduction in equity from buying back shares. The credit side shows asset decrease (cash paid out), which is consistent. This is the proper accounting treatment for a share repurchase. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction is a share buyback (treasury stock transaction). The company pays $200 cash to repurchase its own shares from shareholders.\n\nUnder IFRS, when a company buys back its own shares:\n- Cash (asset) decreases by $200 \u2192 Credit: asset decrease (slot d)\n- Equity decreases by $200 \u2192 Debit: equity decrease (slot e in debit tuple)\n\nThe debit tuple shows (0,0,0,0,1,0) = equity decrease, which is correct for a share buyback.\n\nThe initial credit tuple shows (0,0,0,1,0,0) = asset decrease, which correctly represents the cash outflow.\n\nBoth sides tell a consistent story: equity is reduced (debit side) and cash is reduced (credit side). This is the proper accounting treatment for a share buyback under IFRS. The initial credit tuple is correct and requires no correction.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Repurchase of 100 common shares from shareholders",
+        "rationale": "Share buyback reduces equity (treasury stock or share capital retirement) and decreases cash. Under IFRS, repurchased shares are typically recorded as treasury stock (contra-equity) or retired immediately. The debit tuple (e=1) correctly indicates equity decrease, and credit tuple (d=1) correctly indicates asset decrease. This is a capital transaction, not subject to sales tax.",
+        "lines": [
+          {
+            "account_name": "Treasury Stock",
+            "type": "debit",
+            "amount": 200.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 200.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 489,
+        "output_tokens": 114,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 487,
+        "output_tokens": 126,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 657,
+        "output_tokens": 160,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 657,
+        "output_tokens": 270,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 788,
+        "output_tokens": 268,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

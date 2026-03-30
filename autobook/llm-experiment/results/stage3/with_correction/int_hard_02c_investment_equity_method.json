@@ -1,0 +1,352 @@
+{
+  "test_case_id": "int_hard_02c_investment_equity_method",
+  "variant_name": "with_correction",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    2,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2026-03-22",
+    "description": "Acquisition of 10% equity interest in Ford with significant influence, accounted for using equity method",
+    "rationale": "Under IAS 28, investments in associates where the investor has significant influence are accounted for using the equity method. The initial investment is recorded at cost, which includes the purchase price plus directly attributable transaction costs. The $3,000,000 purchase price and $100,000 transaction fee are capitalized to Investment in Associate. Cash is reduced by the total outflow of $3,100,000. This follows the debit tuple (1 asset increase for the investment, 1 expense increase which should actually be capitalized as part of the investment cost per IAS 28) and credit tuple (2 asset decreases, but we combine into one Cash line as they represent the same account). The transaction fee is not expensed but capitalized as it is directly attributable to the acquisition.",
+    "lines": [
+      {
+        "account_name": "Investment in Associate",
+        "type": "debit",
+        "amount": 3100000.0
+      },
+      {
+        "account_name": "Cash",
+        "type": "credit",
+        "amount": 3100000.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": "APPROVED",
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0331494,
+  "raw_cost_usd": 0.057768,
+  "total_latency_ms": 24695,
+  "total_input_tokens": 12416,
+  "total_output_tokens": 1368,
+  "total_llm_calls": 5,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "debit_classifier": {
+      "input_tokens": 533,
+      "output_tokens": 159,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1795,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0043626,
+      "raw_cost_usd": 0.00777,
+      "output": {
+        "reason": "Under IAS 28, the investment in associate (Ford) is recorded as a single financial asset. The initial cost includes both the purchase price ($3,000,000) and directly attributable transaction costs ($100,000), totaling $3,100,000. This represents one asset increase on the debit side: Investment in Associate. The transaction fee is capitalized as part of the investment cost under the equity method, not expensed separately.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Under IAS 28, the investment in associate (Ford) is recorded as a single financial asset. The initial cost includes both the purchase price ($3,000,000) and directly attributable transaction costs ($100,000), totaling $3,100,000. This represents one asset increase on the debit side: Investment in Associate. The transaction fee is capitalized as part of the investment cost under the equity method, not expensed separately."
+    },
+    "credit_classifier": {
+      "input_tokens": 531,
+      "output_tokens": 158,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1772,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0043353,
+      "raw_cost_usd": 0.007686,
+      "output": {
+        "reason": "BlackRock pays $3,000,000 for the shares and $100,000 transaction fee, both by cheque. This results in cash leaving the business. Under IAS 28, transaction costs directly attributable to acquiring an equity method investment are included in the cost of the investment (capitalized), not expensed. Therefore, we have one credit line: cash (asset) decrease of $3,100,000 total.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": "BlackRock pays $3,000,000 for the shares and $100,000 transaction fee, both by cheque. This results in cash leaving the business. Under IAS 28, transaction costs directly attributable to acquiring an equity method investment are included in the cost of the investment (capitalized), not expensed. Therefore, we have one credit line: cash (asset) decrease of $3,100,000 total."
+    },
+    "credit_corrector": {
+      "input_tokens": 701,
+      "output_tokens": 289,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2455,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0069642,
+      "raw_cost_usd": 0.0117,
+      "output": {
+        "reason": "The transaction involves two distinct payments by BlackRock: (1) $3,000,000 for the equity investment and (2) $100,000 for transaction fees. Both are cash outflows (asset decreases). The initial credit tuple shows only 1 asset decrease, but there should be 2 separate credit lines: one for cash paid for the investment ($3,000,000) and one for cash paid for transaction fees ($100,000). Under IAS 28, transaction costs directly attributable to acquiring an equity method investment are included in the cost of the investment (debited to the Investment in Associate account), but the cash payments themselves are still two separate asset decreases on the credit side. The debit tuple showing only 1 asset increase (a=1) appears to be incorrect, as it should show the investment asset increase plus the transaction fee capitalized into that investment cost. However, my job is to correct the credit tuple: BlackRock paid cash twice (investment + fee), so credit side should show 2 asset decreases.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves two distinct payments by BlackRock: (1) $3,000,000 for the equity investment and (2) $100,000 for transaction fees. Both are cash outflows (asset decreases). The initial credit tuple shows only 1 asset decrease, but there should be 2 separate credit lines: one for cash paid for the investment ($3,000,000) and one for cash paid for transaction fees ($100,000). Under IAS 28, transaction costs directly attributable to acquiring an equity method investment are included in the cost of the investment (debited to the Investment in Associate account), but the cash payments themselves are still two separate asset decreases on the credit side. The debit tuple showing only 1 asset increase (a=1) appears to be incorrect, as it should show the investment asset increase plus the transaction fee capitalized into that investment cost. However, my job is to correct the credit tuple: BlackRock paid cash twice (investment + fee), so credit side should show 2 asset decreases."
+    },
+    "debit_corrector": {
+      "input_tokens": 701,
+      "output_tokens": 393,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2447,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0085218,
+      "raw_cost_usd": 0.013236,
+      "output": {
+        "reason": "The transaction involves two distinct economic events: (1) acquisition of an investment in associate for $3,000,000, and (2) payment of a transaction fee of $100,000. Under IAS 28, the investment in associate is recorded as a non-current asset at cost, including directly attributable transaction costs. However, the $100,000 transaction fee should be capitalized as part of the investment cost, not expensed separately. But looking at the credit side showing only one asset decrease (cash), this suggests the system is treating these as separate line items on the debit side. The investment of $3,000,000 is an asset increase (Investment in Associate). The $100,000 transaction fee, if treated separately rather than capitalized, would be recorded as an expense. However, under IFRS, transaction costs directly attributable to the acquisition should be included in the cost of the investment. Given the credit tuple shows only (0,0,0,1,0,0) = one asset decrease (cash outflow of $3,100,000 total), and the initial debit shows only one asset increase, this is incomplete. The correct treatment is: the Investment in Associate should be recorded at $3,100,000 (including transaction costs), which is one asset increase. Therefore, the initial debit tuple (1,0,0,0,0,0) is actually correct - one asset increase for the total investment including transaction costs. Correction: Upon reflection, the initial tuple is correct as one asset increase.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction involves two distinct economic events: (1) acquisition of an investment in associate for $3,000,000, and (2) payment of a transaction fee of $100,000. Under IAS 28, the investment in associate is recorded as a non-current asset at cost, including directly attributable transaction costs. However, the $100,000 transaction fee should be capitalized as part of the investment cost, not expensed separately. But looking at the credit side showing only one asset decrease (cash), this suggests the system is treating these as separate line items on the debit side. The investment of $3,000,000 is an asset increase (Investment in Associate). The $100,000 transaction fee, if treated separately rather than capitalized, would be recorded as an expense. However, under IFRS, transaction costs directly attributable to the acquisition should be included in the cost of the investment. Given the credit tuple shows only (0,0,0,1,0,0) = one asset decrease (cash outflow of $3,100,000 total), and the initial debit shows only one asset increase, this is incomplete. The correct treatment is: the Investment in Associate should be recorded at $3,100,000 (including transaction costs), which is one asset increase. Therefore, the initial debit tuple (1,0,0,0,0,0) is actually correct - one asset increase for the total investment including transaction costs. Correction: Upon reflection, the initial tuple is correct as one asset increase."
+    },
+    "entry_builder": {
+      "input_tokens": 832,
+      "output_tokens": 369,
+      "cache_read_tokens": 3115,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3947,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0089655,
+      "raw_cost_usd": 0.017376,
+      "output": {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity interest in Ford with significant influence, accounted for using equity method",
+        "rationale": "Under IAS 28, investments in associates where the investor has significant influence are accounted for using the equity method. The initial investment is recorded at cost, which includes the purchase price plus directly attributable transaction costs. The $3,000,000 purchase price and $100,000 transaction fee are capitalized to Investment in Associate. Cash is reduced by the total outflow of $3,100,000. This follows the debit tuple (1 asset increase for the investment, 1 expense increase which should actually be capitalized as part of the investment cost per IAS 28) and credit tuple (2 asset decreases, but we combine into one Cash line as they represent the same account). The transaction fee is not expensed but capitalized as it is directly attributable to the acquisition.",
+        "lines": [
+          {
+            "account_name": "Investment in Associate",
+            "type": "debit",
+            "amount": 3100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Under IAS 28, the investment in associate (Ford) is recorded as a single financial asset. The initial cost includes both the purchase price ($3,000,000) and directly attributable transaction costs ($100,000), totaling $3,100,000. This represents one asset increase on the debit side: Investment in Associate. The transaction fee is capitalized as part of the investment cost under the equity method, not expensed separately.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "BlackRock pays $3,000,000 for the shares and $100,000 transaction fee, both by cheque. This results in cash leaving the business. Under IAS 28, transaction costs directly attributable to acquiring an equity method investment are included in the cost of the investment (capitalized), not expensed. Therefore, we have one credit line: cash (asset) decrease of $3,100,000 total.",
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction involves two distinct economic events: (1) acquisition of an investment in associate for $3,000,000, and (2) payment of a transaction fee of $100,000. Under IAS 28, the investment in associate is recorded as a non-current asset at cost, including directly attributable transaction costs. However, the $100,000 transaction fee should be capitalized as part of the investment cost, not expensed separately. But looking at the credit side showing only one asset decrease (cash), this suggests the system is treating these as separate line items on the debit side. The investment of $3,000,000 is an asset increase (Investment in Associate). The $100,000 transaction fee, if treated separately rather than capitalized, would be recorded as an expense. However, under IFRS, transaction costs directly attributable to the acquisition should be included in the cost of the investment. Given the credit tuple shows only (0,0,0,1,0,0) = one asset decrease (cash outflow of $3,100,000 total), and the initial debit shows only one asset increase, this is incomplete. The correct treatment is: the Investment in Associate should be recorded at $3,100,000 (including transaction costs), which is one asset increase. Therefore, the initial debit tuple (1,0,0,0,0,0) is actually correct - one asset increase for the total investment including transaction costs. Correction: Upon reflection, the initial tuple is correct as one asset increase.",
+        "tuple": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction involves two distinct payments by BlackRock: (1) $3,000,000 for the equity investment and (2) $100,000 for transaction fees. Both are cash outflows (asset decreases). The initial credit tuple shows only 1 asset decrease, but there should be 2 separate credit lines: one for cash paid for the investment ($3,000,000) and one for cash paid for transaction fees ($100,000). Under IAS 28, transaction costs directly attributable to acquiring an equity method investment are included in the cost of the investment (debited to the Investment in Associate account), but the cash payments themselves are still two separate asset decreases on the credit side. The debit tuple showing only 1 asset increase (a=1) appears to be incorrect, as it should show the investment asset increase plus the transaction fee capitalized into that investment cost. However, my job is to correct the credit tuple: BlackRock paid cash twice (investment + fee), so credit side should show 2 asset decreases.",
+        "tuple": [
+          0,
+          0,
+          0,
+          2,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Acquisition of 10% equity interest in Ford with significant influence, accounted for using equity method",
+        "rationale": "Under IAS 28, investments in associates where the investor has significant influence are accounted for using the equity method. The initial investment is recorded at cost, which includes the purchase price plus directly attributable transaction costs. The $3,000,000 purchase price and $100,000 transaction fee are capitalized to Investment in Associate. Cash is reduced by the total outflow of $3,100,000. This follows the debit tuple (1 asset increase for the investment, 1 expense increase which should actually be capitalized as part of the investment cost per IAS 28) and credit tuple (2 asset decreases, but we combine into one Cash line as they represent the same account). The transaction fee is not expensed but capitalized as it is directly attributable to the acquisition.",
+        "lines": [
+          {
+            "account_name": "Investment in Associate",
+            "type": "debit",
+            "amount": 3100000.0
+          },
+          {
+            "account_name": "Cash",
+            "type": "credit",
+            "amount": 3100000.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": "APPROVED",
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 533,
+        "output_tokens": 159,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 531,
+        "output_tokens": 158,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 701,
+        "output_tokens": 289,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 701,
+        "output_tokens": 393,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 832,
+        "output_tokens": 369,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "credit_corrector": "tool_use",
+      "debit_corrector": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

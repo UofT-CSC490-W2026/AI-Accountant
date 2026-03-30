@@ -21,6 +21,38 @@ def _normalize_entry_payload(payload: dict | None) -> tuple[dict, list[dict]]:
     return entry, list(payload.get("lines", []))
 
 
+def _merge_entry_metadata(
+    payload: dict | None,
+    *,
+    parse_id: str | None,
+    parent_parse_id: str | None,
+    child_parse_id: str | None,
+    statement_index: int | None,
+    statement_total: int | None,
+) -> dict | None:
+    if payload is None and not any([parse_id, parent_parse_id, child_parse_id, statement_index is not None, statement_total is not None]):
+        return None
+
+    if payload is None:
+        entry_payload, line_payload = {}, []
+    else:
+        entry_payload, line_payload = _normalize_entry_payload(payload)
+    if parse_id is not None:
+        entry_payload.setdefault("parse_id", parse_id)
+    if parent_parse_id is not None:
+        entry_payload.setdefault("parent_parse_id", parent_parse_id)
+    if child_parse_id is not None:
+        entry_payload.setdefault("child_parse_id", child_parse_id)
+    if statement_index is not None:
+        entry_payload.setdefault("statement_index", statement_index)
+    if statement_total is not None:
+        entry_payload.setdefault("statement_total", statement_total)
+    return {
+        "entry": entry_payload,
+        "lines": line_payload,
+    }
+
+
 def _json_safe_entry_payload(payload: dict) -> dict:
     normalized: dict = {}
     for key, value in payload.items():
@@ -43,6 +75,27 @@ def _resolve_posting_payload(task: ClarificationTask, edited_entry: dict | None)
     return {**base_entry_payload, **edited_entry_payload}, edited_line_payload
 
 
+def _apply_entry_defaults(task: ClarificationTask, entry_payload: dict) -> dict:
+    normalized_payload = dict(entry_payload)
+
+    if "date" not in normalized_payload:
+        transaction_date = getattr(getattr(task, "transaction", None), "date", None)
+        if transaction_date is not None:
+            normalized_payload["date"] = transaction_date
+
+    if "description" not in normalized_payload:
+        transaction_description = getattr(getattr(task, "transaction", None), "description", None)
+        normalized_payload["description"] = transaction_description or task.source_text
+
+    if "rationale" not in normalized_payload:
+        normalized_payload["rationale"] = task.explanation
+
+    if "origin_tier" not in normalized_payload:
+        normalized_payload["origin_tier"] = 3
+
+    return normalized_payload
+
+
 class ClarificationDAO:
     @staticmethod
     def insert(
@@ -54,6 +107,11 @@ class ClarificationDAO:
         confidence,
         proposed_entry: dict | None,
         verdict: str,
+        parse_id: str | None = None,
+        parent_parse_id: str | None = None,
+        child_parse_id: str | None = None,
+        statement_index: int | None = None,
+        statement_total: int | None = None,
     ) -> ClarificationTask:
         set_current_user_context(db, user_id)
         task = ClarificationTask(
@@ -62,7 +120,14 @@ class ClarificationDAO:
             source_text=source_text,
             explanation=explanation,
             confidence=confidence,
-            proposed_entry=proposed_entry,
+            proposed_entry=_merge_entry_metadata(
+                proposed_entry,
+                parse_id=parse_id,
+                parent_parse_id=parent_parse_id,
+                child_parse_id=child_parse_id,
+                statement_index=statement_index,
+                statement_total=statement_total,
+            ),
             evaluator_verdict=verdict,
         )
         db.add(task)
@@ -106,6 +171,7 @@ class ClarificationDAO:
             raise ValueError(f"unsupported clarification action {action!r}")
 
         entry_payload, line_payload = _resolve_posting_payload(task, edited_entry)
+        entry_payload = _apply_entry_defaults(task, entry_payload)
         entry_payload.setdefault("transaction_id", task.transaction_id)
         entry_payload.setdefault("status", "posted")
 

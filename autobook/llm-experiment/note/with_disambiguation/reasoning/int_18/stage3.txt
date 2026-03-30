@@ -1,0 +1,48 @@
+======================================================================
+Test Case: int_18_multiple_assets
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [3, 0, 0, 0, 0, 0]  ✗
+  Credit: [1, 0, 0, 2, 0, 0]  ✗
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (0):
+  (none)
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [3, 0, 0, 0, 0, 0]
+Reason: Three distinct asset purchases: (1) office desks $2,000 = asset increase (furniture/equipment), (2) computers $3,500 = asset increase (computer equipment), (3) crane-equipped truck $250,000 = asset increase (vehicle/equipment). All three are capitalized assets with different useful lives and depreciation schedules, but all represent asset increases on the debit side. Total: 3 asset increase lines.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [1, 0, 0, 2, 0, 0]
+Reason: Three credit lines: (1) Cash paid for office desks = asset decrease, (2) Cash paid for computers = asset decrease, (3) Crane-equipped truck purchased on account = liability increase (accounts payable). Total: 2 asset decreases + 1 liability increase.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Rationale: Three distinct asset acquisitions: (1) Office desks $2,000 - furniture asset, paid cash; (2) Computers $3,500 - computer equipment asset, paid cash; (3) Crane-equipped truck $250,000 - specialized vehicle for moving operations, purchased on account creating accounts payable. The debit tuple (3,0,0,0,0,0) correctly indicates three asset increases. The credit tuple (1,0,0,2,0,0) correctly indicates one liability increase (accounts payable for truck) and two asset decreases (cash payments for desks and computers). All items are capital assets that will be depreciated over their useful lives. No tax lines are included as the transaction does not specify HST/GST amounts or indicate whether tax was charged separately.
+Entry:
+  debit  Furniture and Fixtures                        $      2,000.00
+  debit  Computer Equipment                            $      3,500.00
+  debit  Vehicles                                      $    250,000.00
+  credit Cash                                          $      5,500.00
+  credit Accounts Payable                              $    250,000.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Furniture and Fixtures                        $      2,000.00
+  debit  Computer Equipment                            $      3,500.00
+  debit  Vehicles                                      $    250,000.00
+  credit Cash                                          $      5,500.00
+  credit Accounts Payable                              $    250,000.00
+======================================================================

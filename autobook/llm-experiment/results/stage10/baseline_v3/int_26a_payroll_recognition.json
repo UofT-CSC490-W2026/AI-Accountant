@@ -1,0 +1,740 @@
+{
+  "test_case_id": "int_26a_payroll_recognition",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": false,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 0.8333333333333334,
+  "entry_valid": true,
+  "debit_tuple": [
+    1,
+    0,
+    1,
+    4,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    4,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Payroll recognized: production wages capitalized to inventory, administrative salaries expensed, employee withholdings recorded as liabilities, net pay transferred to employees",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Inventories \u2014 work in progress",
+        "amount": 25000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Employee benefits expense",
+        "amount": 20000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Pension contributions payable",
+        "amount": 2000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Health insurance premiums payable",
+        "amount": 3250.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Employment insurance premiums payable",
+        "amount": 1050.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Income tax withholdings payable",
+        "amount": 1450.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash and cash equivalents",
+        "amount": 37250.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0679437,
+  "raw_cost_usd": 0.132741,
+  "total_latency_ms": 42132,
+  "total_input_tokens": 30202,
+  "total_output_tokens": 2809,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "tax_specialist": {
+      "input_tokens": 592,
+      "output_tokens": 177,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3608,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0053358,
+      "raw_cost_usd": 0.013479,
+      "output": {
+        "reasoning": "Payroll transaction involving wages, salaries, and statutory employee deductions (pension, health insurance, EI premiums, income tax withholdings). Payroll is not a taxable supply under tax legislation - it is a compensation arrangement between employer and employees, not a purchase or sale of goods/services subject to sales tax.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 567,
+      "output_tokens": 354,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4334,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0081411,
+      "raw_cost_usd": 0.018312,
+      "output": {
+        "liability_increase": [
+          {
+            "reason": "Pension contributions withheld from employees, payable to pension authority",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Health insurance premiums withheld from employees, payable to insurer",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Employment insurance premiums withheld from employees, payable to government",
+            "category": "Tax liabilities",
+            "count": 1
+          },
+          {
+            "reason": "Income tax withheld from employees, payable to tax authority",
+            "category": "Tax liabilities",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Net payroll payment transferred to employees' personal accounts",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "complexity_detector": {
+      "input_tokens": 582,
+      "output_tokens": 330,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3260,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0074994,
+      "raw_cost_usd": 0.01473,
+      "output": {
+        "flags": [
+          {
+            "aspect": "production worker wages as manufacturing cost",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "administrative salaries as period expense",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "employee statutory deductions withheld",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "net payroll payment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "allocation of withholdings between production and administrative employees",
+            "why_llm_cannot_do_this": "The transaction states total withholdings but does not specify how the $2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax are split between the 5 production workers and 5 administrative employees. Manufacturing costs must be capitalized to inventory while administrative costs are expensed, requiring separate liability accounts or allocation.",
+            "what_is_best_llm_can_do": "Allocate withholdings proportionally based on gross wages ($25,000 production vs $20,000 administrative) or record all withholdings as a single pooled liability without distinguishing the source",
+            "skeptical": true
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 568,
+      "output_tokens": 379,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4533,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0085785,
+      "raw_cost_usd": 0.019284,
+      "output": {
+        "asset_increase": [
+          {
+            "reason": "Production worker wages capitalized to work in progress inventory",
+            "category": "Inventories \u2014 work in progress",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Administrative salaries expense for the period",
+            "category": "Employee benefits expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [
+          {
+            "reason": "Pension contributions withheld from employees paid out",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Health insurance premiums withheld from employees paid out",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Employment insurance premiums withheld from employees paid out",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Income tax withholdings paid out",
+            "category": "Tax liabilities",
+            "count": 1
+          }
+        ],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          1,
+          4,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "ambiguity_detector": {
+      "input_tokens": 606,
+      "output_tokens": 303,
+      "cache_read_tokens": 3285,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3891,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0073485,
+      "raw_cost_usd": 0.016218,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "allocation of employee-borne deductions between production and administrative employees",
+            "why_entry_depends_on_clarification": "Production worker deductions affect inventory (product cost capitalized), while administrative deductions affect current liabilities only. Different allocations change the inventory capitalization amount.",
+            "why_ambiguity_not_resolved_by_given_info": "The transaction provides aggregate deduction amounts but does not specify which portion relates to production vs administrative employees. No convention exists for allocating aggregate withholdings between employee groups with different cost classifications.",
+            "clarification_question": "How should the $2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax be allocated between the production workers and administrative staff?",
+            "options": [
+              "Deductions split proportionally by gross wages ($25,000 production vs $20,000 admin)",
+              "Deductions split equally by headcount (5 production vs 5 admin employees)",
+              "Deductions allocated by actual withholding from each employee group"
+            ],
+            "resolved": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 2170,
+      "output_tokens": 910,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5954,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0212952,
+      "raw_cost_usd": 0.031512,
+      "output": {
+        "ambiguity_assessment": "The ambiguity detector flags allocation of withholdings between production and administrative employees. However, this is overly cautious. The transaction describes a single payroll recognition event where gross wages are recorded and withholdings are deducted. The withholdings create liabilities regardless of which employee group they came from. The production wages ($25,000 gross) are capitalized to inventory, and administrative salaries ($20,000 gross) are expensed\u2014this is clear from the transaction. The withholdings ($7,750 total) reduce the net cash payment but do not need separate allocation to affect the entry structure. The liability accounts for withholdings are pooled by type (pension, health, EI, tax), not by employee category. The entry can be built without knowing the allocation: Dr WIP $25,000, Dr Admin expense $20,000, Cr various payables $7,750, Cr Cash $37,250. The allocation would only matter if we needed separate liability sub-accounts by employee type, which is not a standard requirement.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The complexity detector flags the same allocation issue skeptically. As analyzed above, the system can handle this by recording withholdings as pooled liabilities by type. The transaction provides all necessary amounts: production wages $25,000, admin salaries $20,000, each withholding type's total, and net payment calculation. No specialized calculation or entity-specific information is required beyond standard payroll accounting.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "The debit classifier incorrectly treats this as two separate events: (1) recognition of payroll with withholdings creating liabilities, and (2) payment of those liabilities. The transaction describes a single event: \"recognized January payroll... The net amount was transferred.\" This is recognition AND payment in one transaction. The correct structure is: Dr WIP $25,000 (production wages capitalized), Dr Employee benefits expense $20,000 (admin salaries), Cr Employee benefits payable $5,250 (pension $2,000 + health $3,250), Cr Tax liabilities $2,500 (EI $1,050 + income tax $1,450), Cr Cash $37,250 (net payment). The debit classifier incorrectly includes 4 liability decreases, treating withholdings as if they were previously recorded and now being paid out. The credit classifier correctly recognizes the liability increases and cash decrease. The debit side needs correction to remove the liability decreases.",
+        "debit_approved": false,
+        "override_debit": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity and complexity flags are overly cautious. The transaction describes a single payroll recognition and payment event with all necessary amounts provided. The withholdings create pooled liabilities by type and do not require allocation between employee groups to build the entry. However, the debit classifier made a structural error by treating this as recognition plus payment of pre-existing liabilities, when it should be recognition with simultaneous net payment. Correcting the debit classification to remove the 4 liability decreases resolves this. The entry can proceed with the corrected classification.",
+        "decision": "proceed"
+      },
+      "reason": null
+    },
+    "entry_drafter": {
+      "input_tokens": 1118,
+      "output_tokens": 356,
+      "cache_read_tokens": 3504,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4622,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0097452,
+      "raw_cost_usd": 0.019206,
+      "output": {
+        "reason": "Payroll recognized: production wages capitalized to inventory, administrative salaries expensed, employee withholdings recorded as liabilities, net pay transferred to employees",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Inventories \u2014 work in progress",
+            "amount": 25000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Employee benefits expense",
+            "amount": 20000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Pension contributions payable",
+            "amount": 2000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Health insurance premiums payable",
+            "amount": 3250.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Employment insurance premiums payable",
+            "amount": 1050.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Income tax withholdings payable",
+            "amount": 1450.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash and cash equivalents",
+            "amount": 37250.0
+          }
+        ]
+      },
+      "reason": "Payroll recognized: production wages capitalized to inventory, administrative salaries expensed, employee withholdings recorded as liabilities, net pay transferred to employees"
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of employee-borne deductions between production and administrative employees",
+            "why_entry_depends_on_clarification": "Production worker deductions affect inventory (product cost capitalized), while administrative deductions affect current liabilities only. Different allocations change the inventory capitalization amount.",
+            "why_ambiguity_not_resolved_by_given_info": "The transaction provides aggregate deduction amounts but does not specify which portion relates to production vs administrative employees. No convention exists for allocating aggregate withholdings between employee groups with different cost classifications.",
+            "clarification_question": "How should the $2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax be allocated between the production workers and administrative staff?",
+            "options": [
+              "Deductions split proportionally by gross wages ($25,000 production vs $20,000 admin)",
+              "Deductions split equally by headcount (5 production vs 5 admin employees)",
+              "Deductions allocated by actual withholding from each employee group"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "production worker wages as manufacturing cost",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "administrative salaries as period expense",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "employee statutory deductions withheld",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "net payroll payment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "allocation of withholdings between production and administrative employees",
+            "why_llm_cannot_do_this": "The transaction states total withholdings but does not specify how the $2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax are split between the 5 production workers and 5 administrative employees. Manufacturing costs must be capitalized to inventory while administrative costs are expensed, requiring separate liability accounts or allocation.",
+            "what_is_best_llm_can_do": "Allocate withholdings proportionally based on gross wages ($25,000 production vs $20,000 administrative) or record all withholdings as a single pooled liability without distinguishing the source",
+            "skeptical": true
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Payroll transaction involving wages, salaries, and statutory employee deductions (pension, health insurance, EI premiums, income tax withholdings). Payroll is not a taxable supply under tax legislation - it is a compensation arrangement between employer and employees, not a purchase or sale of goods/services subject to sales tax.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "The ambiguity detector flags allocation of withholdings between production and administrative employees. However, this is overly cautious. The transaction describes a single payroll recognition event where gross wages are recorded and withholdings are deducted. The withholdings create liabilities regardless of which employee group they came from. The production wages ($25,000 gross) are capitalized to inventory, and administrative salaries ($20,000 gross) are expensed\u2014this is clear from the transaction. The withholdings ($7,750 total) reduce the net cash payment but do not need separate allocation to affect the entry structure. The liability accounts for withholdings are pooled by type (pension, health, EI, tax), not by employee category. The entry can be built without knowing the allocation: Dr WIP $25,000, Dr Admin expense $20,000, Cr various payables $7,750, Cr Cash $37,250. The allocation would only matter if we needed separate liability sub-accounts by employee type, which is not a standard requirement.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "The complexity detector flags the same allocation issue skeptically. As analyzed above, the system can handle this by recording withholdings as pooled liabilities by type. The transaction provides all necessary amounts: production wages $25,000, admin salaries $20,000, each withholding type's total, and net payment calculation. No specialized calculation or entity-specific information is required beyond standard payroll accounting.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "The debit classifier incorrectly treats this as two separate events: (1) recognition of payroll with withholdings creating liabilities, and (2) payment of those liabilities. The transaction describes a single event: \"recognized January payroll... The net amount was transferred.\" This is recognition AND payment in one transaction. The correct structure is: Dr WIP $25,000 (production wages capitalized), Dr Employee benefits expense $20,000 (admin salaries), Cr Employee benefits payable $5,250 (pension $2,000 + health $3,250), Cr Tax liabilities $2,500 (EI $1,050 + income tax $1,450), Cr Cash $37,250 (net payment). The debit classifier incorrectly includes 4 liability decreases, treating withholdings as if they were previously recorded and now being paid out. The credit classifier correctly recognizes the liability increases and cash decrease. The debit side needs correction to remove the liability decreases.",
+        "debit_approved": false,
+        "override_debit": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The ambiguity and complexity flags are overly cautious. The transaction describes a single payroll recognition and payment event with all necessary amounts provided. The withholdings create pooled liabilities by type and do not require allocation between employee groups to build the entry. However, the debit classifier made a structural error by treating this as recognition plus payment of pre-existing liabilities, when it should be recognition with simultaneous net payment. Correcting the debit classification to remove the 4 liability decreases resolves this. The entry can proceed with the corrected classification.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Payroll recognized: production wages capitalized to inventory, administrative salaries expensed, employee withholdings recorded as liabilities, net pay transferred to employees",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Inventories \u2014 work in progress",
+            "amount": 25000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Employee benefits expense",
+            "amount": 20000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Pension contributions payable",
+            "amount": 2000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Health insurance premiums payable",
+            "amount": 3250.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Employment insurance premiums payable",
+            "amount": 1050.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Income tax withholdings payable",
+            "amount": 1450.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash and cash equivalents",
+            "amount": 37250.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "allocation of employee-borne deductions between production and administrative employees",
+            "why_entry_depends_on_clarification": "Production worker deductions affect inventory (product cost capitalized), while administrative deductions affect current liabilities only. Different allocations change the inventory capitalization amount.",
+            "why_ambiguity_not_resolved_by_given_info": "The transaction provides aggregate deduction amounts but does not specify which portion relates to production vs administrative employees. No convention exists for allocating aggregate withholdings between employee groups with different cost classifications.",
+            "clarification_question": "How should the $2,000 pension, $3,250 health insurance, $1,050 EI, and $1,450 income tax be allocated between the production workers and administrative staff?",
+            "options": [
+              "Deductions split proportionally by gross wages ($25,000 production vs $20,000 admin)",
+              "Deductions split equally by headcount (5 production vs 5 admin employees)",
+              "Deductions allocated by actual withholding from each employee group"
+            ],
+            "resolved": false
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [
+          {
+            "reason": "Production worker wages capitalized to work in progress inventory",
+            "category": "Inventories \u2014 work in progress",
+            "count": 1
+          }
+        ],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Administrative salaries expense for the period",
+            "category": "Employee benefits expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [
+          {
+            "reason": "Pension contributions withheld from employees paid out",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Health insurance premiums withheld from employees paid out",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Employment insurance premiums withheld from employees paid out",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Income tax withholdings paid out",
+            "category": "Tax liabilities",
+            "count": 1
+          }
+        ],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          1,
+          0,
+          1,
+          4,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [
+          {
+            "reason": "Pension contributions withheld from employees, payable to pension authority",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Health insurance premiums withheld from employees, payable to insurer",
+            "category": "Employee benefits payable",
+            "count": 1
+          },
+          {
+            "reason": "Employment insurance premiums withheld from employees, payable to government",
+            "category": "Tax liabilities",
+            "count": 1
+          },
+          {
+            "reason": "Income tax withheld from employees, payable to tax authority",
+            "category": "Tax liabilities",
+            "count": 1
+          }
+        ],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Net payroll payment transferred to employees' personal accounts",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          4,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 592,
+        "output_tokens": 177,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 567,
+        "output_tokens": 354,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 582,
+        "output_tokens": 330,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 568,
+        "output_tokens": 379,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 606,
+        "output_tokens": 303,
+        "input_token_details": {
+          "cache_read": 3285,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 2170,
+        "output_tokens": 910,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_drafter",
+        "stop_reason": "tool_use",
+        "input_tokens": 1118,
+        "output_tokens": 356,
+        "input_token_details": {
+          "cache_read": 3504,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "tax_specialist": "tool_use",
+      "credit_classifier": "tool_use",
+      "complexity_detector": "tool_use",
+      "debit_classifier": "tool_use",
+      "ambiguity_detector": "tool_use",
+      "decision_maker": "tool_use",
+      "entry_drafter": "tool_use"
+    }
+  }
+}

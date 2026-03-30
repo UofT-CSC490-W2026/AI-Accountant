@@ -1,0 +1,465 @@
+{
+  "test_case_id": "basic_12_pay_salaries",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": null,
+  "actual_cost_usd": 0.060147,
+  "raw_cost_usd": 0.096759,
+  "total_latency_ms": 27329,
+  "total_input_tokens": 24223,
+  "total_output_tokens": 1606,
+  "total_llm_calls": 6,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "complexity_detector": {
+      "input_tokens": 489,
+      "output_tokens": 57,
+      "cache_read_tokens": 2678,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3167,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0031254,
+      "raw_cost_usd": 0.010356,
+      "output": {
+        "flags": [
+          {
+            "aspect": "salary payment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      },
+      "reason": null
+    },
+    "tax_specialist": {
+      "input_tokens": 499,
+      "output_tokens": 134,
+      "cache_read_tokens": 3016,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3515,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0044118000000000004,
+      "raw_cost_usd": 0.012555,
+      "output": {
+        "reasoning": "Payroll/employee salaries are not a taxable supply under tax legislation. The transaction text does not mention any tax.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 474,
+      "output_tokens": 170,
+      "cache_read_tokens": 3767,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4241,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0051021,
+      "raw_cost_usd": 0.015273,
+      "output": {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for employee salaries",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 475,
+      "output_tokens": 157,
+      "cache_read_tokens": 3965,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 4440,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0049695,
+      "raw_cost_usd": 0.015675,
+      "output": {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Employee salaries paid for the period",
+            "category": "Employee benefits expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "ambiguity_detector": {
+      "input_tokens": 513,
+      "output_tokens": 259,
+      "cache_read_tokens": 0,
+      "cache_write_tokens": 3285,
+      "total_input_tokens": 3798,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.025134,
+      "raw_cost_usd": 0.015279,
+      "output": {
+        "ambiguities": [
+          {
+            "aspect": "whether salaries are gross or net",
+            "why_entry_depends_on_clarification": "If gross: Dr Salaries expense $100, Cr Cash $X, Cr various payables for withholdings. If net: Dr Salaries expense $100, Cr Cash $100 (no withholdings)",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states 'paid employee salaries' without specifying gross vs net; no convention establishes which interpretation applies when withholdings are not mentioned",
+            "clarification_question": "Is the $100 the gross salary amount or the net amount paid to employees?",
+            "options": [
+              "Gross salaries (before withholdings)",
+              "Net salaries (after withholdings)"
+            ],
+            "resolved": false
+          },
+          {
+            "aspect": "whether employer payroll taxes apply",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          }
+        ]
+      },
+      "reason": null
+    },
+    "decision_maker": {
+      "input_tokens": 1278,
+      "output_tokens": 829,
+      "cache_read_tokens": 3784,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5062,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0174042,
+      "raw_cost_usd": 0.027621,
+      "output": {
+        "ambiguity_assessment": "The unresolved ambiguity is \"whether salaries are gross or net\". This is a critical distinction:\n- If gross ($100): the entry would be Dr Employee benefits expense $100, Cr Cash $X (less than $100), Cr Employee benefits payable $Y (withholdings). Multiple lines on credit side.\n- If net ($100): the entry would be Dr Employee benefits expense $100, Cr Cash $100. Single line on each side.\n\nThe transaction states \"Paid employee salaries of $100\" without specifying gross vs net. The word \"paid\" conventionally means cash disbursed, which suggests the $100 is what left the bank account (net interpretation). However, \"salaries of $100\" could mean the salary expense amount (gross interpretation).\n\nUnder common accounting convention, when a transaction states \"paid salaries of $X\" without mentioning withholdings, it typically means the net amount paid to employees. If withholdings were involved, the transaction would normally state \"paid gross salaries of $X\" or mention the withholdings explicitly.\n\nHowever, this interpretation affects the account structure materially: the gross interpretation creates additional liability lines that don't exist in the net interpretation. The person who initiated the transaction knows which interpretation is correct.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "Is the $100 the gross salary amount (before withholdings) or the net amount paid to employees (after withholdings)?"
+        ],
+        "complexity_assessment": "No complexity flags were raised. The complexity detector marked salary payment as not skeptical, indicating the system can handle this transaction type.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classification: Employee benefits expense increase is correct for salary payments. Count of 1 is appropriate.\n\nCredit classification: Cash and cash equivalents decrease is correct for the payment. Count of 1 assumes net interpretation (no withholdings). If gross interpretation applies, additional liability increase lines would be needed for withholdings, but that depends on resolving the ambiguity.\n\nBoth classifications are valid under the net interpretation. The gross interpretation would require additional liability lines on the credit side that are not currently present.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The unresolved ambiguity (gross vs net salaries) materially affects the entry structure. Under the gross interpretation, the entry would include additional liability lines for withholdings (CPP, EI, income tax payable), while the net interpretation produces a simple two-line entry. This is not just a tuple difference\u2014it changes the number of lines and the accounts involved. The transaction text does not provide sufficient information to determine which interpretation is correct, and this is a fact the transaction initiator would know. The classifications provided are valid under the net interpretation, but we cannot proceed without knowing which interpretation applies.",
+        "decision": "missing_info"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "whether salaries are gross or net",
+            "why_entry_depends_on_clarification": "If gross: Dr Salaries expense $100, Cr Cash $X, Cr various payables for withholdings. If net: Dr Salaries expense $100, Cr Cash $100 (no withholdings)",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states 'paid employee salaries' without specifying gross vs net; no convention establishes which interpretation applies when withholdings are not mentioned",
+            "clarification_question": "Is the $100 the gross salary amount or the net amount paid to employees?",
+            "options": [
+              "Gross salaries (before withholdings)",
+              "Net salaries (after withholdings)"
+            ],
+            "resolved": false
+          },
+          {
+            "aspect": "whether employer payroll taxes apply",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          }
+        ]
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "salary payment",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Payroll/employee salaries are not a taxable supply under tax legislation. The transaction text does not mention any tax.",
+        "tax_mentioned": false,
+        "taxable": false,
+        "add_tax_lines": false,
+        "tax_rate": null,
+        "tax_amount": null,
+        "treatment": "not_applicable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "The unresolved ambiguity is \"whether salaries are gross or net\". This is a critical distinction:\n- If gross ($100): the entry would be Dr Employee benefits expense $100, Cr Cash $X (less than $100), Cr Employee benefits payable $Y (withholdings). Multiple lines on credit side.\n- If net ($100): the entry would be Dr Employee benefits expense $100, Cr Cash $100. Single line on each side.\n\nThe transaction states \"Paid employee salaries of $100\" without specifying gross vs net. The word \"paid\" conventionally means cash disbursed, which suggests the $100 is what left the bank account (net interpretation). However, \"salaries of $100\" could mean the salary expense amount (gross interpretation).\n\nUnder common accounting convention, when a transaction states \"paid salaries of $X\" without mentioning withholdings, it typically means the net amount paid to employees. If withholdings were involved, the transaction would normally state \"paid gross salaries of $X\" or mention the withholdings explicitly.\n\nHowever, this interpretation affects the account structure materially: the gross interpretation creates additional liability lines that don't exist in the net interpretation. The person who initiated the transaction knows which interpretation is correct.",
+        "missing_info_decision": true,
+        "clarification_questions": [
+          "Is the $100 the gross salary amount (before withholdings) or the net amount paid to employees (after withholdings)?"
+        ],
+        "complexity_assessment": "No complexity flags were raised. The complexity detector marked salary payment as not skeptical, indicating the system can handle this transaction type.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit classification: Employee benefits expense increase is correct for salary payments. Count of 1 is appropriate.\n\nCredit classification: Cash and cash equivalents decrease is correct for the payment. Count of 1 assumes net interpretation (no withholdings). If gross interpretation applies, additional liability increase lines would be needed for withholdings, but that depends on resolving the ambiguity.\n\nBoth classifications are valid under the net interpretation. The gross interpretation would require additional liability lines on the credit side that are not currently present.",
+        "debit_approved": true,
+        "override_debit": null,
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The unresolved ambiguity (gross vs net salaries) materially affects the entry structure. Under the gross interpretation, the entry would include additional liability lines for withholdings (CPP, EI, income tax payable), while the net interpretation produces a simple two-line entry. This is not just a tuple difference\u2014it changes the number of lines and the accounts involved. The transaction text does not provide sufficient information to determine which interpretation is correct, and this is a fact the transaction initiator would know. The classifications provided are valid under the net interpretation, but we cannot proceed without knowing which interpretation applies.",
+        "decision": "missing_info"
+      }
+    ],
+    "output_entry_drafter": [],
+    "output_disambiguator": [
+      {
+        "ambiguities": [
+          {
+            "aspect": "whether salaries are gross or net",
+            "why_entry_depends_on_clarification": "If gross: Dr Salaries expense $100, Cr Cash $X, Cr various payables for withholdings. If net: Dr Salaries expense $100, Cr Cash $100 (no withholdings)",
+            "why_ambiguity_not_resolved_by_given_info": "Transaction states 'paid employee salaries' without specifying gross vs net; no convention establishes which interpretation applies when withholdings are not mentioned",
+            "clarification_question": "Is the $100 the gross salary amount or the net amount paid to employees?",
+            "options": [
+              "Gross salaries (before withholdings)",
+              "Net salaries (after withholdings)"
+            ],
+            "resolved": false
+          },
+          {
+            "aspect": "whether employer payroll taxes apply",
+            "why_entry_depends_on_clarification": null,
+            "why_ambiguity_not_resolved_by_given_info": null,
+            "clarification_question": null,
+            "options": null,
+            "resolved": true
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase": [],
+        "dividend_increase": [],
+        "expense_increase": [
+          {
+            "reason": "Employee salaries paid for the period",
+            "category": "Employee benefits expense",
+            "count": 1
+          }
+        ],
+        "liability_decrease": [],
+        "equity_decrease": [],
+        "revenue_decrease": [],
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase": [],
+        "equity_increase": [],
+        "revenue_increase": [],
+        "asset_decrease": [
+          {
+            "reason": "Cash payment for employee salaries",
+            "category": "Cash and cash equivalents",
+            "count": 1
+          }
+        ],
+        "dividend_decrease": [],
+        "expense_decrease": [],
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [],
+    "output_credit_corrector": [],
+    "output_entry_builder": [],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 0,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 0,
+    "status_credit_corrector": 0,
+    "status_entry_builder": 0,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "complexity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 489,
+        "output_tokens": 57,
+        "input_token_details": {
+          "cache_read": 2678,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "tax_specialist",
+        "stop_reason": "tool_use",
+        "input_tokens": 499,
+        "output_tokens": 134,
+        "input_token_details": {
+          "cache_read": 3016,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 474,
+        "output_tokens": 170,
+        "input_token_details": {
+          "cache_read": 3767,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 475,
+        "output_tokens": 157,
+        "input_token_details": {
+          "cache_read": 3965,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "ambiguity_detector",
+        "stop_reason": "tool_use",
+        "input_tokens": 513,
+        "output_tokens": 259,
+        "input_token_details": {
+          "cache_read": 0,
+          "cache_creation": 3285
+        }
+      },
+      {
+        "node": "decision_maker",
+        "stop_reason": "tool_use",
+        "input_tokens": 1278,
+        "output_tokens": 829,
+        "input_token_details": {
+          "cache_read": 3784,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "complexity_detector": "tool_use",
+      "tax_specialist": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "ambiguity_detector": "tool_use",
+      "decision_maker": "tool_use"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "evaluator": "claude",
+  "evaluated_at": "2026-03-29T12:00:00Z",
+  "prompt_version": "v1",
+  "results": {
+    "hard_01_note_discounting": {
+      "actual_decision": "INCOMPLETE_INFORMATION",
+      "actual_questions": [
+        "Did Ford transfer the note to the bank with full recourse, partial recourse, or without recourse? (This determines whether the note should be derecognized or treated as collateralized borrowing)"
+      ],
+      "expected_cases": ["Derecognition (sale)", "Collateralized borrowing"],
+      "relevant": true,
+      "reason": "Decision is INCOMPLETE_INFORMATION. The clarification question asks about recourse terms, which is the exact business fact that determines whether the note is derecognized (sale) or treated as collateralized borrowing. The question targets business facts (recourse provisions), not accounting treatment. The pipeline's disambiguator options explicitly list both expected interpretations."
+    },
+    "hard_02_investment_classification": {
+      "actual_decision": "APPROVED",
+      "actual_questions": [],
+      "expected_cases": ["FVTPL (short-term trading)", "FVOCI (long-term strategic)", "Equity method (significant influence)"],
+      "relevant": false,
+      "reason": "Decision is APPROVED, not INCOMPLETE_INFORMATION. The complexity detector correctly flagged the FVTPL/FVOCI/equity-method ambiguity, but the decision maker dismissed it, reasoning that 10% ownership without stated influence factors defaults to FVTPL. No clarification questions were surfaced to the user. The pipeline failed to recognize that the expected ambiguity (management intent and whether significant influence exists at 10%) cannot be resolved by convention alone."
+    },
+    "hard_27_meal_purpose": {
+      "actual_decision": "APPROVED",
+      "actual_questions": [
+        "What was the business purpose of this meal expense?"
+      ],
+      "expected_cases": ["Overtime meal", "Working meeting", "Client entertainment", "Factory staff meal (production overhead)"],
+      "relevant": false,
+      "reason": "Decision is APPROVED, not INCOMPLETE_INFORMATION. The ambiguity detector correctly identified the meal purpose ambiguity with relevant options (travel, client entertainment, team meeting, employee benefit, owner personal), and the disambiguator produced a question. However, the decision maker overrode the ambiguity, arguing that the entry structure (Dr Expense, Cr Liability) is identical regardless of meal purpose and only the sub-account name differs. The pipeline did not halt for clarification."
+    },
+    "hard_32_grocery_purpose": {
+      "actual_decision": "INCOMPLETE_INFORMATION",
+      "actual_questions": [
+        "What is the business purpose of these tea, beverages, and refreshments? (e.g., office supplies for employee consumption, resale inventory, client entertainment/hospitality, or event catering)"
+      ],
+      "expected_cases": ["Client entertainment", "Employee break room supplies"],
+      "relevant": true,
+      "reason": "Decision is INCOMPLETE_INFORMATION. The clarification question asks about the business purpose of the grocery purchase, which is the exact fact needed to distinguish between the expected interpretations. The options include 'client entertainment/hospitality' and 'office supplies for employee consumption' (analogous to break room supplies), covering both expected cases. The question targets business facts (what the items are for), not accounting treatment. The pipeline correctly identified that the debit structure differs (asset vs expense) depending on purpose."
+    },
+    "hard_16_rent_treatment": {
+      "actual_decision": "APPROVED",
+      "actual_questions": [
+        "Does the $24,000 payment cover rent for the upcoming 12 months, the past 12 months, or some other period?"
+      ],
+      "expected_cases": ["Prepaid asset", "Immediate expense (short-term lease exemption)"],
+      "relevant": false,
+      "reason": "Decision is APPROVED, not INCOMPLETE_INFORMATION. The ambiguity detector flagged timing uncertainty (prepaid vs arrears), and the disambiguator produced a question. However, the decision maker overrode it, reasoning that 'paid...representing 12 months of rent' conventionally implies prepayment. Additionally, the question asked about timing (future vs past periods), not about the expected ambiguity: whether a 12-month prepayment should be recorded as a prepaid asset or expensed immediately under the IFRS 16 short-term lease exemption. The pipeline missed the core ambiguity entirely."
+    }
+  }
+}

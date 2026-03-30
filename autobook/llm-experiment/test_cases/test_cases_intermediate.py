@@ -310,7 +310,7 @@ INTERMEDIATE_TEST_CASES: list[TestCase] = [
     ),
     TestCase(
         id="int_26b_payroll_remittance",
-        transaction_text="Mondelez remitted January statutory deductions to the respective government agencies in cash: pension contributions $4,000 (employee + employer portions), health insurance premiums $6,500, employment insurance premiums $2,100, and income tax withholdings $1,450.",
+        transaction_text="Mondelez remitted January statutory deductions to the respective government agencies in cash, combining the employee withholdings with the company's matching contributions: pension $4,000, health insurance $6,500, employment insurance $2,100. Mondelez also remitted employee income tax withholdings of $1,450.",
         user_context=_DEFAULT_CTX,
         # 1 liability decrease (withholdings) + 1 expense (employer portions)
         expected_debit_tuple=(0, 0, 1, 1, 0, 0),

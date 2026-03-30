@@ -10,6 +10,7 @@ import redis.asyncio as aioredis
 from config import get_settings
 
 STATUS_TTL_SECONDS = 60 * 60 * 24
+TERMINAL_STATUSES = {"auto_posted", "needs_clarification", "resolved", "rejected", "failed"}
 
 _sync_client: sync_redis.Redis | None = None
 
@@ -27,6 +28,32 @@ def _normalize_confidence(confidence: dict | None) -> dict | None:
         return None
     payload = dict(confidence)
     payload.setdefault("auto_post_threshold", get_settings().AUTO_POST_THRESHOLD)
+    return payload
+
+
+def _normalize_batch(batch: dict | None) -> dict | None:
+    if batch is None:
+        return None
+
+    payload = dict(batch)
+    items = list(payload.get("items") or [])
+    normalized_items = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        normalized_items.append(
+            {
+                "child_parse_id": item.get("child_parse_id"),
+                "statement_index": item.get("statement_index"),
+                "input_text": item.get("input_text"),
+                "status": item.get("status"),
+                "clarification_id": item.get("clarification_id"),
+                "journal_entry_id": item.get("journal_entry_id"),
+                "error": item.get("error"),
+            }
+        )
+    normalized_items.sort(key=lambda item: int(item.get("statement_index") or 0))
+    payload["items"] = normalized_items
     return payload
 
 
@@ -64,6 +91,9 @@ def _merge_status(current: dict[str, Any] | None, updates: dict[str, Any]) -> di
             continue
         if key == "confidence":
             merged[key] = _normalize_confidence(value)
+            continue
+        if key == "batch":
+            merged[key] = _normalize_batch(value)
             continue
         merged[key] = value
 
@@ -104,6 +134,7 @@ def set_status_sync(
     clarification_id: str | None = None,
     journal_entry_id: str | None = None,
     error: str | None = None,
+    batch: dict | None = None,
 ) -> dict[str, Any]:
     current = _load_sync(parse_id)
     payload = _merge_status(
@@ -120,6 +151,7 @@ def set_status_sync(
             "clarification_id": clarification_id,
             "journal_entry_id": journal_entry_id,
             "error": error,
+            "batch": batch,
         },
     )
     try:
@@ -143,6 +175,7 @@ async def set_status(
     clarification_id: str | None = None,
     journal_entry_id: str | None = None,
     error: str | None = None,
+    batch: dict | None = None,
 ) -> dict[str, Any]:
     current = await load_status(redis, parse_id)
     payload = _merge_status(
@@ -159,8 +192,126 @@ async def set_status(
             "clarification_id": clarification_id,
             "journal_entry_id": journal_entry_id,
             "error": error,
+            "batch": batch,
         },
     )
     if hasattr(redis, "set"):
         await redis.set(_key(parse_id), json.dumps(payload), ex=STATUS_TTL_SECONDS)
     return payload
+
+
+def summarize_batch_results(
+    *,
+    total_statements: int,
+    items: list[dict],
+) -> tuple[str, dict[str, int]]:
+    counts = {
+        "auto_posted": 0,
+        "needs_clarification": 0,
+        "resolved": 0,
+        "rejected": 0,
+        "failed": 0,
+    }
+    for item in items:
+        status = str(item.get("status") or "").lower()
+        if status in counts:
+            counts[status] += 1
+
+    completed_statements = sum(counts.values())
+    if completed_statements < total_statements:
+        return "processing", counts
+    if counts["needs_clarification"] > 0:
+        return "needs_clarification", counts
+    if counts["failed"] > 0:
+        return "failed", counts
+    if counts["auto_posted"] == total_statements:
+        return "auto_posted", counts
+    if counts["rejected"] == total_statements:
+        return "rejected", counts
+    return "resolved", counts
+
+
+def build_batch_summary(
+    *,
+    total_statements: int,
+    items: list[dict],
+) -> dict[str, Any]:
+    status, counts = summarize_batch_results(total_statements=total_statements, items=items)
+    completed_statements = sum(counts.values())
+    return {
+        "total_statements": total_statements,
+        "completed_statements": completed_statements,
+        "pending_statements": max(total_statements - completed_statements, 0),
+        "auto_posted_count": counts["auto_posted"],
+        "needs_clarification_count": counts["needs_clarification"],
+        "resolved_count": counts["resolved"],
+        "rejected_count": counts["rejected"],
+        "failed_count": counts["failed"],
+        "items": items,
+        "status": status,
+    }
+
+
+def record_batch_result_sync(
+    *,
+    parent_parse_id: str,
+    child_parse_id: str,
+    user_id: str,
+    statement_index: int,
+    total_statements: int,
+    status: str,
+    input_text: str | None = None,
+    clarification_id: str | None = None,
+    journal_entry_id: str | None = None,
+    error: str | None = None,
+) -> dict[str, Any]:
+    current = _load_sync(parent_parse_id) or {}
+    current_batch = dict(current.get("batch") or {})
+    items_by_child: dict[str, dict[str, Any]] = {
+        str(item.get("child_parse_id")): dict(item)
+        for item in current_batch.get("items") or []
+        if item.get("child_parse_id")
+    }
+    items_by_child[child_parse_id] = {
+        "child_parse_id": child_parse_id,
+        "statement_index": statement_index,
+        "input_text": input_text,
+        "status": status,
+        "clarification_id": clarification_id,
+        "journal_entry_id": journal_entry_id,
+        "error": error,
+    }
+    items = sorted(items_by_child.values(), key=lambda item: int(item.get("statement_index") or 0))
+    batch = build_batch_summary(total_statements=total_statements, items=items)
+    explanation = _batch_explanation(batch)
+    payload = _merge_status(
+        current,
+        {
+            "parse_id": parent_parse_id,
+            "user_id": user_id,
+            "status": batch["status"],
+            "stage": current.get("stage") or "batch",
+            "explanation": explanation,
+            "batch": batch,
+            "clarification_id": clarification_id if batch["status"] == "needs_clarification" else None,
+            "journal_entry_id": journal_entry_id if batch["total_statements"] == 1 else None,
+            "error": error if batch["status"] == "failed" else None,
+        },
+    )
+    try:
+        _get_sync_redis().setex(_key(parent_parse_id), STATUS_TTL_SECONDS, json.dumps(payload))
+    except Exception:
+        return payload
+    return payload
+
+
+def _batch_explanation(batch: dict[str, Any]) -> str:
+    total = int(batch.get("total_statements") or 0)
+    return (
+        f"Processed {total} statements: "
+        f"{batch.get('auto_posted_count', 0)} auto-posted, "
+        f"{batch.get('needs_clarification_count', 0)} awaiting clarification, "
+        f"{batch.get('resolved_count', 0)} resolved, "
+        f"{batch.get('rejected_count', 0)} rejected, "
+        f"{batch.get('failed_count', 0)} failed."
+    )

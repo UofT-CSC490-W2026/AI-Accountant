@@ -1,4 +1,9 @@
-"""Cache warmup — prime Bedrock prompt caches for all agents."""
+"""Cache warmup — prime Bedrock prompt caches for V3 agents.
+
+Two cache points per agent:
+  1. SHARED_INSTRUCTION (shared across all agents — cached once)
+  2. AGENT_INSTRUCTION (per-agent — cached separately)
+"""
 from __future__ import annotations
 
 from rich.console import Console
@@ -7,29 +12,36 @@ console = Console()
 
 
 def warmup_caches() -> None:
-    """Call each agent's LLM once to trigger cache_creation on system prompts."""
+    """Call each V3 agent's LLM once to trigger cache_creation on system prompts.
+
+    First warms the shared instruction (cache point 1), then each agent's
+    own instruction (cache point 2). The shared prefix is reused across agents.
+    """
     from langchain_core.callbacks import BaseCallbackHandler
     from services.agent.utils.llm import get_llm
     from services.agent.utils.parsers.json_output import _MODELS
-    from services.agent.prompts.disambiguator import SYSTEM_INSTRUCTION as P0
-    from services.agent.prompts.debit_classifier import SYSTEM_INSTRUCTION as P1
-    from services.agent.prompts.credit_classifier import SYSTEM_INSTRUCTION as P2
-    from services.agent.prompts.debit_corrector import SYSTEM_INSTRUCTION as P3
-    from services.agent.prompts.credit_corrector import SYSTEM_INSTRUCTION as P4
-    from services.agent.prompts.entry_builder import _build_system_instruction
-    P5 = _build_system_instruction({})
-    from services.agent.prompts.approver import SYSTEM_INSTRUCTION as P6
-    from services.agent.prompts.diagnostician import SYSTEM_INSTRUCTION as P7
-    from variants.single_agent.prompt import _SYSTEM_INSTRUCTION as P_SINGLE
-    from variants.single_agent.graph import SingleAgentOutput
     from services.agent.utils.prompt import CACHE_POINT, to_bedrock_messages
 
-    prompts = [
-        ("disambiguator", P0), ("debit_classifier", P1),
-        ("credit_classifier", P2), ("debit_corrector", P3),
-        ("credit_corrector", P4), ("entry_builder", P5),
-        ("approver", P6), ("diagnostician", P7),
-        ("single_agent", P_SINGLE),
+    # Shared instruction — same for all agents, cached at point 1
+    from services.agent.prompts.shared import SHARED_INSTRUCTION
+
+    # Per-agent instructions — cached at point 2
+    from services.agent.prompts.disambiguator import AGENT_INSTRUCTION as AI_AMB
+    from services.agent.prompts.complexity_detector import AGENT_INSTRUCTION as AI_COMP
+    from services.agent.prompts.debit_classifier import AGENT_INSTRUCTION as AI_DC
+    from services.agent.prompts.credit_classifier import AGENT_INSTRUCTION as AI_CC
+    from services.agent.prompts.tax_specialist import AGENT_INSTRUCTION as AI_TAX
+    from services.agent.prompts.decision_maker import AGENT_INSTRUCTION as AI_DM
+    from services.agent.prompts.entry_drafter import AGENT_INSTRUCTION as AI_ED
+
+    agents = [
+        ("ambiguity_detector", AI_AMB),
+        ("complexity_detector", AI_COMP),
+        ("debit_classifier", AI_DC),
+        ("credit_classifier", AI_CC),
+        ("tax_specialist", AI_TAX),
+        ("decision_maker", AI_DM),
+        ("entry_drafter", AI_ED),
     ]
 
     class CacheProbe(BaseCallbackHandler):
@@ -41,14 +53,18 @@ def warmup_caches() -> None:
                 if hasattr(msg, "usage_metadata") and msg.usage_metadata:
                     self.usage = dict(msg.usage_metadata)
 
-    console.print("[dim]Warming up caches...[/dim]")
-    for agent_name, system_text in prompts:
-        system_blocks = [{"text": system_text}, CACHE_POINT]
+    console.print("[dim]Warming up caches (V3 agents)...[/dim]")
+    for agent_name, agent_instruction in agents:
+        # Two cache points: shared + agent-specific
+        system_blocks = [
+            {"text": SHARED_INSTRUCTION}, CACHE_POINT,
+            {"text": agent_instruction}, CACHE_POINT,
+        ]
         message_blocks = [{"text": "Respond with one word: ready"}]
         messages = to_bedrock_messages(system_blocks, message_blocks)
 
-        pydantic_cls = SingleAgentOutput if agent_name == "single_agent" else _MODELS[agent_name]
-        llm = get_llm("entry_builder" if agent_name == "single_agent" else agent_name)
+        pydantic_cls = _MODELS.get(agent_name)
+        llm = get_llm(agent_name)
         structured = llm.with_structured_output(pydantic_cls)
 
         probe = CacheProbe()

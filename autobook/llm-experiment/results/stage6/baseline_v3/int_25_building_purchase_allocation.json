@@ -1,0 +1,501 @@
+{
+  "test_case_id": "int_25_building_purchase_allocation",
+  "variant_name": "baseline_v3",
+  "model": "sonnet",
+  "debit_tuple_exact_match": false,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 0.8333333333333334,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Purchased land and building for $9,000,000 allocated by fair value ($6,000,000 land, $3,000,000 building). Paid 50% ($4,500,000) plus $300,000 recoverable sales tax on building by cheque; remaining 50% ($4,500,000) due in 6 months.",
+    "lines": [
+      {
+        "type": "debit",
+        "account_name": "Land",
+        "amount": 6000000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Building",
+        "amount": 3000000.0
+      },
+      {
+        "type": "debit",
+        "account_name": "Input Tax Credit Recoverable",
+        "amount": 300000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Accounts Payable",
+        "amount": 4500000.0
+      },
+      {
+        "type": "credit",
+        "account_name": "Cash",
+        "amount": 4800000.0
+      }
+    ]
+  },
+  "actual_cost_usd": 0.0672303,
+  "raw_cost_usd": 0.10533,
+  "total_latency_ms": 34940,
+  "total_input_tokens": 19970,
+  "total_output_tokens": 3028,
+  "total_llm_calls": 7,
+  "iteration_count": 1,
+  "final_decision": "APPROVED",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "unknown": {
+      "input_tokens": 4740,
+      "output_tokens": 2088,
+      "cache_read_tokens": 10450,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 15190,
+      "llm_calls": 5,
+      "actual_cost_usd": 0.048675,
+      "raw_cost_usd": 0.07689,
+      "output": null,
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 559,
+      "output_tokens": 410,
+      "cache_read_tokens": 1805,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2364,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0083685,
+      "raw_cost_usd": 0.013242,
+      "output": {
+        "liability_increase_reason": "Accounts payable for 50% of purchase price ($4,500,000) due in 6 months is a liability increase",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity transactions; this is an asset acquisition financed by liability and cash",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue earned; this is a purchase transaction, not a sale",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash paid by cheque for 50% of purchase price ($4,500,000) plus sales tax on building portion ($400,000 \u00d7 10% = $40,000 based on building's allocated cost), totaling cash outflow",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend or owner withdrawal transactions involved",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense reversals or refunds; land and building are capitalized as assets, and sales tax on building is capitalized to the building cost under IFRS",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 560,
+      "output_tokens": 530,
+      "cache_read_tokens": 1856,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2416,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0101868,
+      "raw_cost_usd": 0.015198,
+      "output": {
+        "asset_increase_reason": "Three distinct asset increases: (1) Land at allocated cost of $6,000,000 (non-depreciable, allocated 8/12 of $9M purchase price based on relative fair values 8:4); (2) Building at allocated cost of $3,000,000 (depreciable, allocated 4/12 of $9M); (3) Sales tax paid on building creates a third asset line because the $400,000 sales tax (10% \u00d7 $4,000,000) is capitalized to the building cost as an acquisition cost. However, since the sales tax increases the same building asset account, it combines with line 2 into a single Building asset increase of $3,400,000. Therefore: Land = 1 line, Building (including capitalized tax) = 1 line. Total = 2 asset increase lines.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses. The sales tax on the building is capitalized as part of the building's acquisition cost (asset), not expensed, per IFRS cost capitalization rules for property acquisition.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being reduced or paid off in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected in this asset acquisition transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_ambiguity_detector": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_complexity_detector": [
+      {
+        "flags": [
+          {
+            "aspect": "allocation of lump-sum purchase price between land and building",
+            "why_llm_cannot_do_this": "Requires proportional allocation calculation based on relative fair values ($8M and $4M totaling $12M) to split the $9M purchase price, which involves mathematical computation that may produce rounding errors or incorrect allocation logic",
+            "what_is_best_llm_can_do": "Attempt proportional allocation but may miscalculate the split (should be $6M land and $3M building based on 2:1 ratio)",
+            "skeptical": true
+          },
+          {
+            "aspect": "selective sales tax application to building only",
+            "why_llm_cannot_do_this": "Requires understanding that sales tax applies only to the building component ($3M allocated portion) not the land, and computing 10% tax on the allocated building amount, not the stated purchase price",
+            "what_is_best_llm_can_do": "May incorrectly apply 10% tax to entire $9M purchase price or to the $4M fair value instead of the $3M allocated cost",
+            "skeptical": true
+          },
+          {
+            "aspect": "split payment with deferred portion",
+            "why_llm_cannot_do_this": null,
+            "what_is_best_llm_can_do": null,
+            "skeptical": false
+          },
+          {
+            "aspect": "payment calculation combining principal and tax",
+            "why_llm_cannot_do_this": "Requires computing the immediate payment as 50% of allocated costs ($3M land + $1.5M building) plus 10% tax on building portion ($300K), totaling $4.8M, which involves multi-step dependent calculations",
+            "what_is_best_llm_can_do": "May calculate payment incorrectly by applying tax to wrong base or miscalculating the 50% split timing",
+            "skeptical": true
+          }
+        ]
+      }
+    ],
+    "output_tax_specialist": [
+      {
+        "reasoning": "Text explicitly states \"10% sales tax on the building\" paid with the balance. Land is not taxable; building is taxable. Tax base is the building component. Using fair value allocation: building = $4,000,000 / ($8,000,000 + $4,000,000) \u00d7 $9,000,000 = $3,000,000. Tax = $3,000,000 \u00d7 10% = $300,000. This is a purchase of real property for business use, so tax is recoverable as input tax credit.",
+        "tax_mentioned": true,
+        "taxable": true,
+        "add_tax_lines": true,
+        "tax_rate": 0.1,
+        "tax_amount": 300000.0,
+        "treatment": "recoverable"
+      }
+    ],
+    "output_decision_maker": [
+      {
+        "ambiguity_assessment": "No ambiguities flagged. The transaction is clear: lump-sum purchase with fair value allocation, split payment (50% deferred, 50% + tax paid now), and sales tax on building only.",
+        "missing_info_decision": false,
+        "clarification_questions": [],
+        "complexity_assessment": "All flagged complexities are standard IFRS calculations:\n1. Lump-sum allocation: Standard proportional allocation based on relative fair values (8:4 ratio \u2192 2:1 \u2192 land $6M, building $3M). This is routine.\n2. Selective tax application: Standard - land is not taxable, building is. Tax base is allocated building cost ($3M), not fair value.\n3. Split payment: Straightforward - 50% deferred ($4.5M payable), 50% + tax paid now.\n4. Payment calculation: 50% of $9M = $4.5M, plus 10% \u00d7 $3M building = $300K tax, total $4.8M cash paid.\n\nThese are all within standard IFRS knowledge and basic arithmetic. The system can handle this correctly.",
+        "llm_stuck": false,
+        "stuck_reason": null,
+        "classification_assessment": "Debit side: Correct - 2 asset increases (Land $6M, Building $3.3M including $300K capitalized tax).\n\nCredit side: INCORRECT. The credit classifier has errors:\n1. Asset decrease (cash): Stated as $4.5M + $40K = $4.54M, but should be $4.5M + $300K = $4.8M. The classifier incorrectly calculated tax as $40K instead of $300K.\n2. The tax specialist correctly identified $300K tax, which is recoverable. This creates TWO credit lines: (a) Cash decrease $4.8M, (b) Sales Tax Recoverable increase (which is an asset increase on the DEBIT side, not credit).\n\nWait - reviewing more carefully: If tax is recoverable, it's an input tax credit (ITC). This means:\n- Debit: Land $6M, Building $3M, Sales Tax Recoverable $300K = 3 asset increases\n- Credit: Cash $4.8M (50% + tax), Accounts Payable $4.5M (50% deferred) = 1 asset decrease, 1 liability increase\n\nThe debit classifier counted only 2 (Land and Building with tax capitalized), but if tax is recoverable, it should be 3 (Land, Building, and Sales Tax Recoverable as separate asset). The credit classifier counted cash correctly as 1 line but calculated the wrong amount.",
+        "debit_approved": false,
+        "override_debit": [
+          3,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "credit_approved": true,
+        "override_credit": null,
+        "decision_rationale": "The complexity flags are overly cautious - all calculations are standard IFRS procedures. However, the debit classification is incorrect. Since tax is recoverable (per tax specialist), the entry should have 3 debit lines: Land ($6M), Building ($3M), and Sales Tax Recoverable ($300K). The debit classifier incorrectly capitalized the tax to the building instead of treating it as a recoverable asset. The credit side structure is correct (1 cash decrease, 1 liability increase), though the cash amount calculation had an error in reasoning that won't affect the entry structure. Correcting debit count to 3 asset increases.",
+        "decision": "proceed"
+      }
+    ],
+    "output_entry_drafter": [
+      {
+        "reason": "Purchased land and building for $9,000,000 allocated by fair value ($6,000,000 land, $3,000,000 building). Paid 50% ($4,500,000) plus $300,000 recoverable sales tax on building by cheque; remaining 50% ($4,500,000) due in 6 months.",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Land",
+            "amount": 6000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Building",
+            "amount": 3000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Input Tax Credit Recoverable",
+            "amount": 300000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Accounts Payable",
+            "amount": 4500000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash",
+            "amount": 4800000.0
+          }
+        ]
+      }
+    ],
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "Three distinct asset increases: (1) Land at allocated cost of $6,000,000 (non-depreciable, allocated 8/12 of $9M purchase price based on relative fair values 8:4); (2) Building at allocated cost of $3,000,000 (depreciable, allocated 4/12 of $9M); (3) Sales tax paid on building creates a third asset line because the $400,000 sales tax (10% \u00d7 $4,000,000) is capitalized to the building cost as an acquisition cost. However, since the sales tax increases the same building asset account, it combines with line 2 into a single Building asset increase of $3,400,000. Therefore: Land = 1 line, Building (including capitalized tax) = 1 line. Total = 2 asset increase lines.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses. The sales tax on the building is capitalized as part of the building's acquisition cost (asset), not expensed, per IFRS cost capitalization rules for property acquisition.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being reduced or paid off in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected in this asset acquisition transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "Accounts payable for 50% of purchase price ($4,500,000) due in 6 months is a liability increase",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity transactions; this is an asset acquisition financed by liability and cash",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue earned; this is a purchase transaction, not a sale",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash paid by cheque for 50% of purchase price ($4,500,000) plus sales tax on building portion ($400,000 \u00d7 10% = $40,000 based on building's allocated cost), totaling cash outflow",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend or owner withdrawal transactions involved",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense reversals or refunds; land and building are capitalized as assets, and sales tax on building is capitalized to the building cost under IFRS",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "Three distinct asset increases: (1) Land at allocated cost of $6,000,000 (non-depreciable, allocated 8/12 of $9M purchase price based on relative fair values 8:4); (2) Building at allocated cost of $3,000,000 (depreciable, allocated 4/12 of $9M); (3) Sales tax paid on building creates a third asset line because the $400,000 sales tax (10% \u00d7 $4,000,000) is capitalized to the building cost as an acquisition cost. However, since the sales tax increases the same building asset account, it combines with line 2 into a single Building asset increase of $3,400,000. Therefore: Land = 1 line, Building (including capitalized tax) = 1 line. Total = 2 asset increase lines.",
+        "asset_increase_count": 2,
+        "dividend_increase_reason": "No owner withdrawals or dividends in this transaction.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses. The sales tax on the building is capitalized as part of the building's acquisition cost (asset), not expensed, per IFRS cost capitalization rules for property acquisition.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "No liabilities are being reduced or paid off in this transaction.",
+        "liability_decrease_count": 0,
+        "equity_decrease_reason": "No equity accounts are reduced in this transaction.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue accounts are affected in this asset acquisition transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          2,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "Accounts payable for 50% of purchase price ($4,500,000) due in 6 months is a liability increase",
+        "liability_increase_count": 1,
+        "equity_increase_reason": "No equity transactions; this is an asset acquisition financed by liability and cash",
+        "equity_increase_count": 0,
+        "revenue_increase_reason": "No revenue earned; this is a purchase transaction, not a sale",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "Cash paid by cheque for 50% of purchase price ($4,500,000) plus sales tax on building portion ($400,000 \u00d7 10% = $40,000 based on building's allocated cost), totaling cash outflow",
+        "asset_decrease_count": 1,
+        "dividend_decrease_reason": "No dividend or owner withdrawal transactions involved",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expense reversals or refunds; land and building are capitalized as assets, and sales tax on building is capitalized to the building cost under IFRS",
+        "expense_decrease_count": 0,
+        "tuple": [
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "reason": "Purchased land and building for $9,000,000 allocated by fair value ($6,000,000 land, $3,000,000 building). Paid 50% ($4,500,000) plus $300,000 recoverable sales tax on building by cheque; remaining 50% ($4,500,000) due in 6 months.",
+        "lines": [
+          {
+            "type": "debit",
+            "account_name": "Land",
+            "amount": 6000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Building",
+            "amount": 3000000.0
+          },
+          {
+            "type": "debit",
+            "account_name": "Input Tax Credit Recoverable",
+            "amount": 300000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Accounts Payable",
+            "amount": 4500000.0
+          },
+          {
+            "type": "credit",
+            "account_name": "Cash",
+            "amount": 4800000.0
+          }
+        ]
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_ambiguity_detector": 1,
+    "status_complexity_detector": 1,
+    "status_tax_specialist": 1,
+    "status_decision_maker": 1,
+    "status_entry_drafter": 1,
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 602,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2257,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 588,
+        "output_tokens": 271,
+        "input_token_details": {
+          "cache_read": 1988,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 559,
+        "output_tokens": 410,
+        "input_token_details": {
+          "cache_read": 1805,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 578,
+        "output_tokens": 479,
+        "input_token_details": {
+          "cache_read": 1650,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 560,
+        "output_tokens": 530,
+        "input_token_details": {
+          "cache_read": 1856,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 2125,
+        "output_tokens": 986,
+        "input_token_details": {
+          "cache_read": 2494,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "unknown",
+        "stop_reason": "tool_use",
+        "input_tokens": 847,
+        "output_tokens": 317,
+        "input_token_details": {
+          "cache_read": 2061,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "unknown": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use"
+    }
+  }
+}

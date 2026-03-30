@@ -1,0 +1,491 @@
+{
+  "test_case_id": "int_hard_27b_meal_meeting",
+  "variant_name": "with_evaluation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2024-01-01",
+    "description": "Meal expense for employee working meeting, paid by corporate credit card",
+    "rationale": "The $125 total includes HST. Working backwards: $125 / 1.13 = $110.62 base, $14.38 HST. For meals, only 50% of HST is recoverable as ITC per CRA rules. Therefore: debit $7.19 (50% of $14.38) to HST Receivable, debit $117.81 ($110.62 base + $7.19 non-recoverable HST) to Meals Expense, credit $125.00 to Credit Card Payable. This follows the fix context guidance on partial HST recovery for meals.",
+    "lines": [
+      {
+        "account_name": "Meals Expense",
+        "type": "debit",
+        "amount": 117.81
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 7.19
+      },
+      {
+        "account_name": "Credit Card Payable",
+        "type": "credit",
+        "amount": 125.0
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0552936,
+  "raw_cost_usd": 0.094962,
+  "total_latency_ms": 42450,
+  "total_input_tokens": 21974,
+  "total_output_tokens": 1936,
+  "total_llm_calls": 7,
+  "iteration_count": 2,
+  "final_decision": "APPROVED",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "credit_classifier": {
+      "input_tokens": 499,
+      "output_tokens": 89,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1740,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0032043,
+      "raw_cost_usd": 0.006555,
+      "output": {
+        "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is on the debit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is on the debit side."
+    },
+    "debit_classifier": {
+      "input_tokens": 501,
+      "output_tokens": 100,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1763,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033816,
+      "raw_cost_usd": 0.006789,
+      "output": {
+        "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (meals & entertainment) incurred for business purposes, so it increases expense.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (meals & entertainment) incurred for business purposes, so it increases expense."
+    },
+    "entry_builder": {
+      "input_tokens": 1583,
+      "output_tokens": 670,
+      "cache_read_tokens": 6230,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7813,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.016668,
+      "raw_cost_usd": 0.033489,
+      "output": {
+        "date": "2024-01-01",
+        "description": "Meal expense for employee working meeting, paid by corporate credit card",
+        "rationale": "The $125 total includes HST. Working backwards: $125 / 1.13 = $110.62 base, $14.38 HST. For meals, only 50% of HST is recoverable as ITC per CRA rules. Therefore: debit $7.19 (50% of $14.38) to HST Receivable, debit $117.81 ($110.62 base + $7.19 non-recoverable HST) to Meals Expense, credit $125.00 to Credit Card Payable. This follows the fix context guidance on partial HST recovery for meals.",
+        "lines": [
+          {
+            "account_name": "Meals Expense",
+            "type": "debit",
+            "amount": 117.81
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 7.19
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 3442,
+      "output_tokens": 429,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 7546,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0179922,
+      "raw_cost_usd": 0.029073,
+      "output": {
+        "reason": "Entry correctly records meal expense with proper 50% HST recovery. Transaction amount $125 includes HST. Calculation verified: $125 / 1.13 = $110.62 base, $14.38 HST. Meals have 50% ITC recovery per CRA rules: HST Receivable $7.19 (50% of $14.38), Meals Expense $117.81 ($110.62 base + $7.19 non-recoverable portion). Credit Card Payable $125.00. Balance verified: $117.81 + $7.19 = $125.00. Accounts appropriate, amounts correct, tax treatment follows restricted ITC rules for meals.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      "reason": "Entry correctly records meal expense with proper 50% HST recovery. Transaction amount $125 includes HST. Calculation verified: $125 / 1.13 = $110.62 base, $14.38 HST. Meals have 50% ITC recovery per CRA rules: HST Receivable $7.19 (50% of $14.38), Meals Expense $117.81 ($110.62 base + $7.19 non-recoverable portion). Credit Card Payable $125.00. Balance verified: $117.81 + $7.19 = $125.00. Accounts appropriate, amounts correct, tax treatment follows restricted ITC rules for meals."
+    },
+    "diagnostician": {
+      "input_tokens": 1257,
+      "output_tokens": 648,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3112,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0140475,
+      "raw_cost_usd": 0.019056,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Missing HST Receivable. The $125 is stated as the total paid, which includes HST. For meals, the company can recover 50% of the HST paid as input tax credit. The entry should separate: base amount to Meals Expense, 50% of HST to HST Receivable (debit), 50% of HST stays in expense, and total $125 to Credit Card Payable (credit). The generator's rationale incorrectly states 'no tax is applicable' when meals are taxable purchases requiring HST treatment with 50% ITC recovery.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": true,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "intermediate",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [],
+    "output_debit_classifier": [
+      {
+        "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (meals & entertainment) incurred for business purposes, so it increases expense.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (meals & entertainment) incurred for business purposes, so it increases expense.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is on the debit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is on the debit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (meals & entertainment) incurred for business purposes, so it increases expense.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Meal for a working meeting among employees = business meal expense increase. This is an operating expense (meals & entertainment) incurred for business purposes, so it increases expense.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is on the debit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Corporate credit card used = liability increase (credit card payable). The meal expense itself is on the debit side.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2024-01-01",
+        "description": "Employee working meeting meal expense",
+        "rationale": "The transaction states the meal was for a working meeting among employees, which qualifies as a meals and entertainment expense under IFRS. In Canada, only 50% of meals and entertainment expenses are deductible for tax purposes, but the full amount is recorded as an expense. The corporate credit card creates a liability (credit card payable). The debit tuple (0,0,1,0,0,0) correctly identifies one expense increase, and the credit tuple (1,0,0,0,0,0) correctly identifies one liability increase. No tax is applicable as restaurant meals are subject to tax at the point of sale (already included in the $125 amount paid).",
+        "lines": [
+          {
+            "account_name": "Meals and Entertainment Expense",
+            "type": "debit",
+            "amount": 125.0
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2024-01-01",
+        "description": "Meal expense for employee working meeting, paid by corporate credit card",
+        "rationale": "The $125 total includes HST. Working backwards: $125 / 1.13 = $110.62 base, $14.38 HST. For meals, only 50% of HST is recoverable as ITC per CRA rules. Therefore: debit $7.19 (50% of $14.38) to HST Receivable, debit $117.81 ($110.62 base + $7.19 non-recoverable HST) to Meals Expense, credit $125.00 to Credit Card Payable. This follows the fix context guidance on partial HST recovery for meals.",
+        "lines": [
+          {
+            "account_name": "Meals Expense",
+            "type": "debit",
+            "amount": 117.81
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 7.19
+          },
+          {
+            "account_name": "Credit Card Payable",
+            "type": "credit",
+            "amount": 125.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Missing HST Receivable. The $125 is stated as the total paid, which includes HST. For meals, the company can recover 50% of the HST paid as input tax credit. The entry should separate: base amount to Meals Expense, 50% of HST to HST Receivable (debit), 50% of HST stays in expense, and total $125 to Credit Card Payable (credit). The generator's rationale incorrectly states 'no tax is applicable' when meals are taxable purchases requiring HST treatment with 50% ITC recovery.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Entry correctly records meal expense with proper 50% HST recovery. Transaction amount $125 includes HST. Calculation verified: $125 / 1.13 = $110.62 base, $14.38 HST. Meals have 50% ITC recovery per CRA rules: HST Receivable $7.19 (50% of $14.38), Meals Expense $117.81 ($110.62 base + $7.19 non-recoverable portion). Credit Card Payable $125.00. Balance verified: $117.81 + $7.19 = $125.00. Accounts appropriate, amounts correct, tax treatment follows restricted ITC rules for meals.",
+        "decision": "APPROVED",
+        "confidence": "VERY_CONFIDENT"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected because the entry is missing HST Receivable treatment. The $125 paid includes HST, and for meals, the company can recover 50% of the HST as an input tax credit (ITC). The entry should separate the base amount, record 50% of HST to HST Receivable (debit), leave 50% of HST in expense, and credit the full $125 to Credit Card Payable.\n\nTracing the error:\n- Agent 1 (Debit Classifier) classified this as (0,0,1,0,0,0) = one expense increase. This is incomplete because it doesn't account for the HST Receivable component that should be recorded as an asset increase.\n- Agent 2 (Credit Classifier) classified this as (1,0,0,0,0,0) = one liability increase. This is correct for the credit side.\n- Agent 3 (Debit Corrector) validated the debit tuple and kept it as (0,0,1,0,0,0). It should have caught that HST recovery creates an asset increase.\n- Agent 4 (Credit Corrector) validated the credit tuple correctly.\n- Agent 5 (Entry Builder) explicitly stated in its rationale \"No tax is applicable as restaurant meals are subject to tax at the point of sale (already included in the $125 amount paid).\" This is the fundamental error \u2014 the builder failed to recognize that even though tax is included in the amount paid, the company can recover 50% of the HST as ITC, requiring separate HST Receivable treatment.\n\nThe root cause is Agent 5 (Entry Builder). While Agent 1 could have classified this as (1,0,1,0,0,0) to indicate both an asset increase (HST Receivable) and an expense increase, the debit tuple structure doesn't naturally capture the tax-splitting logic required here. The Entry Builder is specifically responsible for applying Canadian tax rules, including the 50% ITC recovery on meals. Agent 5's rationale explicitly dismissed tax treatment, which is the core error.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "The $125 includes HST. For meals, recover 50% of HST as ITC: calculate HST component from $125 total, debit 50% of HST to HST Receivable (asset increase), add remaining 50% of HST to the base meal amount for Meals Expense, credit full $125 to Credit Card Payable."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 0,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "The $125 includes HST. For meals, recover 50% of HST as ITC: calculate HST component from $125 total, debit 50% of HST to HST Receivable (asset increase), add remaining 50% of HST to the base meal amount for Meals Expense, credit full $125 to Credit Card Payable."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "APPROVED",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 499,
+        "output_tokens": 89,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 501,
+        "output_tokens": 100,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 737,
+        "output_tokens": 314,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1398,
+        "output_tokens": 200,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1257,
+        "output_tokens": 648,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 846,
+        "output_tokens": 356,
+        "input_token_details": {
+          "cache_read": 3115,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2044,
+        "output_tokens": 229,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

@@ -17,9 +17,15 @@ class NormalizationTask(BaseModel):
     parse_id: str
     user_id: str
     source: str
+    parent_parse_id: str | None = None
+    statement_index: int | None = None
+    statement_total: int | None = None
     input_text: str | None = None
     currency: str | None = None
     filename: str | None = None
+    transaction_date: str | None = None
+    amount: float | None = None
+    counterparty: str | None = None
     submitted_at: str | None = None
     stages: list[str] = Field(default_factory=lambda: list(DEFAULT_STAGES))
     store: bool = True
@@ -83,4 +89,5 @@ class FlywheelTask(BaseModel):
     user_id: str
     transaction_id: str
     journal_entry_id: str
+    origin_tier: int | None = None
     proposed_entry: dict | None = None

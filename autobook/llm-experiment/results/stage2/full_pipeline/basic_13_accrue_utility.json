@@ -1,0 +1,589 @@
+{
+  "test_case_id": "basic_13_accrue_utility",
+  "variant_name": "full_pipeline",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": true,
+  "debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "date": "2024-01-01",
+    "description": "Accrual of utility bill",
+    "rationale": "Under IFRS accrual accounting, utility expense and related HST input tax credit are recognized when the service is consumed. The fix context indicates utilities are taxable services in Canada. Assuming the $50 is the pre-tax amount (most common interpretation for utility bills), HST at 13% (Ontario default) is added. The expense is debited, HST Receivable is debited for the recoverable input tax, and Accounts Payable is credited for the total amount owed. Debit tuple (0,0,1,0,0,0) indicates one expense increase; credit tuple (1,0,0,0,0,0) indicates one liability increase. Tax lines are additional per system rules.",
+    "lines": [
+      {
+        "account_name": "Utilities Expense",
+        "type": "debit",
+        "amount": 50.0
+      },
+      {
+        "account_name": "HST Receivable",
+        "type": "debit",
+        "amount": 6.5
+      },
+      {
+        "account_name": "Accounts Payable",
+        "type": "credit",
+        "amount": 56.5
+      }
+    ],
+    "disambiguator_responses": null,
+    "decision": null,
+    "clarification_questions": null,
+    "stuck_reason": null
+  },
+  "actual_cost_usd": 0.0712245,
+  "raw_cost_usd": 0.12734399999999998,
+  "total_latency_ms": 53536,
+  "total_input_tokens": 30938,
+  "total_output_tokens": 2302,
+  "total_llm_calls": 10,
+  "iteration_count": 2,
+  "final_decision": "STUCK",
+  "fix_attempted": true,
+  "fix_succeeded": false,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 508,
+      "output_tokens": 35,
+      "cache_read_tokens": 2395,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2903,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0027675,
+      "raw_cost_usd": 0.009234,
+      "output": {
+        "ambiguities": []
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 481,
+      "output_tokens": 102,
+      "cache_read_tokens": 1241,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1722,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0033453000000000003,
+      "raw_cost_usd": 0.006696,
+      "output": {
+        "reason": "Accruing a utility bill means recognizing the obligation to pay. This creates a liability (accounts payable or accrued expenses) which is increased by crediting it.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Accruing a utility bill means recognizing the obligation to pay. This creates a liability (accounts payable or accrued expenses) which is increased by crediting it."
+    },
+    "debit_classifier": {
+      "input_tokens": 483,
+      "output_tokens": 114,
+      "cache_read_tokens": 1262,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 1745,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0035376,
+      "raw_cost_usd": 0.006945,
+      "output": {
+        "reason": "Accruing a utility bill means recognizing the expense incurred. The debit side records the utility expense increase (1 line). The credit side (not classified here) would increase accounts payable/accrued liabilities.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "Accruing a utility bill means recognizing the expense incurred. The debit side records the utility expense increase (1 line). The credit side (not classified here) would increase accounts payable/accrued liabilities."
+    },
+    "debit_corrector": {
+      "input_tokens": 651,
+      "output_tokens": 225,
+      "cache_read_tokens": 1746,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2397,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058518,
+      "raw_cost_usd": 0.010566,
+      "output": {
+        "reason": "The transaction \"Accrue $50 utility bill\" represents recording an expense that has been incurred but not yet paid. Under IFRS accrual accounting, this requires:\n- Debit: Expense increase (utilities expense) - slot c\n- Credit: Liability increase (accounts payable/accrued expenses) - slot a\n\nThe initial debit tuple (0,0,1,0,0,0) correctly shows one expense increase, which is appropriate for recognizing the utility expense. The credit tuple (1,0,0,0,0,0) shows one liability increase, which is consistent with creating an accrued liability. Both sides tell a consistent story of accruing an unpaid expense. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Accrue $50 utility bill\" represents recording an expense that has been incurred but not yet paid. Under IFRS accrual accounting, this requires:\n- Debit: Expense increase (utilities expense) - slot c\n- Credit: Liability increase (accounts payable/accrued expenses) - slot a\n\nThe initial debit tuple (0,0,1,0,0,0) correctly shows one expense increase, which is appropriate for recognizing the utility expense. The credit tuple (1,0,0,0,0,0) shows one liability increase, which is consistent with creating an accrued liability. Both sides tell a consistent story of accruing an unpaid expense. No correction needed."
+    },
+    "credit_corrector": {
+      "input_tokens": 651,
+      "output_tokens": 224,
+      "cache_read_tokens": 1754,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2405,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0058392,
+      "raw_cost_usd": 0.010575,
+      "output": {
+        "reason": "The transaction \"Accrue $50 utility bill\" represents recording an expense that has been incurred but not yet paid. Under accrual accounting (IFRS), this creates:\n- Debit: Utility Expense (expense increase) - correctly shown as (0,0,1,0,0,0) in debit tuple\n- Credit: Accounts Payable or Utilities Payable (liability increase) - correctly shown as (1,0,0,0,0,0) in initial credit tuple\n\nThe initial credit tuple is correct. Accruing an unpaid bill increases a liability account. The debit and credit sides are consistent and tell the proper story of recognizing an expense obligation. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": "The transaction \"Accrue $50 utility bill\" represents recording an expense that has been incurred but not yet paid. Under accrual accounting (IFRS), this creates:\n- Debit: Utility Expense (expense increase) - correctly shown as (0,0,1,0,0,0) in debit tuple\n- Credit: Accounts Payable or Utilities Payable (liability increase) - correctly shown as (1,0,0,0,0,0) in initial credit tuple\n\nThe initial credit tuple is correct. Accruing an unpaid bill increases a liability account. The debit and credit sides are consistent and tell the proper story of recognizing an expense obligation. No correction needed."
+    },
+    "entry_builder": {
+      "input_tokens": 1600,
+      "output_tokens": 640,
+      "cache_read_tokens": 6428,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8028,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0163284,
+      "raw_cost_usd": 0.033684000000000006,
+      "output": {
+        "date": "2024-01-01",
+        "description": "Accrual of utility bill",
+        "rationale": "Under IFRS accrual accounting, utility expense and related HST input tax credit are recognized when the service is consumed. The fix context indicates utilities are taxable services in Canada. Assuming the $50 is the pre-tax amount (most common interpretation for utility bills), HST at 13% (Ontario default) is added. The expense is debited, HST Receivable is debited for the recoverable input tax, and Accounts Payable is credited for the total amount owed. Debit tuple (0,0,1,0,0,0) indicates one expense increase; credit tuple (1,0,0,0,0,0) indicates one liability increase. Tax lines are additional per system rules.",
+        "lines": [
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 50.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 6.5
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 56.5
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      "reason": null
+    },
+    "approver": {
+      "input_tokens": 4248,
+      "output_tokens": 383,
+      "cache_read_tokens": 4104,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 8352,
+      "llm_calls": 2,
+      "actual_cost_usd": 0.0197202,
+      "raw_cost_usd": 0.030801,
+      "output": {
+        "reason": "Transaction states \"Accrue $50 utility bill\" but does not specify whether $50 is pre-tax or tax-inclusive. Entry treats $50 as pre-tax (adding $6.50 HST for $56.50 total), but the transaction could equally mean $50 is the total amount owed. Both interpretations are structurally valid but produce different entries. Cannot determine which is correct without clarification on whether the stated amount includes tax.",
+        "decision": "STUCK",
+        "confidence": "SOMEWHAT_UNCERTAIN"
+      },
+      "reason": "Transaction states \"Accrue $50 utility bill\" but does not specify whether $50 is pre-tax or tax-inclusive. Entry treats $50 as pre-tax (adding $6.50 HST for $56.50 total), but the transaction could equally mean $50 is the total amount owed. Both interpretations are structurally valid but produce different entries. Cannot determine which is correct without clarification on whether the stated amount includes tax."
+    },
+    "diagnostician": {
+      "input_tokens": 1531,
+      "output_tokens": 579,
+      "cache_read_tokens": 1855,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 3386,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0138345,
+      "raw_cost_usd": 0.018843,
+      "output": null,
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "post_fix_debit_tuple": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0
+  ],
+  "pre_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "post_fix_credit_tuple": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "fix_root_cause_agent": [
+    5
+  ],
+  "rejection_reason": "Tax treatment error. Utilities are taxable services in Canada. The $50 stated in the transaction must be interpreted as either (1) the pre-tax amount requiring HST/GST to be added, or (2) the tax-inclusive amount requiring HST/GST to be separated. The entry rationale incorrectly states \"any HST/GST would have been recorded when the bill is eventually paid\" \u2014 this violates accrual accounting. Under IFRS, both the expense and the related tax receivable must be accrued when the service is consumed, not when paid. The entry is missing HST Receivable (input tax credit) lines.",
+  "diagnostician_decision": "FIX",
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 1,
+    "output_disambiguator": [
+      {
+        "ambiguities": []
+      },
+      {
+        "ambiguities": []
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "reason": "Accruing a utility bill means recognizing the expense incurred. The debit side records the utility expense increase (1 line). The credit side (not classified here) would increase accounts payable/accrued liabilities.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Accruing a utility bill means recognizing the expense incurred. The debit side records the utility expense increase (1 line). The credit side (not classified here) would increase accounts payable/accrued liabilities.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "reason": "Accruing a utility bill means recognizing the obligation to pay. This creates a liability (accounts payable or accrued expenses) which is increased by crediting it.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "Accruing a utility bill means recognizing the obligation to pay. This creates a liability (accounts payable or accrued expenses) which is increased by crediting it.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "reason": "The transaction \"Accrue $50 utility bill\" represents recording an expense that has been incurred but not yet paid. Under IFRS accrual accounting, this requires:\n- Debit: Expense increase (utilities expense) - slot c\n- Credit: Liability increase (accounts payable/accrued expenses) - slot a\n\nThe initial debit tuple (0,0,1,0,0,0) correctly shows one expense increase, which is appropriate for recognizing the utility expense. The credit tuple (1,0,0,0,0,0) shows one liability increase, which is consistent with creating an accrued liability. Both sides tell a consistent story of accruing an unpaid expense. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction \"Accrue $50 utility bill\" represents recording an expense that has been incurred but not yet paid. Under IFRS accrual accounting, this requires:\n- Debit: Expense increase (utilities expense) - slot c\n- Credit: Liability increase (accounts payable/accrued expenses) - slot a\n\nThe initial debit tuple (0,0,1,0,0,0) correctly shows one expense increase, which is appropriate for recognizing the utility expense. The credit tuple (1,0,0,0,0,0) shows one liability increase, which is consistent with creating an accrued liability. Both sides tell a consistent story of accruing an unpaid expense. No correction needed.",
+        "tuple": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "reason": "The transaction \"Accrue $50 utility bill\" represents recording an expense that has been incurred but not yet paid. Under accrual accounting (IFRS), this creates:\n- Debit: Utility Expense (expense increase) - correctly shown as (0,0,1,0,0,0) in debit tuple\n- Credit: Accounts Payable or Utilities Payable (liability increase) - correctly shown as (1,0,0,0,0,0) in initial credit tuple\n\nThe initial credit tuple is correct. Accruing an unpaid bill increases a liability account. The debit and credit sides are consistent and tell the proper story of recognizing an expense obligation. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "The transaction \"Accrue $50 utility bill\" represents recording an expense that has been incurred but not yet paid. Under accrual accounting (IFRS), this creates:\n- Debit: Utility Expense (expense increase) - correctly shown as (0,0,1,0,0,0) in debit tuple\n- Credit: Accounts Payable or Utilities Payable (liability increase) - correctly shown as (1,0,0,0,0,0) in initial credit tuple\n\nThe initial credit tuple is correct. Accruing an unpaid bill increases a liability account. The debit and credit sides are consistent and tell the proper story of recognizing an expense obligation. No correction needed.",
+        "tuple": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "date": "2026-03-22",
+        "description": "Accrual of utility bill",
+        "rationale": "Recording utility expense incurred but not yet paid. Debit Utilities Expense (expense increase) per debit tuple slot c=1. Credit Accounts Payable or Accrued Liabilities (liability increase) per credit tuple slot a=1. No tax lines needed as this is an accrual entry; any HST/GST would have been recorded when the bill is eventually paid or was already included in the bill amount. The $50 represents the full amount owed.",
+        "lines": [
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 50.0
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 50.0
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      },
+      {
+        "date": "2024-01-01",
+        "description": "Accrual of utility bill",
+        "rationale": "Under IFRS accrual accounting, utility expense and related HST input tax credit are recognized when the service is consumed. The fix context indicates utilities are taxable services in Canada. Assuming the $50 is the pre-tax amount (most common interpretation for utility bills), HST at 13% (Ontario default) is added. The expense is debited, HST Receivable is debited for the recoverable input tax, and Accounts Payable is credited for the total amount owed. Debit tuple (0,0,1,0,0,0) indicates one expense increase; credit tuple (1,0,0,0,0,0) indicates one liability increase. Tax lines are additional per system rules.",
+        "lines": [
+          {
+            "account_name": "Utilities Expense",
+            "type": "debit",
+            "amount": 50.0
+          },
+          {
+            "account_name": "HST Receivable",
+            "type": "debit",
+            "amount": 6.5
+          },
+          {
+            "account_name": "Accounts Payable",
+            "type": "credit",
+            "amount": 56.5
+          }
+        ],
+        "disambiguator_responses": null,
+        "decision": null,
+        "clarification_questions": null,
+        "stuck_reason": null
+      }
+    ],
+    "output_approver": [
+      {
+        "reason": "Tax treatment error. Utilities are taxable services in Canada. The $50 stated in the transaction must be interpreted as either (1) the pre-tax amount requiring HST/GST to be added, or (2) the tax-inclusive amount requiring HST/GST to be separated. The entry rationale incorrectly states \"any HST/GST would have been recorded when the bill is eventually paid\" \u2014 this violates accrual accounting. Under IFRS, both the expense and the related tax receivable must be accrued when the service is consumed, not when paid. The entry is missing HST Receivable (input tax credit) lines.",
+        "decision": "REJECTED",
+        "confidence": "VERY_CONFIDENT"
+      },
+      {
+        "reason": "Transaction states \"Accrue $50 utility bill\" but does not specify whether $50 is pre-tax or tax-inclusive. Entry treats $50 as pre-tax (adding $6.50 HST for $56.50 total), but the transaction could equally mean $50 is the total amount owed. Both interpretations are structurally valid but produce different entries. Cannot determine which is correct without clarification on whether the stated amount includes tax.",
+        "decision": "STUCK",
+        "confidence": "SOMEWHAT_UNCERTAIN"
+      }
+    ],
+    "output_diagnostician": [
+      {
+        "reasoning": "The Approver rejected the entry because it's missing HST/GST tax lines. Under IFRS accrual accounting, when a utility expense is accrued, both the expense AND the related input tax credit (HST Receivable) must be recognized at the same time, not deferred until payment.\n\nTracing through the pipeline:\n- Agent 1 (Debit Classifier): Classified as (0,0,1,0,0,0) - one expense increase. This is incomplete because it didn't account for the HST Receivable debit line that should also be present.\n- Agent 2 (Credit Classifier): Classified as (1,0,0,0,0,0) - one liability increase. This is correct for the accounts payable portion.\n- Agent 3 (Debit Corrector): Validated the debit tuple and found it consistent with the credit side, but failed to recognize that utilities are taxable services requiring an additional HST Receivable line.\n- Agent 4 (Credit Corrector): Validated the credit tuple correctly.\n- Agent 5 (Entry Builder): Built the entry from the tuples and explicitly stated in its rationale that \"any HST/GST would have been recorded when the bill is eventually paid\" - this is the wrong accounting treatment under accrual basis.\n\nThe root cause is Agent 5 (Entry Builder). While Agent 1 could be blamed for not counting the tax line, the classifier agents work at the tuple level and count directional movements. The Entry Builder is responsible for recognizing when tax lines are required and adding them to complete the entry. Agent 5's rationale explicitly shows it made a conscious (but incorrect) decision to defer tax recognition until payment, violating accrual accounting principles.",
+        "decision": "FIX",
+        "fix_plans": [
+          {
+            "agent": 5,
+            "fix_context": "Utilities are taxable services in Canada. Under accrual accounting (IFRS), both the expense and the HST/GST input tax credit must be accrued when the service is consumed, not when paid. Add HST Receivable debit line and split the liability: if $50 is pre-tax, add HST on top; if $50 is tax-inclusive, separate out the HST component."
+          }
+        ],
+        "stuck_reason": null
+      }
+    ],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 1,
+    "status_diagnostician": 1,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [
+      "Utilities are taxable services in Canada. Under accrual accounting (IFRS), both the expense and the HST/GST input tax credit must be accrued when the service is consumed, not when paid. Add HST Receivable debit line and split the liability: if $50 is pre-tax, add HST on top; if $50 is tax-inclusive, separate out the HST component."
+    ],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "STUCK",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 508,
+        "output_tokens": 35,
+        "input_token_details": {
+          "cache_read": 2395,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 481,
+        "output_tokens": 102,
+        "input_token_details": {
+          "cache_read": 1241,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 483,
+        "output_tokens": 114,
+        "input_token_details": {
+          "cache_read": 1262,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 651,
+        "output_tokens": 225,
+        "input_token_details": {
+          "cache_read": 1746,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_corrector",
+        "stop_reason": "tool_use",
+        "input_tokens": 651,
+        "output_tokens": 224,
+        "input_token_details": {
+          "cache_read": 1754,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 740,
+        "output_tokens": 275,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 1616,
+        "output_tokens": 213,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "diagnostician",
+        "stop_reason": "tool_use",
+        "input_tokens": 1531,
+        "output_tokens": 579,
+        "input_token_details": {
+          "cache_read": 1855,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 860,
+        "output_tokens": 365,
+        "input_token_details": {
+          "cache_read": 3214,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "approver",
+        "stop_reason": "tool_use",
+        "input_tokens": 2632,
+        "output_tokens": 170,
+        "input_token_details": {
+          "cache_read": 2052,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "credit_classifier": "tool_use",
+      "debit_classifier": "tool_use",
+      "debit_corrector": "tool_use",
+      "credit_corrector": "tool_use",
+      "entry_builder": "tool_use",
+      "approver": "tool_use",
+      "diagnostician": "tool_use"
+    }
+  }
+}

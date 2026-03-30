@@ -1,0 +1,562 @@
+{
+  "test_case_id": "basic_07_loan_to_equity",
+  "variant_name": "with_disambiguation",
+  "model": "sonnet",
+  "debit_tuple_exact_match": true,
+  "credit_tuple_exact_match": true,
+  "debit_tuple_slot_accuracy": 1.0,
+  "credit_tuple_slot_accuracy": 1.0,
+  "entry_valid": false,
+  "debit_tuple": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "credit_tuple": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    0
+  ],
+  "journal_entry": {
+    "reason": "Cannot construct entry without knowing the par value per share. Under IFRS (IAS 32), share capital must be recorded at par value with any excess allocated to share premium. The $200 conversion amount must be split between these accounts based on the par value of the 400 shares issued, but this information is not provided in the transaction text.",
+    "lines": []
+  },
+  "actual_cost_usd": 0.0517767,
+  "raw_cost_usd": 0.079152,
+  "total_latency_ms": 37276,
+  "total_input_tokens": 12454,
+  "total_output_tokens": 2786,
+  "total_llm_calls": 4,
+  "iteration_count": 1,
+  "final_decision": "INCOMPLETE_INFORMATION",
+  "fix_attempted": null,
+  "fix_succeeded": null,
+  "agent_metrics": {
+    "disambiguator": {
+      "input_tokens": 518,
+      "output_tokens": 449,
+      "cache_read_tokens": 2347,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2865,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0089931,
+      "raw_cost_usd": 0.01533,
+      "output": {
+        "resolved_ambiguities": [
+          {
+            "aspect": "conversion mechanism",
+            "resolution": "Transaction states 'converted loan to equity' \u2014 this is a debt-to-equity conversion at the stated amounts ($200 loan extinguished, 400 shares issued)"
+          },
+          {
+            "aspect": "share value per share",
+            "resolution": "Stated amounts imply $0.50 per share ($200 \u00f7 400 shares) \u2014 this is the conversion price"
+          },
+          {
+            "aspect": "accounting treatment of conversion",
+            "resolution": "Standard treatment: debit Loan Payable $200, credit Common Shares at stated/par value (if any), credit Additional Paid-in Capital for remainder"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "par value of common shares",
+            "options": [
+              "Shares have a stated par value (e.g., $0.01, $0.10, $0.50 per share)",
+              "Shares are no-par value"
+            ],
+            "clarification_question": "What is the par value (or stated value) of the common shares being issued, or are they no-par value shares?",
+            "why_entry_differs": "If shares have par value, the $200 must be split between Common Shares (at par) and Additional Paid-in Capital (excess). If no-par, the entire $200 is credited to Common Shares. The accounts and amounts differ.",
+            "why_not_resolved": "Par value is a corporate charter specification not determinable from the transaction text. Ontario corporations can issue par or no-par shares, and there is no default convention."
+          }
+        ]
+      },
+      "reason": null
+    },
+    "debit_classifier": {
+      "input_tokens": 493,
+      "output_tokens": 362,
+      "cache_read_tokens": 1546,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2039,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0073728000000000005,
+      "raw_cost_usd": 0.011547,
+      "output": {
+        "asset_increase_reason": "No assets increase. This is a debt-to-equity conversion that only affects liabilities and equity.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends/drawings. This is a financing transaction, not an owner withdrawal.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses. Converting debt to equity is a financing transaction, not an expense.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The $200 bank loan (liability) is extinguished/decreased as it is converted to equity.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity decreases. Equity increases (credit side) as common shares are issued.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue impact. This is a balance sheet financing transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "credit_classifier": {
+      "input_tokens": 491,
+      "output_tokens": 379,
+      "cache_read_tokens": 1516,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 2007,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.0076128,
+      "raw_cost_usd": 0.011706,
+      "output": {
+        "liability_increase_reason": "No liabilities increase. The bank loan liability is being eliminated (debited), not increased.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "Common shares (equity) increase by $200 as the loan is converted to equity ownership. This is credited to share capital/common stock.",
+        "equity_increase_count": 1,
+        "revenue_increase_reason": "No revenue is generated. This is a financing transaction converting debt to equity, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. This is purely a liability-to-equity conversion with no asset movement.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this debt-to-equity conversion.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease. This is a balance sheet restructuring transaction, not an expense reversal.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "reason": null
+    },
+    "entry_builder": {
+      "input_tokens": 813,
+      "output_tokens": 1596,
+      "cache_read_tokens": 4730,
+      "cache_write_tokens": 0,
+      "total_input_tokens": 5543,
+      "llm_calls": 1,
+      "actual_cost_usd": 0.027798,
+      "raw_cost_usd": 0.040569,
+      "output": {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Share par value and allocation",
+            "reason": "The transaction states 400 common shares were issued for $200 of debt conversion. To properly record this under IFRS, we need to know the par/stated value per share to allocate the $200 between Common Stock and Additional Paid-in Capital (Share Premium). If par value is $0.50, the entry would be: Debit Loan Payable $200, Credit Common Stock $200. If par value is $0.10, it would be: Debit Loan Payable $200, Credit Common Stock $40, Credit Share Premium $160. The structure differs materially based on this fact.",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "What is the par value (or stated value) per common share?"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "The classifier correctly identified zero asset increases. This is a debt-to-equity conversion with no asset movement.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "The classifier correctly identified zero dividend increases. No dividends are involved in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier correctly identified zero expense increases. Debt conversion to equity does not create an expense.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "The classifier correctly identified 1 liability decrease. The $200 bank loan is being extinguished through conversion to equity.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loan Payable"
+          ]
+        },
+        "debit_equity_decrease": {
+          "reason": "The classifier correctly identified zero equity decreases. This transaction increases equity, not decreases it.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "The classifier correctly identified zero revenue decreases. No revenue is involved in this balance sheet transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "The classifier correctly identified zero liability increases. The liability is being eliminated, not increased.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "The classifier identified 1 equity increase, but this may need to be 2 separate lines depending on par value allocation. Under IFRS, share issuance typically requires separate recognition of share capital at par and share premium for any excess. However, without knowing the par value, I cannot determine if this should be 1 line (if par value equals $0.50 per share, making total par = $200) or 2 lines (if par value is less than $0.50, requiring a split between Common Stock and Share Premium). This is a material structural difference.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "The classifier correctly identified zero revenue increases. No revenue is recognized in debt-to-equity conversions.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier correctly identified zero asset decreases. No assets are involved in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "The classifier correctly identified zero dividend decreases. No dividends are involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "The classifier correctly identified zero expense decreases. No expenses are involved in this balance sheet transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot construct entry without knowing the par value per share. Under IFRS (IAS 32), share capital must be recorded at par value with any excess allocated to share premium. The $200 conversion amount must be split between these accounts based on the par value of the 400 shares issued, but this information is not provided in the transaction text.",
+          "lines": []
+        },
+        "decision_rationale": "This is a debt-to-equity conversion where a $200 bank loan is extinguished by issuing 400 common shares. The debit side is clear: reduce Loan Payable by $200. However, the credit side structure depends critically on the par value per share. Under IFRS, share issuances must allocate proceeds between share capital (at par) and share premium (excess over par). If par value is $0.50/share, the entire $200 goes to Common Stock. If par value is $0.10/share, $40 goes to Common Stock and $160 to Share Premium. These are structurally different entries requiring different accounts and amounts. This is not a matter of accounting judgment but a missing business fact that only the entity can provide.",
+        "decision": "INCOMPLETE_INFORMATION"
+      },
+      "reason": null
+    }
+  },
+  "pre_fix_debit_tuple": null,
+  "post_fix_debit_tuple": null,
+  "pre_fix_credit_tuple": null,
+  "post_fix_credit_tuple": null,
+  "fix_root_cause_agent": null,
+  "rejection_reason": null,
+  "diagnostician_decision": null,
+  "validation_error": null,
+  "decision_correct": false,
+  "entry_match": null,
+  "clarification_correct": null,
+  "clarification_questions": null,
+  "ambiguous": false,
+  "tier": "basic",
+  "error": null,
+  "pipeline_state": {
+    "iteration": 0,
+    "output_disambiguator": [
+      {
+        "resolved_ambiguities": [
+          {
+            "aspect": "conversion mechanism",
+            "resolution": "Transaction states 'converted loan to equity' \u2014 this is a debt-to-equity conversion at the stated amounts ($200 loan extinguished, 400 shares issued)"
+          },
+          {
+            "aspect": "share value per share",
+            "resolution": "Stated amounts imply $0.50 per share ($200 \u00f7 400 shares) \u2014 this is the conversion price"
+          },
+          {
+            "aspect": "accounting treatment of conversion",
+            "resolution": "Standard treatment: debit Loan Payable $200, credit Common Shares at stated/par value (if any), credit Additional Paid-in Capital for remainder"
+          }
+        ],
+        "unresolved_ambiguities": [
+          {
+            "aspect": "par value of common shares",
+            "options": [
+              "Shares have a stated par value (e.g., $0.01, $0.10, $0.50 per share)",
+              "Shares are no-par value"
+            ],
+            "clarification_question": "What is the par value (or stated value) of the common shares being issued, or are they no-par value shares?",
+            "why_entry_differs": "If shares have par value, the $200 must be split between Common Shares (at par) and Additional Paid-in Capital (excess). If no-par, the entire $200 is credited to Common Shares. The accounts and amounts differ.",
+            "why_not_resolved": "Par value is a corporate charter specification not determinable from the transaction text. Ontario corporations can issue par or no-par shares, and there is no default convention."
+          }
+        ]
+      }
+    ],
+    "output_debit_classifier": [
+      {
+        "asset_increase_reason": "No assets increase. This is a debt-to-equity conversion that only affects liabilities and equity.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends/drawings. This is a financing transaction, not an owner withdrawal.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses. Converting debt to equity is a financing transaction, not an expense.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The $200 bank loan (liability) is extinguished/decreased as it is converted to equity.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity decreases. Equity increases (credit side) as common shares are issued.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue impact. This is a balance sheet financing transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_classifier": [
+      {
+        "liability_increase_reason": "No liabilities increase. The bank loan liability is being eliminated (debited), not increased.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "Common shares (equity) increase by $200 as the loan is converted to equity ownership. This is credited to share capital/common stock.",
+        "equity_increase_count": 1,
+        "revenue_increase_reason": "No revenue is generated. This is a financing transaction converting debt to equity, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. This is purely a liability-to-equity conversion with no asset movement.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this debt-to-equity conversion.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease. This is a balance sheet restructuring transaction, not an expense reversal.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_debit_corrector": [
+      {
+        "asset_increase_reason": "No assets increase. This is a debt-to-equity conversion that only affects liabilities and equity.",
+        "asset_increase_count": 0,
+        "dividend_increase_reason": "No dividends/drawings. This is a financing transaction, not an owner withdrawal.",
+        "dividend_increase_count": 0,
+        "expense_increase_reason": "No expenses. Converting debt to equity is a financing transaction, not an expense.",
+        "expense_increase_count": 0,
+        "liability_decrease_reason": "The $200 bank loan (liability) is extinguished/decreased as it is converted to equity.",
+        "liability_decrease_count": 1,
+        "equity_decrease_reason": "No equity decreases. Equity increases (credit side) as common shares are issued.",
+        "equity_decrease_count": 0,
+        "revenue_decrease_reason": "No revenue impact. This is a balance sheet financing transaction.",
+        "revenue_decrease_count": 0,
+        "tuple": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_credit_corrector": [
+      {
+        "liability_increase_reason": "No liabilities increase. The bank loan liability is being eliminated (debited), not increased.",
+        "liability_increase_count": 0,
+        "equity_increase_reason": "Common shares (equity) increase by $200 as the loan is converted to equity ownership. This is credited to share capital/common stock.",
+        "equity_increase_count": 1,
+        "revenue_increase_reason": "No revenue is generated. This is a financing transaction converting debt to equity, not an operating activity.",
+        "revenue_increase_count": 0,
+        "asset_decrease_reason": "No assets decrease. This is purely a liability-to-equity conversion with no asset movement.",
+        "asset_decrease_count": 0,
+        "dividend_decrease_reason": "No dividends or owner drawings are involved in this debt-to-equity conversion.",
+        "dividend_decrease_count": 0,
+        "expense_decrease_reason": "No expenses decrease. This is a balance sheet restructuring transaction, not an expense reversal.",
+        "expense_decrease_count": 0,
+        "tuple": [
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "output_entry_builder": [
+      {
+        "incomplete_information_checks": [
+          {
+            "aspect": "Share par value and allocation",
+            "reason": "The transaction states 400 common shares were issued for $200 of debt conversion. To properly record this under IFRS, we need to know the par/stated value per share to allocate the $200 between Common Stock and Additional Paid-in Capital (Share Premium). If par value is $0.50, the entry would be: Debit Loan Payable $200, Credit Common Stock $200. If par value is $0.10, it would be: Debit Loan Payable $200, Credit Common Stock $40, Credit Share Premium $160. The structure differs materially based on this fact.",
+            "sufficient": false
+          }
+        ],
+        "clarification_questions": [
+          "What is the par value (or stated value) per common share?"
+        ],
+        "incomplete_decision": "incomplete",
+        "debit_asset_increase": {
+          "reason": "The classifier correctly identified zero asset increases. This is a debt-to-equity conversion with no asset movement.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_dividend_increase": {
+          "reason": "The classifier correctly identified zero dividend increases. No dividends are involved in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_expense_increase": {
+          "reason": "The classifier correctly identified zero expense increases. Debt conversion to equity does not create an expense.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_liability_decrease": {
+          "reason": "The classifier correctly identified 1 liability decrease. The $200 bank loan is being extinguished through conversion to equity.",
+          "action": "accept",
+          "count": 1,
+          "accounts": [
+            "Loan Payable"
+          ]
+        },
+        "debit_equity_decrease": {
+          "reason": "The classifier correctly identified zero equity decreases. This transaction increases equity, not decreases it.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "debit_revenue_decrease": {
+          "reason": "The classifier correctly identified zero revenue decreases. No revenue is involved in this balance sheet transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_liability_increase": {
+          "reason": "The classifier correctly identified zero liability increases. The liability is being eliminated, not increased.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_equity_increase": {
+          "reason": "The classifier identified 1 equity increase, but this may need to be 2 separate lines depending on par value allocation. Under IFRS, share issuance typically requires separate recognition of share capital at par and share premium for any excess. However, without knowing the par value, I cannot determine if this should be 1 line (if par value equals $0.50 per share, making total par = $200) or 2 lines (if par value is less than $0.50, requiring a split between Common Stock and Share Premium). This is a material structural difference.",
+          "action": "override",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_revenue_increase": {
+          "reason": "The classifier correctly identified zero revenue increases. No revenue is recognized in debt-to-equity conversions.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_asset_decrease": {
+          "reason": "The classifier correctly identified zero asset decreases. No assets are involved in this transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_dividend_decrease": {
+          "reason": "The classifier correctly identified zero dividend decreases. No dividends are involved.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "credit_expense_decrease": {
+          "reason": "The classifier correctly identified zero expense decreases. No expenses are involved in this balance sheet transaction.",
+          "action": "accept",
+          "count": 0,
+          "accounts": []
+        },
+        "stuck_reason": null,
+        "stuck": false,
+        "entry": {
+          "reason": "Cannot construct entry without knowing the par value per share. Under IFRS (IAS 32), share capital must be recorded at par value with any excess allocated to share premium. The $200 conversion amount must be split between these accounts based on the par value of the 400 shares issued, but this information is not provided in the transaction text.",
+          "lines": []
+        },
+        "decision_rationale": "This is a debt-to-equity conversion where a $200 bank loan is extinguished by issuing 400 common shares. The debit side is clear: reduce Loan Payable by $200. However, the credit side structure depends critically on the par value per share. Under IFRS, share issuances must allocate proceeds between share capital (at par) and share premium (excess over par). If par value is $0.50/share, the entire $200 goes to Common Stock. If par value is $0.10/share, $40 goes to Common Stock and $160 to Share Premium. These are structurally different entries requiring different accounts and amounts. This is not a matter of accounting judgment but a missing business fact that only the entity can provide.",
+        "decision": "INCOMPLETE_INFORMATION"
+      }
+    ],
+    "output_approver": [],
+    "output_diagnostician": [],
+    "status_disambiguator": 1,
+    "status_debit_classifier": 1,
+    "status_credit_classifier": 1,
+    "status_debit_corrector": 1,
+    "status_credit_corrector": 1,
+    "status_entry_builder": 1,
+    "status_approver": 0,
+    "status_diagnostician": 0,
+    "fix_context_disambiguator": [],
+    "fix_context_debit_classifier": [],
+    "fix_context_credit_classifier": [],
+    "fix_context_debit_corrector": [],
+    "fix_context_credit_corrector": [],
+    "fix_context_entry_builder": [],
+    "fix_context_approver": [],
+    "fix_context_diagnostician": [],
+    "decision": "INCOMPLETE_INFORMATION",
+    "validation_error": null,
+    "llm_calls": [
+      {
+        "node": "disambiguator",
+        "stop_reason": "tool_use",
+        "input_tokens": 518,
+        "output_tokens": 449,
+        "input_token_details": {
+          "cache_read": 2347,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "debit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 493,
+        "output_tokens": 362,
+        "input_token_details": {
+          "cache_read": 1546,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "credit_classifier",
+        "stop_reason": "tool_use",
+        "input_tokens": 491,
+        "output_tokens": 379,
+        "input_token_details": {
+          "cache_read": 1516,
+          "cache_creation": 0
+        }
+      },
+      {
+        "node": "entry_builder",
+        "stop_reason": "tool_use",
+        "input_tokens": 813,
+        "output_tokens": 1596,
+        "input_token_details": {
+          "cache_read": 4730,
+          "cache_creation": 0
+        }
+      }
+    ],
+    "stop_reasons": {
+      "disambiguator": "tool_use",
+      "debit_classifier": "tool_use",
+      "credit_classifier": "tool_use",
+      "entry_builder": "tool_use"
+    }
+  }
+}

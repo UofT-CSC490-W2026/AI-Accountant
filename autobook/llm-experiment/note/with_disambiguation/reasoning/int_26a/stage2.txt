@@ -1,0 +1,73 @@
+======================================================================
+Test Case: int_26a_payroll_recognition
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [0, 0, 2, 0, 0, 0]  ✗
+  Credit: [4, 0, 0, 1, 0, 0]  ✗
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (2):
+  [UNRESOLVED] employer portion of statutory contributions
+    Options: ['Employer contributions are included in the stated wage/salary amounts', 'Employer contributions are additional to the stated amounts and not yet recorded']
+    Question: Are the employer's matching contributions for CPP, EI, and health insurance included in this payroll recognition, or will they be recorded separately?
+    Why not resolved: Transaction states 'employee-borne statutory deductions' were withheld but does not specify whether employer portions are being recognized. Standard practice varies - some entities record both simultaneously, others record employer portions separately.
+  [UNRESOLVED] allocation of production worker wages
+    Options: ['Expense immediately as period cost', 'Capitalize to work-in-process inventory', 'Allocate between inventory and cost of goods sold based on production status']
+    Question: Should the production worker wages be capitalized to inventory (work-in-process) or expensed as a period cost?
+    Why not resolved: Production worker wages are typically inventoriable costs under IFRS, but the transaction does not indicate whether goods are in process, completed, or sold. Entity's costing system and production status determine treatment.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 2, 0, 0, 0]
+Reason: The debit side records two expense increases: (1) Production worker wages $25,000 = expense increase (manufacturing/production labor cost), and (2) Administrative salaries $20,000 = expense increase (administrative/operating expense). The withholdings are employee-borne deductions that create liabilities (credited), not debits. The net payment reduces cash (credited). Total debit lines = 2 expense increases.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [4, 0, 0, 1, 0, 0]
+Reason: The credit side records:
+1. Pension contributions withheld = $2,000 liability increase (payable to pension plan)
+2. Health insurance premiums withheld = $3,250 liability increase (payable to insurer)
+3. Employment insurance premiums withheld = $1,050 liability increase (payable to government)
+4. Income tax withholdings = $1,450 liability increase (payable to tax authority)
+5. Net pay transferred = $37,250 asset decrease (cash leaving chequing account)
+
+Total gross wages = $45,000. Total withholdings = $7,750. Net pay = $37,250.
+
+The credit side shows 4 liability increases (for the various withholdings that create payables) and 1 asset decrease (cash paid out). The allocation of wages between production (WIP/inventory) and administrative (expense) affects only the debit side.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Disambiguator Responses:
+  [PROCEED] employer portion of statutory contributions
+    The transaction explicitly states 'employee-borne statutory deductions were withheld' and lists only those amounts. Employer contributions are not mentioned and would be recorded in a separate entry when the employer expense is recognized. This entry records only what is stated.
+  [PROCEED] allocation of production worker wages
+    Under IFRS IAS 2, production worker wages are inventoriable costs and must be capitalized to Work-in-Process Inventory. This is not a policy election but a requirement. The transaction identifies these as 'production worker wages' which definitively establishes their treatment as manufacturing costs, not period costs.
+Rationale: Production worker wages are capitalized to Work-in-Process Inventory as they are direct manufacturing costs under IFRS (IAS 2). Administrative salaries are period costs expensed immediately. Employee-borne deductions create liabilities until remitted to authorities/providers. Net pay reduces cash. The transaction explicitly states only employee-borne deductions were withheld; employer contributions are not mentioned and would be recorded separately when incurred. Total gross pay $45,000 less total deductions $7,750 equals net pay $37,250.
+Entry:
+  debit  Work-in-Process Inventory                     $     25,000.00
+  debit  Salaries Expense                              $     20,000.00
+  credit Pension Contributions Payable                 $      2,000.00
+  credit Health Insurance Premiums Payable             $      3,250.00
+  credit EI Premiums Payable                           $      1,050.00
+  credit Income Tax Payable                            $      1,450.00
+  credit Cash                                          $     37,250.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Work-in-Process Inventory                     $     25,000.00
+  debit  Salaries Expense                              $     20,000.00
+  credit Pension Contributions Payable                 $      2,000.00
+  credit Health Insurance Premiums Payable             $      3,250.00
+  credit EI Premiums Payable                           $      1,050.00
+  credit Income Tax Payable                            $      1,450.00
+  credit Cash                                          $     37,250.00
+======================================================================

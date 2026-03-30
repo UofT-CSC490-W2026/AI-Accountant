@@ -1,0 +1,52 @@
+======================================================================
+Test Case: int_24_advertising
+Variant:   with_disambiguation
+Decision:  APPROVED
+======================================================================
+
+Final Tuples:
+  Debit:  [0, 0, 1, 0, 0, 0]  ✓
+  Credit: [0, 0, 0, 1, 0, 0]  ✓
+
+──────────────────────────────────────────────────────────────────────
+Agent: Disambiguator
+──────────────────────────────────────────────────────────────────────
+Ambiguities (2):
+  [RESOLVED] sales tax rate and treatment
+    Resolution: Ontario corporation — HST at 13% applies. 'Inclusive of sales tax' means $22,000 is the gross amount. Marketing services are taxable supplies under Canadian GST/HST rules.
+  [UNRESOLVED] capitalization vs. expense treatment of marketing campaign
+    Options: ['Expense immediately as advertising/marketing expense', 'Capitalize as intangible asset if meets IAS 38 recognition criteria (identifiable, controlled, future economic benefits probable and measurable)']
+    Question: Does this digital marketing campaign create an identifiable intangible asset (e.g., owned digital content, customer lists, brand assets) that will generate measurable future economic benefits, or is it a period advertising expense?
+    Why not resolved: IAS 38 requires management judgment on whether the campaign creates a controlled resource with probable future benefits. 'Commissioned a campaign' could mean either purchased advertising services (expense) or created owned digital assets (potential capitalization). The transaction text does not specify the nature of deliverables or management's intent.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Debit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 1, 0, 0, 0]
+Reason: Digital marketing campaign = expense increase. The $22,000 payment (inclusive of sales tax) represents advertising/marketing expense. Under IFRS, advertising costs are expensed as incurred. This is one debit line for the expense increase.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Credit Classifier
+──────────────────────────────────────────────────────────────────────
+Tuple:  [0, 0, 0, 1, 0, 0]
+Reason: Cash payment of $22,000 (inclusive of sales tax) results in cash leaving the business = asset decrease. This is a single credit line representing the outflow of cash to pay for the marketing campaign.
+
+──────────────────────────────────────────────────────────────────────
+Agent: Entry Builder
+──────────────────────────────────────────────────────────────────────
+Disambiguator Responses:
+  [PROCEED] capitalization vs. expense treatment of marketing campaign
+    The transaction states Mondelez 'commissioned a digital marketing campaign' and paid for it. This language indicates purchasing campaign services (advertising, media placement, creative execution) rather than acquiring identifiable intangible assets. Under IAS 38.69, advertising and promotional expenditure is recognized as an expense when the entity has the right to access the goods or receives the services. Capitalization requires clear evidence of an identifiable asset with controlled future benefits. The transaction text provides no indication of asset creation (no mention of purchased databases, owned content, or developed IP). Following the accounting convention that advertising is expensed unless there is specific evidence of asset acquisition, the expense treatment is appropriate.
+Rationale: Marketing campaign commissioned and paid in cash. Under IFRS (IAS 38), most advertising and promotional expenditures are expensed as incurred unless they create a separately identifiable intangible asset with probable future economic benefits. The term 'commissioned a digital marketing campaign' typically refers to purchasing advertising services (media buys, campaign execution, creative services) rather than acquiring owned digital assets. Without evidence of identifiable assets being created (e.g., purchased customer databases, owned digital content rights, developed brand assets), the default treatment is to expense. The $22,000 gross payment includes 13% HST; base amount is $19,469.03 ($22,000 ÷ 1.13), HST is $2,530.97. HST paid on marketing services is recoverable as input tax credit.
+Entry:
+  debit  Marketing Expense                             $     19,469.03
+  debit  HST Receivable                                $      2,530.97
+  credit Cash                                          $     22,000.00
+Decision: APPROVED
+
+======================================================================
+Final Journal Entry:
+  debit  Marketing Expense                             $     19,469.03
+  debit  HST Receivable                                $      2,530.97
+  credit Cash                                          $     22,000.00
+======================================================================
