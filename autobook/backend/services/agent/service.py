@@ -2,7 +2,7 @@ import logging
 
 from config import get_settings
 from db.dao.chart_of_accounts import DEFAULT_COA
-from services.agent.graph.graph import app
+from services.agent.graph.graph_v3_simple import app
 from services.agent.graph.state import NOT_RUN, AGENT_NAMES
 
 logger = logging.getLogger(__name__)
@@ -193,7 +193,7 @@ def _build_clarification(
 def _extract_result(final_state: dict, message: dict) -> dict:
     """Extract proposed entry and pipeline decision from graph output."""
     i = final_state["iteration"]
-    entry_out = final_state.get("output_entry_builder", [])
+    entry_out = final_state.get("output_entry_drafter", [])
     journal_entry = entry_out[i] if i < len(entry_out) else None
 
     decision = final_state.get("decision") or "APPROVED"

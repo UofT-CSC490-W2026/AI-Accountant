@@ -12,7 +12,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-_SKIP = {"meta.json", "entry_accuracy.json", "clarification_relevance.json"}
+_SKIP_PREFIXES = ("entry_accuracy", "clarification_relevance", "meta")
+
+
+def _should_skip(filename: str) -> bool:
+    return any(filename.startswith(p) for p in _SKIP_PREFIXES)
 
 
 def _merge_eval_file(cases: list[dict], run_dir: Path, filename: str,
@@ -31,7 +35,7 @@ def _load_cases_from_dir(d: Path) -> list[dict]:
     """Load test case JSONs from a single directory."""
     cases = []
     for f in sorted(d.glob("*.json")):
-        if f.name in _SKIP:
+        if _should_skip(f.name):
             continue
         cases.append(json.loads(f.read_text()))
     return cases
@@ -51,7 +55,7 @@ def _has_timestamp_subdirs(variant_dir: Path) -> bool:
 
 def _has_json_files(variant_dir: Path) -> bool:
     """Check if variant dir has JSON files directly (flat structure)."""
-    return any(f.suffix == ".json" and f.name not in _SKIP
+    return any(f.suffix == ".json" and not _should_skip(f.name)
                for f in variant_dir.iterdir() if f.is_file())
 
 
